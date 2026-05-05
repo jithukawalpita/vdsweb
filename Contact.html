@@ -55,13 +55,29 @@
     .login-btn { background:linear-gradient(135deg,#c9a84c,#a07810); color:#1a0800; border:none; padding:5px 16px; border-radius:3px; font-size:10.5px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; cursor:pointer; margin-left:8px; transition:all .2s; box-shadow:0 2px 8px rgba(201,168,76,0.25); white-space:nowrap; }
     .login-btn:hover { background:linear-gradient(135deg,#e0b95c,#b88a20); }
     .login-btn.logged-in { background:rgba(201,168,76,0.12); color:#c9a84c; border:1px solid rgba(201,168,76,0.35); }
-    .hamburger { display:none; flex-direction:column; gap:5px; cursor:pointer; padding:10px; margin-left:8px; background:none; border:none; }
-    .hamburger span { display:block; width:22px; height:2px; background:var(--gold); border-radius:2px; }
-    .mobile-menu { display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(10,4,4,0.97); z-index:400; flex-direction:column; align-items:center; justify-content:center; overflow-y:auto; }
-    .mobile-menu.open { display:flex; }
-    .mobile-menu a { color:#f5deb3; font-size:1.05rem; padding:13px 40px; text-decoration:none; border-bottom:1px solid rgba(201,168,76,0.08); width:100%; text-align:center; transition:all 0.2s; }
-    .mobile-menu a:hover { color:var(--gold); }
-    .mobile-close { position:absolute; top:20px; right:24px; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.15); color:#f5deb3; width:40px; height:40px; border-radius:50%; cursor:pointer; font-size:1.2rem; display:flex; align-items:center; justify-content:center; }
+
+    /* ========== HAMBURGER MENU ========== */
+    .hamburger { display:none; flex-direction:column; gap:4px; cursor:pointer; padding:10px; margin-left:auto; background:none; border:none; }
+    .hamburger span { display:block; width:22px; height:2px; background:#c9a84c; border-radius:2px; transition:all 0.3s; }
+    .hamburger.open span:nth-child(1) { transform:rotate(45deg) translate(5px,5px); }
+    .hamburger.open span:nth-child(2) { opacity:0; }
+    .hamburger.open span:nth-child(3) { transform:rotate(-45deg) translate(7px,-6px); }
+
+    /* ========== MOBILE SIDEBAR ========== */
+    .mobile-sidebar { position:fixed; top:0; left:-280px; width:280px; height:100vh; background:linear-gradient(180deg,#1a0808 0%,#2a0a0a 100%); z-index:500; transition:left 0.3s ease; box-shadow:2px 0 10px rgba(0,0,0,0.5); overflow-y:auto; }
+    .mobile-sidebar.open { left:0; }
+    .mobile-sidebar-header { background:linear-gradient(90deg,#5a0808,#8b1212); padding:1rem; display:flex; align-items:center; justify-content:space-between; }
+    .mobile-sidebar-header .brand { color:#f5deb3; font-size:14px; font-weight:700; }
+    .mobile-close { background:none; border:none; color:#c9a84c; font-size:18px; cursor:pointer; }
+    .mobile-nav-links { padding:1rem 0; }
+    .mobile-nav-links a { display:block; color:#f5deb3; padding:12px 1.5rem; text-decoration:none; border-bottom:1px solid rgba(201,168,76,0.1); transition:all 0.2s; }
+    .mobile-nav-links a:hover { background:rgba(201,168,76,0.1); color:#ffe066; }
+    .mobile-lang-row { padding:1rem; border-top:1px solid rgba(201,168,76,0.1); }
+    .mobile-lang-row .lb { margin-right:8px; }
+
+    /* ========== OVERLAY ========== */
+    .mobile-overlay { display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); z-index:400; }
+    .mobile-overlay.open { display:block; }
 
     /* AUTH MODAL */
     .auth-overlay { display:none; position:fixed; inset:0; z-index:1000; background:rgba(4,2,4,0.92); backdrop-filter:blur(8px); align-items:center; justify-content:center; }
@@ -250,7 +266,7 @@
     @keyframes ornamentBounce { 0%, 100% { transform:translateX(-50%) translateY(0px); } 50% { transform:translateX(-50%) translateY(-15px); } }
     .form-panel { animation:fadeUp 0.6s ease 0.1s both, glow 4s ease-in-out 0.5s infinite; }
     .info-card { animation:fadeUp 0.6s ease both, float 3s ease-in-out infinite; }
-    @media(max-width:768px){ .nav-links,.lang-row{display:none} .hamburger{display:flex} }
+    @media(max-width:768px){ .nav-links,.lang-row{display:none} .hamburger{display:flex} .strip{flex-direction:column;gap:0} .si{flex:none;width:100%;padding:12px 16px;border-right:none;border-bottom:1px solid rgba(201,168,76,0.15)} .si:last-child{border-bottom:none} .tagline-bar{flex-direction:column;gap:8px;padding:16px 12px;font-size:9px} .tagline-bar .tmark{font-size:14px} .tagline-bar .ttext{font-size:9px} }
     @media(max-width:640px){ .wrap{padding:2rem 0.9rem 4rem} .form-panel{padding:1.5rem 1.1rem} .fi{padding:12px 14px} }
   </style>
 </head>
@@ -290,41 +306,32 @@
   </div>
 </div>
 
-<!-- MOBILE MENU -->
-<div class="mobile-menu" id="mobileMenu">
-  <button class="mobile-close" onclick="toggleMobileMenu()">✕</button>
-  <!-- SI -->
-  <div class="block-si">
-    <a href="index.html" onclick="toggleMobileMenu()">මුල් පිටුව</a>
-    <a href="Daily Attendance.html" onclick="toggleMobileMenu()">දෛනික පැමිණීම</a>
-    <a href="About.html" onclick="toggleMobileMenu()">අප ගැන</a>
-    <a href="galery.html" onclick="toggleMobileMenu()">ගැලරිය</a>
-    <a href="#" onclick="toggleMobileMenu()">ජයග්‍රහණ</a>
-    <a href="#" onclick="toggleMobileMenu()">දෛනික උපුටා දැක්වීම්</a>
-    <a href="Contact.html" onclick="toggleMobileMenu()">අප හා සම්බන්ධ වන්න</a>
-    <a href="Subject.html" onclick="toggleMobileMenu()">විෂය නිර්දේශය</a>
+<!-- ========== MOBILE SIDEBAR ========== -->
+<div class="mobile-overlay" id="mobileOverlay" onclick="closeMobileMenu()"></div>
+<div class="mobile-sidebar" id="mobileSidebar">
+  <div class="mobile-sidebar-header">
+    <div class="brand">Sri Vipassi Dhamma School</div>
+    <button class="mobile-close" onclick="closeMobileMenu()">✕</button>
   </div>
-  <!-- EN -->
-  <div class="block-en" style="display:none">
-    <a href="index.html" onclick="toggleMobileMenu()">Home</a>
-    <a href="Daily Attendance.html" onclick="toggleMobileMenu()">Daily Attendance</a>
-    <a href="About.html" onclick="toggleMobileMenu()">About</a>
-    <a href="galery.html" onclick="toggleMobileMenu()">Gallery</a>
-    <a href="#" onclick="toggleMobileMenu()">Achievements</a>
-    <a href="#" onclick="toggleMobileMenu()">Daily Quotes</a>
-    <a href="Contact.html" onclick="toggleMobileMenu()">Contact Us</a>
-    <a href="Subject.html" onclick="toggleMobileMenu()">Subjects</a>
+  <div class="mobile-nav-links">
+    <a href="index.html" onclick="closeMobileMenu()">Home</a>
+    <a href="Daily Attendance.html" onclick="closeMobileMenu()">Daily Attendance</a>
+    <a href="About.html" onclick="closeMobileMenu()">About</a>
+    <a href="galery.html" onclick="closeMobileMenu()">Gallery</a>
+    <a href="#" onclick="closeMobileMenu()">Achievements</a>
+    <a href="#" onclick="closeMobileMenu()">Daily Quotes</a>
+    <a href="Contact.html" onclick="closeMobileMenu()">Contact us</a>
+    <a href="#" onclick="closeMobileMenu()">Projects</a>
+    <a href="Subject.html" onclick="closeMobileMenu()">Syllabus</a>
   </div>
-  <!-- TA -->
-  <div class="block-ta" style="display:none">
-    <a href="index.html" onclick="toggleMobileMenu()">முகப்பு</a>
-    <a href="Daily Attendance.html" onclick="toggleMobileMenu()">தினசரி வருகை</a>
-    <a href="About.html" onclick="toggleMobileMenu()">எங்களை பற்றி</a>
-    <a href="galery.html" onclick="toggleMobileMenu()">தொகுப்பு</a>
-    <a href="#" onclick="toggleMobileMenu()">சாதனைகள்</a>
-    <a href="#" onclick="toggleMobileMenu()">தினசரி மேற்கோள்கள்</a>
-    <a href="Contact.html" onclick="toggleMobileMenu()">தொடர்பு கொள்ளுங்கள்</a>
-    <a href="Subject.html" onclick="toggleMobileMenu()">பாடங்கள்</a>
+  <div class="mobile-lang-row">
+    <button class="lb on">EN</button>
+    <button class="lb">සිං</button>
+    <button class="lb">தமிழ்</button>
+    <button class="login-btn" id="mobileLoginBtn" onclick="openAuth('si'); closeMobileMenu()">Login</button>
+  </div>
+</div>
+  
   </div>
 </div>
 
@@ -959,7 +966,23 @@ function showMsg(type, text) {
 window.addEventListener('scroll', () => { document.getElementById('scrollTopBtn').classList.toggle('visible', window.scrollY>400); });
 function toggleFaq(el){ el.classList.toggle('open'); }
 function updateCount(){ document.getElementById('charCount').textContent = document.getElementById('fmessage').value.length; }
-function toggleMobileMenu(){ document.getElementById('mobileMenu').classList.toggle('open'); }
+function toggleMobileMenu(){
+  const sidebar = document.getElementById('mobileSidebar');
+  const overlay = document.getElementById('mobileOverlay');
+  const hamburger = document.querySelector('.hamburger');
+  sidebar.classList.toggle('open');
+  overlay.classList.toggle('open');
+  hamburger.classList.toggle('open');
+}
+
+function closeMobileMenu(){
+  const sidebar = document.getElementById('mobileSidebar');
+  const overlay = document.getElementById('mobileOverlay');
+  const hamburger = document.querySelector('.hamburger');
+  sidebar.classList.remove('open');
+  overlay.classList.remove('open');
+  hamburger.classList.remove('open');
+}
 
 /* ===== FIREBASE AUTH ===== */
 const firebaseConfig={apiKey:"AIzaSyAWpPP3OevjIRAsoGIjOJTofV6l2jgyhNI",authDomain:"signin-f9656.firebaseapp.com",projectId:"signin-f9656",storageBucket:"signin-f9656.firebasestorage.app",messagingSenderId:"1074665165821",appId:"1:1074665165821:web:91ef329a0472fa138e7f94"};

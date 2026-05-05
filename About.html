@@ -95,6 +95,12 @@ body{font-family:'Lato',sans-serif;background:#080608;color:#f5deb3;overflow-x:h
 @media(max-width:768px) {
   .nav-links, .lang-row { display:none; }
   .hamburger { display:flex; }
+  .strip { flex-direction:column; gap:0; }
+  .si { flex:none; width:100%; padding:12px 16px; border-right:none; border-bottom:1px solid rgba(201,168,76,0.15); }
+  .si:last-child { border-bottom:none; }
+  .tagline-bar { flex-direction:column; gap:8px; padding:16px 12px; font-size:9px; }
+  .tagline-bar .tmark { font-size:14px; }
+  .tagline-bar .ttext { font-size:9px; }
 }
 
 /* ===== HERO BANNER ===== */
