@@ -1,0 +1,1618 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+  
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vipassi Dhamma School | විෂය නිර්දේශය</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@400;500;600&family=Noto+Sans+Sinhala:wght@400;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+.login-btn{background:linear-gradient(135deg,#c9a84c,#a07810);color:#1a0800;border:none;padding:5px 16px;border-radius:3px;font-size:10.5px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;margin-left:8px;transition:all .2s;box-shadow:0 2px 8px rgba(201,168,76,0.25)}
+.login-btn:hover{background:linear-gradient(135deg,#e0b95c,#b88a20);box-shadow:0 4px 14px rgba(201,168,76,0.4)}
+.login-btn.logged-in{background:rgba(201,168,76,0.12);color:#c9a84c;border:1px solid rgba(201,168,76,0.35)}
+.auth-overlay{display:none;position:fixed;inset:0;z-index:1000;background:rgba(4,2,4,0.92);backdrop-filter:blur(8px);align-items:center;justify-content:center}
+.auth-overlay.open{display:flex}
+.auth-modal{background:linear-gradient(160deg,#110808 0%,#1a0a0a 60%,#0d0d0a 100%);border:1px solid rgba(201,168,76,0.28);border-radius:8px;width:100%;max-width:420px;margin:1rem;box-shadow:0 0 80px rgba(0,0,0,0.95);animation:mIn .3s ease both;overflow:hidden;max-height:92vh;overflow-y:auto}
+@keyframes mIn{from{opacity:0;transform:translateY(-20px) scale(0.96)}to{opacity:1;transform:none}}
+.am-head{background:linear-gradient(90deg,#5a0808,#7a0e0e,#5a0808);border-bottom:1px solid rgba(201,168,76,0.3);padding:1rem 1.4rem;display:flex;align-items:center;gap:10px;position:relative}
+.am-wheel{font-size:1.3rem;filter:drop-shadow(0 0 7px rgba(201,168,76,0.6))}
+.am-brand{font-size:10px;letter-spacing:2px;color:#c9a84c;text-transform:uppercase;flex:1}
+.am-close{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:rgba(245,222,179,0.45);font-size:14px;cursor:pointer;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.am-close:hover{background:rgba(255,255,255,0.1);color:#f5deb3}
+.am-tabs{display:flex;border-bottom:1px solid rgba(201,168,76,0.1)}
+.am-tab{flex:1;padding:11px;background:none;border:none;color:rgba(245,222,179,0.4);font-size:9.5px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;border-bottom:2px solid transparent;transition:all .2s}
+.am-tab.on{color:#c9a84c;border-bottom-color:#c9a84c;background:rgba(201,168,76,0.04)}
+.am-tab:hover:not(.on){color:rgba(245,222,179,0.65)}
+.am-body{padding:1.4rem}
+.am-field{margin-bottom:.9rem}
+.am-label{display:block;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:#c9a84c;margin-bottom:5px}
+.am-input{width:100%;background:rgba(255,255,255,0.04);border:1px solid rgba(201,168,76,0.18);border-radius:3px;padding:9px 13px;color:#f5deb3;font-size:0.87rem;outline:none;transition:border-color .2s}
+.am-input:focus{border-color:rgba(201,168,76,0.5);background:rgba(201,168,76,0.03)}
+.am-input::placeholder{color:rgba(245,222,179,0.18)}
+.am-forgot{text-align:right;margin-top:-3px;margin-bottom:.8rem}
+.am-forgot a{font-size:0.75rem;color:rgba(201,168,76,0.55);text-decoration:none}
+.am-forgot a:hover{color:#c9a84c}
+.am-btn{width:100%;padding:11px;background:linear-gradient(135deg,#c9a84c,#a07810);border:none;border-radius:3px;color:#1a0800;font-weight:700;font-size:10.5px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all .2s}
+.am-btn:hover{background:linear-gradient(135deg,#e0b95c,#b88a20);box-shadow:0 4px 18px rgba(201,168,76,0.28)}
+.am-btn:disabled{opacity:.5;cursor:not-allowed}
+.am-err{margin-top:.65rem;font-size:.77rem;color:#e05555;min-height:1rem;text-align:center}
+.am-ok{color:#6dbf6d!important}
+.am-div{display:flex;align-items:center;gap:10px;margin:1rem 0;color:rgba(245,222,179,0.22);font-size:.72rem}
+.am-div::before,.am-div::after{content:'';flex:1;height:1px;background:rgba(201,168,76,0.1)}
+.am-socials{display:grid;grid-template-columns:1fr;gap:8px;margin-bottom:.4rem}
+.am-soc{padding:9px 6px;background:rgba(255,255,255,0.04);border:1px solid rgba(201,168,76,0.14);border-radius:3px;color:rgba(245,222,179,0.7);font-size:.78rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:all .2s;white-space:nowrap}
+.am-soc:hover{background:rgba(255,255,255,0.09);border-color:rgba(201,168,76,0.3);color:#f5deb3}
+.am-soc.google:hover{border-color:rgba(234,67,53,0.5)}
+.am-loggedin{text-align:center;padding:2rem 1.4rem}
+.am-avatar{width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,rgba(201,168,76,0.2),rgba(90,8,8,0.5));border:2px solid rgba(201,168,76,0.4);display:flex;align-items:center;justify-content:center;font-size:1.8rem;margin:0 auto .8rem}
+.am-lg-name{font-size:1.3rem;color:#fff;margin-bottom:.25rem}
+.am-lg-email{font-size:.76rem;color:rgba(201,168,76,0.55);letter-spacing:.8px;margin-bottom:1.4rem}
+
+    body {
+      font-family: 'Poppins', 'Inter', system-ui, sans-serif;
+      color: #f5deb3;
+      min-height: 100vh;
+      overflow-x: hidden;
+      background: #0a0505;
+    }
+
+    /* ========== NAV ========== */
+    .nav {
+      background: linear-gradient(90deg,#5a0808 0%,#8b1212 40%,#7a0e0e 70%,#5a0808 100%);
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      border-bottom: 2px solid #c9a84c;
+      position: relative;
+      z-index: 100;
+      box-shadow: 0 2px 20px rgba(0,0,0,0.6);
+    }
+    .brand { color:#f5deb3; font-size:13px; font-weight:700; letter-spacing:.5px; text-shadow:0 1px 3px rgba(0,0,0,0.5); }
+    .nav-links { display:flex; flex-wrap:wrap; flex:1; }
+    .nav-links a {
+      color:rgba(245,222,179,0.88); font-size:11.5px; padding:14px 10px;
+      text-decoration:none; border-bottom:2px solid transparent; transition:all .2s; white-space:nowrap;
+    }
+    .nav-links a:hover, .nav-links a.active { color:#ffe066; border-bottom-color:#ffe066; background:rgba(255,255,255,0.05); }
+    .lang-row { display:flex; gap:5px; align-items:center; padding:6px 0; margin-left:auto; }
+    .lb {
+      background:rgba(255,255,255,0.08); color:#f5deb3; border:1px solid rgba(255,255,255,0.2);
+      padding:4px 10px; border-radius:3px; font-size:10.5px; cursor:pointer; transition:all .2s;
+    }
+    .lb:hover { background:rgba(255,255,255,0.15); }
+    .lb.on { background:linear-gradient(135deg,#c9a84c,#a07810); color:#1a0800; border-color:#c9a84c; font-weight:700; }
+    .dropdown { position:relative; }
+    .dropdown-menu {
+      display:none; position:absolute; top:100%; right:0; background:#8b1212;
+      border:1px solid #c9a84c; border-top:none; z-index:200; min-width:120px;
+    }
+    .dropdown-menu a { display:block; color:#f5deb3; font-size:11px; padding:8px 14px; text-decoration:none; }
+    .dropdown-menu a:hover { background:rgba(201,168,76,0.15); color:#ffe066; }
+    .dropdown:hover .dropdown-menu { display:block; }
+
+    /* ========== BACKGROUND ========== */
+    .page-bg {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      z-index: 0;
+      background-image: url('https://img3.schoolandcollegelistings.com/003/931/928572720039310.jpg');
+      opacity: 0.18;
+      background-size: 1300px 800px;
+    }
+    .page-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      background: linear-gradient(180deg, rgba(10,5,5,0.88) 0%, rgba(10,5,5,0.75) 50%, rgba(10,5,5,0.92) 100%);
+    }
+
+    /* ========== BUBBLE CANVAS ========== */
+    #bubbleCanvas {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* ========== PAGE CONTENT ========== */
+    .page-content {
+      position: relative;
+      z-index: 10;
+      padding: 2.5rem 1.5rem 4rem;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    /* ========== HERO ========== */
+    .page-hero {
+      text-align: center;
+      margin-bottom: 3rem;
+      animation: fadeUp 0.8s ease both;
+    }
+    .hero-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(201,168,76,0.1);
+      border: 1px solid rgba(201,168,76,0.3);
+      padding: 6px 20px;
+      border-radius: 40px;
+      margin-bottom: 1.2rem;
+      font-size: 0.72rem;
+      color: #c9a84c;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+    .page-hero h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 700;
+      color: #f5deb3;
+      text-shadow: 0 2px 20px rgba(201,168,76,0.3);
+      margin-bottom: 0.5rem;
+      line-height: 1.15;
+    }
+    .page-hero h2 {
+      font-family: 'Noto Sans Sinhala', sans-serif;
+      font-size: clamp(1.2rem, 3vw, 1.8rem);
+      font-weight: 600;
+      color: #c9a84c;
+      margin-bottom: 1rem;
+    }
+    .page-hero p {
+      color: rgba(245,222,179,0.55);
+      font-size: 0.9rem;
+      max-width: 500px;
+      margin: 0 auto;
+      line-height: 1.7;
+    }
+    .divider-lotus {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      justify-content: center;
+      margin: 1.5rem 0;
+    }
+    .divider-lotus .line {
+      height: 1px;
+      width: 80px;
+      background: linear-gradient(90deg, transparent, rgba(201,168,76,0.5));
+    }
+    .divider-lotus .line.right { transform: scaleX(-1); }
+
+    /* ========== GRADE SECTION LABEL ========== */
+    .grade-section-label {
+      text-align: center;
+      margin-bottom: 2rem;
+      animation: fadeUp 0.9s ease both;
+      animation-delay: 0.1s;
+    }
+    .grade-section-label h3 {
+      font-family: 'Noto Sans Sinhala', sans-serif;
+      font-size: 1.1rem;
+      color: rgba(245,222,179,0.7);
+      font-weight: 400;
+    }
+
+    /* ========== GRADES GRID ========== */
+    .grades-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 1.2rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .grade-card {
+      position: relative;
+      background: linear-gradient(145deg, rgba(60,20,10,0.85) 0%, rgba(30,8,4,0.95) 60%, rgba(50,15,8,0.9) 100%);
+      border: none;
+      border-radius: 24px;
+      padding: 1.8rem 1.2rem 1.5rem;
+      cursor: pointer;
+      transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+      text-align: center;
+      overflow: hidden;
+      animation: fadeUp 0.7s ease both;
+      text-decoration: none;
+      display: block;
+      /* Embossed effect: top-left light edge, bottom-right dark shadow */
+      box-shadow:
+        /* outer raised edges */
+        -3px -3px 7px rgba(201,168,76,0.18),
+         3px  3px 8px rgba(0,0,0,0.85),
+        /* inner bevel highlights */
+        inset 1px 1px 1px rgba(201,168,76,0.12),
+        inset -1px -1px 1px rgba(0,0,0,0.6);
+    }
+    .grade-card:nth-child(1)  { animation-delay: 0.05s; }
+    .grade-card:nth-child(2)  { animation-delay: 0.10s; }
+    .grade-card:nth-child(3)  { animation-delay: 0.15s; }
+    .grade-card:nth-child(4)  { animation-delay: 0.20s; }
+    .grade-card:nth-child(5)  { animation-delay: 0.25s; }
+    .grade-card:nth-child(6)  { animation-delay: 0.30s; }
+    .grade-card:nth-child(7)  { animation-delay: 0.35s; }
+    .grade-card:nth-child(8)  { animation-delay: 0.40s; }
+    .grade-card:nth-child(9)  { animation-delay: 0.45s; }
+    .grade-card:nth-child(10) { animation-delay: 0.50s; }
+    .grade-card:nth-child(11) { animation-delay: 0.55s; }
+    .grade-card:nth-child(12) { animation-delay: 0.60s; }
+
+    .grade-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--card-gradient, linear-gradient(135deg, rgba(201,168,76,0.08), rgba(44,95,110,0.08)));
+      opacity: 0;
+      transition: opacity 0.3s;
+      border-radius: 24px;
+    }
+    .grade-card::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 3px;
+      background: var(--card-accent, linear-gradient(90deg, #c9a84c, #8b6914));
+      border-radius: 0 0 24px 24px;
+      transform: scaleX(0);
+      transition: transform 0.3s ease;
+    }
+    .grade-card:hover {
+      transform: translateY(-10px) scale(1.03);
+      background: linear-gradient(145deg, rgba(80,30,12,0.9) 0%, rgba(40,12,5,0.98) 60%, rgba(70,22,10,0.92) 100%);
+      box-shadow:
+        -5px -5px 12px rgba(201,168,76,0.28),
+         6px  6px 14px rgba(0,0,0,0.95),
+        inset 2px 2px 2px rgba(201,168,76,0.18),
+        inset -2px -2px 2px rgba(0,0,0,0.7),
+        0 0 22px rgba(201,168,76,0.1);
+    }
+    .grade-card:hover::before { opacity: 1; }
+    .grade-card:hover::after  { transform: scaleX(1); }
+
+    /* Active / selected: pressed-in (debossed) look */
+    .grade-card.active {
+      transform: translateY(2px) scale(0.98);
+      background: linear-gradient(145deg, rgba(20,6,2,0.98) 0%, rgba(50,18,6,0.92) 60%, rgba(25,8,2,0.98) 100%);
+      box-shadow:
+        /* reversed: dark top-left, light bottom-right = pushed in */
+         3px  3px 6px rgba(0,0,0,0.95),
+        -2px -2px 5px rgba(201,168,76,0.10),
+        inset -2px -2px 4px rgba(201,168,76,0.22),
+        inset  2px  2px 5px rgba(0,0,0,0.8),
+        /* golden glow outline */
+        0 0 0 2px rgba(201,168,76,0.55),
+        0 0 18px rgba(201,168,76,0.15);
+    }
+    .grade-card.active::after { transform: scaleX(1); }
+
+    .grade-card[data-tier="primary"]   { --card-gradient: linear-gradient(135deg, rgba(76,175,80,0.1), rgba(201,168,76,0.05)); --card-accent: linear-gradient(90deg,#4caf50,#81c784); }
+    .grade-card[data-tier="middle"]    { --card-gradient: linear-gradient(135deg, rgba(33,150,243,0.1), rgba(201,168,76,0.05)); --card-accent: linear-gradient(90deg,#2196f3,#64b5f6); }
+    .grade-card[data-tier="secondary"] { --card-gradient: linear-gradient(135deg, rgba(156,39,176,0.1), rgba(201,168,76,0.05)); --card-accent: linear-gradient(90deg,#9c27b0,#ce93d8); }
+
+    .grade-number {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 3.5rem;
+      font-weight: 700;
+      color: #c9a84c;
+      line-height: 1;
+      margin-bottom: 0.3rem;
+      position: relative;
+      z-index: 1;
+      transition: transform 0.3s;
+    }
+    .grade-card:hover .grade-number { transform: scale(1.05); }
+
+    .grade-sinhala {
+      font-family: 'Noto Sans Sinhala', sans-serif;
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #f5deb3;
+      margin-bottom: 0.3rem;
+      position: relative;
+      z-index: 1;
+    }
+    .grade-english {
+      font-size: 0.68rem;
+      color: rgba(245,222,179,0.45);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      position: relative;
+      z-index: 1;
+    }
+    .grade-tier-badge {
+      display: inline-block;
+      margin-top: 0.8rem;
+      padding: 3px 12px;
+      border-radius: 40px;
+      font-size: 0.62rem;
+      letter-spacing: 0.5px;
+      position: relative;
+      z-index: 1;
+    }
+    [data-tier="primary"]   .grade-tier-badge { background: rgba(76,175,80,0.2);  color: #a5d6a7; border: 1px solid rgba(76,175,80,0.3); }
+    [data-tier="middle"]    .grade-tier-badge { background: rgba(33,150,243,0.2); color: #90caf9; border: 1px solid rgba(33,150,243,0.3); }
+    [data-tier="secondary"] .grade-tier-badge { background: rgba(156,39,176,0.2); color: #ce93d8; border: 1px solid rgba(156,39,176,0.3); }
+
+    .grade-icon {
+      font-size: 1.3rem;
+      margin-bottom: 0.5rem;
+      display: block;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ========== TOPIC PANEL ========== */
+    .topic-panel {
+  background: rgba(20,8,4,0.92); /* ← much more solid/dark */
+
+      border: 1px solid rgba(201,168,76,0.2);
+      border-radius: 32px;
+      padding: 2rem;
+      display: none;
+      animation: fadeUp 0.5s ease both;
+      margin-bottom: 2rem;
+    }
+    .topic-panel.visible { display: block; }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.8rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+      border-bottom: 1px solid rgba(201,168,76,0.15);
+      padding-bottom: 1.2rem;
+    }
+    .panel-header-left h3 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.6rem;
+      color: #f5deb3;
+    }
+    .panel-header-left .sinhala-label {
+      font-family: 'Noto Sans Sinhala', sans-serif;
+      font-size: 1.1rem;
+      color: #c9a84c;
+    }
+    .close-panel {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: rgba(245,222,179,0.7);
+      padding: 8px 18px;
+      border-radius: 40px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      transition: all 0.2s;
+      font-family: 'Poppins', sans-serif;
+    }
+    .close-panel:hover { background: rgba(255,255,255,0.1); color: #f5deb3; }
+
+    /* ========== TOPIC CARDS ========== */
+    .topics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 0;
+    }
+
+   .topic-card {
+  background: rgba(40,15,8,0.90);  /* ← solid dark background */
+  border: 1px solid rgba(201,168,76,0.3);  /* slightly brighter border */
+
+      border-radius: 20px;
+      padding: 1.4rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      cursor: pointer;
+      transition: all 0.25s;
+      animation: fadeUp 0.4s ease both;
+    }
+    .topic-card:hover {
+  background: rgba(26, 20, 2, 0.95);
+  border-color: rgba(201,168,76,0.6);
+
+      transform: translateX(4px);
+    }
+    .topic-emoji-box {
+      width: 48px; height: 48px;
+      background: rgba(201,168,76,0.1);
+      border: 1px solid rgba(201,168,76,0.2);
+      border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.4rem;
+      flex-shrink: 0;
+    }
+    .topic-text .tsi {
+      font-family: 'Noto Sans Sinhala', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #f5deb3;
+      display: block;
+      line-height: 1.4;
+    }
+    .topic-text .ten {
+      font-size: 0.68rem;
+      color: rgba(245,222,179,0.45);
+      letter-spacing: 0.5px;
+    }
+
+    /* ========== FILE PAGE ========== */
+    .file-page {
+      display: none;
+      animation: fadeUp 0.4s ease both;
+    }
+    .file-page.visible { display: block; }
+
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 9px 18px;
+      border-radius: 40px;
+      border: 1px solid rgba(201,168,76,0.4);
+      background: rgba(201,168,76,0.06);
+      color: #c9a84c;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-bottom: 1.4rem;
+      transition: all .2s;
+      font-family: 'Poppins', sans-serif;
+    }
+    .back-btn:hover { background: rgba(201,168,76,0.14); color: #f5deb3; }
+
+    .page-title-bar {
+      background: linear-gradient(135deg, rgba(90,8,8,0.9), rgba(139,18,18,0.9));
+      border: 1px solid rgba(201,168,76,0.3);
+      border-radius: 20px;
+      padding: 1.4rem 1.6rem;
+      margin-bottom: 1.4rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+      flex-wrap: wrap;
+    }
+    .page-title-emoji { font-size: 2.2rem; }
+    .page-title-si {
+      font-family: 'Noto Sans Sinhala', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #f5d98b;
+    }
+    .page-title-en { font-size: 0.75rem; color: rgba(245,217,139,0.6); margin-top: 2px; }
+    .page-grade-badge {
+      margin-left: auto;
+      background: rgba(201,168,76,0.2);
+      border: 1px solid rgba(201,168,76,0.4);
+      border-radius: 20px;
+      padding: 5px 14px;
+      font-size: 12px;
+      color: #c9a84c;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    /* ========== SECTION CARDS ========== */
+    .section-card {
+      background: rgba(254,250,242,0.04);
+      border: 1px solid rgba(201,168,76,0.15);
+      border-radius: 20px;
+      overflow: hidden;
+      margin-bottom: 1.2rem;
+    }
+    .section-head {
+      padding: 12px 18px;
+      background: rgba(201,168,76,0.07);
+      border-bottom: 1px solid rgba(201,168,76,0.12);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .section-head-text { font-size: 13px; font-weight: 600; color: #c9a84c; }
+    .files-body { padding: 12px 16px; min-height: 50px; }
+    .no-files {
+      text-align: center;
+      color: rgba(245,222,179,0.3);
+      font-size: 12px;
+      padding: 18px 0;
+    }
+    .file-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      margin-bottom: 8px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(201,168,76,0.1);
+      transition: background 0.2s;
+    }
+    .file-item:hover { background: rgba(201,168,76,0.06); }
+    .file-icon { font-size: 18px; flex-shrink: 0; }
+    .file-name {
+      flex: 1;
+      font-size: 12px;
+      font-weight: 500;
+      color: #f5deb3;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      text-decoration: none;
+    }
+    .file-name:hover { color: #c9a84c; text-decoration: underline; }
+    .file-actions { display: flex; gap: 5px; flex-shrink: 0; }
+    .fa-btn {
+      border: none;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 5px 10px;
+      cursor: pointer;
+      font-family: 'Poppins', sans-serif;
+      transition: all .2s;
+    }
+    .fa-edit { background: rgba(201,168,76,0.15); color: #c9a84c; border: 1px solid rgba(201,168,76,0.3); }
+    .fa-edit:hover { background: rgba(201,168,76,0.28); }
+    .fa-del { background: rgba(192,57,43,0.15); color: #e07060; border: 1px solid rgba(192,57,43,0.25); }
+    .fa-del:hover { background: rgba(192,57,43,0.28); }
+
+    /* ========== PASSWORD GATE ========== */
+    .pw-gate { padding: 20px 18px; text-align: center; }
+    .pw-gate p { font-size: 12px; color: rgba(245,222,179,0.5); margin-bottom: 12px; }
+    .pw-row { display: flex; gap: 8px; max-width: 300px; margin: 0 auto; }
+    .pw-input {
+      flex: 1;
+      padding: 9px 14px;
+      border-radius: 10px;
+      border: 1.5px solid rgba(201,168,76,0.3);
+      background: rgba(255,255,255,0.06);
+      color: #f5deb3;
+      font-size: 13px;
+      font-family: 'Poppins', sans-serif;
+    }
+    .pw-input::placeholder { color: rgba(245,222,179,0.3); }
+    .pw-input:focus { outline: none; border-color: #c9a84c; }
+    .pw-btn {
+      padding: 9px 18px;
+      background: linear-gradient(135deg, #8b1212, #5a0808);
+      color: #f5d98b;
+      border: 1px solid rgba(201,168,76,0.3);
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: 'Poppins', sans-serif;
+      transition: all .2s;
+    }
+    .pw-btn:hover { background: linear-gradient(135deg, #a83232, #7a1010); }
+    .pw-err { color: #e07060; font-size: 12px; margin-top: 8px; }
+
+    /* ========== UPLOADER ========== */
+    .uploader { padding: 16px; display: none; }
+    .drop-zone {
+      border: 2px dashed rgba(201,168,76,0.4);
+      border-radius: 14px;
+      padding: 24px 16px;
+      text-align: center;
+      cursor: pointer;
+      background: rgba(201,168,76,0.04);
+      transition: all .2s;
+      margin-bottom: 12px;
+    }
+    .drop-zone:hover, .drop-zone.drag-over { background: rgba(201,168,76,0.1); border-color: #c9a84c; }
+    .drop-icon { font-size: 28px; margin-bottom: 8px; }
+    .drop-text { font-size: 13px; color: rgba(245,222,179,0.7); font-weight: 500; }
+    .drop-sub { font-size: 11px; color: rgba(245,222,179,0.35); margin-top: 4px; }
+    .sel-name {
+      font-size: 12px; color: #c9a84c;
+      background: rgba(201,168,76,0.1); border: 1px solid rgba(201,168,76,0.2);
+      border-radius: 8px; padding: 7px 12px; margin-bottom: 10px;
+      word-break: break-all; display: none;
+    }
+    .up-btn {
+      width: 100%; padding: 12px;
+      background: linear-gradient(135deg, #8b1212, #5a0808);
+      color: #f5d98b;
+      border: 1px solid rgba(201,168,76,0.3);
+      border-radius: 12px; font-size: 14px; font-weight: 600;
+      cursor: pointer; font-family: 'Poppins', sans-serif; transition: all .2s;
+    }
+    .up-btn:hover:not(:disabled) { background: linear-gradient(135deg, #a83232, #7a1010); }
+    .up-btn:disabled { opacity: .45; cursor: not-allowed; }
+    .prog-bar { height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden; margin-top: 10px; display: none; }
+    .prog-fill { height: 100%; background: linear-gradient(90deg,#c9a84c,#a83232); border-radius: 3px; width: 0%; transition: width .3s; }
+    .up-msg { font-size: 12px; margin-top: 8px; text-align: center; }
+    .up-msg.ok { color: #6fcf97; }
+    .up-msg.err { color: #e07060; }
+
+    /* ========== MODAL ========== */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.75);
+      z-index: 500;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal-box {
+      background: #1a0808;
+      border: 1px solid rgba(201,168,76,0.3);
+      border-radius: 20px;
+      padding: 24px;
+      width: calc(100% - 40px);
+      max-width: 360px;
+      box-shadow: 0 30px 80px rgba(0,0,0,0.8);
+      animation: fadeUp 0.3s ease both;
+    }
+    .modal-title { font-size: 14px; font-weight: 700; color: #c9a84c; margin-bottom: 14px; }
+    .modal-input {
+      width: 100%; padding: 10px 14px; border-radius: 10px;
+      border: 1.5px solid rgba(201,168,76,0.25);
+      background: rgba(255,255,255,0.06); color: #f5deb3;
+      font-size: 13px; font-family: 'Poppins', sans-serif; margin-bottom: 10px;
+    }
+    .modal-input::placeholder { color: rgba(245,222,179,0.3); }
+    .modal-input:focus { outline: none; border-color: #c9a84c; }
+    .modal-row { display: flex; gap: 8px; justify-content: flex-end; }
+    .modal-cancel {
+      padding: 9px 16px; border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.15);
+      background: rgba(255,255,255,0.06); color: rgba(245,222,179,0.7);
+      font-size: 13px; cursor: pointer; font-family: 'Poppins', sans-serif;
+    }
+    .modal-cancel:hover { background: rgba(255,255,255,0.1); }
+    .modal-ok {
+      padding: 9px 18px; border-radius: 10px; border: none;
+      background: linear-gradient(135deg, #8b1212, #5a0808);
+      color: #f5d98b; font-size: 13px; font-weight: 600;
+      cursor: pointer; font-family: 'Poppins', sans-serif;
+    }
+    .modal-ok:hover { background: linear-gradient(135deg, #a83232, #7a1010); }
+    .modal-err { color: #e07060; font-size: 12px; margin-bottom: 10px; }
+
+    /* ========== ANIMATIONS ========== */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ========== FOOTER ========== */
+    .strip {
+      background: linear-gradient(90deg,#4a0606,#7a1010,#8b1212,#7a1010,#4a0606);
+      display: flex; justify-content: center;
+      border-top: 2px solid #c9a84c;
+      flex-wrap: wrap;
+      position: relative; z-index: 10;
+    }
+    .si {
+      display: flex; align-items: center; gap: 12px; padding: 16px 32px;
+      border-right: 1px solid rgba(201,168,76,0.15); flex: 1; justify-content: center;
+      transition: background .2s; min-width: 160px;
+    }
+    .si:last-child { border-right: none; }
+    .si:hover { background: rgba(201,168,76,0.06); }
+    .sicon {
+      width: 38px; height: 38px; border-radius: 50%; background: rgba(201,168,76,0.1);
+      border: 1px solid rgba(201,168,76,0.4); display: flex; align-items: center;
+      justify-content: center; font-size: 16px; flex-shrink: 0;
+    }
+    .stxt { color: #f5deb3; font-size: 11px; line-height: 1.5; }
+    .stxt strong { color: #c9a84c; display: block; font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 2px; }
+    .tagline-bar {
+      background: #050505; text-align: center; padding: 20px 32px;
+      border-top: 1px solid rgba(201,168,76,0.1);
+      display: flex; align-items: center; justify-content: center; gap: 16px;
+      position: relative; z-index: 10;
+    }
+    .tagline-bar .tmark { color: #c9a84c; font-size: 18px; }
+    .tagline-bar .ttext { color: rgba(255,255,255,0.45); font-size: 11.5px; letter-spacing: 2px; text-transform: uppercase; }
+    .tagline-bar .ttext span { color: #c9a84c; }
+
+    @media (max-width: 600px) {
+      .grades-grid { grid-template-columns: repeat(3, 1fr); gap: 0.8rem; }
+      .grade-card { padding: 1.2rem 0.6rem 1rem; border-radius: 18px; }
+      .grade-number { font-size: 2.5rem; }
+      .grade-sinhala { font-size: 0.85rem; }
+      .grade-tier-badge { display: none; }
+      .grade-icon { font-size: 1rem; }
+      .page-content { padding: 1.5rem 0.8rem 3rem; }
+      .topic-panel { padding: 1.2rem; }
+      .topics-grid { grid-template-columns: 1fr 1fr; }
+      .si { padding: 12px 16px; }
+      .page-grade-badge { margin-left: 0; }
+    }
+  </style>
+</head>
+<body>
+<!-- LOGIN BUTTON — place this wherever you want it in your nav -->
+<!-- <button class="login-btn" id="loginBtn" onclick="openAuth('si')">Login</button> -->
+
+<!-- AUTH MODAL -->
+<div class="auth-overlay" id="authOverlay" onclick="overlayClick(event)">
+  <div class="auth-modal">
+    <div class="am-head">
+      <span class="am-wheel">☸</span>
+      <span class="am-brand">Sri Vipassi Dhamma School</span>
+      <button class="am-close" onclick="closeAuth()">✕</button>
+    </div>
+    <div class="am-tabs">
+      <button class="am-tab on" id="tabSI" onclick="switchTab('si')">Sign In</button>
+      <button class="am-tab"    id="tabSU" onclick="switchTab('su')">Sign Up</button>
+    </div>
+
+    <!-- Sign In Panel -->
+    <div class="am-body" id="panSI">
+      <div class="am-field"><label class="am-label">Email</label><input class="am-input" id="siEmail" type="email" placeholder="you@email.com" autocomplete="email"></div>
+      <div class="am-field"><label class="am-label">Password</label><input class="am-input" id="siPass" type="password" placeholder="Password" autocomplete="current-password"></div>
+      <div class="am-forgot"><a href="#" onclick="forgotPw();return false">Forgot password?</a></div>
+      <button class="am-btn" id="siBtn" onclick="doSignIn()">Sign In</button>
+      <div class="am-err" id="siErr"></div>
+      <div class="am-div"><span>or continue with</span></div>
+      <div class="am-socials">
+        <button class="am-soc google" onclick="doGoogle()">
+          <svg width="15" height="15" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+          Continue with Google
+        </button>
+      </div>
+    </div>
+
+    <!-- Sign Up Panel -->
+    <div class="am-body" id="panSU" style="display:none">
+      <div class="am-field"><label class="am-label">Full Name</label><input class="am-input" id="suName" type="text" placeholder="Your name" autocomplete="name"></div>
+      <div class="am-field"><label class="am-label">Email</label><input class="am-input" id="suEmail" type="email" placeholder="you@email.com" autocomplete="email"></div>
+      <div class="am-field"><label class="am-label">Password</label><input class="am-input" id="suPass" type="password" placeholder="Min. 6 characters" autocomplete="new-password"></div>
+      <div class="am-field"><label class="am-label">Confirm Password</label><input class="am-input" id="suConf" type="password" placeholder="Repeat password" autocomplete="new-password"></div>
+      <button class="am-btn" id="suBtn" onclick="doSignUp()">Create Account</button>
+      <div class="am-err" id="suErr"></div>
+      <div class="am-div"><span>or sign up with</span></div>
+      <div class="am-socials">
+        <button class="am-soc google" onclick="doGoogle()">
+          <svg width="15" height="15" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+          Continue with Google
+        </button>
+      </div>
+    </div>
+
+    <!-- Logged In Panel -->
+    <div class="am-body am-loggedin" id="panLI" style="display:none">
+      <div class="am-avatar" id="lgAvatar">☸</div>
+      <div class="am-lg-name" id="lgName">Welcome!</div>
+      <div class="am-lg-email" id="lgEmail"></div>
+      <button class="am-btn" onclick="doSignOut()">Sign Out</button>
+    </div>
+  </div>
+</div>
+<div class="page-bg"></div>
+<div class="page-overlay"></div>
+
+<!-- ========== BUBBLE CANVAS ========== -->
+<canvas id="bubbleCanvas"></canvas>
+
+<!-- ========== NAV ========== -->
+<nav class="nav">
+  <img src="https://i.ibb.co/Zpvb4GkV/image-removebg-preview-5.png" width="40" height="40" alt="logo" style="margin-right:12px">
+  <div class="brand">Sri Vipassi Dhamma School<span style="margin-right:12px"></span></div>
+  <div class="nav-links">
+    <a href="Home Page.html">Home</a>
+    <a href="Daily Attendance.html">Daily Attendance</a>
+    <a href="About.html">About</a>
+    <a href="galery.html">Gallery</a>
+    <a href="#">Achievements</a>
+    <a href="#">Daily Quotes</a>
+    <a href="Contact.html">Contact us</a>
+    <a href="#" class="dropdown" style="position:relative;padding:14px 10px;display:inline-flex;align-items:center;gap:2px">
+      Projects ▾
+      <div class="dropdown-menu">
+        <a href="#">Welfare Unit</a>
+        <a href="#">Media Unit</a>
+      </div>
+    </a>
+    <a href="Subject.html">Syllabus</a>
+  </div>
+  <div class="lang-row">
+    <button class="lb on">EN</button>
+    <button class="lb">සිං</button>
+    <button class="lb">தமிழ்</button>
+    <button class="login-btn" id="loginBtn" onclick="openAuth('si')">Login</button>
+  </div>
+</nav>
+
+<!-- ========== PAGE CONTENT ========== -->
+<div class="page-content">
+
+  <!-- HERO -->
+  <div class="page-hero">
+    <h1>Subject Directory</h1>
+    <h2>විෂය නිර්දේශය</h2>
+    <p>Select your grade to explore the subjects offered at each level of the Dhamma school curriculum.</p>
+  </div>
+
+  <!-- GRADE SECTION LABEL -->
+  <div class="grade-section-label">
+    <h3>ශ්‍රේණිය තෝරා ගන්න · Select Your Grade</h3>
+  </div>
+
+  <!-- GRADES GRID -->
+  <div class="grades-grid" id="gradesGrid">
+    <div class="grade-card" data-tier="primary"   data-grade="1"  onclick="selectGrade(this)"><span class="grade-icon"></span><div class="grade-number">1</div><div class="grade-sinhala">1 ශ්‍රේණිය</div><div class="grade-english">Grade 1</div><span class="grade-tier-badge">Primary</span></div>
+    <div class="grade-card" data-tier="primary"   data-grade="2"  onclick="selectGrade(this)"><span class="grade-icon"></span><div class="grade-number">2</div><div class="grade-sinhala">2 ශ්‍රේණිය</div><div class="grade-english">Grade 2</div><span class="grade-tier-badge">Primary</span></div>
+    <div class="grade-card" data-tier="primary"   data-grade="3"  onclick="selectGrade(this)"><span class="grade-icon"></span><div class="grade-number">3</div><div class="grade-sinhala">3 ශ්‍රේණිය</div><div class="grade-english">Grade 3</div><span class="grade-tier-badge">Primary</span></div>
+    <div class="grade-card" data-tier="primary"   data-grade="4"  onclick="selectGrade(this)"><span class="grade-icon"></span><div class="grade-number">4</div><div class="grade-sinhala">4 ශ්‍රේණිය</div><div class="grade-english">Grade 4</div><span class="grade-tier-badge">Primary</span></div>
+    <div class="grade-card" data-tier="primary"   data-grade="5"  onclick="selectGrade(this)"><span class="grade-icon"></span><div class="grade-number">5</div><div class="grade-sinhala">5 ශ්‍රේණිය</div><div class="grade-english">Grade 5</div><span class="grade-tier-badge">Primary</span></div>
+    <div class="grade-card" data-tier="middle"    data-grade="6"  onclick="selectGrade(this)"><span class="grade-icon"></span><div class="grade-number">6</div><div class="grade-sinhala">6 ශ්‍රේණිය</div><div class="grade-english">Grade 6</div><span class="grade-tier-badge">Middle</span></div>
+    <div class="grade-card" data-tier="middle"    data-grade="7"  onclick="selectGrade(this)"><span class="grade-icon"></span><div class="grade-number">7</div><div class="grade-sinhala">7 ශ්‍රේණිය</div><div class="grade-english">Grade 7</div><span class="grade-tier-badge">Middle</span></div>
+    <div class="grade-card" data-tier="middle"    data-grade="8"  onclick="selectGrade(this)"><span class="grade-icon"></span><div class="grade-number">8</div><div class="grade-sinhala">8 ශ්‍රේණිය</div><div class="grade-english">Grade 8</div><span class="grade-tier-badge">Middle</span></div>
+    <div class="grade-card" data-tier="middle"    data-grade="9"  onclick="selectGrade(this)"><span class="grade-icon"></span><div class="grade-number">9</div><div class="grade-sinhala">9 ශ්‍රේණිය</div><div class="grade-english">Grade 9</div><span class="grade-tier-badge">Middle</span></div>
+    <div class="grade-card" data-tier="secondary" data-grade="10" onclick="selectGrade(this)"><span class="grade-icon"></span><div class="grade-number">10</div><div class="grade-sinhala">10 ශ්‍රේණිය</div><div class="grade-english">Grade 10</div><span class="grade-tier-badge">Secondary</span></div>
+    <div class="grade-card" data-tier="secondary" data-grade="11" onclick="selectGrade(this)"><span class="grade-icon"></span><div class="grade-number">11</div><div class="grade-sinhala">11 ශ්‍රේණිය</div><div class="grade-english">Grade 11</div><span class="grade-tier-badge">Secondary</span></div>
+    <div class="grade-card" data-tier="secondary" data-grade="12" onclick="selectGrade(this)"><span class="grade-icon"></span><div class="grade-number">12</div><div class="grade-sinhala">12 ශ්‍රේණිය</div><div class="grade-english">Grade 12</div><span class="grade-tier-badge">Secondary</span></div>
+  </div>
+
+  <!-- TOPIC PANEL -->
+  <div class="topic-panel" id="topicPanel">
+    <div class="panel-header">
+      <div class="panel-header-left">
+        <div class="sinhala-label" id="panelSinhala">—</div>
+        <h3 id="panelTitle">—</h3>
+      </div>
+      <button class="close-panel" onclick="closeTopicPanel()">✕ Close</button>
+    </div>
+    <div class="topics-grid" id="topicsGrid"></div>
+  </div>
+
+  <!-- FILE PAGE -->
+  <div class="file-page" id="filePage">
+
+    <!-- ACTION MODAL -->
+    <div class="modal-overlay" id="actionModal">
+      <div class="modal-box">
+        <div class="modal-title" id="modalTitle">Confirm Action</div>
+        <div class="modal-err" id="modalErr" style="display:none"></div>
+        <input type="password" class="modal-input" id="modalPw" placeholder="Enter password to confirm" onkeydown="if(event.key==='Enter')confirmModal()">
+        <div id="editNameWrap" style="display:none">
+          <input type="text" class="modal-input" id="editNameInput" placeholder="New file name">
+        </div>
+        <div class="modal-row">
+          <button class="modal-cancel" onclick="closeModal()">Cancel</button>
+          <button class="modal-ok" onclick="confirmModal()">Confirm</button>
+        </div>
+      </div>
+    </div>
+
+    <button class="back-btn" onclick="goBackToTopics()">← Back to Subjects</button>
+
+    <div class="page-title-bar">
+      <div class="page-title-emoji" id="pageEmoji"></div>
+      <div>
+        <div class="page-title-si" id="pageSi"></div>
+        <div class="page-title-en" id="pageEn"></div>
+      </div>
+      <div class="page-grade-badge" id="pageGrade"></div>
+    </div>
+
+    <div class="section-card">
+      <div class="section-head">
+        <span class="section-head-text">📁 Uploaded Files</span>
+        <span id="fileCount" style="font-size:11px;color:rgba(201,168,76,0.6)"></span>
+      </div>
+      <div class="files-body" id="filesList"></div>
+    </div>
+
+    <div class="section-card">
+      <div class="section-head">
+        <span class="section-head-text">🔒 Upload Files</span>
+      </div>
+      <div class="pw-gate" id="pwGate">
+        <p>Enter password to upload files</p>
+        <div class="pw-row">
+          <input type="password" class="pw-input" id="pwInput" placeholder="Password" onkeydown="if(event.key==='Enter')checkPw()">
+          <button class="pw-btn" onclick="checkPw()">Unlock</button>
+        </div>
+        <div class="pw-err" id="pwErr"></div>
+      </div>
+      <div class="uploader" id="uploaderDiv">
+        <div class="drop-zone" id="dropZone"
+             onclick="document.getElementById('fileInput').click()"
+             ondragover="doDragOver(event)"
+             ondragleave="doDragLeave(event)"
+             ondrop="doDrop(event)">
+          <div class="drop-icon">📂</div>
+          <div class="drop-text">Click or drag & drop a file</div>
+          <div class="drop-sub">PDF, DOC, images, ZIP…</div>
+        </div>
+        <input type="file" id="fileInput" style="display:none" onchange="onFileSelected(this)">
+        <div class="sel-name" id="selName"></div>
+        <button class="up-btn" id="upBtn" onclick="doUpload()" disabled>Upload File</button>
+        <div class="prog-bar" id="progBar"><div class="prog-fill" id="progFill"></div></div>
+        <div class="up-msg" id="upMsg"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ========== FOOTER ========== -->
+<div class="strip">
+  <div class="si"><div class="sicon">🏛</div><div class="stxt"><strong>Location</strong>Kananwila, Horana, Sri Lanka 12418</div></div>
+  <div class="si"><div class="sicon">📞</div><div class="stxt"><strong>Contact</strong>077 798 0889</div></div>
+  <div class="si"><div class="sicon">✉</div><div class="stxt"><strong>Email</strong>srivipassidhammaschool@gmail.com</div></div>
+  <div class="si"><div class="sicon">⏰</div><div class="stxt"><strong>Hours</strong>Always open</div></div>
+</div>
+<div class="tagline-bar">
+  <span class="tmark">☸</span>
+  <span class="ttext"><span>Vipassi Dhamma School</span> &nbsp;·&nbsp; Sri Lanka &nbsp;·&nbsp; Developing Wisdom Through Dhamma</span>
+  <span class="tmark">☸</span>
+</div>
+
+<script>
+/* ============================================================
+   BEAUTIFUL BUBBLE ANIMATION
+   - Glowing golden orbs of varied sizes rise slowly
+   - Each bubble has a shimmer highlight and inner glow
+   - Some bubbles carry a faint dharma wheel symbol
+   - Occasional "lotus petal" shaped bubbles
+   - Gentle wobble / sway as they rise
+   - Pop burst effect when a bubble reaches the top
+   ============================================================ */
+(function(){
+  const cv = document.getElementById('bubbleCanvas');
+  const cx = cv.getContext('2d');
+
+  function resize(){
+    cv.width  = window.innerWidth;
+    cv.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  /* ---- Palette ---- */
+  const PALETTES = [
+    { r:201, g:168, b:76  },  // warm gold
+    { r:220, g:190, b:100 },  // light gold
+    { r:180, g:130, b:50  },  // amber
+    { r:245, g:222, b:179 },  // wheat
+    { r:255, g:200, b:80  },  // bright gold
+    { r:160, g:90,  b:20  },  // deep amber
+    { r:230, g:160, b:60  },  // saffron
+  ];
+
+  /* ---- Bubble factory ---- */
+  function mkBubble(forceBottom){
+    const col = PALETTES[Math.floor(Math.random() * PALETTES.length)];
+    const r   = Math.random() * 28 + 5;          // radius 5–33
+    const x   = Math.random() * cv.width;
+    const y   = forceBottom ? cv.height + r + Math.random() * 200
+                            : Math.random() * cv.height + r;
+    return {
+      x, y, r,
+      baseX : x,
+      col,
+      alpha    : Math.random() * 0.45 + 0.08,     // 0.08 – 0.53
+      speedY   : Math.random() * 0.55 + 0.18,     // rise speed
+      wobbleAmp: Math.random() * 18 + 4,           // horizontal sway px
+      wobbleSpd: Math.random() * 0.018 + 0.006,
+      wobbleOff: Math.random() * Math.PI * 2,
+      t        : Math.random() * 1000,
+      type     : Math.random() < 0.15 ? 'wheel'   // 15 % carry dharma wheel
+               : Math.random() < 0.12 ? 'lotus'   // 12 % lotus petal shape
+               : 'orb',
+      shimmerA : Math.random() * 0.35 + 0.1,
+      popR     : 0,
+      popping  : false,
+      popAlpha : 0,
+    };
+  }
+
+  /* ---- Pool of 70 bubbles ---- */
+  const pool = [];
+  for(let i = 0; i < 70; i++) pool.push(mkBubble(false));
+
+  /* ---- Draw a single dharma wheel (simplified) ---- */
+  function drawWheel(cx2, x, y, r, alpha){
+    cx2.save();
+    cx2.globalAlpha = alpha * 0.6;
+    cx2.translate(x, y);
+    cx2.strokeStyle = `rgba(255,240,180,0.9)`;
+    cx2.lineWidth   = r * 0.07;
+    // hub
+    cx2.beginPath(); cx2.arc(0, 0, r * 0.22, 0, Math.PI * 2); cx2.stroke();
+    // rim
+    cx2.beginPath(); cx2.arc(0, 0, r * 0.72, 0, Math.PI * 2); cx2.stroke();
+    // 8 spokes
+    for(let s = 0; s < 8; s++){
+      const a = (s / 8) * Math.PI * 2;
+      cx2.beginPath();
+      cx2.moveTo(Math.cos(a) * r * 0.22, Math.sin(a) * r * 0.22);
+      cx2.lineTo(Math.cos(a) * r * 0.72, Math.sin(a) * r * 0.72);
+      cx2.stroke();
+    }
+    cx2.restore();
+  }
+
+  /* ---- Draw lotus petal shape ---- */
+  function drawLotus(cx2, x, y, r, col, alpha){
+    cx2.save();
+    cx2.globalAlpha = alpha;
+    const n = 6; // 6 petals
+    for(let p = 0; p < n; p++){
+      const a = (p / n) * Math.PI * 2;
+      cx2.save();
+      cx2.translate(x, y);
+      cx2.rotate(a);
+      const grad = cx2.createRadialGradient(0, -r * 0.5, 0, 0, -r * 0.5, r * 0.85);
+      grad.addColorStop(0, `rgba(${col.r+40},${col.g+30},${col.b+20},0.7)`);
+      grad.addColorStop(1, `rgba(${col.r},${col.g},${col.b},0)`);
+      cx2.fillStyle = grad;
+      cx2.beginPath();
+      cx2.ellipse(0, -r * 0.55, r * 0.28, r * 0.55, 0, 0, Math.PI * 2);
+      cx2.fill();
+      cx2.restore();
+    }
+    cx2.restore();
+  }
+
+  /* ---- Draw a regular orb ---- */
+  function drawOrb(cx2, b){
+    cx2.save();
+
+    // outer soft glow
+    const glow = cx2.createRadialGradient(b.x, b.y, 0, b.x, b.y, b.r * 2.2);
+    glow.addColorStop(0,   `rgba(${b.col.r},${b.col.g},${b.col.b},${b.alpha * 0.25})`);
+    glow.addColorStop(1,   `rgba(${b.col.r},${b.col.g},${b.col.b},0)`);
+    cx2.fillStyle = glow;
+    cx2.beginPath(); cx2.arc(b.x, b.y, b.r * 2.2, 0, Math.PI * 2); cx2.fill();
+
+    // bubble body
+    const body = cx2.createRadialGradient(
+      b.x - b.r * 0.28, b.y - b.r * 0.28, b.r * 0.05,
+      b.x, b.y, b.r
+    );
+    body.addColorStop(0,   `rgba(${b.col.r+55},${b.col.g+45},${b.col.b+30},${b.alpha * 0.95})`);
+    body.addColorStop(0.4, `rgba(${b.col.r},${b.col.g},${b.col.b},${b.alpha * 0.65})`);
+    body.addColorStop(1,   `rgba(${b.col.r-30},${b.col.g-20},${b.col.b-10},${b.alpha * 0.2})`);
+    cx2.fillStyle = body;
+    cx2.beginPath(); cx2.arc(b.x, b.y, b.r, 0, Math.PI * 2); cx2.fill();
+
+    // rim highlight (thin arc top-left)
+    cx2.strokeStyle = `rgba(255,245,210,${b.shimmerA})`;
+    cx2.lineWidth   = b.r * 0.08;
+    cx2.beginPath();
+    cx2.arc(b.x, b.y, b.r * 0.78, -Math.PI * 0.85, -Math.PI * 0.15);
+    cx2.stroke();
+
+    // bright specular spot
+    const spec = cx2.createRadialGradient(
+      b.x - b.r * 0.32, b.y - b.r * 0.32, 0,
+      b.x - b.r * 0.32, b.y - b.r * 0.32, b.r * 0.38
+    );
+    spec.addColorStop(0, `rgba(255,252,230,${b.shimmerA * 0.9})`);
+    spec.addColorStop(1, `rgba(255,252,230,0)`);
+    cx2.fillStyle = spec;
+    cx2.beginPath(); cx2.arc(b.x - b.r * 0.32, b.y - b.r * 0.32, b.r * 0.38, 0, Math.PI * 2); cx2.fill();
+
+    cx2.restore();
+  }
+
+  /* ---- Draw pop burst ---- */
+  function drawPop(cx2, b){
+    cx2.save();
+    cx2.globalAlpha = b.popAlpha;
+    const n = 10;
+    for(let i = 0; i < n; i++){
+      const a  = (i / n) * Math.PI * 2;
+      const r2 = b.popR;
+      const x2 = b.x + Math.cos(a) * r2;
+      const y2 = b.y + Math.sin(a) * r2;
+      const sr = Math.max(0, b.r * 0.18 * (1 - b.popR / (b.r * 3)));
+      cx2.fillStyle = `rgba(${b.col.r+40},${b.col.g+30},${b.col.b},1)`;
+      cx2.beginPath(); cx2.arc(x2, y2, sr, 0, Math.PI * 2); cx2.fill();
+    }
+    cx2.restore();
+  }
+
+  /* ---- Animation loop ---- */
+  function tick(){
+    cx.clearRect(0, 0, cv.width, cv.height);
+
+    for(const b of pool){
+      b.t += 1;
+
+      if(b.popping){
+        // pop animation
+        b.popR    += b.r * 0.12;
+        b.popAlpha = Math.max(0, b.popAlpha - 0.05);
+        drawPop(cx, b);
+        if(b.popAlpha <= 0) Object.assign(b, mkBubble(true));
+        continue;
+      }
+
+      // rise + wobble
+      b.y -= b.speedY;
+      b.x  = b.baseX + Math.sin(b.t * b.wobbleSpd + b.wobbleOff) * b.wobbleAmp;
+
+      // pop when off-screen top
+      if(b.y < -b.r * 3){
+        b.popping  = true;
+        b.popR     = 0;
+        b.popAlpha = 0.75;
+        continue;
+      }
+
+      if(b.type === 'lotus'){
+        drawLotus(cx, b.x, b.y, b.r, b.col, b.alpha);
+      } else {
+        drawOrb(cx, b);
+        if(b.type === 'wheel' && b.r > 14){
+          drawWheel(cx, b.x, b.y, b.r, b.alpha);
+        }
+      }
+    }
+
+    requestAnimationFrame(tick);
+  }
+  tick();
+})();
+
+/* ========= DATA ========= */
+const SUBJECTS = {
+  1:[{emoji:"",si:"ප්‍රශ්න පත්‍ර",en:"Question Papers"},{emoji:"",si:"විශය නිර්දේශය",en:"Syllabus"},{emoji:"",si:"ඉංග්‍රීසි භාෂාව",en:"English Language"},{emoji:"",si:"වැඩ පොත",en:"Work Book"},{emoji:"",si:"විපස්සී ප්‍රභා මණ්ඩපය",en:"Vipassi Praba Mandapaya"},{emoji:"",si:"ක්‍රියාකාරකම්",en:"Activities"}],
+  2:[{emoji:"",si:"ප්‍රශ්න පත්‍ර",en:"Question Papers"},{emoji:"",si:"විශය නිර්දේශය",en:"Syllabus"},{emoji:"",si:"ඉංග්‍රීසි භාෂාව",en:"English Language"},{emoji:"",si:"වැඩ පොත",en:"Work Book"},{emoji:"",si:"විපස්සී ප්‍රභා මණ්ඩපය",en:"Vipassi Praba Mandapaya"},{emoji:"",si:"ක්‍රියාකාරකම්",en:"Activities"}],
+  3:[{emoji:"",si:"ප්‍රශ්න පත්‍ර",en:"Question Papers"},{emoji:"",si:"විශය නිර්දේශය",en:"Syllabus"},{emoji:"",si:"ඉංග්‍රීසි භාෂාව",en:"English Language"},{emoji:"",si:"වැඩ පොත",en:"Work Book"},{emoji:"",si:"විපස්සී ප්‍රභා මණ්ඩපය",en:"Vipassi Praba Mandapaya"},{emoji:"",si:"ක්‍රියාකාරකම්",en:"Activities"}],
+  4:[{emoji:"",si:"ප්‍රශ්න පත්‍ර",en:"Question Papers"},{emoji:"",si:"විශය නිර්දේශය",en:"Syllabus"},{emoji:"",si:"ඉංග්‍රීසි භාෂාව",en:"English Language"},{emoji:"",si:"වැඩ පොත",en:"Work Book"},{emoji:"",si:"විපස්සී ප්‍රභා මණ්ඩපය",en:"Vipassi Praba Mandapaya"},{emoji:"",si:"ක්‍රියාකාරකම්",en:"Activities"}],
+  5:[{emoji:"",si:"ප්‍රශ්න පත්‍ර",en:"Question Papers"},{emoji:"",si:"විශය නිර්දේශය",en:"Syllabus"},{emoji:"",si:"ඉංග්‍රීසි භාෂාව",en:"English Language"},{emoji:"",si:"වැඩ පොත",en:"Work Book"},{emoji:"",si:"විපස්සී ප්‍රභා මණ්ඩපය",en:"Vipassi Praba Mandapaya"},{emoji:"",si:"ක්‍රියාකාරකම්",en:"Activities"}],
+  6:[{emoji:"",si:"ප්‍රශ්න පත්‍ර",en:"Question Papers"},{emoji:"",si:"විශය නිර්දේශය",en:"Syllabus"},{emoji:"",si:"ඉංග්‍රීසි භාෂාව",en:"English Language"},{emoji:"",si:"වැඩ පොත",en:"Work Book"},{emoji:"",si:"විපස්සී ප්‍රභා මණ්ඩපය",en:"Vipassi Praba Mandapaya"},{emoji:"",si:"ක්‍රියාකාරකම්",en:"Activities"}],
+  7:[{emoji:"",si:"ප්‍රශ්න පත්‍ර",en:"Question Papers"},{emoji:"",si:"විශය නිර්දේශය",en:"Syllabus"},{emoji:"",si:"ඉංග්‍රීසි භාෂාව",en:"English Language"},{emoji:"",si:"වැඩ පොත",en:"Work Book"},{emoji:"",si:"විපස්සී ප්‍රභා මණ්ඩපය",en:"Vipassi Praba Mandapaya"},{emoji:"",si:"ක්‍රියාකාරකම්",en:"Activities"}],
+  8:[{emoji:"",si:"ප්‍රශ්න පත්‍ර",en:"Question Papers"},{emoji:"",si:"විශය නිර්දේශය",en:"Syllabus"},{emoji:"",si:"ඉංග්‍රීසි භාෂාව",en:"English Language"},{emoji:"",si:"වැඩ පොත",en:"Work Book"},{emoji:"",si:"විපස්සී ප්‍රභා මණ්ඩපය",en:"Vipassi Praba Mandapaya"},{emoji:"",si:"ක්‍රියාකාරකම්",en:"Activities"}],
+  9:[{emoji:"",si:"ප්‍රශ්න පත්‍ර",en:"Question Papers"},{emoji:"",si:"විශය නිර්දේශය",en:"Syllabus"},{emoji:"",si:"ඉංග්‍රීසි භාෂාව",en:"English Language"},{emoji:"",si:"වැඩ පොත",en:"Work Book"},{emoji:"",si:"විපස්සී ප්‍රභා මණ්ඩපය",en:"Vipassi Praba Mandapaya"},{emoji:"",si:"ක්‍රියාකාරකම්",en:"Activities"}],
+  10:[{emoji:"",si:"ප්‍රශ්න පත්‍ර",en:"Question Papers"},{emoji:"",si:"විශය නිර්දේශය",en:"Syllabus"},{emoji:"",si:"ඉංග්‍රීසි භාෂාව",en:"English Language"},{emoji:"",si:"වැඩ පොත",en:"Work Book"},{emoji:"",si:"විපස්සී ප්‍රභා මණ්ඩපය",en:"Vipassi Praba Mandapaya"},{emoji:"",si:"ක්‍රියාකාරකම්",en:"Activities"}],
+  11:[{emoji:"",si:"ප්‍රශ්න පත්‍ර",en:"Question Papers"},{emoji:"",si:"විශය නිර්දේශය",en:"Syllabus"},{emoji:"",si:"ඉංග්‍රීසි භාෂාව",en:"English Language"},{emoji:"",si:"වැඩ පොත",en:"Work Book"},{emoji:"",si:"විපස්සී ප්‍රභා මණ්ඩපය",en:"Vipassi Praba Mandapaya"},{emoji:"",si:"ක්‍රියාකාරකම්",en:"Activities"}],
+  12:[{emoji:"",si:"ප්‍රශ්න පත්‍ර",en:"Question Papers"},{emoji:"",si:"විශය නිර්දේශය",en:"Syllabus"},{emoji:"",si:"ඉංග්‍රීසි භාෂාව",en:"English Language"},{emoji:"",si:"වැඩ පොත",en:"Work Book"},{emoji:"",si:"විපස්සී ප්‍රභා මණ්ඩපය",en:"Vipassi Praba Mandapaya"},{emoji:"",si:"ක්‍රියාකාරකම්",en:"Activities"}]
+};
+
+const SINHALA_GRADES = {
+  1:"1 ශ්‍රේණිය",2:"2 ශ්‍රේණිය",3:"3 ශ්‍රේණිය",4:"4 ශ්‍රේණිය",
+  5:"5 ශ්‍රේණිය",6:"6 ශ්‍රේණිය",7:"7 ශ්‍රේණිය",8:"8 ශ්‍රේණිය",
+  9:"9 ශ්‍රේණිය",10:"10 ශ්‍රේණිය",11:"11 ශ්‍රේණිය",12:"12 ශ්‍රේණිය"
+};
+
+const CLOUD='dbdg4bl5j', PRESET='subject', PW='vds';
+let activeGrade=null, curTopic=null, pwUnlocked=false, selFile=null;
+const fileStore={};
+let modalAction=null, modalIdx=null, modalKey=null;
+
+/* ========= HISTORY-AWARE NAVIGATION ========= */
+/*
+  States:
+    { view: 'home' }
+    { view: 'grade', grade: N }
+    { view: 'topic', grade: N, topicEn: '...' }
+*/
+
+function pushState(state){
+  history.pushState(state, '');
+}
+
+function applyState(state, scroll){
+  if(!state || state.view === 'home'){
+    _closeAll(scroll);
+    return;
+  }
+  if(state.view === 'grade'){
+    _openGrade(state.grade, scroll);
+    return;
+  }
+  if(state.view === 'topic'){
+    _openGrade(state.grade, false);
+    const topics = SUBJECTS[state.grade] || [];
+    const t = topics.find(x => x.en === state.topicEn);
+    if(t) _openFilePage(t, state.grade, scroll);
+  }
+}
+
+window.addEventListener('popstate', function(e){
+  applyState(e.state, true);
+});
+
+/* ---- internal renderers (no pushState) ---- */
+function _closeAll(scroll){
+  activeGrade = null; curTopic = null;
+  document.querySelectorAll('.grade-card').forEach(c => c.classList.remove('active'));
+  document.getElementById('topicPanel').classList.remove('visible');
+  document.getElementById('filePage').classList.remove('visible');
+  if(scroll) document.getElementById('gradesGrid').scrollIntoView({ behavior:'smooth', block:'start' });
+}
+
+function _openGrade(grade, scroll){
+  activeGrade = grade; curTopic = null;
+  document.querySelectorAll('.grade-card').forEach(c => c.classList.remove('active'));
+  const card = document.querySelector(`.grade-card[data-grade="${grade}"]`);
+  if(card) card.classList.add('active');
+  document.getElementById('filePage').classList.remove('visible');
+  document.getElementById('panelSinhala').textContent = SINHALA_GRADES[grade];
+  document.getElementById('panelTitle').textContent = 'Grade ' + grade + ' · Subjects';
+  const grid = document.getElementById('topicsGrid');
+  grid.innerHTML = '';
+  (SUBJECTS[grade]||[]).forEach((t, i) => {
+    const div = document.createElement('div');
+    div.className = 'topic-card';
+    div.style.animationDelay = `${i * 0.06}s`;
+    div.innerHTML = `<div class="topic-emoji-box">${t.emoji}</div><div class="topic-text"><span class="tsi">${t.si}</span><span class="ten">${t.en}</span></div>`;
+    div.onclick = () => selectTopic(t, grade);
+    grid.appendChild(div);
+  });
+  document.getElementById('topicPanel').classList.add('visible');
+  if(scroll) setTimeout(() => document.getElementById('topicPanel').scrollIntoView({ behavior:'smooth', block:'start' }), 100);
+}
+
+function _openFilePage(t, grade, scroll){
+  curTopic = t;
+  document.getElementById('pageEmoji').textContent = t.emoji;
+  document.getElementById('pageSi').textContent = t.si;
+  document.getElementById('pageEn').textContent = t.en;
+  document.getElementById('pageGrade').textContent = 'Grade ' + grade;
+  pwUnlocked = false;
+  document.getElementById('pwGate').style.display = 'block';
+  document.getElementById('uploaderDiv').style.display = 'none';
+  document.getElementById('pwInput').value = '';
+  document.getElementById('pwErr').textContent = '';
+  document.getElementById('upMsg').textContent = '';
+  selFile = null;
+  document.getElementById('selName').style.display = 'none';
+  document.getElementById('upBtn').disabled = true;
+  document.getElementById('progBar').style.display = 'none';
+  document.getElementById('progFill').style.width = '0%';
+  renderFiles(grade, t);
+  document.getElementById('topicPanel').classList.remove('visible');
+  document.getElementById('filePage').classList.add('visible');
+  closeModal();
+  if(scroll) setTimeout(() => document.getElementById('filePage').scrollIntoView({ behavior:'smooth', block:'start' }), 100);
+}
+
+/* ---- public handlers called from HTML ---- */
+function selectGrade(el){
+  const grade = parseInt(el.dataset.grade);
+  if(activeGrade === grade){ 
+    closeTopicPanel(); 
+    return; 
+  }
+  pushState({ view:'grade', grade });
+  _openGrade(grade, true);
+}
+
+function selectTopic(t, grade){
+  pushState({ view:'topic', grade, topicEn: t.en });
+  _openFilePage(t, grade, true);
+}
+
+function closeTopicPanel(){
+  pushState({ view:'home' });
+  _closeAll(true);
+}
+
+function openFilePage(t, grade){ selectTopic(t, grade); }
+
+function goBackToTopics(){
+  history.back();
+}
+
+/* seed initial history entry so the very first back press works */
+history.replaceState({ view:'home' }, '');
+
+function storeKey(g, en){ return `g${g}_${en.replace(/\s+/g,'_')}`; }
+
+function renderFiles(g, t){
+  const key = storeKey(g, t.en);
+  const files = fileStore[key] || [];
+  const list = document.getElementById('filesList');
+  document.getElementById('fileCount').textContent = files.length ? files.length+' file(s)' : '';
+  if(!files.length){ list.innerHTML='<div class="no-files">No files uploaded yet.</div>'; return; }
+  list.innerHTML = files.map((f,i) => `
+    <div class="file-item">
+      <span class="file-icon">${fIcon(f.name)}</span>
+      <a class="file-name" href="${f.url}" target="_blank" title="${f.name}">${f.name}</a>
+      <div class="file-actions">
+        <button class="fa-btn fa-edit" onclick="askEdit('${key}',${i})">✏️ Edit</button>
+        <button class="fa-btn fa-del"  onclick="askDelete('${key}',${i})">🗑️ Del</button>
+      </div>
+    </div>`).join('');
+}
+
+function fIcon(n){
+  const e=n.split('.').pop().toLowerCase();
+  if(e==='pdf') return '📄';
+  if(['doc','docx'].includes(e)) return '📝';
+  if(['jpg','jpeg','png','gif','webp'].includes(e)) return '🖼️';
+  if(['mp4','mov','avi'].includes(e)) return '🎬';
+  if(['mp3','wav'].includes(e)) return '🎵';
+  if(['zip','rar','7z'].includes(e)) return '🗜️';
+  if(['ppt','pptx'].includes(e)) return '📊';
+  return '📎';
+}
+
+function checkPw(){
+  if(document.getElementById('pwInput').value === PW){
+    pwUnlocked = true;
+    document.getElementById('pwGate').style.display = 'none';
+    document.getElementById('uploaderDiv').style.display = 'block';
+  } else {
+    document.getElementById('pwErr').textContent = 'Incorrect password. Please try again.';
+    document.getElementById('pwInput').value = '';
+  }
+}
+
+function openModal(title, showEdit){
+  document.getElementById('modalTitle').textContent = title;
+  document.getElementById('modalPw').value = '';
+  document.getElementById('modalErr').style.display = 'none';
+  document.getElementById('editNameWrap').style.display = showEdit ? 'block' : 'none';
+  if(showEdit) document.getElementById('editNameInput').value = '';
+  document.getElementById('actionModal').classList.add('open');
+  setTimeout(() => document.getElementById('modalPw').focus(), 50);
+}
+function closeModal(){
+  document.getElementById('actionModal').classList.remove('open');
+  modalAction=null; modalIdx=null; modalKey=null;
+}
+function askDelete(key,i){
+  modalAction='delete'; modalKey=key; modalIdx=i;
+  openModal('🗑️ Delete: '+((fileStore[key]||[])[i]?.name||'').substring(0,30), false);
+}
+function askEdit(key,i){
+  modalAction='edit'; modalKey=key; modalIdx=i;
+  openModal('✏️ Rename File', true);
+  document.getElementById('editNameInput').value = (fileStore[key]||[])[i]?.name||'';
+}
+function confirmModal(){
+  const pw = document.getElementById('modalPw').value;
+  const errEl = document.getElementById('modalErr');
+  if(pw !== PW){ errEl.textContent='Incorrect password.'; errEl.style.display='block'; document.getElementById('modalPw').value=''; return; }
+  if(modalAction==='delete'){
+    if(fileStore[modalKey]) fileStore[modalKey].splice(modalIdx,1);
+    closeModal(); renderFiles(activeGrade, curTopic);
+  } else if(modalAction==='edit'){
+    const newName = document.getElementById('editNameInput').value.trim();
+    if(!newName){ errEl.textContent='Please enter a name.'; errEl.style.display='block'; return; }
+    if(fileStore[modalKey]&&fileStore[modalKey][modalIdx]) fileStore[modalKey][modalIdx].name=newName;
+    closeModal(); renderFiles(activeGrade, curTopic);
+  }
+}
+document.getElementById('actionModal').addEventListener('click', function(e){ if(e.target===this) closeModal(); });
+
+function onFileSelected(inp){
+  if(inp.files&&inp.files[0]){
+    selFile=inp.files[0];
+    const el=document.getElementById('selName');
+    el.textContent='Selected: '+selFile.name; el.style.display='block';
+    document.getElementById('upBtn').disabled=false;
+  }
+}
+function doDragOver(e){ e.preventDefault(); document.getElementById('dropZone').classList.add('drag-over'); }
+function doDragLeave(){ document.getElementById('dropZone').classList.remove('drag-over'); }
+function doDrop(e){
+  e.preventDefault(); document.getElementById('dropZone').classList.remove('drag-over');
+  if(e.dataTransfer.files&&e.dataTransfer.files[0]){
+    selFile=e.dataTransfer.files[0];
+    const el=document.getElementById('selName');
+    el.textContent='Selected: '+selFile.name; el.style.display='block';
+    document.getElementById('upBtn').disabled=false;
+  }
+}
+async function doUpload(){
+  if(!selFile||!curTopic) return;
+  const btn=document.getElementById('upBtn'), bar=document.getElementById('progBar'),
+        fill=document.getElementById('progFill'), msg=document.getElementById('upMsg');
+  btn.disabled=true; btn.textContent='Uploading…';
+  bar.style.display='block'; fill.style.width='10%';
+  msg.textContent=''; msg.className='up-msg';
+  try{
+    const fd=new FormData();
+    fd.append('file',selFile); fd.append('upload_preset',PRESET);
+    fd.append('folder',`dhamma_school/grade_${activeGrade}/${curTopic.en.replace(/\s+/g,'_')}`);
+    fill.style.width='40%';
+    const res=await fetch(`https://api.cloudinary.com/v1_1/${CLOUD}/auto/upload`,{method:'POST',body:fd});
+    fill.style.width='80%';
+    const data=await res.json();
+    fill.style.width='100%';
+    if(data.secure_url){
+      const key=storeKey(activeGrade,curTopic.en);
+      if(!fileStore[key]) fileStore[key]=[];
+      fileStore[key].push({name:selFile.name,url:data.secure_url,id:data.public_id});
+      renderFiles(activeGrade,curTopic);
+      msg.textContent='✓ Uploaded successfully!'; msg.className='up-msg ok';
+      selFile=null;
+      document.getElementById('selName').style.display='none';
+      document.getElementById('fileInput').value='';
+    } else throw new Error(data.error?.message||'Upload failed');
+  } catch(err){
+    fill.style.background='#e74c3c';
+    msg.textContent='Upload failed: '+err.message; msg.className='up-msg err';
+  }
+  btn.textContent='Upload File'; btn.disabled=false;
+  setTimeout(()=>{ bar.style.display='none'; fill.style.width='0%'; fill.style.background=''; },2000);
+}
+</script>
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
+<script>
+// ─── Firebase Init ────────────────────────────────────────────────────────────
+if (!firebase.apps.length) {
+  firebase.initializeApp({
+    apiKey:            "AIzaSyAWpPP3OevjIRAsoGIjOJTofV6l2jgyhNI",
+    authDomain:        "signin-f9656.firebaseapp.com",
+    projectId:         "signin-f9656",
+    storageBucket:     "signin-f9656.firebasestorage.app",
+    messagingSenderId: "1074665165821",
+    appId:             "1:1074665165821:web:91ef329a0472fa138e7f94"
+  });
+}
+const auth = firebase.auth();
+const db   = firebase.firestore();
+const googleProvider = new firebase.auth.GoogleAuthProvider();
+googleProvider.addScope('email');
+googleProvider.addScope('profile');
+
+// ─── Save user to Firestore ───────────────────────────────────────────────────
+async function saveUser(user, extra={}) {
+  try {
+    const ref  = db.collection("users").doc(user.uid);
+    const snap = await ref.get();
+    if (!snap.exists) {
+      await ref.set({
+        uid: user.uid, email: user.email || "",
+        displayName: user.displayName || extra.name || "",
+        photoURL: user.photoURL || "",
+        role: "student",
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        ...extra
+      });
+    }
+  } catch(e) { console.warn("Firestore:", e.message); }
+}
+
+// ─── Auth state ───────────────────────────────────────────────────────────────
+auth.onAuthStateChanged(u => {
+  const btn = document.getElementById("loginBtn");
+  if (!btn) return;
+  if (u) {
+    const first = (u.displayName || u.email || "User").split(/[ @]/)[0];
+    btn.textContent = first;
+    btn.classList.add("logged-in");
+    const av = document.getElementById("lgAvatar");
+    if (av) {
+      av.innerHTML = u.photoURL
+        ? `<img src="${u.photoURL}" style="width:100%;height:100%;border-radius:50%;object-fit:cover">`
+        : first.charAt(0).toUpperCase();
+    }
+    const lgName  = document.getElementById("lgName");
+    const lgEmail = document.getElementById("lgEmail");
+    if (lgName)  lgName.textContent  = "Welcome, " + (u.displayName || u.email);
+    if (lgEmail) lgEmail.textContent = u.email || "";
+  } else {
+    btn.textContent = "Login";
+    btn.classList.remove("logged-in");
+  }
+});
+
+// ─── UI helpers ───────────────────────────────────────────────────────────────
+function openAuth(tab) {
+  document.getElementById("authOverlay").classList.add("open");
+  if (auth.currentUser) { showPan("panLI"); return; }
+  switchTab(tab || "si");
+}
+function closeAuth() {
+  document.getElementById("authOverlay").classList.remove("open");
+  clearErrs();
+}
+function overlayClick(e) {
+  if (e.target === document.getElementById("authOverlay")) closeAuth();
+}
+function switchTab(t) {
+  document.getElementById("tabSI").classList.toggle("on", t === "si");
+  document.getElementById("tabSU").classList.toggle("on", t === "su");
+  showPan(t === "si" ? "panSI" : "panSU");
+}
+function showPan(id) {
+  ["panSI","panSU","panLI"].forEach(p =>
+    document.getElementById(p).style.display = p === id ? "block" : "none"
+  );
+}
+function clearErrs() {
+  ["siErr","suErr"].forEach(id => {
+    const el = document.getElementById(id);
+    el.textContent = ""; el.className = "am-err";
+  });
+}
+function errMsg(id, m) { const el=document.getElementById(id); el.textContent=m; el.className="am-err"; }
+function okMsg(id, m)  { const el=document.getElementById(id); el.textContent=m; el.className="am-err am-ok"; }
+function fErr(c) {
+  return ({
+    "auth/user-not-found":        "No account found with that email.",
+    "auth/wrong-password":        "Incorrect password.",
+    "auth/invalid-credential":    "Invalid email or password.",
+    "auth/email-already-in-use":  "Email already registered — try Sign In.",
+    "auth/invalid-email":         "Please enter a valid email.",
+    "auth/weak-password":         "Password must be at least 6 characters.",
+    "auth/popup-closed-by-user":  "Sign-in popup was closed.",
+    "auth/popup-blocked":         "Popup was blocked — please allow popups.",
+    "auth/network-request-failed":"Network error. Check your connection.",
+    "auth/too-many-requests":     "Too many attempts — try again later.",
+    "auth/unauthorized-domain":   "This domain is not authorized. Please open via a proper web server.",
+    "auth/operation-not-supported-in-this-environment": "Please open via a web server, not a file."
+  })[c] || "Something went wrong. (" + c + ")";
+}
+
+// ─── Email Sign In ─────────────────────────────────────────────────────────────
+async function doSignIn() {
+  const email = document.getElementById("siEmail").value.trim();
+  const pass  = document.getElementById("siPass").value;
+  if (!email || !pass) { errMsg("siErr","Please fill in all fields."); return; }
+  const btn = document.getElementById("siBtn");
+  btn.disabled = true;
+  try {
+    await auth.signInWithEmailAndPassword(email, pass);
+    showPan("panLI"); setTimeout(closeAuth, 1400);
+  } catch(e) { errMsg("siErr", fErr(e.code)); }
+  finally { btn.disabled = false; }
+}
+
+// ─── Email Sign Up ─────────────────────────────────────────────────────────────
+async function doSignUp() {
+  const name  = document.getElementById("suName").value.trim();
+  const email = document.getElementById("suEmail").value.trim();
+  const pass  = document.getElementById("suPass").value;
+  const conf  = document.getElementById("suConf").value;
+  if (!name || !email || !pass) { errMsg("suErr","Please fill in all fields."); return; }
+  if (pass !== conf)            { errMsg("suErr","Passwords do not match."); return; }
+  if (pass.length < 6)          { errMsg("suErr","Password must be at least 6 characters."); return; }
+  const btn = document.getElementById("suBtn");
+  btn.disabled = true;
+  try {
+    const cred = await auth.createUserWithEmailAndPassword(email, pass);
+    await cred.user.updateProfile({ displayName: name });
+    await saveUser(cred.user, { name });
+    showPan("panLI"); setTimeout(closeAuth, 1400);
+  } catch(e) { errMsg("suErr", fErr(e.code)); }
+  finally { btn.disabled = false; }
+}
+
+// ─── Google Sign In ────────────────────────────────────────────────────────────
+async function doGoogle() {
+  try {
+    const result = await auth.signInWithPopup(googleProvider);
+    await saveUser(result.user);
+    showPan("panLI"); setTimeout(closeAuth, 1400);
+  } catch(e) {
+    const activeErr = document.getElementById("panSU").style.display === "block" ? "suErr" : "siErr";
+    errMsg(activeErr, fErr(e.code));
+  }
+}
+
+// ─── Sign Out ──────────────────────────────────────────────────────────────────
+async function doSignOut() {
+  await auth.signOut();
+  showPan("panSI");
+  closeAuth();
+}
+
+// ─── Forgot Password ───────────────────────────────────────────────────────────
+async function forgotPw() {
+  const email = document.getElementById("siEmail").value.trim();
+  if (!email) { errMsg("siErr","Enter your email above first."); return; }
+  try {
+    await auth.sendPasswordResetEmail(email);
+    okMsg("siErr","Reset email sent — check your inbox.");
+  } catch(e) { errMsg("siErr", fErr(e.code)); }
+}
+</script>
+
+</body>
+</html>

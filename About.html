@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>About | Sri Vipassi Dhamma School</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=Cinzel:wght@400;600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+  
+.login-btn{background:linear-gradient(135deg,#c9a84c,#a07810);color:#1a0800;border:none;padding:5px 16px;border-radius:3px;font-size:10.5px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;margin-left:8px;transition:all .2s;box-shadow:0 2px 8px rgba(201,168,76,0.25)}
+.login-btn:hover{background:linear-gradient(135deg,#e0b95c,#b88a20);box-shadow:0 4px 14px rgba(201,168,76,0.4)}
+.login-btn.logged-in{background:rgba(201,168,76,0.12);color:#c9a84c;border:1px solid rgba(201,168,76,0.35)}
+.auth-overlay{display:none;position:fixed;inset:0;z-index:1000;background:rgba(4,2,4,0.92);backdrop-filter:blur(8px);align-items:center;justify-content:center}
+.auth-overlay.open{display:flex}
+.auth-modal{background:linear-gradient(160deg,#110808 0%,#1a0a0a 60%,#0d0d0a 100%);border:1px solid rgba(201,168,76,0.28);border-radius:8px;width:100%;max-width:420px;margin:1rem;box-shadow:0 0 80px rgba(0,0,0,0.95);animation:mIn .3s ease both;overflow:hidden;max-height:92vh;overflow-y:auto}
+@keyframes mIn{from{opacity:0;transform:translateY(-20px) scale(0.96)}to{opacity:1;transform:none}}
+.am-head{background:linear-gradient(90deg,#5a0808,#7a0e0e,#5a0808);border-bottom:1px solid rgba(201,168,76,0.3);padding:1rem 1.4rem;display:flex;align-items:center;gap:10px;position:relative}
+.am-wheel{font-size:1.3rem;filter:drop-shadow(0 0 7px rgba(201,168,76,0.6))}
+.am-brand{font-size:10px;letter-spacing:2px;color:#c9a84c;text-transform:uppercase;flex:1}
+.am-close{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:rgba(245,222,179,0.45);font-size:14px;cursor:pointer;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.am-close:hover{background:rgba(255,255,255,0.1);color:#f5deb3}
+.am-tabs{display:flex;border-bottom:1px solid rgba(201,168,76,0.1)}
+.am-tab{flex:1;padding:11px;background:none;border:none;color:rgba(245,222,179,0.4);font-size:9.5px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;border-bottom:2px solid transparent;transition:all .2s}
+.am-tab.on{color:#c9a84c;border-bottom-color:#c9a84c;background:rgba(201,168,76,0.04)}
+.am-tab:hover:not(.on){color:rgba(245,222,179,0.65)}
+.am-body{padding:1.4rem}
+.am-field{margin-bottom:.9rem}
+.am-label{display:block;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:#c9a84c;margin-bottom:5px}
+.am-input{width:100%;background:rgba(255,255,255,0.04);border:1px solid rgba(201,168,76,0.18);border-radius:3px;padding:9px 13px;color:#f5deb3;font-size:0.87rem;outline:none;transition:border-color .2s}
+.am-input:focus{border-color:rgba(201,168,76,0.5);background:rgba(201,168,76,0.03)}
+.am-input::placeholder{color:rgba(245,222,179,0.18)}
+.am-forgot{text-align:right;margin-top:-3px;margin-bottom:.8rem}
+.am-forgot a{font-size:0.75rem;color:rgba(201,168,76,0.55);text-decoration:none}
+.am-forgot a:hover{color:#c9a84c}
+.am-btn{width:100%;padding:11px;background:linear-gradient(135deg,#c9a84c,#a07810);border:none;border-radius:3px;color:#1a0800;font-weight:700;font-size:10.5px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all .2s}
+.am-btn:hover{background:linear-gradient(135deg,#e0b95c,#b88a20);box-shadow:0 4px 18px rgba(201,168,76,0.28)}
+.am-btn:disabled{opacity:.5;cursor:not-allowed}
+.am-err{margin-top:.65rem;font-size:.77rem;color:#e05555;min-height:1rem;text-align:center}
+.am-ok{color:#6dbf6d!important}
+.am-div{display:flex;align-items:center;gap:10px;margin:1rem 0;color:rgba(245,222,179,0.22);font-size:.72rem}
+.am-div::before,.am-div::after{content:'';flex:1;height:1px;background:rgba(201,168,76,0.1)}
+.am-socials{display:grid;grid-template-columns:1fr;gap:8px;margin-bottom:.4rem}
+.am-soc{padding:9px 6px;background:rgba(255,255,255,0.04);border:1px solid rgba(201,168,76,0.14);border-radius:3px;color:rgba(245,222,179,0.7);font-size:.78rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:all .2s;white-space:nowrap}
+.am-soc:hover{background:rgba(255,255,255,0.09);border-color:rgba(201,168,76,0.3);color:#f5deb3}
+.am-soc.google:hover{border-color:rgba(234,67,53,0.5)}
+.am-loggedin{text-align:center;padding:2rem 1.4rem}
+.am-avatar{width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,rgba(201,168,76,0.2),rgba(90,8,8,0.5));border:2px solid rgba(201,168,76,0.4);display:flex;align-items:center;justify-content:center;font-size:1.8rem;margin:0 auto .8rem}
+.am-lg-name{font-size:1.3rem;color:#fff;margin-bottom:.25rem}
+.am-lg-email{font-size:.76rem;color:rgba(201,168,76,0.55);letter-spacing:.8px;margin-bottom:1.4rem}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Lato',sans-serif;background:#080608;color:#f5deb3;overflow-x:hidden}
+
+/* ===== NAV ===== */
+.nav{background:linear-gradient(90deg,#5a0808 0%,#8b1212 40%,#7a0e0e 70%,#5a0808 100%);padding:0 24px;display:flex;align-items:center;border-bottom:2px solid #c9a84c;position:sticky;top:0;z-index:200;box-shadow:0 2px 20px rgba(0,0,0,0.6)}
+.brand{color:#f5deb3;font-size:13px;font-weight:700;letter-spacing:.5px;text-shadow:0 1px 3px rgba(0,0,0,0.5);white-space:nowrap}
+.nav-links{display:flex;flex-wrap:wrap;flex:1}
+.nav-links a{color:rgba(245,222,179,0.88);font-size:11.5px;padding:14px 10px;text-decoration:none;border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap}
+.nav-links a:hover,.nav-links a.active{color:#ffe066;border-bottom-color:#ffe066;background:rgba(255,255,255,0.05)}
+.lang-row{display:flex;gap:5px;align-items:center;padding:6px 0;margin-left:auto}
+.lb{background:rgba(255,255,255,0.08);color:#f5deb3;border:1px solid rgba(255,255,255,0.2);padding:4px 10px;border-radius:3px;font-size:10.5px;cursor:pointer;transition:all .2s}
+.lb:hover{background:rgba(255,255,255,0.15)}
+.lb.on{background:linear-gradient(135deg,#c9a84c,#a07810);color:#1a0800;border-color:#c9a84c;font-weight:700}
+.dropdown{position:relative}
+.dropdown-menu{display:none;position:absolute;top:100%;right:0;background:#8b1212;border:1px solid #c9a84c;border-top:none;z-index:300;min-width:120px}
+.dropdown-menu a{display:block;color:#f5deb3;font-size:11px;padding:8px 14px;text-decoration:none}
+.dropdown-menu a:hover{background:rgba(201,168,76,0.15);color:#ffe066}
+.dropdown:hover .dropdown-menu{display:block}
+
+/* ===== HERO BANNER ===== */
+.about-hero{
+  position:relative;min-height:480px;display:flex;align-items:center;justify-content:center;
+  overflow:hidden;
+  background:linear-gradient(160deg,#1a0505 0%,#2d0a0a 30%,#1a1205 60%,#0d0d0a 100%);
+}
+.hero-mandala{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  width:700px;height:700px;opacity:0.05;pointer-events:none;
+  background:
+    repeating-conic-gradient(from 0deg,#c9a84c 0deg 2deg,transparent 2deg 30deg),
+    repeating-conic-gradient(from 15deg,#c9a84c 0deg 1deg,transparent 1deg 30deg);
+  border-radius:50%;animation:slowspin 60s linear infinite;
+}
+@keyframes slowspin{to{transform:translate(-50%,-50%) rotate(360deg)}}
+.hero-lines{position:absolute;inset:0;pointer-events:none}
+.hero-lines::before{
+  content:'';position:absolute;left:0;right:0;top:40%;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(201,168,76,0.2),rgba(201,168,76,0.5),rgba(201,168,76,0.2),transparent);
+}
+.hero-lines::after{
+  content:'';position:absolute;left:0;right:0;bottom:38%;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(201,168,76,0.1),rgba(201,168,76,0.3),rgba(201,168,76,0.1),transparent);
+}
+.about-hero-content{
+  position:relative;z-index:10;text-align:center;padding:0 2rem;
+  animation:fadeUp 1s ease both;
+}
+@keyframes fadeUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+.hero-eyebrow{
+  display:inline-flex;align-items:center;gap:10px;
+  color:#c9a84c;font-family:'Cinzel',serif;font-size:10px;letter-spacing:4px;
+  text-transform:uppercase;margin-bottom:1.5rem;
+  border:1px solid rgba(201,168,76,0.3);padding:6px 20px;border-radius:30px;
+  background:rgba(201,168,76,0.05);
+}
+.about-hero h1{
+  font-family:'Cormorant Garamond',serif;font-size:clamp(2.8rem,7vw,5.5rem);
+  font-weight:300;color:#fff;line-height:1.05;letter-spacing:-1px;
+  text-shadow:0 0 60px rgba(201,168,76,0.15);
+  margin-bottom:1rem;
+}
+.about-hero h1 em{font-style:italic;color:#c9a84c;font-weight:400}
+.hero-tagline{
+  font-family:'Cormorant Garamond',serif;font-size:1.15rem;font-style:italic;
+  color:rgba(245,222,179,0.6);letter-spacing:1px;margin-bottom:2rem;
+}
+.scroll-cue{
+  display:inline-flex;flex-direction:column;align-items:center;gap:6px;
+  color:rgba(201,168,76,0.5);font-size:9px;letter-spacing:2px;text-transform:uppercase;
+}
+.scroll-cue::after{
+  content:'';width:1px;height:40px;
+  background:linear-gradient(to bottom,rgba(201,168,76,0.5),transparent);
+  animation:scrollpulse 2s ease infinite;
+}
+@keyframes scrollpulse{0%,100%{opacity:0.3;transform:scaleY(0.8)}50%{opacity:1;transform:scaleY(1)}}
+
+/* ===== LAYOUT ===== */
+.page-body{background:#080608;position:relative}
+.section{padding:5rem 2rem;max-width:1100px;margin:0 auto}
+
+/* Gold divider */
+.gold-divider{
+  display:flex;align-items:center;gap:16px;margin:0 auto 3.5rem;max-width:400px;
+}
+.gold-divider::before,.gold-divider::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,transparent,rgba(201,168,76,0.4))}
+.gold-divider::after{background:linear-gradient(90deg,rgba(201,168,76,0.4),transparent)}
+.divider-gem{color:#c9a84c;font-size:18px}
+
+/* Section header */
+.sec-eyebrow{
+  font-family:'Cinzel',serif;font-size:9px;letter-spacing:4px;color:#c9a84c;
+  text-transform:uppercase;margin-bottom:0.8rem;display:block;
+}
+.sec-title{
+  font-family:'Cormorant Garamond',serif;font-size:clamp(1.8rem,4vw,3rem);
+  font-weight:300;color:#fff;line-height:1.2;margin-bottom:1.2rem;
+}
+.sec-title em{font-style:italic;color:#c9a84c}
+.sec-body{font-size:0.95rem;line-height:1.9;color:rgba(245,222,179,0.65);max-width:600px;}
+.sec-body p+p{margin-top:1rem}
+
+/* ===== MISSION SPLIT ===== */
+.mission-grid{display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center}
+.mission-visual{position:relative}
+.mission-frame{
+  width:100%;padding-bottom:100%;position:relative;
+  border:1px solid rgba(201,168,76,0.15);border-radius:4px;overflow:hidden;
+}
+.mission-frame-inner{
+  position:absolute;inset:16px;
+  background:linear-gradient(145deg,rgba(201,168,76,0.06),rgba(90,8,8,0.3));
+  border:1px solid rgba(201,168,76,0.1);border-radius:2px;
+  display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;
+}
+.dhamma-wheel{font-size:5rem;filter:drop-shadow(0 0 20px rgba(201,168,76,0.4));animation:wheelglow 4s ease infinite alternate}
+@keyframes wheelglow{from{filter:drop-shadow(0 0 10px rgba(201,168,76,0.2))}to{filter:drop-shadow(0 0 30px rgba(201,168,76,0.6))}}
+.mission-quote{
+  font-family:'Cormorant Garamond',serif;font-size:1rem;font-style:italic;
+  color:rgba(201,168,76,0.7);text-align:center;padding:0 1.5rem;line-height:1.7;
+}
+.corner-ornament{
+  position:absolute;width:20px;height:20px;
+  border-color:rgba(201,168,76,0.5);border-style:solid;
+}
+.corner-ornament.tl{top:8px;left:8px;border-width:1px 0 0 1px}
+.corner-ornament.tr{top:8px;right:8px;border-width:1px 1px 0 0}
+.corner-ornament.bl{bottom:8px;left:8px;border-width:0 0 1px 1px}
+.corner-ornament.br{bottom:8px;right:8px;border-width:0 1px 1px 0}
+
+/* ===== PILLARS ===== */
+.pillars-section{
+  background:linear-gradient(180deg,#080608 0%,#120808 50%,#080608 100%);
+  padding:5rem 2rem;border-top:1px solid rgba(201,168,76,0.08);border-bottom:1px solid rgba(201,168,76,0.08);
+}
+.pillars-inner{max-width:1100px;margin:0 auto;text-align:center}
+.pillars-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:1.5rem;margin-top:3rem;
+}
+.pillar-card{
+  background:linear-gradient(145deg,rgba(201,168,76,0.04),rgba(90,8,8,0.15));
+  border:1px solid rgba(201,168,76,0.12);border-radius:4px;
+  padding:2.5rem 1.8rem;position:relative;overflow:hidden;
+  transition:border-color .3s,transform .3s;cursor:default;
+  text-align:left;
+}
+.pillar-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,#c9a84c,transparent);
+  opacity:0;transition:opacity .3s;
+}
+.pillar-card:hover{border-color:rgba(201,168,76,0.35);transform:translateY(-4px)}
+.pillar-card:hover::before{opacity:1}
+.pillar-icon{font-size:2rem;margin-bottom:1.2rem;display:block}
+.pillar-title{
+  font-family:'Cinzel',serif;font-size:0.75rem;letter-spacing:2.5px;
+  color:#c9a84c;text-transform:uppercase;margin-bottom:0.8rem;
+}
+.pillar-body{font-size:0.85rem;line-height:1.8;color:rgba(245,222,179,0.55)}
+
+/* ===== HISTORY TIMELINE ===== */
+.timeline-section{padding:5rem 2rem}
+.timeline-inner{max-width:800px;margin:0 auto}
+.timeline{position:relative;margin-top:3rem}
+.timeline::before{
+  content:'';position:absolute;left:20px;top:0;bottom:0;width:1px;
+  background:linear-gradient(to bottom,transparent,rgba(201,168,76,0.3) 10%,rgba(201,168,76,0.3) 90%,transparent);
+}
+.tl-item{
+  display:flex;gap:2rem;margin-bottom:2.5rem;
+  animation:fadeUp .6s ease both;
+}
+.tl-item:nth-child(1){animation-delay:.1s}
+.tl-item:nth-child(2){animation-delay:.2s}
+.tl-item:nth-child(3){animation-delay:.3s}
+.tl-item:nth-child(4){animation-delay:.4s}
+.tl-item:nth-child(5){animation-delay:.5s}
+.tl-dot-wrap{flex-shrink:0;width:40px;display:flex;justify-content:center;padding-top:4px}
+.tl-dot{
+  width:12px;height:12px;background:#c9a84c;border-radius:50%;
+  box-shadow:0 0 0 3px rgba(201,168,76,0.15),0 0 12px rgba(201,168,76,0.3);
+  flex-shrink:0;margin-top:4px;
+}
+.tl-year{
+  font-family:'Cinzel',serif;font-size:0.7rem;letter-spacing:2px;
+  color:#c9a84c;margin-bottom:0.4rem;
+}
+.tl-event{font-family:'Cormorant Garamond',serif;font-size:1.15rem;color:#fff;margin-bottom:0.4rem}
+.tl-desc{font-size:0.82rem;line-height:1.7;color:rgba(245,222,179,0.5)}
+
+/* ===== STATS ROW ===== */
+.stats-band{
+  background:linear-gradient(90deg,#5a0808,#8b1212,#7a0e0e,#5a0808);
+  border-top:1px solid #c9a84c;border-bottom:1px solid rgba(201,168,76,0.3);
+  padding:3rem 2rem;
+}
+.stats-grid{
+  max-width:900px;margin:0 auto;
+  display:grid;grid-template-columns:repeat(4,1fr);gap:0;
+}
+.stat-item{
+  text-align:center;padding:1rem;
+  border-right:1px solid rgba(201,168,76,0.15);
+}
+.stat-item:last-child{border-right:none}
+.stat-num{
+  font-family:'Cormorant Garamond',serif;font-size:3rem;font-weight:700;
+  color:#c9a84c;line-height:1;text-shadow:0 0 20px rgba(201,168,76,0.3);
+}
+.stat-label{font-size:0.72rem;letter-spacing:1.5px;color:rgba(245,222,179,0.6);text-transform:uppercase;margin-top:0.4rem}
+
+/* ===== LEADERSHIP ===== */
+.leadership-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+  gap:1.5rem;margin-top:3rem;
+}
+.leader-card{
+  background:linear-gradient(145deg,rgba(201,168,76,0.03),rgba(90,8,8,0.12));
+  border:1px solid rgba(201,168,76,0.1);border-radius:4px;
+  padding:2rem;display:flex;align-items:flex-start;gap:1.2rem;
+  transition:border-color .3s,transform .3s;
+}
+.leader-card:hover{border-color:rgba(201,168,76,0.3);transform:translateY(-3px)}
+.leader-avatar{
+  width:52px;height:52px;border-radius:50%;flex-shrink:0;
+  background:linear-gradient(135deg,rgba(201,168,76,0.2),rgba(90,8,8,0.5));
+  border:1px solid rgba(201,168,76,0.25);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Cormorant Garamond',serif;font-size:1.4rem;color:#c9a84c;font-weight:700;
+}
+.leader-name{font-family:'Cormorant Garamond',serif;font-size:1.1rem;color:#fff;margin-bottom:2px}
+.leader-role{font-size:0.7rem;letter-spacing:1.5px;color:#c9a84c;text-transform:uppercase;margin-bottom:0.6rem}
+.leader-bio{font-size:0.8rem;line-height:1.7;color:rgba(245,222,179,0.5)}
+
+/* ===== LOCATION ===== */
+.location-section{
+  padding:5rem 2rem;
+  background:linear-gradient(180deg,#080608,#0e0608,#080608);
+  border-top:1px solid rgba(201,168,76,0.08);
+}
+.location-inner{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center}
+.map-placeholder{
+  background:linear-gradient(145deg,rgba(201,168,76,0.04),rgba(30,10,10,0.5));
+  border:1px solid rgba(201,168,76,0.15);border-radius:4px;
+  padding:3rem;text-align:center;min-height:280px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1rem;
+}
+.map-icon{font-size:3rem;filter:drop-shadow(0 0 10px rgba(201,168,76,0.3))}
+.map-address{font-family:'Cormorant Garamond',serif;font-size:1.1rem;color:#c9a84c;font-style:italic}
+.map-sub{font-size:0.8rem;color:rgba(245,222,179,0.45);letter-spacing:1px}
+.contact-list{display:flex;flex-direction:column;gap:1.2rem;margin-top:2rem}
+.contact-item{
+  display:flex;align-items:center;gap:1rem;
+  padding:1rem 1.2rem;
+  background:rgba(201,168,76,0.04);border:1px solid rgba(201,168,76,0.1);border-radius:4px;
+  transition:border-color .2s;
+}
+.contact-item:hover{border-color:rgba(201,168,76,0.3)}
+.contact-icon-wrap{
+  width:36px;height:36px;border-radius:50%;
+  background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.3);
+  display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;
+}
+.contact-label{font-size:0.65rem;letter-spacing:1.5px;color:#c9a84c;text-transform:uppercase}
+.contact-value{font-size:0.9rem;color:rgba(245,222,179,0.8);margin-top:1px}
+
+/* ===== FOOTER ===== */
+.strip{
+  background:linear-gradient(90deg,#4a0606,#7a1010,#8b1212,#7a1010,#4a0606);
+  display:flex;justify-content:center;gap:0;
+  border-top:2px solid #c9a84c;border-bottom:1px solid rgba(201,168,76,0.2);flex-wrap:wrap;
+}
+.si{
+  display:flex;align-items:center;gap:12px;padding:16px 32px;
+  border-right:1px solid rgba(201,168,76,0.15);flex:1;justify-content:center;
+  transition:background .2s;cursor:default;min-width:160px;
+}
+.si:last-child{border-right:none}
+.si:hover{background:rgba(201,168,76,0.06)}
+.sicon{
+  width:38px;height:38px;border-radius:50%;background:rgba(201,168,76,0.1);
+  border:1px solid rgba(201,168,76,0.4);display:flex;align-items:center;
+  justify-content:center;font-size:16px;flex-shrink:0;transition:all .2s;
+}
+.si:hover .sicon{background:rgba(201,168,76,0.2);border-color:#c9a84c}
+.stxt{color:#f5deb3;font-size:11px;line-height:1.5}
+.stxt strong{color:#c9a84c;display:block;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:2px}
+.tagline-bar{
+  background:#050505;text-align:center;padding:20px 32px;
+  border-top:1px solid rgba(201,168,76,0.1);
+  display:flex;align-items:center;justify-content:center;gap:16px;
+}
+.tagline-bar .tmark{color:#c9a84c;font-size:18px}
+.tagline-bar .ttext{color:rgba(255,255,255,0.45);font-size:11.5px;letter-spacing:2px;text-transform:uppercase}
+.tagline-bar .ttext span{color:#c9a84c}
+
+/* ===== SCROLL REVEAL ===== */
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .7s ease,transform .7s ease}
+.reveal.visible{opacity:1;transform:translateY(0)}
+
+@media(max-width:768px){
+  .mission-grid,.location-inner{grid-template-columns:1fr}
+  .stats-grid{grid-template-columns:repeat(2,1fr)}
+  .stat-item{border-right:none;border-bottom:1px solid rgba(201,168,76,0.1)}
+  .stat-item:nth-child(odd){border-right:1px solid rgba(201,168,76,0.1)}
+  .nav-links{display:none}
+  .si{padding:12px 16px;min-width:140px}
+}
+</style>
+</head>
+<body>
+<!-- LOGIN BUTTON — place this wherever you want it in your nav -->
+<!-- <button class="login-btn" id="loginBtn" onclick="openAuth('si')">Login</button> -->
+
+<!-- AUTH MODAL -->
+<div class="auth-overlay" id="authOverlay" onclick="overlayClick(event)">
+  <div class="auth-modal">
+    <div class="am-head">
+      <span class="am-wheel">☸</span>
+      <span class="am-brand">Sri Vipassi Dhamma School</span>
+      <button class="am-close" onclick="closeAuth()">✕</button>
+    </div>
+    <div class="am-tabs">
+      <button class="am-tab on" id="tabSI" onclick="switchTab('si')">Sign In</button>
+      <button class="am-tab"    id="tabSU" onclick="switchTab('su')">Sign Up</button>
+    </div>
+
+    <!-- Sign In Panel -->
+    <div class="am-body" id="panSI">
+      <div class="am-field"><label class="am-label">Email</label><input class="am-input" id="siEmail" type="email" placeholder="you@email.com" autocomplete="email"></div>
+      <div class="am-field"><label class="am-label">Password</label><input class="am-input" id="siPass" type="password" placeholder="Password" autocomplete="current-password"></div>
+      <div class="am-forgot"><a href="#" onclick="forgotPw();return false">Forgot password?</a></div>
+      <button class="am-btn" id="siBtn" onclick="doSignIn()">Sign In</button>
+      <div class="am-err" id="siErr"></div>
+      <div class="am-div"><span>or continue with</span></div>
+      <div class="am-socials">
+        <button class="am-soc google" onclick="doGoogle()">
+          <svg width="15" height="15" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+          Continue with Google
+        </button>
+      </div>
+    </div>
+
+    <!-- Sign Up Panel -->
+    <div class="am-body" id="panSU" style="display:none">
+      <div class="am-field"><label class="am-label">Full Name</label><input class="am-input" id="suName" type="text" placeholder="Your name" autocomplete="name"></div>
+      <div class="am-field"><label class="am-label">Email</label><input class="am-input" id="suEmail" type="email" placeholder="you@email.com" autocomplete="email"></div>
+      <div class="am-field"><label class="am-label">Password</label><input class="am-input" id="suPass" type="password" placeholder="Min. 6 characters" autocomplete="new-password"></div>
+      <div class="am-field"><label class="am-label">Confirm Password</label><input class="am-input" id="suConf" type="password" placeholder="Repeat password" autocomplete="new-password"></div>
+      <button class="am-btn" id="suBtn" onclick="doSignUp()">Create Account</button>
+      <div class="am-err" id="suErr"></div>
+      <div class="am-div"><span>or sign up with</span></div>
+      <div class="am-socials">
+        <button class="am-soc google" onclick="doGoogle()">
+          <svg width="15" height="15" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+          Continue with Google
+        </button>
+      </div>
+    </div>
+
+    <!-- Logged In Panel -->
+    <div class="am-body am-loggedin" id="panLI" style="display:none">
+      <div class="am-avatar" id="lgAvatar">☸</div>
+      <div class="am-lg-name" id="lgName">Welcome!</div>
+      <div class="am-lg-email" id="lgEmail"></div>
+      <button class="am-btn" onclick="doSignOut()">Sign Out</button>
+    </div>
+  </div>
+</div>
+<!-- ===== NAV ===== -->
+<nav class="nav">
+  <img src="https://i.ibb.co/Zpvb4GkV/image-removebg-preview-5.png" width="40" height="40" alt="logo" style="margin-right:12px;flex-shrink:0;">
+  <div class="brand">Sri Vipassi Dhamma School <span style="margin-right: 80px;"></span></div>
+  <div class="nav-links">
+    <a href="Home Page.html">Home</a>
+    <a href="Daily Attendance.html">Daily Attendance</a>
+    <a href="About.html" class="active">About</a>
+    <a href="galery.html">Gallery</a>
+    <a href="#">Achievements</a>
+    <a href="#">Daily Quotes</a>
+    <a href="Contact.html">Contact us</a>
+    <a href="#" class="dropdown" style="position:relative;padding:14px 10px;display:inline-flex;align-items:center;gap:4px">
+      Projects ▾
+      <div class="dropdown-menu">
+        <a href="#">Welfare Unit</a>
+        <a href="#">Media Unit</a>
+      </div>
+    </a>
+    <a href="Subject.html">Syllabus</a>
+  </div>
+  <div class="lang-row">
+    <button class="lb on">EN</button>
+    <button class="lb">සිං</button>
+    <button class="lb">தமிழ்</button>
+    <button class="login-btn" id="loginBtn" onclick="openAuth('si')">Login</button>
+  </div>
+</nav>
+
+<!-- ===== HERO ===== -->
+<section class="about-hero">
+  <div class="hero-mandala"></div>
+  <div class="hero-lines"></div>
+  <canvas id="heroParticles" style="position:absolute;inset:0;pointer-events:none;z-index:2"></canvas>
+  <div class="about-hero-content">
+    <div class="hero-eyebrow">☸ &nbsp; Kande Viharaya · Horana · Sri Lanka</div>
+    <h1>Rooted in <em>Dhamma,</em><br>Growing in Wisdom</h1>
+    <p class="hero-tagline">"Namo tassa bhagavato arahato sammāsambuddhassa"</p>
+    <div class="scroll-cue">Discover our story</div>
+  </div>
+</section>
+
+<!-- ===== MISSION ===== -->
+<div class="section reveal">
+  <div class="gold-divider"><span class="divider-gem">✦</span></div>
+  <div class="mission-grid">
+    <div>
+      <span class="sec-eyebrow">Our Purpose</span>
+      <h2 class="sec-title">A School Built on<br><em>Noble Principles</em></h2>
+      <div class="sec-body">
+        <p>Sri Vipassi Dhamma School was established under the sacred guidance of Kande Viharaya, Horana, with a singular mission — to nurture young minds in the timeless teachings of Lord Buddha, fostering a generation rooted in compassion, wisdom, and right conduct.</p>
+        <p>Every Sunday, our students gather not merely to learn scripture, but to embody the Dhamma — walking the Noble Eightfold Path as a lived experience, not just a concept studied from texts.</p>
+        <p>We believe that a society transformed begins with a child illuminated by wisdom. Our school is that first lamp.</p>
+      </div>
+    </div>
+    <div class="mission-visual">
+      <div class="mission-frame">
+        <div class="corner-ornament tl"></div>
+        <div class="corner-ornament tr"></div>
+        <div class="corner-ornament bl"></div>
+        <div class="corner-ornament br"></div>
+        <div class="mission-frame-inner">
+          <div class="dhamma-wheel">☸</div>
+          <p class="mission-quote">"A human society that develops wisdom through the light of the Dhamma"</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== STATS ===== -->
+<div class="stats-band reveal">
+  <div class="stats-grid">
+    <div class="stat-item">
+      <div class="stat-num">500<span style="font-size:2rem">+</span></div>
+      <div class="stat-label">Students Enrolled</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">12</div>
+      <div class="stat-label">Grade Levels</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">30<span style="font-size:2rem">+</span></div>
+      <div class="stat-label">Dedicated Teachers</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">25<span style="font-size:2rem">+</span></div>
+      <div class="stat-label">Years of Service</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PILLARS ===== -->
+<div class="pillars-section reveal">
+  <div class="pillars-inner">
+    <span class="sec-eyebrow">What We Teach</span>
+    <h2 class="sec-title">The Four <em>Pillars</em> of Our Curriculum</h2>
+    <div class="pillars-grid">
+      <div class="pillar-card">
+        <span class="pillar-icon">📖</span>
+        <div class="pillar-title">Dhamma Studies</div>
+        <p class="pillar-body">Deep engagement with the Tipitaka, Jataka stories, and the life of the Gautama Buddha. Students develop a comprehensive understanding of Buddhist philosophy and ethics.</p>
+      </div>
+      <div class="pillar-card">
+        <span class="pillar-icon">🧘</span>
+        <div class="pillar-title">Meditation & Mindfulness</div>
+        <p class="pillar-body">Age-appropriate meditation practices introduce students to Samatha and Vipassana, cultivating inner stillness, focus, and awareness from a young age.</p>
+      </div>
+      <div class="pillar-card">
+        <span class="pillar-icon">🎨</span>
+        <div class="pillar-title">Arts & Culture</div>
+        <p class="pillar-body">Traditional Buddhist arts, Pirith chanting, Bodhi Puja rituals, and Sinhala cultural expression are woven throughout the curriculum to preserve our heritage.</p>
+      </div>
+      <div class="pillar-card">
+        <span class="pillar-icon">🤝</span>
+        <div class="pillar-title">Compassionate Service</div>
+        <p class="pillar-body">Community service projects, dana activities, and welfare initiatives teach students that wisdom without compassion is incomplete — Dana, Sila, Bhavana.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== TIMELINE ===== -->
+<section class="timeline-section reveal">
+  <div class="timeline-inner">
+    <div style="text-align:center;margin-bottom:0">
+      <span class="sec-eyebrow">Our Journey</span>
+      <h2 class="sec-title" style="text-align:center">Milestones in <em>Our Story</em></h2>
+    </div>
+    <div class="gold-divider" style="margin-bottom:0"><span class="divider-gem">✦</span></div>
+    <div class="timeline">
+      <div class="tl-item">
+        <div class="tl-dot-wrap"><div class="tl-dot"></div></div>
+        <div>
+          <div class="tl-year">Founded</div>
+          <div class="tl-event">Establishment of Sri Vipassi Dhamma School</div>
+          <p class="tl-desc">Under the sacred patronage of Kande Viharaya, Horana, the school opened its doors to the first cohort of students eager to walk the path of Dhamma.</p>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot-wrap"><div class="tl-dot"></div></div>
+        <div>
+          <div class="tl-year">Early Years</div>
+          <div class="tl-event">Curriculum Formalized Across 12 Grades</div>
+          <p class="tl-desc">A structured grade-based syllabus was introduced, ensuring progressive Dhamma education from early childhood through to young adulthood.</p>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot-wrap"><div class="tl-dot"></div></div>
+        <div>
+          <div class="tl-year">Growth Phase</div>
+          <div class="tl-event">Welfare & Media Units Launched</div>
+          <p class="tl-desc">The school expanded beyond the classroom with dedicated units for community welfare and digital media, extending our impact into the broader community.</p>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot-wrap"><div class="tl-dot"></div></div>
+        <div>
+          <div class="tl-year">Recognition</div>
+          <div class="tl-event">Provincial & National Achievements</div>
+          <p class="tl-desc">Students began winning recognition at provincial and national Dhamma school examinations, reflecting the quality of teaching and dedication of both teachers and students.</p>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot-wrap"><div class="tl-dot"></div></div>
+        <div>
+          <div class="tl-year">Today</div>
+          <div class="tl-event">500+ Students, Digital Transformation</div>
+          <p class="tl-desc">With over 500 enrolled students and a modern digital attendance and records system, we continue growing — honoring tradition while embracing the tools of our time.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== LEADERSHIP ===== -->
+<div class="section reveal">
+  <div class="gold-divider"><span class="divider-gem">✦</span></div>
+  <div style="text-align:center">
+    <span class="sec-eyebrow">Who Guides Us</span>
+    <h2 class="sec-title">Our <em>Leadership</em></h2>
+  </div>
+  <div class="leadership-grid">
+    <div class="leader-card">
+      <div class="leader-avatar">P</div>
+      <div>
+        <div class="leader-name">Most Venerable Principal Thero</div>
+        <div class="leader-role">Chief Patron · Kande Viharaya</div>
+        <p class="leader-bio">The guiding spiritual light of our institution, whose wisdom and blessings form the very foundation upon which this school stands.</p>
+      </div>
+    </div>
+    <div class="leader-card">
+      <div class="leader-avatar">P</div>
+      <div>
+        <div class="leader-name">School Principal</div>
+        <div class="leader-role">Principal · Sri Vipassi Dhamma School</div>
+        <p class="leader-bio">Leads the school with unwavering dedication, overseeing curriculum, examinations, and the holistic development of every student.</p>
+      </div>
+    </div>
+    <div class="leader-card">
+      <div class="leader-avatar">T</div>
+      <div>
+        <div class="leader-name">Teaching Staff</div>
+        <div class="leader-role">30+ Dedicated Teachers</div>
+        <p class="leader-bio">A team of passionate educators who volunteer their Sundays to ensure each child receives the highest quality of Dhamma education possible.</p>
+      </div>
+    </div>
+    <div class="leader-card">
+      <div class="leader-avatar">P</div>
+      <div>
+        <div class="leader-name">Parent Association</div>
+        <div class="leader-role">Community Pillars</div>
+        <p class="leader-bio">An engaged community of parents who support school activities, welfare projects, and the day-to-day running of this cherished institution.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== LOCATION & CONTACT ===== -->
+<section class="location-section reveal">
+  <div class="location-inner">
+    <div>
+      <span class="sec-eyebrow">Find Us</span>
+      <h2 class="sec-title">Visit Our <em>Sacred Space</em></h2>
+      <p class="sec-body" style="margin-bottom:0">
+        <p>Nestled within the grounds of Kande Viharaya, our school opens its gates every Sunday morning — a weekly gathering of young minds seeking wisdom under the shade of the Bodhi tree's teachings.</p>
+      </p>
+      <div class="contact-list">
+        <div class="contact-item">
+          <div class="contact-icon-wrap">🏛</div>
+          <div>
+            <div class="contact-label">Location</div>
+            <div class="contact-value">Kananwila, Horana, Sri Lanka 12418</div>
+          </div>
+        </div>
+        <div class="contact-item">
+          <div class="contact-icon-wrap">📞</div>
+          <div>
+            <div class="contact-label">Contact</div>
+            <div class="contact-value">077 798 0889</div>
+          </div>
+        </div>
+        <div class="contact-item">
+          <div class="contact-icon-wrap">✉</div>
+          <div>
+            <div class="contact-label">Email</div>
+            <div class="contact-value">srivipassidhammaschool@gmail.com</div>
+          </div>
+        </div>
+        <div class="contact-item">
+          <div class="contact-icon-wrap">⏰</div>
+          <div>
+            <div class="contact-label">School Hours</div>
+            <div class="contact-value">Every Sunday Morning</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="map-placeholder">
+      <div class="map-icon">🗺</div>
+      <div class="map-address">Kande Viharaya, Horana</div>
+      <div class="map-sub">Kananwila, Horana 12418 · Sri Lanka</div>
+      <div style="margin-top:1.5rem;font-size:0.75rem;color:rgba(201,168,76,0.4);letter-spacing:1px;">
+        ☸ &nbsp; Always Open to Seekers of Wisdom
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FOOTER ===== -->
+<div class="strip">
+  <div class="si"><div class="sicon">🏛</div><div class="stxt"><strong>Location</strong>Kananwila, Horana, Sri Lanka 12418</div></div>
+  <div class="si"><div class="sicon">📞</div><div class="stxt"><strong>Contact</strong>077 798 0889</div></div>
+  <div class="si"><div class="sicon">✉</div><div class="stxt"><strong>Email</strong>srivipassidhammaschool@gmail.com</div></div>
+  <div class="si"><div class="sicon">⏰</div><div class="stxt"><strong>Hours</strong>Always open</div></div>
+</div>
+<div class="tagline-bar">
+  <span class="tmark">☸</span>
+  <span class="ttext"><span>Vipassi Dhamma School</span> &nbsp;·&nbsp; Sri Lanka &nbsp;·&nbsp; Developing Wisdom Through Dhamma</span>
+  <span class="tmark">☸</span>
+</div>
+
+<script>
+/* ===== HERO PARTICLES ===== */
+(function(){
+  const cv=document.getElementById('heroParticles');
+  const cx=cv.getContext('2d');
+  function resize(){cv.width=cv.parentElement.offsetWidth;cv.height=cv.parentElement.offsetHeight}
+  resize();window.addEventListener('resize',resize);
+  const pts=[];
+  for(let i=0;i<60;i++){
+    pts.push({x:Math.random()*cv.width,y:Math.random()*cv.height,
+      r:Math.random()*1.6+0.3,vx:(Math.random()-.5)*.25,vy:-(Math.random()*.35+.08),
+      life:Math.random(),decay:Math.random()*.003+.001,gold:Math.random()<.45});
+  }
+  function tick(){
+    cx.clearRect(0,0,cv.width,cv.height);
+    for(const p of pts){
+      p.x+=p.vx;p.y+=p.vy;p.life-=p.decay;
+      if(p.life<=0||p.y<0){p.x=Math.random()*cv.width;p.y=cv.height+5;p.life=Math.random()*.6+.2}
+      cx.beginPath();cx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      cx.fillStyle=p.gold?`rgba(201,168,76,${p.life*.55})`:`rgba(255,255,255,${p.life*.2})`;
+      cx.fill();
+    }
+    requestAnimationFrame(tick);
+  }
+  tick();
+})();
+
+/* ===== SCROLL REVEAL ===== */
+const revealEls=document.querySelectorAll('.reveal');
+const obs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');obs.unobserve(e.target)}});
+},{threshold:0.12});
+revealEls.forEach(el=>obs.observe(el));
+</script>
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
+<script>
+// ─── Firebase Init ────────────────────────────────────────────────────────────
+if (!firebase.apps.length) {
+  firebase.initializeApp({
+    apiKey:            "AIzaSyAWpPP3OevjIRAsoGIjOJTofV6l2jgyhNI",
+    authDomain:        "signin-f9656.firebaseapp.com",
+    projectId:         "signin-f9656",
+    storageBucket:     "signin-f9656.firebasestorage.app",
+    messagingSenderId: "1074665165821",
+    appId:             "1:1074665165821:web:91ef329a0472fa138e7f94"
+  });
+}
+const auth = firebase.auth();
+const db   = firebase.firestore();
+const googleProvider = new firebase.auth.GoogleAuthProvider();
+googleProvider.addScope('email');
+googleProvider.addScope('profile');
+
+// ─── Save user to Firestore ───────────────────────────────────────────────────
+async function saveUser(user, extra={}) {
+  try {
+    const ref  = db.collection("users").doc(user.uid);
+    const snap = await ref.get();
+    if (!snap.exists) {
+      await ref.set({
+        uid: user.uid, email: user.email || "",
+        displayName: user.displayName || extra.name || "",
+        photoURL: user.photoURL || "",
+        role: "student",
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        ...extra
+      });
+    }
+  } catch(e) { console.warn("Firestore:", e.message); }
+}
+
+// ─── Auth state ───────────────────────────────────────────────────────────────
+auth.onAuthStateChanged(u => {
+  const btn = document.getElementById("loginBtn");
+  if (!btn) return;
+  if (u) {
+    const first = (u.displayName || u.email || "User").split(/[ @]/)[0];
+    btn.textContent = first;
+    btn.classList.add("logged-in");
+    const av = document.getElementById("lgAvatar");
+    if (av) {
+      av.innerHTML = u.photoURL
+        ? `<img src="${u.photoURL}" style="width:100%;height:100%;border-radius:50%;object-fit:cover">`
+        : first.charAt(0).toUpperCase();
+    }
+    const lgName  = document.getElementById("lgName");
+    const lgEmail = document.getElementById("lgEmail");
+    if (lgName)  lgName.textContent  = "Welcome, " + (u.displayName || u.email);
+    if (lgEmail) lgEmail.textContent = u.email || "";
+  } else {
+    btn.textContent = "Login";
+    btn.classList.remove("logged-in");
+  }
+});
+
+// ─── UI helpers ───────────────────────────────────────────────────────────────
+function openAuth(tab) {
+  document.getElementById("authOverlay").classList.add("open");
+  if (auth.currentUser) { showPan("panLI"); return; }
+  switchTab(tab || "si");
+}
+function closeAuth() {
+  document.getElementById("authOverlay").classList.remove("open");
+  clearErrs();
+}
+function overlayClick(e) {
+  if (e.target === document.getElementById("authOverlay")) closeAuth();
+}
+function switchTab(t) {
+  document.getElementById("tabSI").classList.toggle("on", t === "si");
+  document.getElementById("tabSU").classList.toggle("on", t === "su");
+  showPan(t === "si" ? "panSI" : "panSU");
+}
+function showPan(id) {
+  ["panSI","panSU","panLI"].forEach(p =>
+    document.getElementById(p).style.display = p === id ? "block" : "none"
+  );
+}
+function clearErrs() {
+  ["siErr","suErr"].forEach(id => {
+    const el = document.getElementById(id);
+    el.textContent = ""; el.className = "am-err";
+  });
+}
+function errMsg(id, m) { const el=document.getElementById(id); el.textContent=m; el.className="am-err"; }
+function okMsg(id, m)  { const el=document.getElementById(id); el.textContent=m; el.className="am-err am-ok"; }
+function fErr(c) {
+  return ({
+    "auth/user-not-found":        "No account found with that email.",
+    "auth/wrong-password":        "Incorrect password.",
+    "auth/invalid-credential":    "Invalid email or password.",
+    "auth/email-already-in-use":  "Email already registered — try Sign In.",
+    "auth/invalid-email":         "Please enter a valid email.",
+    "auth/weak-password":         "Password must be at least 6 characters.",
+    "auth/popup-closed-by-user":  "Sign-in popup was closed.",
+    "auth/popup-blocked":         "Popup was blocked — please allow popups.",
+    "auth/network-request-failed":"Network error. Check your connection.",
+    "auth/too-many-requests":     "Too many attempts — try again later.",
+    "auth/unauthorized-domain":   "This domain is not authorized. Please open via a proper web server.",
+    "auth/operation-not-supported-in-this-environment": "Please open via a web server, not a file."
+  })[c] || "Something went wrong. (" + c + ")";
+}
+
+// ─── Email Sign In ─────────────────────────────────────────────────────────────
+async function doSignIn() {
+  const email = document.getElementById("siEmail").value.trim();
+  const pass  = document.getElementById("siPass").value;
+  if (!email || !pass) { errMsg("siErr","Please fill in all fields."); return; }
+  const btn = document.getElementById("siBtn");
+  btn.disabled = true;
+  try {
+    await auth.signInWithEmailAndPassword(email, pass);
+    showPan("panLI"); setTimeout(closeAuth, 1400);
+  } catch(e) { errMsg("siErr", fErr(e.code)); }
+  finally { btn.disabled = false; }
+}
+
+// ─── Email Sign Up ─────────────────────────────────────────────────────────────
+async function doSignUp() {
+  const name  = document.getElementById("suName").value.trim();
+  const email = document.getElementById("suEmail").value.trim();
+  const pass  = document.getElementById("suPass").value;
+  const conf  = document.getElementById("suConf").value;
+  if (!name || !email || !pass) { errMsg("suErr","Please fill in all fields."); return; }
+  if (pass !== conf)            { errMsg("suErr","Passwords do not match."); return; }
+  if (pass.length < 6)          { errMsg("suErr","Password must be at least 6 characters."); return; }
+  const btn = document.getElementById("suBtn");
+  btn.disabled = true;
+  try {
+    const cred = await auth.createUserWithEmailAndPassword(email, pass);
+    await cred.user.updateProfile({ displayName: name });
+    await saveUser(cred.user, { name });
+    showPan("panLI"); setTimeout(closeAuth, 1400);
+  } catch(e) { errMsg("suErr", fErr(e.code)); }
+  finally { btn.disabled = false; }
+}
+
+// ─── Google Sign In ────────────────────────────────────────────────────────────
+async function doGoogle() {
+  try {
+    const result = await auth.signInWithPopup(googleProvider);
+    await saveUser(result.user);
+    showPan("panLI"); setTimeout(closeAuth, 1400);
+  } catch(e) {
+    const activeErr = document.getElementById("panSU").style.display === "block" ? "suErr" : "siErr";
+    errMsg(activeErr, fErr(e.code));
+  }
+}
+
+// ─── Sign Out ──────────────────────────────────────────────────────────────────
+async function doSignOut() {
+  await auth.signOut();
+  showPan("panSI");
+  closeAuth();
+}
+
+// ─── Forgot Password ───────────────────────────────────────────────────────────
+async function forgotPw() {
+  const email = document.getElementById("siEmail").value.trim();
+  if (!email) { errMsg("siErr","Enter your email above first."); return; }
+  try {
+    await auth.sendPasswordResetEmail(email);
+    okMsg("siErr","Reset email sent — check your inbox.");
+  } catch(e) { errMsg("siErr", fErr(e.code)); }
+}
+</script>
+</body>
+</html>

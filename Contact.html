@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contact Us | Sri Vipassi Dhamma School</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Noto+Sans+Sinhala:wght@400;600;700&family=Noto+Sans+Tamil:wght@400;600;700&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+  <!-- EmailJS SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <style>
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    :root { --gold:#c9a84c; --gold2:#f0d080; --maroon:#7a1010; --dark:#0a0404; --soft:rgba(245,222,179,0.55); }
+    ::-webkit-scrollbar { width:6px; }
+    ::-webkit-scrollbar-track { background:#0a0404; }
+    ::-webkit-scrollbar-thumb { background:var(--gold); border-radius:3px; }
+    body { font-family:'Lora',Georgia,serif; background:var(--dark); color:#f5deb3; min-height:100vh; overflow-x:hidden; }
+
+    /* LANG */
+    .lang-en,[data-lang="en"]{display:none}
+    .lang-si,[data-lang="si"]{display:inline}
+    .lang-ta,[data-lang="ta"]{display:none}
+    body.en .lang-en,[data-lang="en"]{display:inline}
+    body.en .lang-si,[data-lang="si"]{display:none}
+    body.en .lang-ta,[data-lang="ta"]{display:none}
+    body.ta .lang-ta,[data-lang="ta"]{display:inline}
+    body.ta .lang-si,[data-lang="si"]{display:none}
+    body.ta .lang-en,[data-lang="en"]{display:none}
+    body.en .block-en,.lang-block-en{display:block}
+    body.en .block-si,.lang-block-si{display:none}
+    body.en .block-ta,.lang-block-ta{display:none}
+    body.si .block-si,.lang-block-si{display:block}
+    body.si .block-en,.lang-block-en{display:none}
+    body.si .block-ta,.lang-block-ta{display:none}
+    body.ta .block-ta,.lang-block-ta{display:block}
+    body.ta .block-en,.lang-block-en{display:none}
+    body.ta .block-si,.lang-block-si{display:none}
+
+    /* NAV */
+    .nav { background:linear-gradient(90deg,#5a0808,#8b1212 40%,#7a0e0e 70%,#5a0808); padding:0 24px; display:flex; align-items:center; border-bottom:2px solid var(--gold); position:sticky; top:0; z-index:200; box-shadow:0 2px 20px rgba(0,0,0,0.7); }
+    .brand { color:#f5deb3; font-size:13px; font-weight:700; letter-spacing:.5px; margin-right:20px; font-family:'Lora',serif; white-space:nowrap; }
+    .nav-links { display:flex; flex-wrap:wrap; flex:1; }
+    .nav-links a { color:rgba(245,222,179,0.88); font-size:11.5px; padding:14px 10px; text-decoration:none; border-bottom:2px solid transparent; transition:all .2s; white-space:nowrap; font-family:'Lora',serif; }
+    .nav-links a:hover, .nav-links a.active { color:#ffe066; border-bottom-color:#ffe066; background:rgba(255,255,255,0.05); }
+    .lang-row { display:flex; gap:5px; align-items:center; margin-left:auto; padding-left:10px; }
+    .lb-lang { background:rgba(255,255,255,0.08); color:#f5deb3; border:1px solid rgba(255,255,255,0.2); padding:4px 10px; border-radius:3px; font-size:10.5px; cursor:pointer; transition:all .2s; }
+    .lb-lang.on { background:linear-gradient(135deg,#c9a84c,#a07810); color:#1a0800; border-color:var(--gold); font-weight:700; }
+    .dropdown { position:relative; }
+    .dropdown-menu { display:none; position:absolute; top:100%; right:0; background:#8b1212; border:1px solid var(--gold); border-top:none; z-index:300; min-width:130px; }
+    .dropdown-menu a { display:block; color:#f5deb3; font-size:11px; padding:8px 14px; text-decoration:none; }
+    .dropdown-menu a:hover { background:rgba(201,168,76,0.15); color:#ffe066; }
+    .dropdown:hover .dropdown-menu { display:block; }
+    .login-btn { background:linear-gradient(135deg,#c9a84c,#a07810); color:#1a0800; border:none; padding:5px 16px; border-radius:3px; font-size:10.5px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; cursor:pointer; margin-left:8px; transition:all .2s; box-shadow:0 2px 8px rgba(201,168,76,0.25); white-space:nowrap; }
+    .login-btn:hover { background:linear-gradient(135deg,#e0b95c,#b88a20); }
+    .login-btn.logged-in { background:rgba(201,168,76,0.12); color:#c9a84c; border:1px solid rgba(201,168,76,0.35); }
+    .hamburger { display:none; flex-direction:column; gap:5px; cursor:pointer; padding:10px; margin-left:8px; background:none; border:none; }
+    .hamburger span { display:block; width:22px; height:2px; background:var(--gold); border-radius:2px; }
+    .mobile-menu { display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(10,4,4,0.97); z-index:400; flex-direction:column; align-items:center; justify-content:center; overflow-y:auto; }
+    .mobile-menu.open { display:flex; }
+    .mobile-menu a { color:#f5deb3; font-size:1.05rem; padding:13px 40px; text-decoration:none; border-bottom:1px solid rgba(201,168,76,0.08); width:100%; text-align:center; transition:all 0.2s; }
+    .mobile-menu a:hover { color:var(--gold); }
+    .mobile-close { position:absolute; top:20px; right:24px; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.15); color:#f5deb3; width:40px; height:40px; border-radius:50%; cursor:pointer; font-size:1.2rem; display:flex; align-items:center; justify-content:center; }
+
+    /* AUTH MODAL */
+    .auth-overlay { display:none; position:fixed; inset:0; z-index:1000; background:rgba(4,2,4,0.92); backdrop-filter:blur(8px); align-items:center; justify-content:center; }
+    .auth-overlay.open { display:flex; }
+    .auth-modal { background:linear-gradient(160deg,#110808 0%,#1a0a0a 60%,#0d0d0a 100%); border:1px solid rgba(201,168,76,0.28); border-radius:8px; width:100%; max-width:420px; margin:1rem; box-shadow:0 0 80px rgba(0,0,0,0.95); animation:mIn .3s ease both; overflow:hidden; max-height:92vh; overflow-y:auto; }
+    @keyframes mIn { from{opacity:0;transform:translateY(-20px) scale(0.96)} to{opacity:1;transform:none} }
+    .am-head { background:linear-gradient(90deg,#5a0808,#7a0e0e,#5a0808); border-bottom:1px solid rgba(201,168,76,0.3); padding:1rem 1.4rem; display:flex; align-items:center; gap:10px; position:relative; }
+    .am-wheel { font-size:1.3rem; }
+    .am-brand { font-size:10px; letter-spacing:2px; color:#c9a84c; text-transform:uppercase; flex:1; }
+    .am-close { position:absolute; right:12px; top:50%; transform:translateY(-50%); background:none; border:none; color:rgba(245,222,179,0.45); font-size:14px; cursor:pointer; width:26px; height:26px; border-radius:50%; display:flex; align-items:center; justify-content:center; }
+    .am-tabs { display:flex; border-bottom:1px solid rgba(201,168,76,0.1); }
+    .am-tab { flex:1; padding:11px; background:none; border:none; color:rgba(245,222,179,0.4); font-size:9.5px; letter-spacing:2px; text-transform:uppercase; cursor:pointer; border-bottom:2px solid transparent; transition:all .2s; }
+    .am-tab.on { color:#c9a84c; border-bottom-color:#c9a84c; background:rgba(201,168,76,0.04); }
+    .am-body { padding:1.4rem; }
+    .am-field { margin-bottom:.9rem; }
+    .am-label { display:block; font-size:9px; letter-spacing:1.5px; text-transform:uppercase; color:#c9a84c; margin-bottom:5px; }
+    .am-input { width:100%; background:rgba(255,255,255,0.04); border:1px solid rgba(201,168,76,0.18); border-radius:3px; padding:9px 13px; color:#f5deb3; font-size:0.87rem; outline:none; transition:border-color .2s; }
+    .am-input:focus { border-color:rgba(201,168,76,0.5); }
+    .am-input::placeholder { color:rgba(245,222,179,0.18); }
+    .am-forgot { text-align:right; margin-top:-3px; margin-bottom:.8rem; }
+    .am-forgot a { font-size:0.75rem; color:rgba(201,168,76,0.55); text-decoration:none; }
+    .am-btn { width:100%; padding:11px; background:linear-gradient(135deg,#c9a84c,#a07810); border:none; border-radius:3px; color:#1a0800; font-weight:700; font-size:10.5px; letter-spacing:2px; text-transform:uppercase; cursor:pointer; transition:all .2s; }
+    .am-btn:disabled { opacity:.5; cursor:not-allowed; }
+    .am-err { margin-top:.65rem; font-size:.77rem; color:#e05555; min-height:1rem; text-align:center; }
+    .am-ok { color:#6dbf6d!important; }
+    .am-div { display:flex; align-items:center; gap:10px; margin:1rem 0; color:rgba(245,222,179,0.22); font-size:.72rem; }
+    .am-div::before,.am-div::after { content:''; flex:1; height:1px; background:rgba(201,168,76,0.1); }
+    .am-socials { display:grid; gap:8px; margin-bottom:.4rem; }
+    .am-soc { padding:9px 6px; background:rgba(255,255,255,0.04); border:1px solid rgba(201,168,76,0.14); border-radius:3px; color:rgba(245,222,179,0.7); font-size:.78rem; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:7px; transition:all .2s; }
+    .am-soc:hover { background:rgba(255,255,255,0.09); }
+    .am-loggedin { text-align:center; padding:2rem 1.4rem; }
+    .am-avatar { width:64px; height:64px; border-radius:50%; background:linear-gradient(135deg,rgba(201,168,76,0.2),rgba(90,8,8,0.5)); border:2px solid rgba(201,168,76,0.4); display:flex; align-items:center; justify-content:center; font-size:1.8rem; margin:0 auto .8rem; overflow:hidden; }
+    .am-lg-name { font-size:1.3rem; color:#fff; margin-bottom:.25rem; }
+    .am-lg-email { font-size:.76rem; color:rgba(201,168,76,0.55); letter-spacing:.8px; margin-bottom:1.4rem; }
+
+    /* BG */
+    .page-bg { position:fixed; inset:0; z-index:0; pointer-events:none; background: radial-gradient(ellipse 80% 60% at 15% 20%, rgba(122,16,16,0.16) 0%, transparent 60%), radial-gradient(ellipse 60% 50% at 85% 80%, rgba(201,168,76,0.07) 0%, transparent 55%); }
+    #particles { position:fixed; inset:0; pointer-events:none; z-index:1; }
+
+    /* HERO */
+    .hero { position:relative; z-index:10; text-align:center; padding:4rem 1.5rem 3rem; border-bottom:1px solid rgba(201,168,76,0.2); }
+    .hero::before { content:''; position:absolute; inset:0; background:linear-gradient(180deg,rgba(122,16,16,0.1) 0%,transparent 100%); pointer-events:none; }
+    .hero-badge { display:inline-flex; align-items:center; gap:8px; background:rgba(201,168,76,0.1); border:1px solid rgba(201,168,76,0.3); padding:5px 18px; border-radius:40px; margin-bottom:1.2rem; font-size:0.7rem; color:var(--gold); letter-spacing:2.5px; text-transform:uppercase; }
+    .hero h1 { font-family:'Cormorant Garamond',serif; font-size:clamp(2.5rem,5vw,4rem); font-weight:700; background:linear-gradient(135deg,#ffffff 20%,var(--gold2) 80%); -webkit-background-clip:text; background-clip:text; color:transparent; line-height:1.1; margin-bottom:0.4rem; }
+    .hero h2 { font-size:clamp(1rem,2.5vw,1.5rem); font-weight:600; color:var(--gold); margin-bottom:1rem; }
+    .hero h2.si { font-family:'Noto Sans Sinhala',sans-serif; }
+    .hero h2.ta { font-family:'Noto Sans Tamil',sans-serif; }
+    .hero p { color:var(--soft); font-size:0.88rem; max-width:500px; margin:0 auto; line-height:1.8; }
+    .hero p.si { font-family:'Noto Sans Sinhala',sans-serif; }
+    .hero p.ta { font-family:'Noto Sans Tamil',sans-serif; }
+    .hero-divider { display:flex; align-items:center; gap:14px; justify-content:center; margin:1.4rem 0 0; }
+    .hero-divider .line { height:1px; width:80px; background:linear-gradient(90deg,transparent,rgba(201,168,76,0.5)); }
+    .hero-divider .line.r { transform:scaleX(-1); }
+
+    /* MAIN */
+    .wrap { max-width:1200px; margin:0 auto; padding:3rem 1.5rem 5rem; position:relative; z-index:10; }
+    .contact-layout { display:grid; grid-template-columns:1fr 1.45fr; gap:2.5rem; align-items:start; }
+    @media(max-width:900px){ .contact-layout { grid-template-columns:1fr; } }
+
+    /* INFO */
+    .info-panel { display:flex; flex-direction:column; gap:1rem; }
+    .info-card { background:rgba(255,255,255,0.03); border:1px solid rgba(201,168,76,0.15); border-radius:18px; padding:1.2rem 1.4rem; display:flex; align-items:flex-start; gap:1rem; transition:all 0.3s; animation:fadeUp 0.6s ease both; position:relative; overflow:hidden; }
+    .info-card::after { content:''; position:absolute; left:0; top:0; bottom:0; width:3px; background:linear-gradient(180deg,transparent,var(--gold),transparent); opacity:0; transition:opacity 0.3s; }
+    .info-card:hover { border-color:rgba(201,168,76,0.4); background:rgba(201,168,76,0.04); transform:translateX(5px); }
+    .info-card:hover::after { opacity:1; }
+    .info-card:nth-child(1){animation-delay:0.05s} .info-card:nth-child(2){animation-delay:0.12s} .info-card:nth-child(3){animation-delay:0.19s} .info-card:nth-child(4){animation-delay:0.26s} .info-card:nth-child(5){animation-delay:0.33s}
+    .info-icon { width:48px; height:48px; border-radius:14px; flex-shrink:0; background:linear-gradient(135deg,rgba(122,16,16,0.6),rgba(201,168,76,0.15)); border:1px solid rgba(201,168,76,0.25); display:flex; align-items:center; justify-content:center; font-size:1.3rem; }
+    .info-text strong { display:block; font-size:0.65rem; letter-spacing:2px; text-transform:uppercase; color:var(--gold); margin-bottom:4px; font-family:'Lora',serif; }
+    .info-text span, .info-text a { font-size:0.84rem; color:#f5deb3; line-height:1.7; text-decoration:none; }
+    .info-text .si { font-family:'Noto Sans Sinhala',sans-serif; }
+    .info-text .ta { font-family:'Noto Sans Tamil',sans-serif; }
+    .info-text a:hover { color:var(--gold); }
+    .map-card { background:rgba(255,255,255,0.03); border:1px solid rgba(201,168,76,0.15); border-radius:18px; overflow:hidden; animation:fadeUp 0.6s ease 0.4s both; }
+    .map-card iframe { width:100%; height:190px; border:none; display:block; filter:grayscale(40%) sepia(20%) brightness(0.85); }
+    .map-label { padding:0.7rem 1.1rem; font-size:0.7rem; color:rgba(201,168,76,0.6); letter-spacing:1px; text-transform:uppercase; border-top:1px solid rgba(201,168,76,0.1); }
+    .social-row { display:flex; gap:0.7rem; flex-wrap:wrap; animation:fadeUp 0.6s ease 0.5s both; }
+    .social-btn { display:flex; align-items:center; gap:7px; background:rgba(255,255,255,0.04); border:1px solid rgba(201,168,76,0.18); border-radius:40px; padding:7px 14px; font-size:0.76rem; color:rgba(245,222,179,0.7); text-decoration:none; transition:all 0.2s; font-family:'Lora',serif; }
+    .social-btn:hover { background:rgba(201,168,76,0.1); border-color:var(--gold); color:#f5deb3; }
+
+    /* FORM */
+    .form-panel { background:rgba(255,255,255,0.03); border:1px solid rgba(201,168,76,0.18); border-radius:24px; padding:2.2rem 2rem; animation:fadeUp 0.6s ease 0.1s both; position:relative; overflow:hidden; }
+    .form-panel::before { content:'☸'; position:absolute; right:-15px; top:-15px; font-size:110px; color:rgba(201,168,76,0.03); pointer-events:none; }
+    .form-title { font-family:'Cormorant Garamond',serif; font-size:1.6rem; color:#f5deb3; margin-bottom:0.25rem; font-weight:600; }
+    .form-subtitle { font-size:0.78rem; color:rgba(245,222,179,0.4); margin-bottom:1.6rem; }
+    .form-subtitle.si { font-family:'Noto Sans Sinhala',sans-serif; }
+    .form-subtitle.ta { font-family:'Noto Sans Tamil',sans-serif; }
+    .form-divider { height:1px; background:linear-gradient(90deg,rgba(201,168,76,0.4),transparent); margin-bottom:1.6rem; }
+    .form-row { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+    @media(max-width:500px){ .form-row { grid-template-columns:1fr; } }
+    .field { display:flex; flex-direction:column; gap:6px; margin-bottom:1rem; }
+    .field label { font-size:0.65rem; letter-spacing:2px; text-transform:uppercase; color:var(--gold); font-family:'Lora',serif; }
+    .field input, .field select, .field textarea { background:rgba(255,255,255,0.04); border:1px solid rgba(201,168,76,0.2); border-radius:12px; padding:11px 16px; color:#f5deb3; font-size:0.87rem; font-family:'Lora',serif; outline:none; transition:all 0.2s; width:100%; resize:none; }
+    .field input::placeholder, .field textarea::placeholder { color:rgba(245,222,179,0.22); }
+    .field input:focus, .field select:focus, .field textarea:focus { border-color:rgba(201,168,76,0.55); background:rgba(201,168,76,0.04); box-shadow:0 0 0 3px rgba(201,168,76,0.07); }
+    .field select option { background:#1a0808; color:#f5deb3; }
+    .field textarea { height:130px; line-height:1.6; }
+    .char-count { font-size:0.63rem; color:rgba(245,222,179,0.3); text-align:right; margin-top:-4px; }
+    .submit-btn { width:100%; padding:14px; background:linear-gradient(135deg,#c9a84c,#a07810); border:none; border-radius:12px; color:#1a0800; font-weight:700; font-size:0.88rem; letter-spacing:2px; text-transform:uppercase; cursor:pointer; transition:all 0.25s; font-family:'Lora',serif; box-shadow:0 4px 20px rgba(201,168,76,0.25); }
+    .submit-btn:hover { background:linear-gradient(135deg,#e0bc5a,#b88a1a); transform:translateY(-2px); box-shadow:0 8px 30px rgba(201,168,76,0.35); }
+    .submit-btn:disabled { opacity:0.6; cursor:not-allowed; transform:none; }
+    .form-note { text-align:center; margin-top:0.9rem; font-size:0.7rem; color:rgba(245,222,179,0.28); }
+    .form-note.si { font-family:'Noto Sans Sinhala',sans-serif; }
+    .form-note.ta { font-family:'Noto Sans Tamil',sans-serif; }
+    .form-msg { display:none; padding:13px 16px; border-radius:12px; font-size:0.82rem; margin-bottom:1rem; text-align:center; }
+    .form-msg.ok { background:rgba(76,175,80,0.12); border:1px solid rgba(76,175,80,0.3); color:#a5d6a7; display:block; }
+    .form-msg.err { background:rgba(229,57,53,0.12); border:1px solid rgba(229,57,53,0.3); color:#ef9a9a; display:block; }
+
+    /* EMAILJS NOTICE */
+    .setup-notice { background:rgba(201,168,76,0.08); border:1px solid rgba(201,168,76,0.3); border-radius:12px; padding:12px 16px; margin-bottom:1rem; font-size:0.76rem; color:rgba(245,222,179,0.6); line-height:1.6; }
+    .setup-notice strong { color:var(--gold); }
+
+    /* FAQ */
+    .faq-section { position:relative; z-index:10; max-width:1200px; margin:0 auto; padding:0 1.5rem 5rem; }
+    .section-header { text-align:center; margin-bottom:2.5rem; animation:fadeUp 0.6s ease both; }
+    .section-header h3 { font-family:'Cormorant Garamond',serif; font-size:clamp(1.6rem,3vw,2.4rem); color:#f5deb3; font-weight:700; margin-bottom:0.3rem; }
+    .section-header p { font-size:0.8rem; color:rgba(245,222,179,0.4); }
+    .section-header p.si { font-family:'Noto Sans Sinhala',sans-serif; }
+    .section-header p.ta { font-family:'Noto Sans Tamil',sans-serif; }
+    .faq-grid { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+    @media(max-width:700px){ .faq-grid { grid-template-columns:1fr; } }
+    .faq-item { background:rgba(255,255,255,0.03); border:1px solid rgba(201,168,76,0.12); border-radius:16px; overflow:hidden; animation:fadeUp 0.5s ease both; transition:border-color 0.2s; }
+    .faq-item:hover { border-color:rgba(201,168,76,0.35); }
+    .faq-q { padding:1.1rem 1.3rem; cursor:pointer; display:flex; align-items:center; justify-content:space-between; gap:10px; font-size:0.85rem; color:#f5deb3; font-weight:600; user-select:none; }
+    .faq-q.si { font-family:'Noto Sans Sinhala',sans-serif; }
+    .faq-q.ta { font-family:'Noto Sans Tamil',sans-serif; }
+    .faq-icon { color:var(--gold); font-size:1rem; transition:transform 0.3s; flex-shrink:0; }
+    .faq-item.open .faq-icon { transform:rotate(45deg); }
+    .faq-a { max-height:0; overflow:hidden; transition:max-height 0.35s ease; font-size:0.81rem; color:rgba(245,222,179,0.6); line-height:1.7; }
+    .faq-a.si { font-family:'Noto Sans Sinhala',sans-serif; }
+    .faq-a.ta { font-family:'Noto Sans Tamil',sans-serif; }
+    .faq-item.open .faq-a { max-height:220px; }
+    .faq-a-inner { padding:0.9rem 1.3rem 1.1rem; border-top:1px solid rgba(201,168,76,0.1); }
+
+    /* FOOTER */
+    .strip { background:linear-gradient(90deg,#4a0606,#7a1010,#8b1212,#7a1010,#4a0606); display:flex; justify-content:center; border-top:2px solid var(--gold); flex-wrap:wrap; position:relative; z-index:10; }
+    .fi { display:flex; align-items:center; gap:12px; padding:16px 32px; border-right:1px solid rgba(201,168,76,0.15); flex:1; justify-content:center; min-width:160px; transition:background .2s; }
+    .fi:last-child { border-right:none; }
+    .fi:hover { background:rgba(201,168,76,0.06); }
+    .ficon { width:38px; height:38px; border-radius:50%; background:rgba(201,168,76,0.1); border:1px solid rgba(201,168,76,0.4); display:flex; align-items:center; justify-content:center; font-size:16px; flex-shrink:0; }
+    .ftxt { color:#f5deb3; font-size:11px; line-height:1.5; }
+    .ftxt strong { color:var(--gold); display:block; font-size:9px; letter-spacing:1.5px; text-transform:uppercase; margin-bottom:2px; }
+    .tagline-bar { background:#050505; text-align:center; padding:18px 32px; border-top:1px solid rgba(201,168,76,0.1); display:flex; align-items:center; justify-content:center; gap:14px; z-index:10; position:relative; }
+    .tagline-bar .tm { color:var(--gold); font-size:16px; }
+    .tagline-bar .tt { color:rgba(255,255,255,0.4); font-size:11px; letter-spacing:2px; text-transform:uppercase; }
+    .tagline-bar .tt span { color:var(--gold); }
+    .scroll-top { position:fixed; bottom:28px; right:24px; z-index:100; width:44px; height:44px; border-radius:50%; background:linear-gradient(135deg,var(--maroon),#5a0808); border:1px solid rgba(201,168,76,0.4); color:var(--gold); cursor:pointer; font-size:1.1rem; display:flex; align-items:center; justify-content:center; transition:all 0.3s; opacity:0; pointer-events:none; }
+    .scroll-top.visible { opacity:1; pointer-events:all; }
+    .scroll-top:hover { transform:translateY(-3px); }
+
+    @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+    @media(max-width:768px){ .nav-links,.lang-row{display:none} .hamburger{display:flex} }
+    @media(max-width:640px){ .wrap{padding:2rem 0.9rem 4rem} .form-panel{padding:1.5rem 1.1rem} .fi{padding:12px 14px} }
+  </style>
+</head>
+<body class="si">
+
+<div class="page-bg"></div>
+<canvas id="particles"></canvas>
+
+<!-- AUTH MODAL -->
+<div class="auth-overlay" id="authOverlay" onclick="overlayClick(event)">
+  <div class="auth-modal">
+    <div class="am-head"><span class="am-wheel">☸</span><span class="am-brand">Sri Vipassi Dhamma School</span><button class="am-close" onclick="closeAuth()">✕</button></div>
+    <div class="am-tabs"><button class="am-tab on" id="tabSI" onclick="switchTab('si_tab')">Sign In</button><button class="am-tab" id="tabSU" onclick="switchTab('su')">Sign Up</button></div>
+    <div class="am-body" id="panSI">
+      <div class="am-field"><label class="am-label">Email</label><input class="am-input" id="siEmail" type="email" placeholder="you@email.com"></div>
+      <div class="am-field"><label class="am-label">Password</label><input class="am-input" id="siPass" type="password" placeholder="Password"></div>
+      <div class="am-forgot"><a href="#" onclick="forgotPw();return false">Forgot password?</a></div>
+      <button class="am-btn" id="siBtn" onclick="doSignIn()">Sign In</button>
+      <div class="am-err" id="siErr"></div>
+      <div class="am-div"><span>or continue with</span></div>
+      <div class="am-socials"><button class="am-soc" onclick="doGoogle()"><svg width="15" height="15" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg> Continue with Google</button></div>
+    </div>
+    <div class="am-body" id="panSU" style="display:none">
+      <div class="am-field"><label class="am-label">Full Name</label><input class="am-input" id="suName" type="text" placeholder="Your name"></div>
+      <div class="am-field"><label class="am-label">Email</label><input class="am-input" id="suEmail" type="email" placeholder="you@email.com"></div>
+      <div class="am-field"><label class="am-label">Password</label><input class="am-input" id="suPass" type="password" placeholder="Min. 6 characters"></div>
+      <div class="am-field"><label class="am-label">Confirm Password</label><input class="am-input" id="suConf" type="password" placeholder="Repeat password"></div>
+      <button class="am-btn" id="suBtn" onclick="doSignUp()">Create Account</button>
+      <div class="am-err" id="suErr"></div>
+    </div>
+    <div class="am-body am-loggedin" id="panLI" style="display:none">
+      <div class="am-avatar" id="lgAvatar">☸</div>
+      <div class="am-lg-name" id="lgName">Welcome!</div>
+      <div class="am-lg-email" id="lgEmail"></div>
+      <button class="am-btn" onclick="doSignOut()">Sign Out</button>
+    </div>
+  </div>
+</div>
+
+<!-- MOBILE MENU -->
+<div class="mobile-menu" id="mobileMenu">
+  <button class="mobile-close" onclick="toggleMobileMenu()">✕</button>
+  <!-- SI -->
+  <div class="block-si">
+    <a href="Home Page.html" onclick="toggleMobileMenu()">මුල් පිටුව</a>
+    <a href="Daily Attendance.html" onclick="toggleMobileMenu()">දෛනික පැමිණීම</a>
+    <a href="About.html" onclick="toggleMobileMenu()">අප ගැන</a>
+    <a href="galery.html" onclick="toggleMobileMenu()">ගැලරිය</a>
+    <a href="#" onclick="toggleMobileMenu()">ජයග්‍රහණ</a>
+    <a href="#" onclick="toggleMobileMenu()">දෛනික උපුටා දැක්වීම්</a>
+    <a href="Contact.html" onclick="toggleMobileMenu()">අප හා සම්බන්ධ වන්න</a>
+    <a href="Subject.html" onclick="toggleMobileMenu()">විෂය නිර්දේශය</a>
+  </div>
+  <!-- EN -->
+  <div class="block-en" style="display:none">
+    <a href="Home Page.html" onclick="toggleMobileMenu()">Home</a>
+    <a href="Daily Attendance.html" onclick="toggleMobileMenu()">Daily Attendance</a>
+    <a href="About.html" onclick="toggleMobileMenu()">About</a>
+    <a href="galery.html" onclick="toggleMobileMenu()">Gallery</a>
+    <a href="#" onclick="toggleMobileMenu()">Achievements</a>
+    <a href="#" onclick="toggleMobileMenu()">Daily Quotes</a>
+    <a href="Contact.html" onclick="toggleMobileMenu()">Contact Us</a>
+    <a href="Subject.html" onclick="toggleMobileMenu()">Subjects</a>
+  </div>
+  <!-- TA -->
+  <div class="block-ta" style="display:none">
+    <a href="Home Page.html" onclick="toggleMobileMenu()">முகப்பு</a>
+    <a href="Daily Attendance.html" onclick="toggleMobileMenu()">தினசரி வருகை</a>
+    <a href="About.html" onclick="toggleMobileMenu()">எங்களை பற்றி</a>
+    <a href="galery.html" onclick="toggleMobileMenu()">தொகுப்பு</a>
+    <a href="#" onclick="toggleMobileMenu()">சாதனைகள்</a>
+    <a href="#" onclick="toggleMobileMenu()">தினசரி மேற்கோள்கள்</a>
+    <a href="Contact.html" onclick="toggleMobileMenu()">தொடர்பு கொள்ளுங்கள்</a>
+    <a href="Subject.html" onclick="toggleMobileMenu()">பாடங்கள்</a>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav class="nav">
+  <img src="https://i.ibb.co/Zpvb4GkV/image-removebg-preview-5.png" width="40" height="40" alt="logo" style="margin-right:12px" onerror="this.style.display='none'">
+  <div class="brand">Sri Vipassi Dhamma School</div>
+  <div class="nav-links">
+    <a href="Home Page.html">
+      <span class="lang-en">Home</span>
+      <span class="lang-si">මුල් පිටුව</span>
+      <span class="lang-ta">முகப்பு</span>
+    </a>
+    <a href="Daily Attendance.html">
+      <span class="lang-en">Daily Attendance</span>
+      <span class="lang-si">දෛනික පැමිණීම</span>
+      <span class="lang-ta">தினசரி வருகை</span>
+    </a>
+    <a href="About.html">
+      <span class="lang-en">About</span>
+      <span class="lang-si">අප ගැන</span>
+      <span class="lang-ta">எங்களை பற்றி</span>
+    </a>
+    <a href="galery.html">
+      <span class="lang-en">Gallery</span>
+      <span class="lang-si">ගැලරිය</span>
+      <span class="lang-ta">தொகுப்பு</span>
+    </a>
+    <a href="#">
+      <span class="lang-en">Achievements</span>
+      <span class="lang-si">ජයග්‍රහණ</span>
+      <span class="lang-ta">சாதனைகள்</span>
+    </a>
+    <a href="#">
+      <span class="lang-en">Daily Quotes</span>
+      <span class="lang-si">දෛනික උපුටා</span>
+      <span class="lang-ta">தினசரி மேற்கோள்</span>
+    </a>
+    <a href="Contact.html" class="active">
+      <span class="lang-en">Contact Us</span>
+      <span class="lang-si">අප හා සම්බන්ධ වන්න</span>
+      <span class="lang-ta">தொடர்பு கொள்ளுங்கள்</span>
+    </a>
+    <a href="#" class="dropdown" style="position:relative;padding:14px 10px;display:inline-flex;align-items:center;gap:4px">
+      <span class="lang-en">Projects</span>
+      <span class="lang-si">ව්‍යාපෘති</span>
+      <span class="lang-ta">திட்டங்கள்</span> ▾
+      <div class="dropdown-menu">
+        <a href="#"><span class="lang-en">Welfare Unit</span><span class="lang-si">සුභ සාධන</span><span class="lang-ta">நலன் அலகு</span></a>
+        <a href="#"><span class="lang-en">Media Unit</span><span class="lang-si">මාධ්‍ය ඒකකය</span><span class="lang-ta">ஊடக அலகு</span></a>
+      </div>
+    </a>
+    <a href="Subject.html">
+      <span class="lang-en">Subjects</span>
+      <span class="lang-si">විෂය නිර්දේශය</span>
+      <span class="lang-ta">பாடங்கள்</span>
+    </a>
+  </div>
+  <div class="lang-row">
+    <button class="lb-lang" onclick="setLang('en')">EN</button>
+    <button class="lb-lang on" onclick="setLang('si')" id="btn-si">සිං</button>
+    <button class="lb-lang" onclick="setLang('ta')" id="btn-ta">தமிழ்</button>
+  </div>
+  <button class="login-btn" id="loginBtn" onclick="openAuth('si_tab')">
+    <span class="lang-en">Login</span>
+    <span class="lang-si">ඇතුල් වන්න</span>
+    <span class="lang-ta">உள்நுழைவு</span>
+  </button>
+  <button class="hamburger" onclick="toggleMobileMenu()"><span></span><span></span><span></span></button>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-badge">☸ &nbsp;
+    <span class="lang-en">Contact Us</span>
+    <span class="lang-si">අප හා සම්බන්ධ වන්න</span>
+    <span class="lang-ta">தொடர்பு கொள்ளுங்கள்</span>
+  </div>
+  <h1>
+    <span class="lang-en">Contact Us</span>
+    <span class="lang-si">සම්බන්ධ වන්න</span>
+    <span class="lang-ta">தொடர்பு கொள்ளுங்கள்</span>
+  </h1>
+  <!-- Sinhala subtitle -->
+  <h2 class="si" style="display:none" id="hero-si">ශ්‍රී විපස්සි දහම් පාසල</h2>
+  <h2 class="en" style="display:none" id="hero-en">Sri Vipassi Dhamma School</h2>
+  <h2 class="ta" style="display:none" id="hero-ta">ஸ்ரீ விபஸ்ஸி தம்ம பள்ளி</h2>
+
+  <p class="si" id="p-si">ඔබගේ ප්‍රශ්න, යෝජනා හෝ අදහස් අප වෙත යොමු කරන්න. අපි ඔබට ඉක්මනින් පිළිතුරු දෙන්නෙමු.</p>
+  <p class="en" style="display:none" id="p-en">Send us your questions, suggestions or ideas. We will reply to you as soon as possible.</p>
+  <p class="ta" style="display:none" id="p-ta">உங்கள் கேள்விகள், பரிந்துரைகள் அல்லது கருத்துகளை எங்களுக்கு அனுப்புங்கள். நாங்கள் விரைவில் பதிலளிப்போம்.</p>
+
+  <div class="hero-divider"><div class="line"></div><span style="color:var(--gold);font-size:1.1rem">☸</span><div class="line r"></div></div>
+</div>
+
+<!-- MAIN -->
+<div class="wrap">
+  <div class="contact-layout">
+
+    <!-- LEFT INFO -->
+    <div class="info-panel">
+      <div class="info-card">
+        <div class="info-icon">🏛</div>
+        <div class="info-text">
+          <strong>
+            <span class="lang-en">Address</span>
+            <span class="lang-si">ලිපිනය</span>
+            <span class="lang-ta">முகவரி</span>
+          </strong>
+          <span>Kananwila, Horana,<br>Sri Lanka 12418</span>
+        </div>
+      </div>
+      <div class="info-card">
+        <div class="info-icon">📞</div>
+        <div class="info-text">
+          <strong>
+            <span class="lang-en">Phone</span>
+            <span class="lang-si">දුරකථන</span>
+            <span class="lang-ta">தொலைபேசி</span>
+          </strong>
+          <a href="tel:+94777980889">077 798 0889</a>
+        </div>
+      </div>
+      <div class="info-card">
+        <div class="info-icon">✉️</div>
+        <div class="info-text">
+          <strong>
+            <span class="lang-en">Email</span>
+            <span class="lang-si">විද්‍යුත් තැපෑල</span>
+            <span class="lang-ta">மின்னஞ்சல்</span>
+          </strong>
+          <a href="mailto:welfarevds@gmail.com">welfarevds@gmail.com</a>
+        </div>
+      </div>
+      <div class="info-card">
+        <div class="info-icon">⏰</div>
+        <div class="info-text">
+          <strong>
+            <span class="lang-en">Hours</span>
+            <span class="lang-si">වේලාව</span>
+            <span class="lang-ta">நேரம்</span>
+          </strong>
+          <span>
+            <span class="lang-si si">ඉරිදා 8:00 am – 12:00 pm</span>
+            <span class="lang-en" style="display:none">Sunday 8:00 AM – 12:00 PM</span>
+            <span class="lang-ta ta" style="display:none">ஞாயிறு காலை 8:00 – பகல் 12:00</span>
+          </span>
+        </div>
+      </div>
+      <div class="info-card">
+        <div class="info-icon">🏯</div>
+        <div class="info-text">
+          <strong>
+            <span class="lang-en">Temple</span>
+            <span class="lang-si">විහාරස්ථානය</span>
+            <span class="lang-ta">கோவில்</span>
+          </strong>
+          <span>Kande Viharaya, Horana</span>
+        </div>
+      </div>
+
+      <div class="map-card">
+        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d31694.5!2d80.069!3d6.716!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ae24f610db9e0b1%3A0x3bb6d18b069b1b9b!2sHorana!5e0!3m2!1sen!2slk!4v1" allowfullscreen="" loading="lazy"></iframe>
+        <div class="map-label">📍 Kananwila, Horana, Sri Lanka</div>
+      </div>
+
+      <div class="social-row">
+        <a class="social-btn" href="#">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="#1877f2"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+          Facebook
+        </a>
+        <a class="social-btn" href="mailto:welfarevds@gmail.com">✉️
+          <span class="lang-en">Email Us</span>
+          <span class="lang-si">ඊමේල් කරන්න</span>
+          <span class="lang-ta">மின்னஞ்சல்</span>
+        </a>
+        <a class="social-btn" href="tel:+94777980889">📞
+          <span class="lang-en">Call Now</span>
+          <span class="lang-si">දැන් අමතන්න</span>
+          <span class="lang-ta">இப்போது அழைக்கவும்</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- RIGHT FORM -->
+    <div class="form-panel">
+      <div class="form-title">
+        <span class="lang-en">Send Us a Message</span>
+        <span class="lang-si">පණිවිඩයක් යවන්න</span>
+        <span class="lang-ta">எங்களுக்கு செய்தி அனுப்புங்கள்</span>
+      </div>
+      <div class="form-subtitle si" id="fsub-si">අපට පණිවිඩයක් යවන්න · පැය 24ක් ඇතුළත පිළිතුරු දෙමු</div>
+      <div class="form-subtitle en" id="fsub-en" style="display:none">We'll reply within 24 hours</div>
+      <div class="form-subtitle ta" id="fsub-ta" style="display:none">24 மணி நேரத்திற்குள் பதிலளிப்போம்</div>
+      <div class="form-divider"></div>
+      <div class="form-msg" id="formMsg"></div>
+
+      <div class="form-row">
+        <div class="field">
+          <label>
+            <span class="lang-en">Name</span>
+            <span class="lang-si">ඔබගේ නම</span>
+            <span class="lang-ta">உங்கள் பெயர்</span>
+          </label>
+          <input type="text" id="fname" maxlength="60"
+            data-ph-si="ඔබේ නම ලියන්න"
+            data-ph-en="Your full name"
+            data-ph-ta="உங்கள் பெயரை உள்ளிடவும்">
+        </div>
+        <div class="field">
+          <label>
+            <span class="lang-en">Phone</span>
+            <span class="lang-si">දුරකථන</span>
+            <span class="lang-ta">தொலைபேசி</span>
+          </label>
+          <input type="tel" id="fphone"
+            data-ph-si="07X XXX XXXX"
+            data-ph-en="07X XXX XXXX"
+            data-ph-ta="07X XXX XXXX">
+        </div>
+      </div>
+
+      <div class="field">
+        <label>
+          <span class="lang-en">Email</span>
+          <span class="lang-si">විද්‍යුත් තැපෑල</span>
+          <span class="lang-ta">மின்னஞ்சல்</span>
+        </label>
+        <input type="email" id="femail"
+          data-ph-si="you@email.com"
+          data-ph-en="you@email.com"
+          data-ph-ta="you@email.com">
+      </div>
+
+      <div class="field">
+        <label>
+          <span class="lang-en">Subject</span>
+          <span class="lang-si">විෂය</span>
+          <span class="lang-ta">விஷயம்</span>
+        </label>
+        <select id="fsubject">
+          <!-- Options updated by JS based on lang -->
+        </select>
+      </div>
+
+      <div class="field">
+        <label>
+          <span class="lang-en">Message</span>
+          <span class="lang-si">පණිවිඩය</span>
+          <span class="lang-ta">செய்தி</span>
+        </label>
+        <textarea id="fmessage" maxlength="1000" oninput="updateCount()"
+          data-ph-si="ඔබගේ පණිවිඩය මෙහි ලියන්න..."
+          data-ph-en="Write your message here..."
+          data-ph-ta="உங்கள் செய்தியை இங்கே எழுதுங்கள்..."></textarea>
+        <div class="char-count"><span id="charCount">0</span> / 1000</div>
+      </div>
+
+      <button class="submit-btn" id="submitBtn" onclick="submitForm()">
+        ☸ &nbsp;
+        <span class="lang-en">Submit Message</span>
+        <span class="lang-si">පණිවිඩය යවන්න</span>
+        <span class="lang-ta">செய்தி அனுப்பு</span>
+      </button>
+
+      <div class="form-note si" id="fnote-si">ඔබගේ තොරතුරු ආරක්ෂිතව තබා ගනු ලැබේ</div>
+      <div class="form-note en" id="fnote-en" style="display:none">Your information is kept private and secure</div>
+      <div class="form-note ta" id="fnote-ta" style="display:none">உங்கள் தகவல்கள் பாதுகாப்பாக வைக்கப்படும்</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- FAQ -->
+<div class="faq-section">
+  <div class="section-header">
+    <h3>
+      <span class="lang-en">Frequently Asked Questions</span>
+      <span class="lang-si">නිතර අසන ප්‍රශ්න</span>
+      <span class="lang-ta">அடிக்கடி கேட்கப்படும் கேள்விகள்</span>
+    </h3>
+    <p class="si" id="faq-sub-si">නිතර අසන ප්‍රශ්න</p>
+    <p class="en" id="faq-sub-en" style="display:none">Common questions about our Dhamma school</p>
+    <p class="ta" id="faq-sub-ta" style="display:none">எங்கள் தம்ம பள்ளியைப் பற்றிய பொதுவான கேள்விகள்</p>
+  </div>
+  <div class="faq-grid">
+
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-q">
+        <span class="lang-en">What are the school hours?</span>
+        <span class="lang-si">දහම් පාසලේ වේලාව කොපමණද?</span>
+        <span class="lang-ta">பள்ளி நேரம் என்ன?</span>
+        <span class="faq-icon">+</span>
+      </div>
+      <div class="faq-a">
+        <div class="faq-a-inner">
+          <span class="lang-si">ශ්‍රී විපස්සි දහම් පාසල ඉරිදා දිනයන්හි පෙ.ව. 8:00 සිට ප.ව. 12:00 දක්වා පවත්වනු ලැබේ.</span>
+          <span class="lang-en">Sri Vipassi Dhamma School runs on Sundays from 8:00 AM to 12:00 PM. Hours may change on special occasions.</span>
+          <span class="lang-ta">ஸ்ரீ விபஸ்ஸி தம்ம பள்ளி ஞாயிறு தோறும் காலை 8:00 மணி முதல் பகல் 12:00 மணி வரை நடத்தப்படுகிறது.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-q">
+        <span class="lang-en">How can I enroll my child?</span>
+        <span class="lang-si">ළමයා ඇතුළත් කිරීම කෙසේ කළ හැකිද?</span>
+        <span class="lang-ta">என் குழந்தையை எவ்வாறு சேர்க்கலாம்?</span>
+        <span class="faq-icon">+</span>
+      </div>
+      <div class="faq-a">
+        <div class="faq-a-inner">
+          <span class="lang-si">ඕනෑම ඉරිදා දිනයක පාසලට පැමිණ හෝ දුරකථන හෝ ඊමේල් හරහා ඇතුළත් කිරීම කළ හැකිය.</span>
+          <span class="lang-en">You can enroll your child by visiting the school on any Sunday or by contacting us via phone or email. Enrollment is open at the beginning of each academic year.</span>
+          <span class="lang-ta">எந்த ஞாயிற்றுக்கிழமையும் பள்ளிக்கு வருவதன் மூலம் அல்லது தொலைபேசி அல்லது மின்னஞ்சல் மூலம் தொடர்பு கொள்வதன் மூலம் உங்கள் குழந்தையை சேர்க்கலாம்.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-q">
+        <span class="lang-en">Are there any school fees?</span>
+        <span class="lang-si">දහම් පාසලේ ගාස්තු මොනවාද?</span>
+        <span class="lang-ta">பள்ளி கட்டணம் உள்ளதா?</span>
+        <span class="faq-icon">+</span>
+      </div>
+      <div class="faq-a">
+        <div class="faq-a-inner">
+          <span class="lang-si">ශ්‍රී විපස්සි දහම් පාසලේ අධ්‍යාපනය නොමිලේ ලබා දෙනු ලැබේ. දෙමාපියන්ගේ දායකත්වය ස්වේච්ඡාවෙන් පිළිගනු ලැබේ.</span>
+          <span class="lang-en">Education at Sri Vipassi Dhamma School is completely free. Parental contributions are welcomed voluntarily.</span>
+          <span class="lang-ta">ஸ்ரீ விபஸ்ஸி தம்ம பள்ளியில் கல்வி இலவசமாக வழங்கப்படுகிறது. பெற்றோர்களின் தன்னார்வ பங்களிப்பை வரவேற்கிறோம்.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-q">
+        <span class="lang-en">What grades are available?</span>
+        <span class="lang-si">කුමන ශ්‍රේණි ඇතිද?</span>
+        <span class="lang-ta">எந்த தரங்கள் உள்ளன?</span>
+        <span class="faq-icon">+</span>
+      </div>
+      <div class="faq-a">
+        <div class="faq-a-inner">
+          <span class="lang-si">1 ශ්‍රේණිය සිට 12 ශ්‍රේණිය දක්වා ජාතික දහම් පාසල් විෂය නිර්දේශය ඔස්සේ දහම් අධ්‍යාපනය ලබා දෙනු ලැබේ.</span>
+          <span class="lang-en">We offer Dhamma education from Grade 1 through Grade 12, following the national Dhamma school curriculum approved by the Department of Buddhist Affairs.</span>
+          <span class="lang-ta">பௌத்த விவகாரங்கள் திணைக்களத்தால் அங்கீகரிக்கப்பட்ட தேசிய பாடத்திட்டத்தின்படி 1 ஆம் வகுப்பு முதல் 12 ஆம் வகுப்பு வரை தம்ம கல்வி வழங்கப்படுகிறது.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-q">
+        <span class="lang-en">Is child safety ensured?</span>
+        <span class="lang-si">ළමයින්ගේ ආරක්ෂාව සහතික කරනවාද?</span>
+        <span class="lang-ta">குழந்தை பாதுகாப்பு உறுதி செய்யப்படுகிறதா?</span>
+        <span class="faq-icon">+</span>
+      </div>
+      <div class="faq-a">
+        <div class="faq-a-inner">
+          <span class="lang-si">ඔව්. දරුවන්ගේ ආරක්ෂාව අපගේ ප්‍රාථමික වගකීමකි. සියලු ගුරුවරුන් සුදුසු පරීක්ෂණවලට ලක් කර ඇත.</span>
+          <span class="lang-en">Yes. The safety of children is our primary responsibility. All teachers have undergone appropriate screening and training.</span>
+          <span class="lang-ta">ஆம். குழந்தைகளின் பாதுகாப்பு எங்கள் முதன்மை பொறுப்பு. அனைத்து ஆசிரியர்களும் தகுந்த சரிபார்ப்புக்கு உட்படுத்தப்பட்டுள்ளனர்.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-q">
+        <span class="lang-en">Are there special programs?</span>
+        <span class="lang-si">විශේෂ වැඩසටහන් ඇතිද?</span>
+        <span class="lang-ta">சிறப்பு நிகழ்ச்சிகள் உள்ளதா?</span>
+        <span class="faq-icon">+</span>
+      </div>
+      <div class="faq-a">
+        <div class="faq-a-inner">
+          <span class="lang-si">ඔව්! වාර්ෂිකව දහම් ප්‍රශ්නෝත්තර, වෙසක් සැමරුම්, සහ විපස්සි ප්‍රභා මණ්ඩපය වැඩසටහන් පවත්වනු ලැබේ.</span>
+          <span class="lang-en">Yes! We run Dhamma quiz competitions, Vesak celebrations, merit-making activities, and the Vipassi Praba Mandapaya program throughout the year.</span>
+          <span class="lang-ta">ஆம்! ஆண்டு முழுவதும் தம்ம வினாடி வினா, வேசாக் கொண்டாட்டங்கள், புண்ணிய நடவடிக்கைகள் மற்றும் விபஸ்ஸி பிரபா மண்டபய திட்டம் நடத்தப்படுகின்றன.</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- SCROLL TOP -->
+<button class="scroll-top" id="scrollTopBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})">▲</button>
+
+<!-- FOOTER -->
+<div class="strip">
+  <div class="fi"><div class="ficon">🏛</div><div class="ftxt">
+    <strong><span class="lang-en">Location</span><span class="lang-si">ලිපිනය</span><span class="lang-ta">இடம்</span></strong>
+    Kananwila, Horana, Sri Lanka
+  </div></div>
+  <div class="fi"><div class="ficon">📞</div><div class="ftxt">
+    <strong><span class="lang-en">Phone</span><span class="lang-si">දුරකථන</span><span class="lang-ta">தொலைபேசி</span></strong>
+    077 798 0889
+  </div></div>
+  <div class="fi"><div class="ficon">✉</div><div class="ftxt">
+    <strong><span class="lang-en">Email</span><span class="lang-si">ඊමේල්</span><span class="lang-ta">மின்னஞ்சல்</span></strong>
+    welfarevds@gmail.com
+  </div></div>
+  <div class="fi"><div class="ficon">⏰</div><div class="ftxt">
+    <strong><span class="lang-en">Hours</span><span class="lang-si">වේලාව</span><span class="lang-ta">நேரம்</span></strong>
+    <span class="lang-en">Sunday 8AM–12PM</span>
+    <span class="lang-si">ඉරිදා 8–12</span>
+    <span class="lang-ta">ஞாயிறு 8–12</span>
+  </div></div>
+</div>
+<div class="tagline-bar">
+  <span class="tm">☸</span>
+  <span class="tt"><span>Vipassi Dhamma School</span> &nbsp;·&nbsp; Sri Lanka &nbsp;·&nbsp; Developing Wisdom Through Dhamma</span>
+  <span class="tm">☸</span>
+</div>
+
+<script>
+/* ===== LANGUAGE DATA ===== */
+const subjects = {
+  si: [
+    {v:'',t:'-- විෂය තෝරන්න --'},
+    {v:'admission',t:'ඇතුල් වීම · Admission'},
+    {v:'general',t:'සාමාන්‍ය විමසීම · General'},
+    {v:'activities',t:'ක්‍රියාකාරකම් · Activities'},
+    {v:'donations',t:'දායකත්වය · Donations'},
+    {v:'other',t:'වෙනත් · Other'}
+  ],
+  en: [
+    {v:'',t:'-- Select a Subject --'},
+    {v:'admission',t:'Admission Inquiry'},
+    {v:'general',t:'General Inquiry'},
+    {v:'activities',t:'Activities'},
+    {v:'donations',t:'Donations'},
+    {v:'other',t:'Other'}
+  ],
+  ta: [
+    {v:'',t:'-- விஷயத்தை தேர்ந்தெடுக்கவும் --'},
+    {v:'admission',t:'சேர்க்கை விசாரணை'},
+    {v:'general',t:'பொது விசாரணை'},
+    {v:'activities',t:'நடவடிக்கைகள்'},
+    {v:'donations',t:'நன்கொடை'},
+    {v:'other',t:'மற்றவை'}
+  ]
+};
+
+let currentLang = 'si';
+
+function setLang(lang) {
+  currentLang = lang;
+  document.body.className = lang;
+  // Update lang buttons
+  document.querySelectorAll('.lb-lang').forEach(b => b.classList.remove('on'));
+  const map = {en:0, si:1, ta:2};
+  document.querySelectorAll('.lb-lang')[map[lang]].classList.add('on');
+  // Hero elements
+  ['si','en','ta'].forEach(l => {
+    const h = document.getElementById('hero-'+l);
+    const p = document.getElementById('p-'+l);
+    if(h) h.style.display = l===lang ? 'block' : 'none';
+    if(p) p.style.display = l===lang ? 'block' : 'none';
+  });
+  // Form subtitle/note
+  ['si','en','ta'].forEach(l => {
+    const fs = document.getElementById('fsub-'+l);
+    const fn = document.getElementById('fnote-'+l);
+    const fq = document.getElementById('faq-sub-'+l);
+    if(fs) fs.style.display = l===lang ? 'block' : 'none';
+    if(fn) fn.style.display = l===lang ? 'block' : 'none';
+    if(fq) fq.style.display = l===lang ? 'block' : 'none';
+  });
+  // Hours span
+  document.querySelectorAll('.info-text .lang-si, .info-text .lang-en, .info-text .lang-ta').forEach(el => {
+    const cls = el.classList;
+    if(cls.contains('lang-'+lang)) el.style.display='inline';
+    else el.style.display='none';
+  });
+  // Mobile menu blocks
+  ['si','en','ta'].forEach(l => {
+    const bl = document.querySelector('.mobile-menu .block-'+l);
+    if(bl) bl.style.display = l===lang ? 'block' : 'none';
+  });
+  // Placeholders
+  document.querySelectorAll('[data-ph-'+lang+']').forEach(el => {
+    el.placeholder = el.getAttribute('data-ph-'+lang);
+  });
+  // Subject dropdown
+  updateSubjects(lang);
+}
+
+function updateSubjects(lang) {
+  const sel = document.getElementById('fsubject');
+  const cur = sel.value;
+  sel.innerHTML = '';
+  subjects[lang].forEach(o => {
+    const opt = document.createElement('option');
+    opt.value = o.v; opt.textContent = o.t;
+    sel.appendChild(opt);
+  });
+  sel.value = cur;
+}
+
+/* ===== EMAILJS ===== */
+// Initialize EmailJS with your Public Key
+// REPLACE 'YOUR_PUBLIC_KEY' with actual key from emailjs.com
+(function(){
+  emailjs.init({publicKey: "R1qY1eBNPzxQ7Vd9z"});
+})();
+
+/* ===== FORM SUBMIT ===== */
+function submitForm() {
+  const name    = document.getElementById('fname').value.trim();
+  const email   = document.getElementById('femail').value.trim();
+  const phone   = document.getElementById('fphone').value.trim();
+  const subject = document.getElementById('fsubject').value;
+  const message = document.getElementById('fmessage').value.trim();
+
+  const msgs = {
+    si: { name:'ඔබගේ නම ඇතුළත් කරන්න', email:'වලංගු ඊමේල් ලිපිනයක් ඇතුළත් කරන්න', subj:'විෂය තෝරන්න', msg:'පණිවිඩය ලියන්න', sending:'⏳ යවමින් පවතී...', ok:'✅ ඔබගේ පණිවිඩය සාර්ථකව යවන ලදී! පැය 24ක් ඇතුළත පිළිතුරු දෙමු.', fail:'❌ දෝෂයක් ඇතිවිය. නැවත උත්සාහ කරන්න.' },
+    en: { name:'Please enter your name', email:'Please enter a valid email', subj:'Please select a subject', msg:'Please write your message', sending:'⏳ Sending...', ok:'✅ Message sent successfully! We\'ll reply within 24 hours.', fail:'❌ An error occurred. Please try again.' },
+    ta: { name:'உங்கள் பெயரை உள்ளிடவும்', email:'சரியான மின்னஞ்சல் உள்ளிடவும்', subj:'விஷயத்தை தேர்ந்தெடுக்கவும்', msg:'செய்தி எழுதவும்', sending:'⏳ அனுப்புகிறது...', ok:'✅ செய்தி வெற்றிகரமாக அனுப்பப்பட்டது! 24 மணி நேரத்திற்குள் பதிலளிப்போம்.', fail:'❌ பிழை ஏற்பட்டது. மீண்டும் முயற்சிக்கவும்.' }
+  };
+  const m = msgs[currentLang];
+
+  if(!name)               { showMsg('err', m.name);    return; }
+  if(!email||!email.includes('@')){ showMsg('err', m.email);   return; }
+  if(!subject)            { showMsg('err', m.subj);    return; }
+  if(!message)            { showMsg('err', m.msg);     return; }
+
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.querySelector('.lang-'+currentLang).textContent = m.sending;
+
+  // Send via EmailJS
+  // REPLACE 'YOUR_SERVICE_ID' and 'YOUR_TEMPLATE_ID' with actual values
+  emailjs.send('service_13k6z1d', 'template_e1oov6a', {
+    from_name:    name,
+    from_email:   email,
+    phone:        phone || 'Not provided',
+    subject:      subject,
+    message:      message,
+    to_email:     'welfarevds@gmail.com',
+    reply_to:     email,
+    language:     currentLang.toUpperCase()
+  }).then(() => {
+    showMsg('ok', m.ok);
+    ['fname','femail','fphone','fmessage'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('fsubject').value = '';
+    document.getElementById('charCount').textContent = '0';
+    btn.disabled = false;
+    resetBtnText();
+  }).catch(err => {
+    console.error('EmailJS error:', err);
+    const detail = err && err.text ? err.text
+                 : err && err.status ? 'HTTP Status: ' + err.status
+                 : err && err.message ? err.message
+                 : JSON.stringify(err);
+    showMsg('err', '❌ EmailJS Error: ' + detail);
+    btn.disabled = false;
+    resetBtnText();
+  });
+}
+
+function resetBtnText(){
+  const btn = document.getElementById('submitBtn');
+  btn.innerHTML = '☸ &nbsp;<span class="lang-en" style="display:none">Submit Message</span><span class="lang-si">පණිවිඩය යවන්න</span><span class="lang-ta" style="display:none">செய்தி அனுப்பு</span>';
+  setLang(currentLang);
+}
+
+function showMsg(type, text) {
+  const el = document.getElementById('formMsg');
+  el.textContent = text;
+  el.className = 'form-msg ' + type;
+  el.scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+
+/* ===== PARTICLES ===== */
+(function(){
+  const cv = document.getElementById('particles'), cx = cv.getContext('2d');
+  function resize(){ cv.width = window.innerWidth; cv.height = window.innerHeight; }
+  resize(); window.addEventListener('resize', resize);
+  const pts = [];
+  for(let i=0;i<55;i++) pts.push({x:Math.random()*window.innerWidth,y:Math.random()*window.innerHeight,r:Math.random()*1.8+0.4,vx:(Math.random()-.5)*.3,vy:-(Math.random()*.4+.1),life:Math.random(),decay:Math.random()*.003+.001,gold:Math.random()<.4});
+  function tick(){
+    cx.clearRect(0,0,cv.width,cv.height);
+    for(const p of pts){p.x+=p.vx;p.y+=p.vy;p.life-=p.decay;if(p.life<=0||p.y<0){p.x=Math.random()*cv.width;p.y=cv.height+5;p.life=Math.random()*.6+.2;}cx.beginPath();cx.arc(p.x,p.y,p.r,0,Math.PI*2);cx.fillStyle=p.gold?`rgba(201,168,76,${p.life*.5})`:`rgba(255,255,255,${p.life*.25})`;cx.fill();}
+    requestAnimationFrame(tick);
+  }
+  tick();
+})();
+
+window.addEventListener('scroll', () => { document.getElementById('scrollTopBtn').classList.toggle('visible', window.scrollY>400); });
+function toggleFaq(el){ el.classList.toggle('open'); }
+function updateCount(){ document.getElementById('charCount').textContent = document.getElementById('fmessage').value.length; }
+function toggleMobileMenu(){ document.getElementById('mobileMenu').classList.toggle('open'); }
+
+/* ===== FIREBASE AUTH ===== */
+const firebaseConfig={apiKey:"AIzaSyAWpPP3OevjIRAsoGIjOJTofV6l2jgyhNI",authDomain:"signin-f9656.firebaseapp.com",projectId:"signin-f9656",storageBucket:"signin-f9656.firebasestorage.app",messagingSenderId:"1074665165821",appId:"1:1074665165821:web:91ef329a0472fa138e7f94"};
+const authApp=firebase.initializeApp(firebaseConfig,"authApp");
+const auth=authApp.auth(); const firestoreDb=authApp.firestore();
+const googleProvider=new firebase.auth.GoogleAuthProvider();
+googleProvider.addScope('email'); googleProvider.addScope('profile');
+async function saveUser(user,extra={}){ try{ const ref=firestoreDb.collection("users").doc(user.uid); const snap=await ref.get(); if(!snap.exists){await ref.set({uid:user.uid,email:user.email||"",displayName:user.displayName||extra.name||"",photoURL:user.photoURL||"",role:"student",createdAt:new Date().toISOString(),...extra});} }catch(e){console.warn(e.message);} }
+auth.onAuthStateChanged(u=>{ const btn=document.getElementById("loginBtn"); if(!btn)return; if(u){ const first=(u.displayName||u.email||"User").split(/[ @]/)[0]; btn.innerHTML=first; btn.classList.add("logged-in"); const av=document.getElementById("lgAvatar"); if(av){av.innerHTML=u.photoURL?`<img src="${u.photoURL}" style="width:100%;height:100%;border-radius:50%;object-fit:cover">`:first.charAt(0).toUpperCase();} const lgName=document.getElementById("lgName"); const lgEmail=document.getElementById("lgEmail"); if(lgName)lgName.textContent="Welcome, "+(u.displayName||u.email); if(lgEmail)lgEmail.textContent=u.email||""; }else{ btn.innerHTML='<span class="lang-en" style="display:none">Login</span><span class="lang-si">ඇතුල් වන්න</span><span class="lang-ta" style="display:none">உள்நுழைவு</span>'; setLang(currentLang); btn.classList.remove("logged-in"); } });
+function openAuth(tab){document.getElementById("authOverlay").classList.add("open");if(auth.currentUser){showPan("panLI");return;}switchTab(tab||"si_tab");}
+function closeAuth(){document.getElementById("authOverlay").classList.remove("open");clearErrs();}
+function overlayClick(e){if(e.target===document.getElementById("authOverlay"))closeAuth();}
+function switchTab(t){document.getElementById("tabSI").classList.toggle("on",t==="si_tab");document.getElementById("tabSU").classList.toggle("on",t==="su");showPan(t==="si_tab"?"panSI":"panSU");}
+function showPan(id){["panSI","panSU","panLI"].forEach(p=>document.getElementById(p).style.display=p===id?"block":"none");}
+function clearErrs(){["siErr","suErr"].forEach(id=>{const el=document.getElementById(id);if(el){el.textContent="";el.className="am-err";}});}
+function errMsg(id,m){const el=document.getElementById(id);if(el){el.textContent=m;el.className="am-err";}}
+function okMsg(id,m){const el=document.getElementById(id);if(el){el.textContent=m;el.className="am-err am-ok";}}
+function fErr(c){return({"auth/user-not-found":"No account found with that email.","auth/wrong-password":"Incorrect password.","auth/invalid-credential":"Invalid email or password.","auth/email-already-in-use":"Email already registered.","auth/invalid-email":"Please enter a valid email.","auth/weak-password":"Password must be at least 6 characters.","auth/popup-closed-by-user":"Sign-in popup was closed.","auth/network-request-failed":"Network error.","auth/too-many-requests":"Too many attempts — try again later."})[c]||"Something went wrong. ("+c+")";}
+async function doSignIn(){const email=document.getElementById("siEmail").value.trim();const pass=document.getElementById("siPass").value;if(!email||!pass){errMsg("siErr","Please fill in all fields.");return;}const btn=document.getElementById("siBtn");btn.disabled=true;try{await auth.signInWithEmailAndPassword(email,pass);showPan("panLI");setTimeout(closeAuth,1400);}catch(e){errMsg("siErr",fErr(e.code));}finally{btn.disabled=false;}}
+async function doSignUp(){const name=document.getElementById("suName").value.trim();const email=document.getElementById("suEmail").value.trim();const pass=document.getElementById("suPass").value;const conf=document.getElementById("suConf").value;if(!name||!email||!pass){errMsg("suErr","Please fill in all fields.");return;}if(pass!==conf){errMsg("suErr","Passwords do not match.");return;}if(pass.length<6){errMsg("suErr","Min. 6 characters.");return;}const btn=document.getElementById("suBtn");btn.disabled=true;try{const cred=await auth.createUserWithEmailAndPassword(email,pass);await cred.user.updateProfile({displayName:name});await saveUser(cred.user,{name});showPan("panLI");setTimeout(closeAuth,1400);}catch(e){errMsg("suErr",fErr(e.code));}finally{btn.disabled=false;}}
+async function doGoogle(){try{const result=await auth.signInWithPopup(googleProvider);await saveUser(result.user);showPan("panLI");setTimeout(closeAuth,1400);}catch(e){const ae=document.getElementById("panSU").style.display==="block"?"suErr":"siErr";errMsg(ae,fErr(e.code));}}
+async function doSignOut(){await auth.signOut();showPan("panSI");closeAuth();}
+async function forgotPw(){const email=document.getElementById("siEmail").value.trim();if(!email){errMsg("siErr","Enter your email above first.");return;}try{await auth.sendPasswordResetEmail(email);okMsg("siErr","Reset email sent!");}catch(e){errMsg("siErr",fErr(e.code));}}
+
+// Init language on load
+setLang('si');
+</script>
+</body>
+</html>

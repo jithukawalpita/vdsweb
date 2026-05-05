@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>Vipassi Dhamma School | Student History Access</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    
+.login-btn{background:linear-gradient(135deg,#c9a84c,#a07810);color:#1a0800;border:none;padding:5px 16px;border-radius:3px;font-size:10.5px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;margin-left:8px;transition:all .2s;box-shadow:0 2px 8px rgba(201,168,76,0.25)}
+.login-btn:hover{background:linear-gradient(135deg,#e0b95c,#b88a20);box-shadow:0 4px 14px rgba(201,168,76,0.4)}
+.login-btn.logged-in{background:rgba(201,168,76,0.12);color:#c9a84c;border:1px solid rgba(201,168,76,0.35)}
+.auth-overlay{display:none;position:fixed;inset:0;z-index:1000;background:rgba(4,2,4,0.92);backdrop-filter:blur(8px);align-items:center;justify-content:center}
+.auth-overlay.open{display:flex}
+.auth-modal{background:linear-gradient(160deg,#110808 0%,#1a0a0a 60%,#0d0d0a 100%);border:1px solid rgba(201,168,76,0.28);border-radius:8px;width:100%;max-width:420px;margin:1rem;box-shadow:0 0 80px rgba(0,0,0,0.95);animation:mIn .3s ease both;overflow:hidden;max-height:92vh;overflow-y:auto}
+@keyframes mIn{from{opacity:0;transform:translateY(-20px) scale(0.96)}to{opacity:1;transform:none}}
+.am-head{background:linear-gradient(90deg,#5a0808,#7a0e0e,#5a0808);border-bottom:1px solid rgba(201,168,76,0.3);padding:1rem 1.4rem;display:flex;align-items:center;gap:10px;position:relative}
+.am-wheel{font-size:1.3rem;filter:drop-shadow(0 0 7px rgba(201,168,76,0.6))}
+.am-brand{font-size:10px;letter-spacing:2px;color:#c9a84c;text-transform:uppercase;flex:1}
+.am-close{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:rgba(245,222,179,0.45);font-size:14px;cursor:pointer;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.am-close:hover{background:rgba(255,255,255,0.1);color:#f5deb3}
+.am-tabs{display:flex;border-bottom:1px solid rgba(201,168,76,0.1)}
+.am-tab{flex:1;padding:11px;background:none;border:none;color:rgba(245,222,179,0.4);font-size:9.5px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;border-bottom:2px solid transparent;transition:all .2s}
+.am-tab.on{color:#c9a84c;border-bottom-color:#c9a84c;background:rgba(201,168,76,0.04)}
+.am-tab:hover:not(.on){color:rgba(245,222,179,0.65)}
+.am-body{padding:1.4rem}
+.am-field{margin-bottom:.9rem}
+.am-label{display:block;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:#c9a84c;margin-bottom:5px}
+.am-input{width:100%;background:rgba(255,255,255,0.04);border:1px solid rgba(201,168,76,0.18);border-radius:3px;padding:9px 13px;color:#f5deb3;font-size:0.87rem;outline:none;transition:border-color .2s}
+.am-input:focus{border-color:rgba(201,168,76,0.5);background:rgba(201,168,76,0.03)}
+.am-input::placeholder{color:rgba(245,222,179,0.18)}
+.am-forgot{text-align:right;margin-top:-3px;margin-bottom:.8rem}
+.am-forgot a{font-size:0.75rem;color:rgba(201,168,76,0.55);text-decoration:none}
+.am-forgot a:hover{color:#c9a84c}
+.am-btn{width:100%;padding:11px;background:linear-gradient(135deg,#c9a84c,#a07810);border:none;border-radius:3px;color:#1a0800;font-weight:700;font-size:10.5px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all .2s}
+.am-btn:hover{background:linear-gradient(135deg,#e0b95c,#b88a20);box-shadow:0 4px 18px rgba(201,168,76,0.28)}
+.am-btn:disabled{opacity:.5;cursor:not-allowed}
+.am-err{margin-top:.65rem;font-size:.77rem;color:#e05555;min-height:1rem;text-align:center}
+.am-ok{color:#6dbf6d!important}
+.am-div{display:flex;align-items:center;gap:10px;margin:1rem 0;color:rgba(245,222,179,0.22);font-size:.72rem}
+.am-div::before,.am-div::after{content:'';flex:1;height:1px;background:rgba(201,168,76,0.1)}
+.am-socials{display:grid;grid-template-columns:1fr;gap:8px;margin-bottom:.4rem}
+.am-soc{padding:9px 6px;background:rgba(255,255,255,0.04);border:1px solid rgba(201,168,76,0.14);border-radius:3px;color:rgba(245,222,179,0.7);font-size:.78rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:all .2s;white-space:nowrap}
+.am-soc:hover{background:rgba(255,255,255,0.09);border-color:rgba(201,168,76,0.3);color:#f5deb3}
+.am-soc.google:hover{border-color:rgba(234,67,53,0.5)}
+.am-loggedin{text-align:center;padding:2rem 1.4rem}
+.am-avatar{width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,rgba(201,168,76,0.2),rgba(90,8,8,0.5));border:2px solid rgba(201,168,76,0.4);display:flex;align-items:center;justify-content:center;font-size:1.8rem;margin:0 auto .8rem}
+.am-lg-name{font-size:1.3rem;color:#fff;margin-bottom:.25rem}
+.am-lg-email{font-size:.76rem;color:rgba(201,168,76,0.55);letter-spacing:.8px;margin-bottom:1.4rem}
+
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --bg: #fefaf2;
+      --card: #ffffff;
+      --golden: #c9a03d;
+      --golden-light: #f5e9cb;
+      --deep-forest: #2c5f6e;
+      --forest-light: rgba(44,95,110,0.08);
+      --text: #2a3b3c;
+      --text-soft: #6b7a5e;
+      --border: #f0e6d6;
+      --shadow: 0 15px 35px rgba(0,0,0,0.05), 0 2px 6px rgba(0,0,0,0.02);
+    }
+    
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+      background: #000;
+    }
+
+    /* ========== NAV FROM HOMEPAGE ========== */
+    .nav {
+      background: linear-gradient(90deg,#5a0808 0%,#8b1212 40%,#7a0e0e 70%,#5a0808 100%);
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      border-bottom: 2px solid #c9a84c;
+      position: relative;
+      z-index: 100;
+      box-shadow: 0 2px 20px rgba(0,0,0,0.6);
+    }
+    .nav-logo { display:flex; align-items:center; gap:10px; padding:8px 0; margin-right:20px; }
+    .brand { color:#f5deb3; font-size:13px; font-weight:700; letter-spacing:.5px; text-shadow:0 1px 3px rgba(0,0,0,0.5); }
+    .nav-links { display:flex; flex-wrap:wrap; flex:1; }
+    .nav-links a {
+      color:rgba(245,222,179,0.88); font-size:11.5px; padding:14px 10px;
+      text-decoration:none; border-bottom:2px solid transparent; transition:all .2s; white-space:nowrap;
+    }
+    .nav-links a:hover { color:#ffe066; border-bottom-color:#ffe066; background:rgba(255,255,255,0.05); }
+    .lang-row { display:flex; gap:5px; align-items:center; padding:6px 0; margin-left:auto; }
+    .lb {
+      background:rgba(255,255,255,0.08); color:#f5deb3; border:1px solid rgba(255,255,255,0.2);
+      padding:4px 10px; border-radius:3px; font-size:10.5px; cursor:pointer; transition:all .2s;
+    }
+    .lb:hover { background:rgba(255,255,255,0.15); }
+    .lb.on { background:linear-gradient(135deg,#c9a84c,#a07810); color:#1a0800; border-color:#c9a84c; font-weight:700; }
+    .dropdown { position:relative; }
+    .dropdown-menu {
+      display:none; position:absolute; top:100%; right:0; background:#8b1212;
+      border:1px solid #c9a84c; border-top:none; z-index:200; min-width:120px;
+    }
+    .dropdown-menu a { display:block; color:#f5deb3; font-size:11px; padding:8px 14px; text-decoration:none; }
+    .dropdown-menu a:hover { background:rgba(201,168,76,0.15); color:#ffe066; }
+    .dropdown:hover .dropdown-menu { display:block; }
+
+    /* ========== BACKGROUND ========== */
+    .page-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 120vh;
+      z-index: 0;
+      background-image: url('https://t4.ftcdn.net/jpg/06/90/25/33/360_F_690253303_8VSOHZgCODCjqpJadt9lQFzbx5gT5hTg.jpg');
+      opacity: 0.3;
+      background-size: 1300px 800px;
+    }
+    #particles {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* ========== MAIN CONTENT WRAPPER ========== */
+    .page-content {
+      position: relative;
+      z-index: 10;
+      padding: 2.5rem 1.2rem 3rem;
+    }
+
+    /* ========== PORTAL CARDS ========== */
+    .main-card {
+      max-width: 500px;
+      margin: 0 auto;
+      background: rgba(254,250,242,0.97);
+      border-radius: 32px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(201,168,76,0.2);
+      padding: 2rem;
+    }
+    .full-card { max-width: 1300px; }
+
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 1.2rem;
+      margin-bottom: 1.8rem;
+      flex-wrap: wrap;
+      border-bottom: 2px solid var(--border);
+      padding-bottom: 1rem;
+    }
+    .brand-inner h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 600; font-size: 1.6rem;
+      background: linear-gradient(135deg, #2c5f6e 0%, #b8860b 90%);
+      background-clip: text; -webkit-background-clip: text; color: transparent;
+    }
+    .brand-inner p { font-size: 0.75rem; color: var(--text-soft); }
+
+    /* Login Form */
+    .login-box {
+      background: white;
+      border-radius: 28px;
+      padding: 2rem 1.8rem;
+      text-align: center;
+      border: 1px solid var(--border);
+    }
+    .login-icon { font-size: 3rem; margin-bottom: 1rem; }
+    .login-box h2 { font-family: 'Cormorant Garamond', serif; color: var(--deep-forest); margin-bottom: 0.5rem; }
+    .login-box p.sub { font-size: 0.75rem; color: var(--text-soft); margin-bottom: 1.5rem; }
+    .input-group { margin-bottom: 1.2rem; text-align: left; }
+    .input-group label { font-size: 0.75rem; font-weight: 600; color: var(--text-soft); display: block; margin-bottom: 6px; }
+    .input-group input {
+      width: 100%; padding: 12px 16px; border: 1px solid var(--border);
+      border-radius: 60px; font-size: 0.9rem; font-family: inherit; outline: none; transition: 0.2s;
+    }
+    .input-group input:focus { border-color: var(--golden); box-shadow: 0 0 0 3px rgba(201,160,61,0.15); }
+    .btn { padding: 10px 24px; border-radius: 40px; border: none; font-weight: 600; font-family: inherit; cursor: pointer; transition: 0.2s; font-size: 0.85rem; }
+    .btn-gold { background: var(--golden); color: #28200d; width: 100%; }
+    .btn-gold:hover { background: #b8902e; }
+    .btn-ghost { background: white; border: 1px solid #e2d6c2; color: var(--text); }
+    .alert { padding: 10px 14px; border-radius: 60px; margin-bottom: 1rem; font-size: 0.8rem; font-weight: 500; }
+    .alert-error { background: #ffe9e7; border-left: 4px solid #e57373; color: #c62828; }
+    .alert-success { background: #e4f3e2; border-left: 4px solid #81c784; color: #2e7d32; }
+    .alert-info { background: #e6f1fb; border-left: 4px solid #85b7eb; color: #185fa5; }
+    .hidden { display: none; }
+    .conn-badge {
+      margin-left: auto; background: var(--forest-light); padding: 6px 16px;
+      border-radius: 60px; font-size: 0.7rem; font-weight: 500; display: flex; align-items: center; gap: 8px;
+    }
+    .dot { width: 9px; height: 9px; border-radius: 50%; }
+    .dot.green { background: #2c9b6e; box-shadow: 0 0 0 2px #d3f0e2; }
+
+    /* History page styles */
+    .controls {
+      display: flex; gap: 1rem; flex-wrap: wrap; align-items: flex-end;
+      margin-bottom: 1.5rem; background: white; padding: 1rem 1.3rem;
+      border-radius: 28px; border: 1px solid var(--border);
+    }
+    .ctrl-group { display: flex; flex-direction: column; gap: 5px; flex: 1; min-width: 140px; }
+    .ctrl-group label { font-size: 0.7rem; font-weight: 600; color: var(--text-soft); text-transform: uppercase; letter-spacing: 0.8px; }
+    select, input[type="date"] {
+      padding: 9px 14px; border: 1px solid var(--border); border-radius: 28px;
+      background: var(--bg); font-size: 0.85rem; font-family: inherit; outline: none; cursor: pointer;
+    }
+    .stats-row { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
+    .stat-card {
+      background: white; border: 1px solid var(--border); border-radius: 24px;
+      padding: 0.8rem 1.2rem; flex: 1; min-width: 100px; text-align: center;
+    }
+    .stat-card .num { font-size: 1.8rem; font-weight: 700; color: var(--deep-forest); }
+    .stat-card .label { font-size: 0.68rem; color: var(--text-soft); }
+    .section-label {
+      font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1.5px;
+      color: var(--golden); background: #fbf5e8; padding: 0.3rem 1rem;
+      border-radius: 40px; width: fit-content; margin-bottom: 1rem;
+    }
+    .history-wrap { overflow-x: auto; margin-top: 0.5rem; border-radius: 24px; background: white; padding: 0.5rem 0; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+    th { background: #fbf5e8; padding: 12px 10px; text-align: left; font-weight: 600; color: var(--text-soft); white-space: nowrap; }
+    td { padding: 10px 10px; border-top: 1px solid var(--border); }
+    tr:hover td { background: #fdf9f3; }
+    .student-name { font-weight: 600; color: var(--deep-forest); }
+    .grade-badge { background: #fcf0df; padding: 2px 10px; border-radius: 40px; font-size: 0.7rem; display: inline-block; }
+    .status-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+    .status-dot.present { background: #4caf50; }
+    .status-dot.absent { background: #ef5350; }
+    .status-dot.unmarked { background: #bdbdbd; }
+    .empty-state { text-align: center; padding: 3rem 1rem; background: white; border-radius: 28px; border: 1px dashed var(--border); color: var(--text-soft); }
+    .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid #e6dbc9; border-top-color: var(--golden); border-radius: 50%; animation: spin 0.6s linear infinite; margin-right: 6px; vertical-align: middle; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .welcome-user {
+      background: var(--golden-light); padding: 4px 12px; border-radius: 40px;
+      font-size: 0.75rem; font-weight: 500; color: var(--deep-forest);
+      margin-left: auto; display: flex; align-items: center; gap: 8px;
+    }
+    .student-view-badge { background: #e8f5e9; color: #2e7d32; padding: 4px 12px; border-radius: 40px; font-size: 0.7rem; font-weight: 500; }
+
+    /* ========== FOOTER FROM HOMEPAGE ========== */
+    .strip {
+      background: linear-gradient(90deg,#4a0606,#7a1010,#8b1212,#7a1010,#4a0606);
+      display: flex; justify-content: center; gap: 0;
+      border-top: 2px solid #c9a84c; border-bottom: 1px solid rgba(201,168,76,0.2);
+      flex-wrap: wrap;
+      position: relative; z-index: 10;
+    }
+    .si {
+      display: flex; align-items: center; gap: 12px; padding: 16px 32px;
+      border-right: 1px solid rgba(201,168,76,0.15); flex: 1; justify-content: center;
+      transition: background .2s; cursor: default; min-width: 160px;
+    }
+    .si:last-child { border-right: none; }
+    .si:hover { background: rgba(201,168,76,0.06); }
+    .sicon {
+      width: 38px; height: 38px; border-radius: 50%; background: rgba(201,168,76,0.1);
+      border: 1px solid rgba(201,168,76,0.4); display: flex; align-items: center;
+      justify-content: center; font-size: 16px; flex-shrink: 0; transition: all .2s;
+    }
+    .si:hover .sicon { background: rgba(201,168,76,0.2); border-color: #c9a84c; }
+    .stxt { color: #f5deb3; font-size: 11px; line-height: 1.5; }
+    .stxt strong { color: #c9a84c; display: block; font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 2px; }
+    .tagline-bar {
+      background: #050505; text-align: center; padding: 20px 32px;
+      border-top: 1px solid rgba(201,168,76,0.1);
+      display: flex; align-items: center; justify-content: center; gap: 16px;
+      position: relative; z-index: 10;
+    }
+    .tagline-bar .tmark { color: #c9a84c; font-size: 18px; }
+    .tagline-bar .ttext { color: rgba(255,255,255,0.45); font-size: 11.5px; letter-spacing: 2px; text-transform: uppercase; }
+    .tagline-bar .ttext span { color: #c9a84c; }
+
+    @media (max-width: 700px) {
+      .main-card { padding: 1.2rem; }
+      th, td { font-size: 0.7rem; padding: 6px 4px; }
+      .si { padding: 12px 16px; }
+      .hero-content { padding: 0 20px; }
+    }
+  </style>
+</head>
+<body>
+<!-- LOGIN BUTTON — place this wherever you want it in your nav -->
+<!-- <button class="login-btn" id="loginBtn" onclick="openAuth('si')">Login</button> -->
+
+<!-- AUTH MODAL -->
+<div class="auth-overlay" id="authOverlay" onclick="overlayClick(event)">
+  <div class="auth-modal">
+    <div class="am-head">
+      <span class="am-wheel">☸</span>
+      <span class="am-brand">Sri Vipassi Dhamma School</span>
+      <button class="am-close" onclick="closeAuth()">✕</button>
+    </div>
+    <div class="am-tabs">
+      <button class="am-tab on" id="tabSI" onclick="switchTab('si')">Sign In</button>
+      <button class="am-tab"    id="tabSU" onclick="switchTab('su')">Sign Up</button>
+    </div>
+
+    <!-- Sign In Panel -->
+    <div class="am-body" id="panSI">
+      <div class="am-field"><label class="am-label">Email</label><input class="am-input" id="siEmail" type="email" placeholder="you@email.com" autocomplete="email"></div>
+      <div class="am-field"><label class="am-label">Password</label><input class="am-input" id="siPass" type="password" placeholder="Password" autocomplete="current-password"></div>
+      <div class="am-forgot"><a href="#" onclick="forgotPw();return false">Forgot password?</a></div>
+      <button class="am-btn" id="siBtn" onclick="doSignIn()">Sign In</button>
+      <div class="am-err" id="siErr"></div>
+      <div class="am-div"><span>or continue with</span></div>
+      <div class="am-socials">
+        <button class="am-soc google" onclick="doGoogle()">
+          <svg width="15" height="15" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+          Continue with Google
+        </button>
+      </div>
+    </div>
+
+    <!-- Sign Up Panel -->
+    <div class="am-body" id="panSU" style="display:none">
+      <div class="am-field"><label class="am-label">Full Name</label><input class="am-input" id="suName" type="text" placeholder="Your name" autocomplete="name"></div>
+      <div class="am-field"><label class="am-label">Email</label><input class="am-input" id="suEmail" type="email" placeholder="you@email.com" autocomplete="email"></div>
+      <div class="am-field"><label class="am-label">Password</label><input class="am-input" id="suPass" type="password" placeholder="Min. 6 characters" autocomplete="new-password"></div>
+      <div class="am-field"><label class="am-label">Confirm Password</label><input class="am-input" id="suConf" type="password" placeholder="Repeat password" autocomplete="new-password"></div>
+      <button class="am-btn" id="suBtn" onclick="doSignUp()">Create Account</button>
+      <div class="am-err" id="suErr"></div>
+      <div class="am-div"><span>or sign up with</span></div>
+      <div class="am-socials">
+        <button class="am-soc google" onclick="doGoogle()">
+          <svg width="15" height="15" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+          Continue with Google
+        </button>
+      </div>
+    </div>
+
+    <!-- Logged In Panel -->
+    <div class="am-body am-loggedin" id="panLI" style="display:none">
+      <div class="am-avatar" id="lgAvatar">☸</div>
+      <div class="am-lg-name" id="lgName">Welcome!</div>
+      <div class="am-lg-email" id="lgEmail"></div>
+      <button class="am-btn" onclick="doSignOut()">Sign Out</button>
+    </div>
+  </div>
+</div>
+<!-- BACKGROUND PARTICLE CANVAS -->
+<div class="page-bg"></div>
+<canvas id="particles"></canvas>
+
+<!-- ========== NAV FROM HOMEPAGE ========== -->
+<nav class="nav">
+  <img src="https://i.ibb.co/Zpvb4GkV/image-removebg-preview-5.png" width="40" height="40" alt="logo" style="margin-right:12px">
+  <div class="brand">Sri Vipassi Dhamma School<span style="margin-right: 50px;"></span></div>
+  <div class="nav-links">
+    <a href="Home Page.html">Home</a>
+    <a href="Daily Attendance.html">Daily Attendance</a>
+    <a href="About.html">About</a>
+    <a href="galery.html">Gallery</a>
+    <a href="#">Achievements</a>
+    <a href="#">Daily Quotes</a>
+    <a href="Contact.html">Contact us</a>
+    <a href="#" class="dropdown" style="position:relative;padding:14px 10px;display:inline-flex;align-items:center;gap:4px">
+      Projects ▾
+      <div class="dropdown-menu">
+        <a href="#">Welfare Unit</a>
+        <a href="#">Media Unit</a>
+      </div>
+    </a>
+    <a href="Subject.html">Syllabus</a>
+  </div>
+  <div class="lang-row">
+    <button class="lb on">EN</button>
+    <button class="lb">සිං</button>
+    <button class="lb">தமிழ்</button>
+    <button class="login-btn" id="loginBtn" onclick="openAuth('si')">Login</button>
+  </div>
+</nav>
+
+<!-- ========== PAGE CONTENT ========== -->
+<div class="page-content">
+
+  <!-- LOGIN PAGE -->
+  <div id="loginContainer" class="main-card">
+    <div class="header" style="border-bottom: none; justify-content: center;">
+      <div class="brand-inner"><h1>Vipassi Dhamma School</h1><p>Student Attendance History Portal</p></div>
+    </div>
+    <div class="login-box">
+      <div class="login-icon">📖</div>
+      <h2>Student Access Portal</h2>
+      <p class="sub">Enter your Name or NIC number to view attendance history</p>
+      <div id="loginAlert"></div>
+      <div class="input-group">
+        <label>🪪 Full Name or NIC Number</label>
+        <input type="text" id="loginCode" placeholder="e.g., Nimal Perera or 199523456789">
+      </div>
+      <button class="btn btn-gold" onclick="verifyAccess()">🔍 View My Attendance History</button>
+      <p style="font-size: 0.7rem; color: var(--text-soft); margin-top: 1.5rem;">All registered students can access their attendance records using their name or NIC.</p>
+    </div>
+  </div>
+
+  <!-- HISTORY PAGE (hidden until login) -->
+  <div id="historyContainer" class="main-card full-card" style="display: none;">
+    <div class="header">
+      <div class="brand-inner">
+        <h1>Vipassi Dhamma School</h1>
+        <p>My Attendance History</p>
+      </div>
+      <div class="conn-badge" id="connBadge">
+        <span class="dot green"></span><span>Connected</span>
+      </div>
+      <div class="welcome-user" id="welcomeUser"></div>
+      <button class="btn btn-ghost" onclick="logout()">🚪 Logout</button>
+    </div>
+
+    <div id="alertBox"></div>
+
+    <!-- Student Info Card -->
+    <div id="studentInfoCard" style="background: linear-gradient(135deg, #fff7ed, #fef4e6); border-radius: 24px; padding: 1rem 1.5rem; margin-bottom: 1.5rem; border: 1px solid #f0e2cf;">
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+        <div>
+          <span style="font-size: 0.7rem; color: var(--text-soft);">Welcome,</span>
+          <h3 id="studentNameDisplay" style="font-family: 'Cormorant Garamond', serif; color: var(--deep-forest); margin: 0;">—</h3>
+          <span id="studentGradeDisplay" class="student-view-badge" style="display: inline-block; margin-top: 5px;">—</span>
+        </div>
+        <div style="text-align: right;">
+          <span style="font-size: 0.7rem; color: var(--text-soft);">NIC / ID</span>
+          <div id="studentNicDisplay" style="font-weight: 600;">—</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filter Controls -->
+    <div class="controls">
+      <div class="ctrl-group"><label>📅 From (Sunday)</label><input type="date" id="histFrom"></div>
+      <div class="ctrl-group"><label>📅 To (Sunday)</label><input type="date" id="histTo"></div>
+      <button class="btn btn-gold" onclick="loadHistory()">🔍 View My History</button>
+      <button class="btn btn-ghost" onclick="exportMyCSV()">📎 Export My CSV</button>
+    </div>
+
+    <!-- Personal Stats -->
+    <div id="summaryStats" style="display: none;">
+      <div class="stats-row" id="statsRow"></div>
+    </div>
+
+    <!-- History Content -->
+    <div id="historyContent">
+      <div class="empty-state">
+        <div class="icon">📋</div>
+        <div>Select date range and click View My History</div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end page-content -->
+
+<!-- ========== FOOTER FROM HOMEPAGE ========== -->
+<div class="strip">
+  <div class="si">
+    <div class="sicon">🏛</div>
+    <div class="stxt"><strong>Location</strong>Kananwila, Horana, Sri Lanka 12418</div>
+  </div>
+  <div class="si">
+    <div class="sicon">📞</div>
+    <div class="stxt"><strong>Contact</strong>077 798 0889</div>
+  </div>
+  <div class="si">
+    <div class="sicon">✉</div>
+    <div class="stxt"><strong>Email</strong>srivipassidhammaschool@gmail.com</div>
+  </div>
+  <div class="si">
+    <div class="sicon">⏰</div>
+    <div class="stxt"><strong>Hours</strong>Always open</div>
+  </div>
+</div>
+<div class="tagline-bar">
+  <span class="tmark">☸</span>
+  <span class="ttext"><span>Vipassi Dhamma School</span> &nbsp;·&nbsp; Sri Lanka &nbsp;·&nbsp; Developing Wisdom Through Dhamma</span>
+  <span class="tmark">☸</span>
+</div>
+
+<script>
+/* ========= BACKGROUND PARTICLES ========= */
+(function(){
+  const cv = document.getElementById('particles');
+  const cx = cv.getContext('2d');
+  function resize(){ cv.width = window.innerWidth; cv.height = window.innerHeight; }
+  resize(); window.addEventListener('resize', resize);
+  const pts = [];
+  for(let i = 0; i < 55; i++){
+    pts.push({
+      x: Math.random() * window.innerWidth, y: Math.random() * window.innerHeight,
+      r: Math.random() * 1.8 + 0.4,
+      vx: (Math.random() - .5) * 0.3, vy: -(Math.random() * 0.4 + 0.1),
+      life: Math.random(), decay: Math.random() * 0.003 + 0.001,
+      gold: Math.random() < 0.4
+    });
+  }
+  function tick(){
+    cx.clearRect(0, 0, cv.width, cv.height);
+    for(const p of pts){
+      p.x += p.vx; p.y += p.vy; p.life -= p.decay;
+      if(p.life <= 0 || p.y < 0){
+        p.x = Math.random() * cv.width; p.y = cv.height + 5;
+        p.life = Math.random() * 0.6 + 0.2;
+      }
+      cx.beginPath(); cx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      cx.fillStyle = p.gold
+        ? `rgba(201,168,76,${p.life * 0.5})`
+        : `rgba(255,255,255,${p.life * 0.25})`;
+      cx.fill();
+    }
+    requestAnimationFrame(tick);
+  }
+  tick();
+})();
+
+/* ========= PORTAL LOGIC ========= */
+const DB_URL = "https://vipassi-dhamma-school-default-rtdb.firebaseio.com";
+const SECRET = "NoPiT3elQJ1bqvVQvudSGS8Ij0fMvMhvUoySFkZY";
+
+let allStudents = {};
+let allAttendance = {};
+let allMeta = {};
+let currentStudent = null;
+let currentStudentKey = null;
+
+async function loadAllStudents() {
+  try {
+    const students = await fetch(`${DB_URL}/students.json?auth=${SECRET}`);
+    const data = await students.json();
+    allStudents = data || {};
+    return true;
+  } catch (e) { console.error("Failed to load students", e); return false; }
+}
+
+async function verifyAccess() {
+  const code = document.getElementById("loginCode").value.trim();
+  const alertDiv = document.getElementById("loginAlert");
+  if (!code) {
+    alertDiv.innerHTML = `<div class="alert alert-error">❌ Please enter your name or NIC number</div>`;
+    return;
+  }
+  alertDiv.innerHTML = `<div class="alert alert-info">⏳ Searching for student record...</div>`;
+  await loadAllStudents();
+
+  let foundStudent = null, foundKey = null;
+  for (const [key, student] of Object.entries(allStudents)) {
+    const studentName = (student.name || "").toLowerCase();
+    const studentNic = (student.nic || "").toLowerCase();
+    const inputCode = code.toLowerCase();
+    if (studentName === inputCode || studentName.includes(inputCode) ||
+        studentNic === inputCode || studentNic.includes(inputCode)) {
+      foundStudent = student; foundKey = key; break;
+    }
+  }
+
+  if (foundStudent) {
+    currentStudent = foundStudent; currentStudentKey = foundKey;
+    sessionStorage.setItem("vipassi_student_key", foundKey);
+    sessionStorage.setItem("vipassi_student_name", foundStudent.name);
+    sessionStorage.setItem("vipassi_student_nic", foundStudent.nic || "");
+    sessionStorage.setItem("vipassi_student_grade", foundStudent.grade || "");
+    sessionStorage.setItem("vipassi_auth_time", Date.now().toString());
+
+    alertDiv.innerHTML = `<div class="alert alert-success">✅ Welcome, ${foundStudent.name}! Loading your attendance...</div>`;
+    setTimeout(() => {
+      document.getElementById("loginContainer").style.display = "none";
+      document.getElementById("historyContainer").style.display = "block";
+      document.getElementById("studentNameDisplay").innerHTML = foundStudent.name || "—";
+      document.getElementById("studentGradeDisplay").innerHTML = foundStudent.grade || "Grade not set";
+      document.getElementById("studentNicDisplay").innerHTML = foundStudent.nic || "Not provided";
+      document.getElementById("welcomeUser").innerHTML = `🪔 ${foundStudent.name}`;
+      initializeHistoryPage();
+    }, 1000);
+  } else {
+    alertDiv.innerHTML = `<div class="alert alert-error">❌ No student found with "${code}". Please check your name or NIC.</div>`;
+  }
+}
+
+function checkExistingSession() {
+  const studentKey = sessionStorage.getItem("vipassi_student_key");
+  const studentName = sessionStorage.getItem("vipassi_student_name");
+  const studentNic = sessionStorage.getItem("vipassi_student_nic");
+  const studentGrade = sessionStorage.getItem("vipassi_student_grade");
+  const authTime = sessionStorage.getItem("vipassi_auth_time");
+
+  if (studentKey && authTime) {
+    const hoursDiff = (Date.now() - parseInt(authTime)) / (1000 * 60 * 60);
+    if (hoursDiff < 24) {
+      currentStudentKey = studentKey;
+      currentStudent = { name: studentName, nic: studentNic, grade: studentGrade };
+      document.getElementById("loginContainer").style.display = "none";
+      document.getElementById("historyContainer").style.display = "block";
+      document.getElementById("studentNameDisplay").innerHTML = studentName || "—";
+      document.getElementById("studentGradeDisplay").innerHTML = studentGrade || "Grade not set";
+      document.getElementById("studentNicDisplay").innerHTML = studentNic || "Not provided";
+      document.getElementById("welcomeUser").innerHTML = `🪔 ${studentName}`;
+      initializeHistoryPage();
+      return true;
+    } else { sessionStorage.clear(); }
+  }
+  return false;
+}
+
+function logout() {
+  sessionStorage.clear();
+  currentStudent = null; currentStudentKey = null;
+  document.getElementById("historyContainer").style.display = "none";
+  document.getElementById("loginContainer").style.display = "block";
+  document.getElementById("loginCode").value = "";
+  document.getElementById("loginAlert").innerHTML = "";
+}
+
+async function fbGet(path) {
+  const r = await fetch(`${DB_URL}${path}.json?auth=${SECRET}`);
+  if (!r.ok) throw new Error(await r.text());
+  return r.json();
+}
+
+function showAlert(msg, type = "success") {
+  const box = document.getElementById("alertBox");
+  if (!box) return;
+  const bgColor = type === "error" ? "#ffe9e7" : type === "info" ? "#e6f1fb" : "#e4f3e2";
+  box.innerHTML = `<div class="alert alert-${type}" style="background:${bgColor}">${msg}</div>`;
+  setTimeout(() => box.innerHTML = "", 4500);
+}
+
+function formatDateForDisplay(dateStr) {
+  if (!dateStr) return "—";
+  const d = new Date(dateStr + "T00:00:00");
+  return d.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", year: "numeric" });
+}
+
+function toLocalDateStr(d) {
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+}
+
+function getSundaysBetween(fromDateStr, toDateStr) {
+  const from = new Date(fromDateStr + "T00:00:00");
+  const to = new Date(toDateStr + "T00:00:00");
+  const sundays = [];
+  let current = new Date(from);
+  while (current.getDay() !== 0) current.setDate(current.getDate() + 1);
+  while (current <= to) { sundays.push(toLocalDateStr(current)); current.setDate(current.getDate() + 7); }
+  return sundays;
+}
+
+function setDefaultDates() {
+  const today = new Date();
+  const lastSun = new Date(today);
+  lastSun.setDate(today.getDate() - today.getDay());
+  const threeMonthsAgo = new Date(lastSun);
+  threeMonthsAgo.setMonth(lastSun.getMonth() - 3);
+  while (threeMonthsAgo.getDay() !== 0) threeMonthsAgo.setDate(threeMonthsAgo.getDate() + 1);
+  document.getElementById("histFrom").value = toLocalDateStr(threeMonthsAgo);
+  document.getElementById("histTo").value = toLocalDateStr(lastSun);
+}
+
+async function loadAllData() {
+  try {
+    const attendance = await fbGet("/attendance");
+    allAttendance = attendance || {};
+    return true;
+  } catch (e) { showAlert("Failed to load data: " + e.message, "error"); return false; }
+}
+
+// Converts the attendance records (keyed by Firebase push ID, each with a .date string
+// and .present / .absent arrays) into a lookup map:
+//   dateStr → { studentKey: "present"|"absent" }
+function buildDateLookup() {
+  const lookup = {}; // { "2025-01-05": { "-abc": "present", "-def": "absent" } }
+  for (const record of Object.values(allAttendance)) {
+    const dateStr = record.date;
+    if (!dateStr) continue;
+    if (!lookup[dateStr]) lookup[dateStr] = {};
+    for (const key of (record.present || [])) lookup[dateStr][key] = "present";
+    for (const key of (record.absent  || [])) lookup[dateStr][key] = "absent";
+  }
+  return lookup;
+}
+
+async function loadHistory() {
+  if (!currentStudentKey) { showAlert("Session expired. Please login again.", "error"); logout(); return; }
+  const from = document.getElementById("histFrom").value;
+  const to   = document.getElementById("histTo").value;
+  if (!from || !to) { showAlert("Please select both From and To dates", "error"); return; }
+
+  const contentDiv = document.getElementById("historyContent");
+  contentDiv.innerHTML = `<div class="empty-state"><span class="spinner"></span> Loading your attendance records...</div>`;
+  document.getElementById("summaryStats").style.display = "none";
+
+  const success = await loadAllData();
+  if (!success) return;
+
+  const sundays = getSundaysBetween(from, to);
+  if (sundays.length === 0) {
+    contentDiv.innerHTML = `<div class="empty-state"><div class="icon">📅</div><div>No Sundays found in selected range</div></div>`;
+    return;
+  }
+
+  // Build lookup from the array-based Firebase structure
+  const dateLookup = buildDateLookup();
+
+  let attendanceRecords = [], presentCount = 0, absentCount = 0, unmarkedCount = 0;
+
+  for (const dateStr of sundays) {
+    const dayMap = dateLookup[dateStr] || {};
+    const status = dayMap[currentStudentKey]; // "present" | "absent" | undefined
+
+    if (status === "present") { presentCount++; attendanceRecords.push({ date: dateStr, status: "present" }); }
+    else if (status === "absent") { absentCount++; attendanceRecords.push({ date: dateStr, status: "absent" }); }
+    else { unmarkedCount++; attendanceRecords.push({ date: dateStr, status: "unmarked" }); }
+  }
+
+  const totalMarked = presentCount + absentCount;
+  const attendanceRate = totalMarked > 0 ? Math.round((presentCount / totalMarked) * 100) : 0;
+
+  let html = `<div class="section-label">📜 My Attendance · ${sundays.length} Sunday(s)</div>`;
+  html += `<div class="history-wrap"><table style="min-width: 400px;"><thead><tr><th>Date</th><th>Status</th></tr></thead><tbody>`;
+  for (const record of attendanceRecords) {
+    const statusClass = record.status === "present" ? "present" : record.status === "absent" ? "absent" : "unmarked";
+    const statusText  = record.status === "present" ? "✓ Present" : record.status === "absent" ? "✗ Absent" : "— Not Marked";
+    html += `<tr><td>${formatDateForDisplay(record.date)}</td><td><span class="status-dot ${statusClass}" style="margin-right: 8px;"></span> ${statusText}</td></tr>`;
+  }
+  html += `</tbody></table></div>`;
+
+  document.getElementById("summaryStats").style.display = "block";
+  document.getElementById("statsRow").innerHTML = `
+    <div class="stat-card"><div class="num">${sundays.length}</div><div class="label">Total Sundays</div></div>
+    <div class="stat-card"><div class="num">${presentCount}</div><div class="label">Present</div></div>
+    <div class="stat-card"><div class="num">${absentCount}</div><div class="label">Absent</div></div>
+    <div class="stat-card"><div class="num">${attendanceRate}%</div><div class="label">Attendance Rate</div></div>
+  `;
+  contentDiv.innerHTML = html;
+}
+
+async function exportMyCSV() {
+  if (!currentStudentKey) { showAlert("Session expired", "error"); return; }
+  const from = document.getElementById("histFrom").value;
+  const to = document.getElementById("histTo").value;
+  if (!from || !to) { showAlert("Please select date range first", "error"); return; }
+
+  await loadAllData();
+  const sundays = getSundaysBetween(from, to);
+  if (sundays.length === 0) { showAlert("No Sundays in selected range", "error"); return; }
+
+  const dateLookup = buildDateLookup();
+  let csvRows = [["Date", "Status"]];
+  for (const dateStr of sundays) {
+    const dayMap = dateLookup[dateStr] || {};
+    const status = dayMap[currentStudentKey];
+    csvRows.push([formatDateForDisplay(dateStr), status === "present" ? "Present" : status === "absent" ? "Absent" : "Not Marked"]);
+  }
+
+  const csvContent = csvRows.map(row => row.join(",")).join("\n");
+  const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" });
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.setAttribute("download", `my_attendance_${currentStudent.name}_${from}_to_${to}.csv`);
+  document.body.appendChild(link); link.click();
+  document.body.removeChild(link);
+  showAlert("CSV exported successfully", "success");
+}
+
+async function initializeHistoryPage() {
+  setDefaultDates();
+  try {
+    await fbGet("/");
+    await loadAllData();
+    await loadHistory();
+  } catch(e) { showAlert("Connection issue", "error"); }
+}
+
+window.loadHistory = loadHistory;
+window.exportMyCSV = exportMyCSV;
+window.verifyAccess = verifyAccess;
+window.logout = logout;
+
+checkExistingSession();
+</script>
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
+<script>
+// ─── Firebase Init ────────────────────────────────────────────────────────────
+if (!firebase.apps.length) {
+  firebase.initializeApp({
+    apiKey:            "AIzaSyAWpPP3OevjIRAsoGIjOJTofV6l2jgyhNI",
+    authDomain:        "signin-f9656.firebaseapp.com",
+    projectId:         "signin-f9656",
+    storageBucket:     "signin-f9656.firebasestorage.app",
+    messagingSenderId: "1074665165821",
+    appId:             "1:1074665165821:web:91ef329a0472fa138e7f94"
+  });
+}
+const auth = firebase.auth();
+const db   = firebase.firestore();
+const googleProvider = new firebase.auth.GoogleAuthProvider();
+googleProvider.addScope('email');
+googleProvider.addScope('profile');
+
+// ─── Save user to Firestore ───────────────────────────────────────────────────
+async function saveUser(user, extra={}) {
+  try {
+    const ref  = db.collection("users").doc(user.uid);
+    const snap = await ref.get();
+    if (!snap.exists) {
+      await ref.set({
+        uid: user.uid, email: user.email || "",
+        displayName: user.displayName || extra.name || "",
+        photoURL: user.photoURL || "",
+        role: "student",
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        ...extra
+      });
+    }
+  } catch(e) { console.warn("Firestore:", e.message); }
+}
+
+// ─── Auth state ───────────────────────────────────────────────────────────────
+auth.onAuthStateChanged(u => {
+  const btn = document.getElementById("loginBtn");
+  if (!btn) return;
+  if (u) {
+    const first = (u.displayName || u.email || "User").split(/[ @]/)[0];
+    btn.textContent = first;
+    btn.classList.add("logged-in");
+    const av = document.getElementById("lgAvatar");
+    if (av) {
+      av.innerHTML = u.photoURL
+        ? `<img src="${u.photoURL}" style="width:100%;height:100%;border-radius:50%;object-fit:cover">`
+        : first.charAt(0).toUpperCase();
+    }
+    const lgName  = document.getElementById("lgName");
+    const lgEmail = document.getElementById("lgEmail");
+    if (lgName)  lgName.textContent  = "Welcome, " + (u.displayName || u.email);
+    if (lgEmail) lgEmail.textContent = u.email || "";
+  } else {
+    btn.textContent = "Login";
+    btn.classList.remove("logged-in");
+  }
+});
+
+// ─── UI helpers ───────────────────────────────────────────────────────────────
+function openAuth(tab) {
+  document.getElementById("authOverlay").classList.add("open");
+  if (auth.currentUser) { showPan("panLI"); return; }
+  switchTab(tab || "si");
+}
+function closeAuth() {
+  document.getElementById("authOverlay").classList.remove("open");
+  clearErrs();
+}
+function overlayClick(e) {
+  if (e.target === document.getElementById("authOverlay")) closeAuth();
+}
+function switchTab(t) {
+  document.getElementById("tabSI").classList.toggle("on", t === "si");
+  document.getElementById("tabSU").classList.toggle("on", t === "su");
+  showPan(t === "si" ? "panSI" : "panSU");
+}
+function showPan(id) {
+  ["panSI","panSU","panLI"].forEach(p =>
+    document.getElementById(p).style.display = p === id ? "block" : "none"
+  );
+}
+function clearErrs() {
+  ["siErr","suErr"].forEach(id => {
+    const el = document.getElementById(id);
+    el.textContent = ""; el.className = "am-err";
+  });
+}
+function errMsg(id, m) { const el=document.getElementById(id); el.textContent=m; el.className="am-err"; }
+function okMsg(id, m)  { const el=document.getElementById(id); el.textContent=m; el.className="am-err am-ok"; }
+function fErr(c) {
+  return ({
+    "auth/user-not-found":        "No account found with that email.",
+    "auth/wrong-password":        "Incorrect password.",
+    "auth/invalid-credential":    "Invalid email or password.",
+    "auth/email-already-in-use":  "Email already registered — try Sign In.",
+    "auth/invalid-email":         "Please enter a valid email.",
+    "auth/weak-password":         "Password must be at least 6 characters.",
+    "auth/popup-closed-by-user":  "Sign-in popup was closed.",
+    "auth/popup-blocked":         "Popup was blocked — please allow popups.",
+    "auth/network-request-failed":"Network error. Check your connection.",
+    "auth/too-many-requests":     "Too many attempts — try again later.",
+    "auth/unauthorized-domain":   "This domain is not authorized. Please open via a proper web server.",
+    "auth/operation-not-supported-in-this-environment": "Please open via a web server, not a file."
+  })[c] || "Something went wrong. (" + c + ")";
+}
+
+// ─── Email Sign In ─────────────────────────────────────────────────────────────
+async function doSignIn() {
+  const email = document.getElementById("siEmail").value.trim();
+  const pass  = document.getElementById("siPass").value;
+  if (!email || !pass) { errMsg("siErr","Please fill in all fields."); return; }
+  const btn = document.getElementById("siBtn");
+  btn.disabled = true;
+  try {
+    await auth.signInWithEmailAndPassword(email, pass);
+    showPan("panLI"); setTimeout(closeAuth, 1400);
+  } catch(e) { errMsg("siErr", fErr(e.code)); }
+  finally { btn.disabled = false; }
+}
+
+// ─── Email Sign Up ─────────────────────────────────────────────────────────────
+async function doSignUp() {
+  const name  = document.getElementById("suName").value.trim();
+  const email = document.getElementById("suEmail").value.trim();
+  const pass  = document.getElementById("suPass").value;
+  const conf  = document.getElementById("suConf").value;
+  if (!name || !email || !pass) { errMsg("suErr","Please fill in all fields."); return; }
+  if (pass !== conf)            { errMsg("suErr","Passwords do not match."); return; }
+  if (pass.length < 6)          { errMsg("suErr","Password must be at least 6 characters."); return; }
+  const btn = document.getElementById("suBtn");
+  btn.disabled = true;
+  try {
+    const cred = await auth.createUserWithEmailAndPassword(email, pass);
+    await cred.user.updateProfile({ displayName: name });
+    await saveUser(cred.user, { name });
+    showPan("panLI"); setTimeout(closeAuth, 1400);
+  } catch(e) { errMsg("suErr", fErr(e.code)); }
+  finally { btn.disabled = false; }
+}
+
+// ─── Google Sign In ────────────────────────────────────────────────────────────
+async function doGoogle() {
+  try {
+    const result = await auth.signInWithPopup(googleProvider);
+    await saveUser(result.user);
+    showPan("panLI"); setTimeout(closeAuth, 1400);
+  } catch(e) {
+    const activeErr = document.getElementById("panSU").style.display === "block" ? "suErr" : "siErr";
+    errMsg(activeErr, fErr(e.code));
+  }
+}
+
+// ─── Sign Out ──────────────────────────────────────────────────────────────────
+async function doSignOut() {
+  await auth.signOut();
+  showPan("panSI");
+  closeAuth();
+}
+
+// ─── Forgot Password ───────────────────────────────────────────────────────────
+async function forgotPw() {
+  const email = document.getElementById("siEmail").value.trim();
+  if (!email) { errMsg("siErr","Enter your email above first."); return; }
+  try {
+    await auth.sendPasswordResetEmail(email);
+    okMsg("siErr","Reset email sent — check your inbox.");
+  } catch(e) { errMsg("siErr", fErr(e.code)); }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vipassi Dhamma School</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Arial,sans-serif;background:#000000;color:#000000;overflow-x:hidden}
+
+/* NAV */
+.nav{background:linear-gradient(90deg,#5a0808 0%,#8b1212 40%,#7a0e0e 70%,#5a0808 100%);padding:0 24px;display:flex;align-items:center;border-bottom:2px solid #c9a84c;position:relative;z-index:100;box-shadow:0 2px 20px rgba(0,0,0,0.6)}
+.nav-logo{display:flex;align-items:center;gap:10px;padding:8px 0;margin-right:20px}
+.emblem{width:40px;height:40px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff5a0,#c9a84c 40%,#8b6400);border:2px solid #ffe066;display:flex;align-items:center;justify-content:center;font-size:20px;color:#5a0808;font-weight:900;box-shadow:0 0 10px rgba(201,168,76,0.5)}
+.brand{color:#f5deb3;font-size:13px;font-weight:700;letter-spacing:.5px;text-shadow:0 1px 3px rgba(0,0,0,0.5)}
+.nav-links{display:flex;flex-wrap:wrap;flex:1}
+.nav-links a{color:rgba(245,222,179,0.88);font-size:11.5px;padding:14px 10px;text-decoration:none;border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap}
+.nav-links a:hover{color:#ffe066;border-bottom-color:#ffe066;background:rgba(255,255,255,0.05)}
+.lang-row{display:flex;gap:5px;align-items:center;padding:6px 0;margin-left:auto}
+.lb{background:rgba(255,255,255,0.08);color:#f5deb3;border:1px solid rgba(255,255,255,0.2);padding:4px 10px;border-radius:3px;font-size:10.5px;cursor:pointer;transition:all .2s}
+.lb:hover{background:rgba(255,255,255,0.15)}
+.lb.on{background:linear-gradient(135deg,#c9a84c,#a07810);color:#1a0800;border-color:#c9a84c;font-weight:700}
+.dropdown{position:relative}
+.dropdown-menu{display:none;position:absolute;top:100%;right:0;background:#8b1212;border:1px solid #c9a84c;border-top:none;z-index:200;min-width:120px}
+.dropdown-menu a{display:block;color:#f5deb3;font-size:11px;padding:8px 14px;text-decoration:none}
+.dropdown-menu a:hover{background:rgba(201,168,76,0.15);color:#ffe066}
+.dropdown:hover .dropdown-menu{display:block}
+
+/* HERO */
+.hero{position:relative;height:520px;overflow:hidden;display:flex;align-items:center}
+.hero-bg{position:absolute;inset:0;background:linear-gradient(135deg,#0d0d1a 0%,#1a1a2e 30%,#0d1520 60%,#0a0a0a 100%)}
+/* Simulated crowd/temple background with CSS */
+.crowd-layer{position:absolute;inset:0;background:
+  radial-gradient(ellipse 80% 60% at 50% 100%,rgba(30,20,10,0.95) 0%,transparent 70%),
+  radial-gradient(ellipse 100% 40% at 50% 80%,rgba(20,15,8,0.8) 0%,transparent 60%);
+}
+.pattern-overlay{position:absolute;inset:0;opacity:0.06;
+  background-image: url('https://i.ibb.co/ttrDTQf/image.png');
+  
+  background-size: 1260px 550px;
+  opacity:0.1;}
+.hero-vignette{position:absolute;inset:0;background:radial-gradient(ellipse 120% 100% at 50% 50%,transparent 30%,rgba(0,0,0,0.7) 100%)}
+
+/* Particles canvas */
+#particles{position:absolute;inset:0;pointer-events:none;z-index:1}
+
+/* Decorative arch top */
+.arch{position:absolute;top:-60px;left:50%;transform:translateX(-50%);width:700px;height:200px;border-radius:50%;border:1px solid rgba(201,168,76,0.08);pointer-events:none;z-index:1}
+.arch2{position:absolute;top:-30px;left:50%;transform:translateX(-50%);width:600px;height:160px;border-radius:50%;border:1px solid rgba(201,168,76,0.05);pointer-events:none;z-index:1}
+
+.hero-content{position:relative;z-index:10;display:flex;align-items:center;justify-content:space-between;width:100%;padding:0 56px;gap:32px}
+
+/* LEFT TEXT */
+.hero-left{max-width:380px}
+.badge{display:inline-flex;align-items:center;gap:8px;background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.4);color:#c9a84c;font-size:9.5px;letter-spacing:2.5px;text-transform:uppercase;padding:6px 16px;border-radius:20px;margin-bottom:20px}
+.badge::before{content:'☸';font-size:12px}
+.school-name{font-size:52px;font-weight:900;color:#fff;line-height:1;letter-spacing:-2px;text-shadow:0 0 40px rgba(201,168,76,0.15),0 2px 8px rgba(0,0,0,0.5)}
+.school-sub{font-size:18px;color:#c9a84c;font-weight:400;letter-spacing:4px;text-transform:uppercase;margin-top:4px;margin-bottom:20px;text-shadow:0 1px 4px rgba(0,0,0,0.5)}
+.gold-line{display:flex;align-items:center;gap:12px;margin-bottom:20px}
+.gold-line::before,.gold-line::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,#c9a84c,transparent)}
+.gold-line::before{flex:0 0 50px;background:#c9a84c}
+.gold-line::after{background:linear-gradient(90deg,rgba(201,168,76,0.3),transparent)}
+.dot-gold{width:5px;height:5px;border-radius:50%;background:#c9a84c}
+.tagline-main{font-size:17px;color:rgba(255,255,255,0.85);line-height:1.75;margin-bottom:10px;font-style:italic}
+.tagline-main em{color:#c9a84c;font-style:normal;font-weight:600}
+.tagline-sub{font-size:12px;color:rgba(255,255,255,0.45);letter-spacing:1px;margin-bottom:32px}
+.btns{display:flex;gap:14px;flex-wrap:wrap}
+.b1{background:linear-gradient(135deg,#c9a84c 0%,#e8c060 50%,#a07810 100%);color:#1a0800;font-size:11px;font-weight:800;padding:13px 28px;border:none;border-radius:3px;cursor:pointer;letter-spacing:2px;text-transform:uppercase;box-shadow:0 4px 20px rgba(201,168,76,0.35);transition:transform .2s,box-shadow .2s}
+.b1:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(201,168,76,0.5)}
+.b2{background:transparent;color:#c9a84c;font-size:11px;font-weight:600;padding:12px 28px;border:1px solid #c9a84c;border-radius:3px;cursor:pointer;letter-spacing:2px;text-transform:uppercase;transition:all .2s}
+.b2:hover{background:rgba(201,168,76,0.1);transform:translateY(-2px)}
+
+/* RIGHT FLAG AREA */
+.hero-right{background-image:url('https://i.ibb.co/7JsgmgdY/image-removebg-preview-6.png');background-size:cover;background-position:center;width:420px;height:380px;;align-items:center;justify-content:center;}
+
+
+/* INFO STRIP */
+.strip{background:linear-gradient(90deg,#4a0606,#7a1010,#8b1212,#7a1010,#4a0606);display:flex;justify-content:center;gap:0;border-top:2px solid #c9a84c;border-bottom:1px solid rgba(201,168,76,0.2)}
+.si{display:flex;align-items:center;gap:12px;padding:16px 32px;border-right:1px solid rgba(201,168,76,0.15);flex:1;justify-content:center;transition:background .2s;cursor:default}
+.si:last-child{border-right:none}
+.si:hover{background:rgba(201,168,76,0.06)}
+.sicon{width:38px;height:38px;border-radius:50%;background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.4);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;transition:all .2s}
+.si:hover .sicon{background:rgba(201,168,76,0.2);border-color:#c9a84c}
+.stxt{color:#f5deb3;font-size:11px;line-height:1.5}
+.stxt strong{color:#c9a84c;display:block;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:2px}
+
+/* BOTTOM TAGLINE */
+.tagline-bar{background:#050505;text-align:center;padding:20px 32px;border-top:1px solid rgba(201,168,76,0.1);display:flex;align-items:center;justify-content:center;gap:16px}
+.tagline-bar .tmark{color:#c9a84c;font-size:18px}
+.tagline-bar .ttext{color:rgba(255,255,255,0.45);font-size:11.5px;letter-spacing:2px;text-transform:uppercase}
+.tagline-bar .ttext span{color:#c9a84c}
+/* ===== LOGIN BUTTON ===== */
+.login-btn{background:linear-gradient(135deg,#c9a84c,#a07810);color:#1a0800;border:none;padding:5px 16px;border-radius:3px;font-size:10.5px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;margin-left:8px;transition:all .2s;box-shadow:0 2px 8px rgba(201,168,76,0.25)}
+.login-btn:hover{background:linear-gradient(135deg,#e0b95c,#b88a20);box-shadow:0 4px 14px rgba(201,168,76,0.4)}
+.login-btn.logged-in{background:rgba(201,168,76,0.12);color:#c9a84c;border:1px solid rgba(201,168,76,0.35)}
+.auth-overlay{display:none;position:fixed;inset:0;z-index:1000;background:rgba(4,2,4,0.92);backdrop-filter:blur(8px);align-items:center;justify-content:center}
+.auth-overlay.open{display:flex}
+.auth-modal{background:linear-gradient(160deg,#110808 0%,#1a0a0a 60%,#0d0d0a 100%);border:1px solid rgba(201,168,76,0.28);border-radius:8px;width:100%;max-width:420px;margin:1rem;box-shadow:0 0 80px rgba(0,0,0,0.95);animation:mIn .3s ease both;overflow:hidden;max-height:92vh;overflow-y:auto}
+@keyframes mIn{from{opacity:0;transform:translateY(-20px) scale(0.96)}to{opacity:1;transform:none}}
+.am-head{background:linear-gradient(90deg,#5a0808,#7a0e0e,#5a0808);border-bottom:1px solid rgba(201,168,76,0.3);padding:1rem 1.4rem;display:flex;align-items:center;gap:10px;position:relative}
+.am-wheel{font-size:1.3rem;filter:drop-shadow(0 0 7px rgba(201,168,76,0.6))}
+.am-brand{font-size:10px;letter-spacing:2px;color:#c9a84c;text-transform:uppercase;flex:1}
+.am-close{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:rgba(245,222,179,0.45);font-size:14px;cursor:pointer;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.am-close:hover{background:rgba(255,255,255,0.1);color:#f5deb3}
+.am-tabs{display:flex;border-bottom:1px solid rgba(201,168,76,0.1)}
+.am-tab{flex:1;padding:11px;background:none;border:none;color:rgba(245,222,179,0.4);font-size:9.5px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;border-bottom:2px solid transparent;transition:all .2s}
+.am-tab.on{color:#c9a84c;border-bottom-color:#c9a84c;background:rgba(201,168,76,0.04)}
+.am-tab:hover:not(.on){color:rgba(245,222,179,0.65)}
+.am-body{padding:1.4rem}
+.am-field{margin-bottom:.9rem}
+.am-label{display:block;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:#c9a84c;margin-bottom:5px}
+.am-input{width:100%;background:rgba(255,255,255,0.04);border:1px solid rgba(201,168,76,0.18);border-radius:3px;padding:9px 13px;color:#f5deb3;font-size:0.87rem;outline:none;transition:border-color .2s}
+.am-input:focus{border-color:rgba(201,168,76,0.5);background:rgba(201,168,76,0.03)}
+.am-input::placeholder{color:rgba(245,222,179,0.18)}
+.am-forgot{text-align:right;margin-top:-3px;margin-bottom:.8rem}
+.am-forgot a{font-size:0.75rem;color:rgba(201,168,76,0.55);text-decoration:none}
+.am-forgot a:hover{color:#c9a84c}
+.am-btn{width:100%;padding:11px;background:linear-gradient(135deg,#c9a84c,#a07810);border:none;border-radius:3px;color:#1a0800;font-weight:700;font-size:10.5px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all .2s}
+.am-btn:hover{background:linear-gradient(135deg,#e0b95c,#b88a20);box-shadow:0 4px 18px rgba(201,168,76,0.28)}
+.am-btn:disabled{opacity:.5;cursor:not-allowed}
+.am-err{margin-top:.65rem;font-size:.77rem;color:#e05555;min-height:1rem;text-align:center}
+.am-ok{color:#6dbf6d!important}
+.am-div{display:flex;align-items:center;gap:10px;margin:1rem 0;color:rgba(245,222,179,0.22);font-size:.72rem}
+.am-div::before,.am-div::after{content:'';flex:1;height:1px;background:rgba(201,168,76,0.1)}
+.am-socials{display:grid;grid-template-columns:1fr;gap:8px;margin-bottom:.4rem}
+.am-soc{padding:9px 6px;background:rgba(255,255,255,0.04);border:1px solid rgba(201,168,76,0.14);border-radius:3px;color:rgba(245,222,179,0.7);font-size:.78rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:all .2s;white-space:nowrap}
+.am-soc:hover{background:rgba(255,255,255,0.09);border-color:rgba(201,168,76,0.3);color:#f5deb3}
+.am-soc.google:hover{border-color:rgba(234,67,53,0.5)}
+.am-loggedin{text-align:center;padding:2rem 1.4rem}
+.am-avatar{width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,rgba(201,168,76,0.2),rgba(90,8,8,0.5));border:2px solid rgba(201,168,76,0.4);display:flex;align-items:center;justify-content:center;font-size:1.8rem;margin:0 auto .8rem}
+.am-lg-name{font-size:1.3rem;color:#fff;margin-bottom:.25rem}
+.am-lg-email{font-size:.76rem;color:rgba(201,168,76,0.55);letter-spacing:.8px;margin-bottom:1.4rem}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+ <img src="https://i.ibb.co/Zpvb4GkV/image-removebg-preview-5.png"  width="40" height="40"
+     height="150"
+     alt="photo"
+     align="left" style="margin-right:10px">
+    <div class="brand"> Sri Vipassi Dhamma School<span style="margin-right: 80px;"></span></div>
+  </div>
+  <div class="nav-links">
+    <a href="Home Page.html">Home</a>
+    <a href="Daily Attendance.html">Daily Attendance</a>
+    <a href="About.html">About</a>
+    <a href="galery.html">Gallery</a>
+    <a href="#">Achievements</a>
+    <a href="#">Daily Quotes</a>
+    <a href="Contact.html">Contact us</a>
+    <a href="#" class="dropdown" style="position:relative;padding:14px 10px;display:inline-flex;align-items:center;gap:2px">
+      Projects ▾
+      <div class="dropdown-menu">
+        <a href="#">Welfare Unit</a>
+        <a href="#">Media Unit</a>
+      </div>
+    </a>
+    <a href="Subject.html">Syllabus</a>
+  </div>
+  <div class="lang-row">
+    <button class="lb on">EN</button>
+    <button class="lb">සිං</button>
+    <button class="lb">தமிழ்</button>
+    <button class="login-btn" id="loginBtn" onclick="openAuth('signin')">Login</button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-bg"></div>
+  <div class="crowd-layer"></div>
+  <div class="pattern-overlay"></div>
+  <div class="hero-vignette"></div>
+  <div class="arch"></div>
+  <div class="arch2"></div>
+  <canvas id="particles"></canvas>
+
+  <div class="hero-content">
+    <!-- LEFT -->
+    <div class="hero-left">
+      <div class="badge">Kande Viharaya · Horana · Sri Lanka</div>
+      <div class="school-name">ශ්‍රී විපස්සි දහම් පාසල</div>
+      <div class="school-sub">Sri Vipassi Dhamma School</div>
+     
+      <div class="tagline-main">A human society that<br><em>develops wisdom</em></div>
+      <div class="tagline-sub">Walking the Noble Eightfold Path · Since founded</div>
+      <div class="btns">
+        <button class="b1">Explore Now</button>
+        <button class="b2">Daily Quotes</button>
+      </div>
+    </div>
+
+    <!-- RIGHT FLAG -->
+    <div class="hero-right">
+      <div class="aura" style="width:380px;height:380px;background:radial-gradient(circle,rgba(201,168,76,0.12),transparent 70%);animation-delay:0s"></div>
+      <div class="aura" style="width:300px;height:300px;background:radial-gradient(circle,rgba(26,53,128,0.1),transparent 70%);animation-delay:1.3s"></div>
+      <div class="aura" style="width:220px;height:220px;background:radial-gradient(circle,rgba(224,80,16,0.08),transparent 70%);animation-delay:2.6s"></div>
+      <!-- Decorative rings -->
+      <svg style="position:absolute;width:380px;height:380px;z-index:4;pointer-events:none" viewBox="0 0 380 380">
+        <circle cx="190" cy="190" r="178" stroke="rgba(201,168,76,0.15)" stroke-width="0.8" fill="none" stroke-dasharray="6,10"/>
+        <circle cx="190" cy="190" r="155" stroke="rgba(201,168,76,0.1)" stroke-width="0.5" fill="none"/>
+        <circle cx="190" cy="190" r="130" stroke="rgba(201,168,76,0.07)" stroke-width="0.5" fill="none" stroke-dasharray="2,8"/>
+      </svg>
+      <div class="flag-wrap">
+        <canvas id="fc" width="360" height="310"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- INFO STRIP -->
+<div class="strip">
+  <div class="si">
+    <div class="sicon">🏛</div>
+    <div class="stxt"><strong>Location</strong>Kananwila, Horana, Sri Lanka 12418</div>
+  </div>
+  <div class="si">
+    <div class="sicon">📞</div>
+    <div class="stxt"><strong>Contact</strong>077 798 0889</div>
+  </div>
+  <div class="si">
+    <div class="sicon">✉</div>
+    <div class="stxt"><strong>Email</strong>srivipassidhammaschool@gmail.com</div>
+  </div>
+  <div class="si">
+    <div class="sicon">⏰</div>
+    <div class="stxt"><strong>Hours</strong>Always open</div>
+  </div>
+</div>
+
+<!-- BOTTOM BAR -->
+<div class="tagline-bar">
+  <span class="tmark">☸</span>
+  <span class="ttext"><span>Vipassi Dhamma School</span> &nbsp;·&nbsp; Sri Lanka &nbsp;·&nbsp; Developing Wisdom Through Dhamma</span>
+  <span class="tmark">☸</span>
+</div>
+
+<script>
+/* ========= PARTICLES ========= */
+(function(){
+  const cv=document.getElementById('particles');
+  const cx=cv.getContext('2d');
+  function resize(){cv.width=cv.parentElement.offsetWidth;cv.height=cv.parentElement.offsetHeight;}
+  resize();window.addEventListener('resize',resize);
+  const pts=[];
+  for(let i=0;i<55;i++){
+    pts.push({
+      x:Math.random()*cv.width,y:Math.random()*cv.height,
+      r:Math.random()*1.8+0.4,
+      vx:(Math.random()-.5)*0.3,vy:-(Math.random()*0.4+0.1),
+      life:Math.random(),decay:Math.random()*0.003+0.001,
+      gold:Math.random()<0.4
+    });
+  }
+  function tick(){
+    cx.clearRect(0,0,cv.width,cv.height);
+    for(const p of pts){
+      p.x+=p.vx;p.y+=p.vy;p.life-=p.decay;
+      if(p.life<=0||p.y<0){
+        p.x=Math.random()*cv.width;p.y=cv.height+5;
+        p.life=Math.random()*0.6+0.2;
+      }
+      cx.beginPath();cx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      cx.fillStyle=p.gold
+        ?`rgba(201,168,76,${p.life*0.5})`
+        :`rgba(255,255,255,${p.life*0.25})`;
+      cx.fill();
+    }
+    requestAnimationFrame(tick);
+  }
+  tick();
+})();
+
+/* ========= FLAG ========= */
+(function(){
+  const cv=document.getElementById('fc');
+  const cx=cv.getContext('2d');
+  const W=cv.width,H=cv.height;
+  let t=0;
+  const PX=60,PTOP=12,PBOT=H-10;
+
+  function lh(hex,f){
+    const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);
+    return'rgb('+Math.min(255,Math.round(r*f))+','+Math.min(255,Math.round(g*f))+','+Math.min(255,Math.round(b*f))+')';
+  }
+
+  // Exact flag colors from image
+  function getColor(u,v){
+    // Right small panel (last ~12%)
+    if(u>=0.888){
+      if(v<0.36)return'#1a3580';    // blue top
+      if(v<0.62)return'#f5c200';    // yellow mid
+      return'#f0f0f0';               // white bottom
+    }
+    if(u<0.20)return'#1a3480';      // dark blue
+    if(u<0.365)return'#f5c200';     // yellow
+    if(u<0.53)return'#bf2418';      // red
+    if(u<0.70)return'#f0f0f0';      // white
+    return'#e04e10';                  // orange/saffron
+  }
+
+  function warp(u,ph,amp){return Math.sin(u*0.17*Math.PI*2+ph)*amp*u;}
+
+  function drawFlag(){
+    const fx=PX+5,fy=PTOP+12,fw=W-fx-8,fh=H*0.71;
+    const cols=72,rows=36,cw=fw/cols,ch=fh/rows,ph=t*2.1;
+    const amp=10;
+
+    for(let row=0;row<rows;row++){
+      for(let col=0;col<cols;col++){
+        const u=col/cols,v=row/rows;
+        const w0=warp(u,ph,amp),w1=warp((col+1)/cols,ph,amp);
+        const wv0=warp(u,ph+0.6,amp*0.3),wv1=warp((col+1)/cols,ph+0.6,amp*0.3);
+        const x0=fx+col*cw,   y0=fy+row*ch+w0+wv0;
+        const x1=fx+(col+1)*cw, y1=fy+row*ch+w1+wv0;
+        const x2=fx+(col+1)*cw, y2=fy+(row+1)*ch+w1+wv1;
+        const x3=fx+col*cw,   y3=fy+(row+1)*ch+w0+wv1;
+        const li=0.76+0.24*Math.sin(u*0.17*Math.PI*6+ph+v*2);
+        cx.beginPath();cx.moveTo(x0,y0);cx.lineTo(x1,y1);cx.lineTo(x2,y2);cx.lineTo(x3,y3);
+        cx.closePath();cx.fillStyle=lh(getColor(u,v),li);cx.fill();
+      }
+    }
+
+    // Emblem center
+    const eu=0.445,ev=0.5;
+    const ex=fx+eu*fw,ey=fy+ev*fh+warp(eu,ph,amp)*0.25;
+    const R=42;
+
+    // Outer gold ring glow
+    cx.shadowColor='rgba(201,168,76,0.6)';cx.shadowBlur=8;
+    cx.beginPath();cx.arc(ex,ey,R,0,Math.PI*2);
+    cx.strokeStyle='rgba(255,215,60,0.95)';cx.lineWidth=5;cx.stroke();
+    cx.shadowBlur=0;
+
+    // Dotted decorative ring
+    cx.setLineDash([3,4]);
+    cx.beginPath();cx.arc(ex,ey,R+6,0,Math.PI*2);
+    cx.strokeStyle='rgba(255,215,60,0.35)';cx.lineWidth=1;cx.stroke();
+    cx.setLineDash([]);
+
+    // Inner ring
+    cx.beginPath();cx.arc(ex,ey,R-13,0,Math.PI*2);
+    cx.strokeStyle='rgba(200,150,20,0.7)';cx.lineWidth=2.5;cx.stroke();
+
+    // 16 spokes
+    for(let s=0;s<16;s++){
+      const a=(s/16)*Math.PI*2;
+      cx.beginPath();cx.moveTo(ex+Math.cos(a)*11,ey+Math.sin(a)*11);
+      cx.lineTo(ex+Math.cos(a)*(R-7),ey+Math.sin(a)*(R-7));
+      cx.strokeStyle='rgba(255,215,60,0.85)';cx.lineWidth=s%2===0?2.2:1.2;cx.stroke();
+    }
+
+    // Hub
+    cx.beginPath();cx.arc(ex,ey,10,0,Math.PI*2);
+    const hg=cx.createRadialGradient(ex-3,ey-3,1,ex,ey,10);
+    hg.addColorStop(0,'#fff9a0');hg.addColorStop(1,'#c9a84c');
+    cx.fillStyle=hg;cx.fill();
+    cx.strokeStyle='rgba(255,255,255,0.7)';cx.lineWidth=1.5;cx.stroke();
+
+    // Spear through center
+    cx.beginPath();cx.moveTo(ex,ey-R-12);cx.lineTo(ex,ey+R+10);
+    cx.strokeStyle='rgba(8,8,8,0.88)';cx.lineWidth=3.5;cx.stroke();
+    // spear tip
+    cx.beginPath();cx.moveTo(ex-7,ey-R-2);cx.lineTo(ex,ey-R-16);cx.lineTo(ex+7,ey-R-2);
+    cx.strokeStyle='rgba(8,8,8,0.85)';cx.lineWidth=2.5;cx.fill();
+
+    // Oil lamp
+    cx.fillStyle='rgba(8,8,8,0.9)';
+    cx.beginPath();cx.ellipse(ex,ey+17,12,5,0,0,Math.PI*2);cx.fill();
+    cx.fillRect(ex-3,ey+4,6,15);
+    cx.beginPath();cx.ellipse(ex,ey+28,9,3.5,0,0,Math.PI*2);cx.fill();
+    // lamp stand coil
+    cx.beginPath();
+    for(let i=0;i<3;i++){
+      cx.arc(ex,ey+8+i*4,(3-i)*2.5,0,Math.PI*2);
+    }
+    cx.strokeStyle='rgba(8,8,8,0.7)';cx.lineWidth=1.5;cx.stroke();
+
+    // Flame flicker
+    const ff=Math.sin(t*10)*1.8;
+    const fg=cx.createRadialGradient(ex,ey+5+ff,1,ex,ey+7,9);
+    fg.addColorStop(0,'rgba(255,248,150,1)');
+    fg.addColorStop(0.4,'rgba(255,140,0,0.85)');
+    fg.addColorStop(1,'rgba(255,0,0,0)');
+    cx.beginPath();cx.ellipse(ex,ey+6+ff,5,9,0,0,Math.PI*2);cx.fillStyle=fg;cx.fill();
+
+    // Book below lamp
+    cx.fillStyle='rgba(240,240,240,0.85)';
+    cx.beginPath();cx.ellipse(ex-12,ey+35,13,5,-0.3,0,Math.PI*2);cx.fill();
+    cx.beginPath();cx.ellipse(ex+12,ey+35,13,5,0.3,0,Math.PI*2);cx.fill();
+    cx.strokeStyle='rgba(100,100,100,0.5)';cx.lineWidth=0.8;
+    cx.beginPath();cx.moveTo(ex,ey+30);cx.lineTo(ex,ey+40);cx.stroke();
+    // book lines
+    for(let i=0;i<3;i++){
+      cx.beginPath();cx.moveTo(ex-18,ey+33+i*2.5);cx.lineTo(ex-4,ey+33+i*2);
+      cx.strokeStyle='rgba(100,100,100,0.3)';cx.lineWidth=0.6;cx.stroke();
+    }
+  }
+
+  function drawPole(){
+    // Pole shadow
+    cx.fillStyle='rgba(0,0,0,0.3)';cx.fillRect(PX-2,PTOP,8,PBOT-PTOP);
+    // Pole
+    const pg=cx.createLinearGradient(PX-5,0,PX+6,0);
+    pg.addColorStop(0,'#777');pg.addColorStop(0.35,'#eee');pg.addColorStop(0.65,'#ccc');pg.addColorStop(1,'#888');
+    cx.fillStyle=pg;cx.fillRect(PX-5,PTOP,11,PBOT-PTOP);
+    // Pole embedded in ground
+    cx.fillStyle='rgba(0,0,0,0.4)';cx.fillRect(PX-4,PBOT,8,12);
+    // Gold finial ball
+    cx.beginPath();cx.arc(PX,PTOP,11,0,Math.PI*2);
+    const bg=cx.createRadialGradient(PX-4,PTOP-4,1,PX,PTOP,11);
+    bg.addColorStop(0,'#fff9a0');bg.addColorStop(0.5,'#ffe066');bg.addColorStop(1,'#a07010');
+    cx.fillStyle=bg;cx.fill();
+    cx.strokeStyle='rgba(255,255,255,0.4)';cx.lineWidth=1;cx.stroke();
+    // Ground line
+    cx.fillStyle='rgba(60,50,40,0.8)';cx.fillRect(0,PBOT,W,4);
+    cx.fillStyle='rgba(80,60,40,0.4)';cx.fillRect(0,PBOT+4,W,8);
+  }
+
+  function drawFlames(){
+    for(let i=0;i<16;i++){
+      const ox=(i%5-2)*5;
+      const baseY=PBOT;
+      const ht=Math.abs(Math.sin(t*4.5+i*1.15))*34+8;
+      const fy=baseY-ht;
+      const fs=7+Math.sin(t*7+i)*3;
+      // outer flame
+      const fg=cx.createRadialGradient(PX+ox,fy+fs,0,PX+ox,fy,fs*1.8);
+      fg.addColorStop(0,'rgba(255,240,80,'+(0.9-i*0.045)+')');
+      fg.addColorStop(0.35,'rgba(255,130,0,'+(0.75-i*0.038)+')');
+      fg.addColorStop(0.7,'rgba(220,40,0,'+(0.45-i*0.022)+')');
+      fg.addColorStop(1,'rgba(140,0,0,0)');
+      cx.beginPath();cx.arc(PX+ox,fy,fs,0,Math.PI*2);cx.fillStyle=fg;cx.fill();
+    }
+    // Ground glow
+    const gl=cx.createRadialGradient(PX,PBOT,0,PX,PBOT,80);
+    gl.addColorStop(0,'rgba(255,120,0,0.22)');
+    gl.addColorStop(0.5,'rgba(255,60,0,0.08)');
+    gl.addColorStop(1,'rgba(255,0,0,0)');
+    cx.fillStyle=gl;cx.fillRect(PX-90,PBOT-15,180,40);
+  }
+
+  function loop(){
+    t+=0.016;
+    cx.clearRect(0,0,W,H);
+    drawFlames();
+    drawPole();
+    drawFlag();
+    requestAnimationFrame(loop);
+  }
+  loop();
+})();
+</script>
+<!-- ===== AUTH MODAL ===== -->
+<div class="auth-overlay" id="authOverlay" onclick="overlayClick(event)">
+  <div class="auth-modal">
+    <div class="am-head">
+      <span class="am-wheel">☸</span>
+      <span class="am-brand">Sri Vipassi Dhamma School</span>
+      <button class="am-close" onclick="closeAuth()">✕</button>
+    </div>
+    <div class="am-tabs">
+      <button class="am-tab on" id="tabSI" onclick="switchTab('si')">Sign In</button>
+      <button class="am-tab"    id="tabSU" onclick="switchTab('su')">Sign Up</button>
+    </div>
+
+    <!-- Sign In Panel -->
+    <div class="am-body" id="panSI">
+      <div class="am-field"><label class="am-label">Email</label><input class="am-input" id="siEmail" type="email" placeholder="you@email.com" autocomplete="email"></div>
+      <div class="am-field"><label class="am-label">Password</label><input class="am-input" id="siPass" type="password" placeholder="Password" autocomplete="current-password"></div>
+      <div class="am-forgot"><a href="#" onclick="forgotPw();return false">Forgot password?</a></div>
+      <button class="am-btn" id="siBtn" onclick="doSignIn()">Sign In</button>
+      <div class="am-err" id="siErr"></div>
+      <div class="am-div"><span>or continue with</span></div>
+      <div class="am-socials">
+        <button class="am-soc google" onclick="doGoogle()">
+          <svg width="15" height="15" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+          Continue with Google
+        </button>
+      </div>
+    </div>
+
+    <!-- Sign Up Panel -->
+    <div class="am-body" id="panSU" style="display:none">
+      <div class="am-field"><label class="am-label">Full Name</label><input class="am-input" id="suName" type="text" placeholder="Your name" autocomplete="name"></div>
+      <div class="am-field"><label class="am-label">Email</label><input class="am-input" id="suEmail" type="email" placeholder="you@email.com" autocomplete="email"></div>
+      <div class="am-field"><label class="am-label">Password</label><input class="am-input" id="suPass" type="password" placeholder="Min. 6 characters" autocomplete="new-password"></div>
+      <div class="am-field"><label class="am-label">Confirm Password</label><input class="am-input" id="suConf" type="password" placeholder="Repeat password" autocomplete="new-password"></div>
+      <button class="am-btn" id="suBtn" onclick="doSignUp()">Create Account</button>
+      <div class="am-err" id="suErr"></div>
+      <div class="am-div"><span>or sign up with</span></div>
+      <div class="am-socials">
+        <button class="am-soc google"    onclick="doGoogle()"><svg width="15" height="15" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>Continue with Google</button>
+      </div>
+    </div>
+
+    <!-- Logged In Panel -->
+    <div class="am-body am-loggedin" id="panLI" style="display:none">
+      <div class="am-avatar" id="lgAvatar">☸</div>
+      <div class="am-lg-name" id="lgName">Welcome!</div>
+      <div class="am-lg-email" id="lgEmail"></div>
+      <button class="am-btn" onclick="doSignOut()">Sign Out</button>
+    </div>
+  </div>
+</div>
+
+<!-- Firebase SDKs (compat version — works with normal scripts, no module scoping issues) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
+<script>
+// ─── Firebase Init ───────────────────────────────────────────────────────────
+const firebaseConfig = {
+  apiKey:            "AIzaSyAWpPP3OevjIRAsoGIjOJTofV6l2jgyhNI",
+  authDomain:        "signin-f9656.firebaseapp.com",
+  projectId:         "signin-f9656",
+  storageBucket:     "signin-f9656.firebasestorage.app",
+  messagingSenderId: "1074665165821",
+  appId:             "1:1074665165821:web:91ef329a0472fa138e7f94",
+  measurementId:     "G-SG9TZSLP6E"
+};
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db   = firebase.firestore();
+
+// ─── Providers ───────────────────────────────────────────────────────────────
+const providers = {
+  google: new firebase.auth.GoogleAuthProvider()
+};
+providers.google.addScope('email');
+providers.google.addScope('profile');
+
+// ─── Save user to Firestore ───────────────────────────────────────────────────
+async function saveUser(user, extra={}) {
+  try {
+    const ref  = db.collection("users").doc(user.uid);
+    const snap = await ref.get();
+    if (!snap.exists) {
+      await ref.set({
+        uid: user.uid,
+        email: user.email || "",
+        displayName: user.displayName || extra.name || "",
+        photoURL: user.photoURL || "",
+        role: "student",
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        ...extra
+      });
+    }
+  } catch(e) { console.warn("Firestore save:", e.message); }
+}
+
+// ─── Auth State Listener ──────────────────────────────────────────────────────
+auth.onAuthStateChanged(u => {
+  const btn = document.getElementById("loginBtn");
+  if (u) {
+    const first = (u.displayName || u.email || "User").split(/[ @]/)[0];
+    btn.textContent = first;
+    btn.classList.add("logged-in");
+    const av = document.getElementById("lgAvatar");
+    if (av) {
+      if (u.photoURL) {
+        av.innerHTML = `<img src="${u.photoURL}" style="width:100%;height:100%;border-radius:50%;object-fit:cover">`;
+      } else {
+        av.textContent = first.charAt(0).toUpperCase();
+      }
+    }
+    const lgName  = document.getElementById("lgName");
+    const lgEmail = document.getElementById("lgEmail");
+    if (lgName)  lgName.textContent  = "Welcome, " + (u.displayName || u.email);
+    if (lgEmail) lgEmail.textContent = u.email || "";
+  } else {
+    btn.textContent = "Login";
+    btn.classList.remove("logged-in");
+  }
+});
+
+// ─── UI Helpers ───────────────────────────────────────────────────────────────
+function openAuth(tab) {
+  document.getElementById("authOverlay").classList.add("open");
+  if (auth.currentUser) { showPan("panLI"); return; }
+  switchTab(tab || "si");
+}
+function closeAuth() {
+  document.getElementById("authOverlay").classList.remove("open");
+  clearErrs();
+}
+function overlayClick(e) {
+  if (e.target === document.getElementById("authOverlay")) closeAuth();
+}
+function switchTab(t) {
+  document.getElementById("tabSI").classList.toggle("on", t === "si");
+  document.getElementById("tabSU").classList.toggle("on", t === "su");
+  showPan(t === "si" ? "panSI" : "panSU");
+}
+function showPan(id) {
+  ["panSI","panSU","panLI"].forEach(p => {
+    document.getElementById(p).style.display = p === id ? "block" : "none";
+  });
+}
+function clearErrs() {
+  ["siErr","suErr"].forEach(id => {
+    const el = document.getElementById(id);
+    el.textContent = ""; el.className = "am-err";
+  });
+}
+function errMsg(id, m) {
+  const el = document.getElementById(id);
+  el.textContent = m; el.className = "am-err";
+}
+function okMsg(id, m) {
+  const el = document.getElementById(id);
+  el.textContent = m; el.className = "am-err am-ok";
+}
+function fErr(c) {
+  return ({
+    "auth/user-not-found":                          "No account found with that email.",
+    "auth/wrong-password":                          "Incorrect password.",
+    "auth/invalid-credential":                      "Invalid email or password.",
+    "auth/email-already-in-use":                    "Email already registered — try Sign In.",
+    "auth/invalid-email":                           "Please enter a valid email.",
+    "auth/weak-password":                           "Password must be at least 6 characters.",
+    "auth/popup-closed-by-user":                    "Sign-in popup was closed.",
+    "auth/popup-blocked":                           "Popup was blocked — please allow popups for this site.",
+    "auth/network-request-failed":                  "Network error. Check your connection.",
+    "auth/too-many-requests":                       "Too many attempts — try again later.",
+    "auth/account-exists-with-different-credential":"An account already exists with this email using a different sign-in method.",
+    "auth/cancelled-popup-request":                 "Another popup is already open.",
+    "auth/operation-not-allowed":                   "This sign-in method is not enabled. Please contact the administrator.",
+    "auth/unauthorized-domain":                     "This domain is not authorized. Please open via a proper web server."
+  })[c] || "Something went wrong. Please try again. (" + c + ")";
+}
+
+// ─── Email Sign In ────────────────────────────────────────────────────────────
+async function doSignIn() {
+  const email = document.getElementById("siEmail").value.trim();
+  const pass  = document.getElementById("siPass").value;
+  if (!email || !pass) { errMsg("siErr","Please fill in all fields."); return; }
+  const btn = document.getElementById("siBtn");
+  btn.disabled = true;
+  try {
+    await auth.signInWithEmailAndPassword(email, pass);
+    showPan("panLI");
+    setTimeout(closeAuth, 1400);
+  } catch(e) {
+    errMsg("siErr", fErr(e.code));
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+// ─── Email Sign Up ────────────────────────────────────────────────────────────
+async function doSignUp() {
+  const name  = document.getElementById("suName").value.trim();
+  const email = document.getElementById("suEmail").value.trim();
+  const pass  = document.getElementById("suPass").value;
+  const conf  = document.getElementById("suConf").value;
+  if (!name || !email || !pass)    { errMsg("suErr","Please fill in all fields."); return; }
+  if (pass !== conf)               { errMsg("suErr","Passwords do not match."); return; }
+  if (pass.length < 6)             { errMsg("suErr","Password must be at least 6 characters."); return; }
+  const btn = document.getElementById("suBtn");
+  btn.disabled = true;
+  try {
+    const cred = await auth.createUserWithEmailAndPassword(email, pass);
+    await cred.user.updateProfile({ displayName: name });
+    await saveUser(cred.user, { name });
+    showPan("panLI");
+    setTimeout(closeAuth, 1400);
+  } catch(e) {
+    errMsg("suErr", fErr(e.code));
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+// ─── Social Sign In (popup) ───────────────────────────────────────────────────
+async function doSocial(providerKey) {
+  clearErrs();
+  const provider = providers[providerKey];
+  if (!provider) { errMsg("siErr","Provider not configured."); return; }
+  try {
+    const result = await auth.signInWithPopup(provider);
+    await saveUser(result.user);
+    showPan("panLI");
+    setTimeout(closeAuth, 1400);
+  } catch(e) {
+    // Show error on whichever panel is visible
+    const activeErr = document.getElementById("panSU").style.display === "block" ? "suErr" : "siErr";
+    errMsg(activeErr, fErr(e.code));
+    console.error("Social auth error:", e.code, e.message);
+  }
+}
+
+function doGoogle()    { doSocial("google"); }
+
+// ─── Sign Out ─────────────────────────────────────────────────────────────────
+async function doSignOut() {
+  await auth.signOut();
+  showPan("panSI");
+  closeAuth();
+}
+
+// ─── Forgot Password ──────────────────────────────────────────────────────────
+async function forgotPw() {
+  const email = document.getElementById("siEmail").value.trim();
+  if (!email) { errMsg("siErr","Enter your email above first."); return; }
+  try {
+    await auth.sendPasswordResetEmail(email);
+    okMsg("siErr","Reset email sent — check your inbox.");
+  } catch(e) {
+    errMsg("siErr", fErr(e.code));
+  }
+}
+</script>
+</body>
+</html>
