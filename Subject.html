@@ -92,6 +92,35 @@
     .dropdown-menu a:hover { background:rgba(201,168,76,0.15); color:#ffe066; }
     .dropdown:hover .dropdown-menu { display:block; }
 
+    /* ========== HAMBURGER MENU ========== */
+    .hamburger { display:none; flex-direction:column; gap:4px; cursor:pointer; padding:10px; margin-left:auto; background:none; border:none; }
+    .hamburger span { display:block; width:22px; height:2px; background:#c9a84c; border-radius:2px; transition:all 0.3s; }
+    .hamburger.open span:nth-child(1) { transform:rotate(45deg) translate(5px,5px); }
+    .hamburger.open span:nth-child(2) { opacity:0; }
+    .hamburger.open span:nth-child(3) { transform:rotate(-45deg) translate(7px,-6px); }
+
+    /* ========== MOBILE SIDEBAR ========== */
+    .mobile-sidebar { position:fixed; top:0; left:-280px; width:280px; height:100vh; background:linear-gradient(180deg,#1a0808 0%,#2a0a0a 100%); z-index:500; transition:left 0.3s ease; box-shadow:2px 0 10px rgba(0,0,0,0.5); overflow-y:auto; }
+    .mobile-sidebar.open { left:0; }
+    .mobile-sidebar-header { background:linear-gradient(90deg,#5a0808,#8b1212); padding:1rem; display:flex; align-items:center; justify-content:space-between; }
+    .mobile-sidebar-header .brand { color:#f5deb3; font-size:14px; font-weight:700; }
+    .mobile-close { background:none; border:none; color:#c9a84c; font-size:18px; cursor:pointer; }
+    .mobile-nav-links { padding:1rem 0; }
+    .mobile-nav-links a { display:block; color:#f5deb3; padding:12px 1.5rem; text-decoration:none; border-bottom:1px solid rgba(201,168,76,0.1); transition:all 0.2s; }
+    .mobile-nav-links a:hover { background:rgba(201,168,76,0.1); color:#ffe066; }
+    .mobile-lang-row { padding:1rem; border-top:1px solid rgba(201,168,76,0.1); }
+    .mobile-lang-row .lb { margin-right:8px; }
+
+    /* ========== OVERLAY ========== */
+    .mobile-overlay { display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); z-index:400; }
+    .mobile-overlay.open { display:block; }
+
+    /* ========== RESPONSIVE ========== */
+    @media(max-width:768px) {
+      .nav-links, .lang-row { display:none; }
+      .hamburger { display:flex; }
+    }
+
     /* ========== BACKGROUND ========== */
     .page-bg {
       position: fixed;
@@ -821,7 +850,36 @@
     <button class="lb">தமிழ்</button>
     <button class="login-btn" id="loginBtn" onclick="openAuth('si')">Login</button>
   </div>
+  <button class="hamburger" onclick="toggleMobileMenu()">
+    <span></span><span></span><span></span>
+  </button>
 </nav>
+
+<!-- ========== MOBILE SIDEBAR ========== -->
+<div class="mobile-overlay" id="mobileOverlay" onclick="closeMobileMenu()"></div>
+<div class="mobile-sidebar" id="mobileSidebar">
+  <div class="mobile-sidebar-header">
+    <div class="brand">Sri Vipassi Dhamma School</div>
+    <button class="mobile-close" onclick="closeMobileMenu()">✕</button>
+  </div>
+  <div class="mobile-nav-links">
+    <a href="index.html" onclick="closeMobileMenu()">Home</a>
+    <a href="Daily Attendance.html" onclick="closeMobileMenu()">Daily Attendance</a>
+    <a href="About.html" onclick="closeMobileMenu()">About</a>
+    <a href="galery.html" onclick="closeMobileMenu()">Gallery</a>
+    <a href="#" onclick="closeMobileMenu()">Achievements</a>
+    <a href="#" onclick="closeMobileMenu()">Daily Quotes</a>
+    <a href="Contact.html" onclick="closeMobileMenu()">Contact us</a>
+    <a href="#" onclick="closeMobileMenu()">Projects</a>
+    <a href="Subject.html" onclick="closeMobileMenu()">Syllabus</a>
+  </div>
+  <div class="mobile-lang-row">
+    <button class="lb on">EN</button>
+    <button class="lb">සිං</button>
+    <button class="lb">தமிழ்</button>
+    <button class="login-btn" id="mobileLoginBtn" onclick="openAuth('si'); closeMobileMenu()">Login</button>
+  </div>
+</div>
 
 <!-- ========== PAGE CONTENT ========== -->
 <div class="page-content">
@@ -1435,6 +1493,25 @@ async function doUpload(){
   }
   btn.textContent='Upload File'; btn.disabled=false;
   setTimeout(()=>{ bar.style.display='none'; fill.style.width='0%'; fill.style.background=''; },2000);
+}
+
+// ========== MOBILE MENU FUNCTIONS ==========
+function toggleMobileMenu(){
+  const sidebar = document.getElementById('mobileSidebar');
+  const overlay = document.getElementById('mobileOverlay');
+  const hamburger = document.querySelector('.hamburger');
+  sidebar.classList.toggle('open');
+  overlay.classList.toggle('open');
+  hamburger.classList.toggle('open');
+}
+
+function closeMobileMenu(){
+  const sidebar = document.getElementById('mobileSidebar');
+  const overlay = document.getElementById('mobileOverlay');
+  const hamburger = document.querySelector('.hamburger');
+  sidebar.classList.remove('open');
+  overlay.classList.remove('open');
+  hamburger.classList.remove('open');
 }
 </script>
 <!-- Firebase -->
