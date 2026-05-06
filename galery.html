@@ -472,11 +472,17 @@ text-shadow: none;
     .lb-caption { text-align:center; margin-top:1rem; font-family:'Noto Sans Sinhala',sans-serif; font-size:0.9rem; color:#f5deb3; }
     .lb-caption span { font-size:0.72rem; color:var(--soft); margin-top:3px; display:block; }
     .lb-close {
-      position:fixed; top:20px; right:24px; background:rgba(255,255,255,0.1);
-      border:1px solid rgba(255,255,255,0.2); color:#f5deb3; width:40px; height:40px;
-      border-radius:50%; cursor:pointer; font-size:1.2rem; display:flex;
-      align-items:center; justify-content:center; transition:0.2s;
-    }
+  position:absolute; top:12px; right:12px;
+  background:rgba(30,10,10,0.85);
+  border:2px solid rgba(201,168,76,0.6);
+  color:#f5deb3; width:44px; height:44px;
+  border-radius:50%; cursor:pointer; font-size:1.3rem;
+  display:flex; align-items:center; justify-content:center;
+  transition:0.2s; z-index:999;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+.lb-close:hover { background:rgba(201,168,76,0.25); }
     .lb-close:hover { background:rgba(255,255,255,0.2); }
     .lb-nav {
       position:fixed; top:50%; transform:translateY(-50%);
@@ -605,7 +611,8 @@ text-shadow: none;
     .mobile-nav-links a { display:block; color:#f5deb3; padding:12px 1.5rem; text-decoration:none; border-bottom:1px solid rgba(201,168,76,0.1); transition:all 0.2s; }
     .mobile-nav-links a:hover { background:rgba(201,168,76,0.1); color:#ffe066; }
     .mobile-lang-row { padding:1rem; border-top:1px solid rgba(201,168,76,0.1); }
-    .mobile-lang-row .lb { margin-right:8px; }
+   .mobile-lang-row .lb { margin-right:8px; background:rgba(255,255,255,0.08); color:#f5deb3; border:1px solid rgba(255,255,255,0.2); padding:4px 10px; border-radius:3px; font-size:10.5px; cursor:pointer; transition:all .2s; }
+    .mobile-lang-row .lb.on { background:linear-gradient(135deg,#c9a84c,#a07810); color:#1a0800; border-color:var(--gold); font-weight:700; }
 
     /* ========== OVERLAY ========== */
     .mobile-overlay { display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); z-index:400; }
@@ -614,8 +621,186 @@ text-shadow: none;
     @keyframes fadeUp { from { opacity:0; transform:translateY(18px); } to { opacity:1; transform:translateY(0); } }
     @keyframes spin { to { transform:rotate(360deg); } }
 
-    @media(max-width:768px) { .nav-links, .lang-row { display:none; } .hamburger { display:flex; } .strip { flex-direction:column; gap:20px; padding:16px 16px; } .side-card { flex-direction:column; gap:8px; } .fi { flex:none; width:100%; padding:12px 16px; border-radius:8px; } .tagline-bar { flex-direction:column; gap:8px; padding:16px 12px; font-size:9px; } .tagline-bar .tm { font-size:14px; } .tagline-bar .tt { font-size:9px; } }
-    @media(max-width:640px) { .wrap { padding:1.5rem 0.8rem 3rem; } .fi { padding:12px 14px; } .lb-nav { display:none; } .controls-bar { padding:0.8rem; } .search-wrap input { width:140px; } }
+    /* ======= MOBILE — all fixes ======= */
+    @media(max-width:768px) {
+      .lb-close {
+  width:40px; height:40px; font-size:1.1rem;
+  top:8px; right:8px;
+}
+.lb-inner {
+  position:relative;
+}
+
+      /* prevent ANY element escaping viewport */
+      *, *::before, *::after { box-sizing:border-box; max-width:100%; }
+      html, body { overflow-x:hidden; width:100%; }
+
+      /* NAV */
+      .nav { padding:0 10px; min-height:52px; gap:6px; flex-wrap:nowrap; overflow:hidden; }
+      .nav img { width:32px; height:32px; flex-shrink:0; margin-right:6px !important; }
+      .brand { font-size:10.5px; letter-spacing:0; flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:calc(100vw - 150px); margin-right:0; }
+      .nav-links, .lang-row { display:none; }
+      .hamburger { display:flex; flex-shrink:0; margin-left:6px; padding:6px 8px; }
+      .login-btn { padding:5px 9px; font-size:9px; letter-spacing:1px; flex-shrink:0; margin-left:4px; white-space:nowrap; }
+
+      /* HERO */
+      .hero { padding:2rem 1rem 1.8rem; min-height:200px; }
+      .hero h1 { font-size:clamp(1.6rem,7.5vw,2.4rem); line-height:1.15; margin-bottom:0.3rem; }
+      .hero h2 { font-size:clamp(0.9rem,4vw,1.2rem); margin-bottom:0.6rem; }
+      .hero p { font-size:0.8rem; line-height:1.7; padding:0 0.2rem; }
+      .hero-badge { font-size:0.6rem; padding:4px 12px; letter-spacing:1.5px; margin-bottom:0.8rem; }
+      .hero-divider .line { width:40px; }
+
+      /* WRAP */
+      .wrap { padding:1rem 0.75rem 2.5rem; }
+
+      /* STATS CARDS */
+      .stats-cards { display:grid; grid-template-columns:repeat(3,1fr); gap:0.45rem; margin-bottom:0.9rem; }
+      .stat-card { flex-direction:column; align-items:center; text-align:center; gap:5px; padding:0.65rem 0.4rem; border-radius:12px; min-width:0; }
+      .stat-card-icon { font-size:1.3rem; }
+      .stat-card-info strong { font-size:1.1rem; line-height:1; }
+      .stat-card-info span { font-size:0.58rem; line-height:1.3; }
+
+      /* CALENDAR */
+      .calendar-panel { padding:0.9rem; border-radius:14px; }
+      .cal-header { margin-bottom:0.7rem; }
+      .cal-month-label { font-size:0.85rem; }
+      .cal-nav { width:28px; height:28px; font-size:0.95rem; }
+      .cal-days-header span { font-size:0.55rem; padding:3px 0; }
+      .cal-day { font-size:0.65rem; border-radius:7px; }
+      .cal-day.has-photos::after { width:3px; height:3px; bottom:2px; }
+      .cal-selected-label { font-size:0.68rem; margin-top:0.5rem; }
+
+      /* CONTROLS BAR */
+      .controls-bar { flex-direction:column; gap:0.6rem; padding:0.8rem; border-radius:12px; margin-bottom:1rem; }
+      .filter-group { width:100%; display:flex; flex-wrap:wrap; gap:0.35rem; }
+      .filter-btn { font-size:0.68rem; padding:5px 10px; border-radius:40px; white-space:nowrap; }
+      .search-wrap { width:100%; }
+      .search-wrap input { width:100% !important; font-size:0.8rem; padding:9px 14px 9px 36px; border-radius:40px; }
+      .search-wrap .ico { left:11px; font-size:0.8rem; }
+      .admin-toggle { width:100%; text-align:center; font-size:0.74rem; padding:8px 14px; border-radius:40px; }
+
+      /* UPLOAD PANEL */
+      .upload-panel { border-radius:14px; padding:1rem; margin-bottom:1rem; }
+      .upload-panel h3 { font-size:0.95rem; margin-bottom:0.7rem; }
+      .upload-row { flex-direction:column; gap:0.65rem; }
+      .ufield { min-width:0; width:100%; }
+      .ufield label { font-size:0.62rem; }
+      .ufield input, .ufield select { font-size:0.82rem; padding:9px 11px; border-radius:10px; width:100%; }
+      .file-drop { min-width:0; width:100%; padding:1rem; border-radius:11px; }
+      .file-drop .drop-icon { font-size:1.5rem; }
+      .file-drop p { font-size:0.72rem; }
+      .btn-upload { width:100%; font-size:0.8rem; padding:10px 18px; border-radius:40px; }
+      .prev-thumb { width:55px; height:55px; }
+      .upload-status { font-size:0.72rem; }
+
+      /* GALLERY GRID */
+      .gallery-grid { columns:2; column-gap:0.6rem; }
+      .gallery-item { margin-bottom:0.6rem; border-radius:11px; }
+      .gallery-item img { border-radius:11px; }
+      .gallery-item:hover { transform:none; box-shadow:none; }
+      .img-date-badge { font-size:0.52rem; padding:2px 7px; top:6px; left:6px; border-radius:40px; }
+      .overlay { border-radius:11px; padding:0.6rem; }
+      .overlay .img-title { font-size:0.7rem; line-height:1.2; }
+      .overlay .img-meta { font-size:0.58rem; }
+      .img-delete { width:24px; height:24px; font-size:0.72rem; top:5px; right:5px; }
+
+      /* CATEGORY SECTIONS */
+      .cat-section { margin-bottom:1.2rem; }
+      .cat-header { padding:0.75rem 0.9rem; border-radius:11px; margin-bottom:0.7rem; }
+      .cat-header-left { gap:8px; min-width:0; flex:1; overflow:hidden; }
+      .cat-icon { font-size:1.1rem; flex-shrink:0; }
+      .cat-name { font-size:0.82rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+      .cat-sub { display:none; }
+      .cat-count { font-size:0.6rem; padding:2px 8px; white-space:nowrap; flex-shrink:0; }
+      .cat-chevron { font-size:0.78rem; flex-shrink:0; }
+      .cat-grid { columns:2; column-gap:0.6rem; }
+
+      /* LIGHTBOX */
+      .lightbox { padding:0.5rem; }
+      .lb-inner { max-width:100vw; width:100%; }
+      .lb-inner img { max-width:100%; max-height:60vh; border-radius:10px; }
+      .lb-caption { font-size:0.78rem; margin-top:0.6rem; padding:0 0.4rem; }
+      .lb-caption span { font-size:0.62rem; }
+      .lb-close { top:10px; right:12px; width:34px; height:34px; font-size:1rem; }
+      .lb-nav { display:none; }
+      .lb-actions { gap:6px; margin-top:0.5rem; flex-wrap:wrap; justify-content:center; }
+      .lb-action-btn { font-size:0.7rem; padding:6px 13px; }
+
+      /* ADMIN MODAL */
+      .admin-login-modal { padding:1rem; }
+      .abox { width:calc(100% - 2rem); max-width:300px; padding:1.4rem 1.1rem; border-radius:18px; }
+      .abox h3 { font-size:1.15rem; }
+      .abox p { font-size:0.72rem; }
+      .abox input { font-size:0.85rem; padding:9px 12px; border-radius:10px; }
+      .btn-aok { font-size:0.85rem; padding:9px; }
+
+      /* AUTH MODAL */
+      .auth-modal { max-width:calc(100% - 1.5rem); margin:0.75rem; border-radius:14px; }
+      .am-head { padding:0.85rem 1rem; }
+      .am-brand { font-size:8.5px; letter-spacing:1.5px; }
+      .am-body { padding:1rem; }
+      .am-input { font-size:0.84rem; padding:9px 11px; }
+      .am-btn { font-size:9.5px; letter-spacing:1.5px; padding:10px; }
+      .am-soc { font-size:0.73rem; padding:8px; }
+
+      /* MOBILE SIDEBAR */
+      .mobile-sidebar { width:255px; }
+      .mobile-sidebar-header { padding:0.85rem 1rem; }
+      .mobile-sidebar-header .brand { font-size:12px; }
+      .mobile-nav-links a { padding:11px 1.2rem; font-size:13px; }
+      .mobile-lang-row { padding:0.85rem 1rem; display:flex; flex-wrap:wrap; gap:6px; align-items:center; }
+      .mobile-lang-row .login-btn { width:100%; text-align:center; margin-top:6px; margin-left:0; }
+
+      /* FOOTER STRIP */
+      .strip { flex-direction:column; gap:12px; padding:14px; }
+      .side-card { flex-direction:column; gap:8px; width:100%; }
+      .fi { flex:none; width:100%; padding:11px 14px; border-radius:10px; justify-content:flex-start; }
+      .ficon { width:34px; height:34px; font-size:14px; }
+      .ftxt { font-size:10.5px; }
+      .ftxt strong { font-size:8.5px; }
+      .tagline-bar { flex-direction:column; gap:6px; padding:14px; text-align:center; }
+      .tagline-bar .tm { font-size:14px; }
+      .tagline-bar .tt { font-size:9px; letter-spacing:1.5px; }
+
+      /* FOOTER WRAP */
+      .footer-top { grid-template-columns:1fr !important; gap:20px; padding:28px 16px 20px; }
+      .brand-col { text-align:center; padding-bottom:14px; border-bottom:1px solid rgba(153,101,21,0.15); }
+      .brand-col .brand-name { font-size:13px; }
+      .brand-col p { font-size:11.5px; }
+      .social-row { justify-content:center; }
+      .footer-col h4 { text-align:center; }
+      .footer-col h4::after { left:50%; transform:translateX(-50%); }
+      .footer-col ul li a { justify-content:center; font-size:12.5px; }
+      .contact-item { max-width:260px; margin:0 auto 10px; }
+      .footer-bottom { flex-direction:column; align-items:center; text-align:center; gap:10px; padding:14px 16px 18px; }
+      .footer-bottom .links { justify-content:center; gap:14px; }
+      .footer-bottom .links a { font-size:10px; }
+      .footer-bottom .copy { font-size:10px; line-height:1.5; }
+      .dhamma-strip { font-size:8.5px; letter-spacing:1.5px; padding:10px; line-height:1.6; }
+
+      /* SCROLL TOP */
+      .scroll-top { bottom:16px; right:14px; width:38px; height:38px; font-size:0.9rem; }
+
+      /* EMPTY STATE */
+      .empty-gallery { padding:2.5rem 1rem; }
+      .empty-gallery .eicon { font-size:2.8rem; }
+      .empty-gallery p { font-size:0.78rem; }
+
+      /* PARTICLES */
+      #particles { opacity:0.5; }
+    }
+
+    /* extra-small phones */
+    @media(max-width:380px) {
+      .stats-cards { grid-template-columns:1fr; }
+      .stat-card { flex-direction:row; text-align:left; padding:0.65rem 0.8rem; }
+      .stat-card-icon { font-size:1.5rem; }
+      .gallery-grid { columns:1; }
+      .cat-grid { columns:1; }
+      .hero h1 { font-size:1.5rem; }
+      .brand { max-width:calc(100vw - 130px); font-size:10px; }
+    }
   </style>
   <link rel="stylesheet" href="footer-mobile.css">
 </head>
@@ -646,9 +831,9 @@ text-shadow: none;
     <a href="Subject.html">Subject</a>
   </div>
   <div class="lang-row">
-    <button class="lb-lang">EN</button>
-    <button class="lb-lang on">සිං</button>
-    <button class="lb-lang">தமிழ்</button>
+    <button class="lb-lang on" id="desk-en" onclick="setLang('en')">EN</button>
+    <button class="lb-lang" id="desk-si" onclick="setLang('si')">සිං</button>
+    <button class="lb-lang" id="desk-ta" onclick="setLang('ta')">தமிழ்</button>
   </div>
   <!-- LOGIN BUTTON -->
   <button class="login-btn" id="loginBtn" onclick="openAuth('si')">Login</button>
@@ -678,10 +863,10 @@ text-shadow: none;
     <a href="Subject.html" onclick="closeMobileMenu()">Syllabus</a>
   </div>
   <div class="mobile-lang-row">
-    <button class="lb on">EN</button>
-    <button class="lb">සිං</button>
-    <button class="lb">தமிழ்</button>
-    <button class="login-btn" id="mobileLoginBtn" onclick="openAuth('si'); closeMobileMenu()">Login</button>
+    <button class="lb on" id="mob-en" onclick="setLang('en');closeMobileMenu()">EN</button>
+    <button class="lb" id="mob-si" onclick="setLang('si');closeMobileMenu()">සිං</button>
+    <button class="lb" id="mob-ta" onclick="setLang('ta');closeMobileMenu()">தமிழ்</button>
+    <button class="login-btn" id="mobileLoginBtn" onclick="openAuth('si');closeMobileMenu()">Login</button>
   </div>
 </div>
 
@@ -809,9 +994,17 @@ text-shadow: none;
     <h3>📤 ඡායාරූප එකතු කරන්න · Add Photos</h3>
     <div class="upload-row">
       <div class="ufield">
-        <label>ශීර්ෂය (Sinhala)</label>
-        <input type="text" id="imgTitle" placeholder="උදා: දන්සල් උත්සවය 2025">
-      </div>
+  <label>ශීර්ෂය (Sinhala)</label>
+  <input type="text" id="imgTitle" placeholder="උදා: දන්සල් උත්සවය 2025">
+</div>
+<div class="ufield">
+  <label>Title (English)</label>
+  <input type="text" id="imgTitleEN" placeholder="e.g: Alms Giving 2025">
+</div>
+<div class="ufield">
+  <label>தலைப்பு (Tamil)</label>
+  <input type="text" id="imgTitleTA" placeholder="எ.கா: தான விழா 2025">
+</div>
       <div class="ufield">
         <label>කාණ්ඩය · Category</label>
         <select id="imgCategory">
@@ -853,11 +1046,11 @@ text-shadow: none;
 </div>
 
 <!-- ===== LIGHTBOX ===== -->
-<div class="lightbox" id="lightbox" onclick="closeLightbox(event)">
-  <button class="lb-close" onclick="closeLightbox()">✕</button>
+<div class="lightbox" id="lightbox" onclick="if(event.target===this){this.classList.remove('open');document.body.style.overflow='';}">
   <button class="lb-nav lb-prev" onclick="navLightbox(-1)">‹</button>
   <button class="lb-nav lb-next" onclick="navLightbox(1)">›</button>
   <div class="lb-inner">
+    <button class="lb-close" onclick="document.getElementById('lightbox').classList.remove('open');document.body.style.overflow='';">✕</button>
     <img id="lbImg" src="" alt="">
     <div class="lb-caption">
       <div id="lbTitle"></div>
@@ -1136,7 +1329,9 @@ function handleDrop(e) {
 /* ========= UPLOAD ========= */
 async function uploadImages() {
   if (!selectedFiles.length) return;
-  const title    = document.getElementById('imgTitle').value.trim() || 'ශ්‍රී විපස්සි ධර්ම පාසල';
+  const title   = document.getElementById('imgTitle').value.trim()   || 'ශ්‍රී විපස්සි ධර්ම පාසල';
+const titleEN = document.getElementById('imgTitleEN').value.trim()  || title;
+const titleTA = document.getElementById('imgTitleTA').value.trim()  || title;
   const category = document.getElementById('imgCategory').value;
   const date     = document.getElementById('imgDate').value;
   const btn      = document.getElementById('uploadBtn');
@@ -1160,7 +1355,7 @@ async function uploadImages() {
       const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, { method: 'POST', body: formData });
       if (!res.ok) { const err = await res.json(); throw new Error(err.error?.message || 'Upload failed'); }
       const data = await res.json();
-      await db.ref('gallery').push({ title, category, date, url: data.secure_url, uploadedAt: Date.now() });
+      await db.ref('gallery').push({ title, titleEN, titleTA, category, date, url: data.secure_url, uploadedAt: Date.now() });
       done++;
       bar.style.width = `${(done / selectedFiles.length) * 100}%`;
       status.textContent = `✅ ${done}/${selectedFiles.length} uploaded!`;
@@ -1171,7 +1366,9 @@ async function uploadImages() {
   selectedFiles = [];
   document.getElementById('uploadPreview').innerHTML = '';
   document.getElementById('fileInput').value = '';
-  document.getElementById('imgTitle').value = '';
+  document.getElementById('imgTitle').value   = '';
+document.getElementById('imgTitleEN').value = '';
+document.getElementById('imgTitleTA').value = '';
   document.getElementById('uploadBtn').disabled = true;
   setTimeout(() => { prog.style.display = 'none'; bar.style.width = '0%'; status.textContent = ''; }, 3000);
 }
@@ -1200,7 +1397,7 @@ function renderAllPhotos(photos) {
   filtered = photos;
   const wrap = document.getElementById('galleryWrap');
   if (!photos.length) {
-    wrap.innerHTML = `<div class="empty-gallery"><span class="eicon">📷</span><p>ඡායාරූප නොමැත.</p></div>`;
+    wrap.innerHTML = `<div class="empty-gallery"><span class="eicon">📷</span><p>${LANG[curLang].empty}</p></div>`;
     return;
   }
   let html = '<div class="gallery-grid">';
@@ -1209,9 +1406,9 @@ function renderAllPhotos(photos) {
     html += `
       <div class="gallery-item" style="animation-delay:${delay}s" onclick="openLightbox(${idx})">
         <img src="${photo.url}" alt="${photo.title}" loading="lazy">
-        <div class="img-date-badge">${CAT_ICONS[photo.category]||'🖼️'} ${photo.category||''}</div>
+       <div class="img-date-badge">${CAT_ICONS[photo.category]||'🖼️'} ${CAT_NAMES[curLang][photo.category]||photo.category||''}</div>
         <div class="overlay">
-          <div class="img-title">${photo.title}</div>
+          <div class="img-title">${getTitle(photo)}</div>
           <div class="img-meta">📅 ${toSinhalaDate(photo.date)}</div>
         </div>
         ${isAdmin ? `<button class="img-delete" title="Delete" onclick="deletePhoto(event,'${photo.key}','${photo.url}')">🗑</button>` : ''}
@@ -1269,9 +1466,9 @@ function selectCalDate(dateStr) {
     html += `
       <div class="gallery-item" style="animation-delay:${idx*0.05}s" onclick="openLightbox(${idx})">
         <img src="${photo.url}" alt="${photo.title}" loading="lazy">
-        <div class="img-date-badge">${CAT_ICONS[photo.category]||'🖼️'} ${photo.category||''}</div>
+       <div class="img-date-badge">${CAT_ICONS[photo.category]||'🖼️'} ${CAT_NAMES[curLang]?.[photo.category]||photo.category||''}</div>
         <div class="overlay">
-          <div class="img-title">${photo.title}</div>
+          <div class="img-title">${photo.title}</div><div class="img-title">${getTitle(photo)}</div>
           <div class="img-meta">📅 ${toSinhalaDate(photo.date)}</div>
         </div>
         ${isAdmin ? `<button class="img-delete" onclick="deletePhoto(event,'${photo.key}','${photo.url}')">🗑</button>` : ''}
@@ -1341,6 +1538,16 @@ let currentLbIdx = 0;
 function toSinhalaDate(dateStr) {
   if (!dateStr) return '—';
   const d = new Date(dateStr + 'T00:00:00');
+  if (curLang === 'en') {
+    const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    return `${days[d.getDay()]}, ${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+  }
+  if (curLang === 'ta') {
+    const months = ['ஜனவரி','பெப்ரவரி','மார்ச்','ஏப்ரல்','மே','ஜூன்','ஜூலை','ஆகஸ்ட்','செப்டம்பர்','அக்டோபர்','நவம்பர்','டிசம்பர்'];
+    const days = ['ஞாயிறு','திங்கள்','செவ்வாய்','புதன்','வியாழன்','வெள்ளி','சனி'];
+    return `${days[d.getDay()]}, ${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+  }
   const months = ['ජනවාරි','පෙබරවාරි','මාර්තු','අප්‍රේල්','මැයි','ජූනි','ජූලි','අගෝස්තු','සැප්තැම්බර්','ඔක්තෝබර්','නොවැම්බර්','දෙසැම්බර්'];
   const days   = ['ඉරිදා','සදුදා','අඟහරුවාදා','බදාදා','බ්‍රහස්පතින්දා','සිකුරාදා','සෙනසුරාදා'];
   return `${days[d.getDay()]}, ${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
@@ -1354,7 +1561,7 @@ function buildFilters(photos) {
     const b = document.createElement('button');
     b.className = 'filter-btn'; b.dataset.cat = cat;
     const cnt = photos.filter(p => p.category === cat).length;
-    b.innerHTML = `${cat} <span class="filter-count">${cnt}</span>`; b.onclick = () => filterGallery(cat, b);
+   b.innerHTML = `${CAT_NAMES[curLang][cat] || cat} <span class="filter-count">${cnt}</span>`; b.onclick = () => filterGallery(cat, b);
     group.appendChild(b);
   });
   const dates = [...new Set(photos.map(p => p.date))];
@@ -1363,14 +1570,61 @@ function buildFilters(photos) {
   document.getElementById('catCount').textContent   = cats.length;
 }
 
-const CAT_DESC = {
-  'දහම් පාසල් ජයග්‍රහණ':'ජාතික හා පළාත් මට්ටමේ ජයග්‍රහණ',
-  'විශේෂ උත්සව':'සුවිශේෂ සමරු හා ආගමික උත්සව',
-  'දිවා ආහාර සංග්‍රහය':'සුබසාධක කාර්යාංශය — දෛනික දිවා ආහාර',
-  'විපස්සි ප්‍රභා මණ්ඩපය':'ප්‍රභා මණ්ඩපය ආශ්‍රිත ක්‍රියාකාරකම්',
-  'වෙනත් විශේෂ ඡායාරූප':'අනෙකුත් සිදුවීම් හා ඡායාරූප',
-  'වෙනත්':'වෙනත් ඡායාරූප'
+const CAT_DESC_ALL = {
+  si: {
+    'දහම් පාසල් ජයග්‍රහණ':'ජාතික හා පළාත් මට්ටමේ ජයග්‍රහණ',
+    'විශේෂ උත්සව':'සුවිශේෂ සමරු හා ආගමික උත්සව',
+    'දිවා ආහාර සංග්‍රහය':'සුබසාධක කාර්යාංශය — දෛනික දිවා ආහාර',
+    'විපස්සි ප්‍රභා මණ්ඩපය':'ප්‍රභා මණ්ඩපය ආශ්‍රිත ක්‍රියාකාරකම්',
+    'වෙනත් විශේෂ ඡායාරූප':'අනෙකුත් සිදුවීම් හා ඡායාරූප',
+    'වෙනත්':'වෙනත් ඡායාරූප'
+  },
+  en: {
+    'දහම් පාසල් ජයග්‍රහණ':'National & Provincial Achievements',
+    'විශේෂ උත්සව':'Special Ceremonies & Religious Events',
+    'දිවා ආහාර සංග්‍රහය':'Welfare Unit — Daily Lunch Programme',
+    'විපස්සි ප්‍රභා මණ්ඩපය':'Vipassi Prabha Hall Activities',
+    'වෙනත් විශේෂ ඡායාරූප':'Other Events & Special Photos',
+    'වෙනත්':'Other Photos'
+  },
+  ta: {
+    'දහම් පාසල් ජයග්‍රහණ':'தேசிய மற்றும் மாகாண சாதனைகள்',
+    'විශේෂ උත්සව':'சிறப்பு விழாக்கள் மற்றும் மத நிகழ்வுகள்',
+    'දිවා ආහාර සංග්‍රහය':'நலன்புரி பிரிவு — தினசரி மதிய உணவு',
+    'විපස්සි ප්‍රභා මණ්ඩපය':'விபஸ்ஸி பிரபா மண்டபம் நடவடிக்கைகள்',
+    'වෙනත් විශේෂ ඡායාරූප':'பிற நிகழ்வுகள் மற்றும் சிறப்பு புகைப்படங்கள்',
+    'වෙනත්':'பிற புகைப்படங்கள்'
+  }
 };
+
+const CAT_NAMES = {
+  si: {
+    'දහම් පාසල් ජයග්‍රහණ':'දහම් පාසල් ජයග්‍රහණ',
+    'විශේෂ උත්සව':'විශේෂ උත්සව',
+    'දිවා ආහාර සංග්‍රහය':'දිවා ආහාර සංග්‍රහය',
+    'විපස්සි ප්‍රභා මණ්ඩපය':'විපස්සි ප්‍රභා මණ්ඩපය',
+    'වෙනත් විශේෂ ඡායාරූප':'වෙනත් විශේෂ ඡායාරූප',
+    'වෙනත්':'වෙනත්'
+  },
+  en: {
+    'දහම් පාසල් ජයග්‍රහණ':'Achievements',
+    'විශේෂ උත්සව':'Special Events',
+    'දිවා ආහාර සංග්‍රහය':'Lunch Programme',
+    'විපස්සි ප්‍රභා මණ්ඩපය':'Prabha Hall',
+    'වෙනත් විශේෂ ඡායාරූප':'Special Photos',
+    'වෙනත්':'Other'
+  },
+  ta: {
+    'දහම් පාසල් ජයග්‍රහණ':'சாதனைகள்',
+    'විශේෂ උත්සව':'சிறப்பு நிகழ்வுகள்',
+    'දිවා ආහාර සංග්‍රහය':'மதிய உணவு',
+    'විපස්සි ප්‍රභා මණ්ඩපය':'பிரபா மண்டபம்',
+    'වෙනත් විශේෂ ඡායාරූප':'சிறப்பு படங்கள்',
+    'වෙනත්':'மற்றவை'
+  }
+};
+
+let CAT_DESC = CAT_DESC_ALL['si'];
 
 const CAT_ICONS = {
   'දහම් පාසල් ජයග්‍රහණ':'🏆',
@@ -1385,7 +1639,7 @@ function renderGallery(photos) {
   filtered = photos;
   const wrap = document.getElementById('galleryWrap');
   if (!photos.length) {
-    wrap.innerHTML = `<div class="empty-gallery"><span class="eicon">📷</span><p>ඡායාරූප නොමැත. Admin ලෙස ඇතුල් වී photos upload කරන්න.</p></div>`;
+    wrap.innerHTML = `<div class="empty-gallery"><span class="eicon">📷</span><p>${LANG[curLang].empty}</p></div>`;
     return;
   }
   const byCat = {};
@@ -1399,10 +1653,10 @@ function renderGallery(photos) {
         <div class="cat-header-left">
           <span class="cat-icon">${icon}</span>
           <div>
-            <span class="cat-name">${cat}</span>
+            <span class="cat-name">${CAT_NAMES[curLang]?.[cat] || cat}</span>
             <span class="cat-sub">${CAT_DESC[cat] || ''}</span>
           </div>
-          <span class="cat-count">${catPhotos.length} ඡායාරූප</span>
+          <span class="cat-count">${catPhotos.length} ${LANG[curLang].catCount}</span>
         </div>
         <span class="cat-chevron">▼</span>
       </div>
@@ -1413,7 +1667,7 @@ function renderGallery(photos) {
       html += `
         <div class="gallery-item" style="animation-delay:${delay}s" onclick="openLightbox(${globalIdx})">
           <img src="${photo.url}" alt="${photo.title}" loading="lazy">
-          <div class="img-date-badge">📅 ${toSinhalaDate(photo.date)}</div>
+          <div class="img-date-badge">${CAT_ICONS[photo.category]||'🖼️'} ${CAT_NAMES[curLang][photo.category]||photo.category||''}</div>
           <div class="overlay">
             <div class="img-title">${photo.title}</div>
             <div class="img-meta">📅 ${toSinhalaDate(photo.date)}</div>
@@ -1453,25 +1707,41 @@ function searchGallery(q) {
 
 async function deletePhoto(e, key, url) {
   e.stopPropagation();
-  if (!confirm('මෙම ඡායාරූපය මකා දැමීමට අවශ්‍යද?')) return;
+  if (!confirm(LANG[curLang].confirm)) return;
   try { await db.ref('gallery/' + key).remove(); }
   catch(err) { console.error(err); }
+}
+function getTitle(photo) {
+  if (curLang === 'en') return photo.titleEN || photo.title || '';
+  if (curLang === 'ta') return photo.titleTA || photo.title || '';
+  return photo.title || '';
 }
 
 /* ========= LIGHTBOX ========= */
 function openLightbox(idx) {
   currentLbIdx = idx;
   const p = filtered[idx];
-  document.getElementById('lbImg').src    = p.url;
-  document.getElementById('lbTitle').textContent = p.title;
-  document.getElementById('lbMeta').textContent  = `${p.category} · ${toSinhalaDate(p.date)}`;
+  document.getElementById('lbImg').src = p.url;
+  document.getElementById('lbTitle').textContent = getTitle(p);
+  document.getElementById('lbMeta').textContent = `${CAT_NAMES[curLang][p.category] || p.category} · ${toSinhalaDate(p.date)}`;
   document.getElementById('lightbox').classList.add('open');
   document.body.style.overflow = 'hidden';
 }
 function closeLightbox(e) {
-  if (e && e.target !== document.getElementById('lightbox') && !e.target.classList.contains('lb-close')) return;
-  document.getElementById('lightbox').classList.remove('open');
-  document.body.style.overflow = '';
+  // If called without event (direct call), always close
+  if (!e) {
+    document.getElementById('lightbox').classList.remove('open');
+    document.body.style.overflow = '';
+    return;
+  }
+  // Allow close if: clicking the dark overlay OR the X button OR inside lb-close
+  const target = e.target;
+  const isOverlay = target === document.getElementById('lightbox');
+  const isCloseBtn = target.classList.contains('lb-close') || target.closest('.lb-close');
+  if (isOverlay || isCloseBtn) {
+    document.getElementById('lightbox').classList.remove('open');
+    document.body.style.overflow = '';
+  }
 }
 function navLightbox(dir) {
   currentLbIdx = (currentLbIdx + dir + filtered.length) % filtered.length;
@@ -1480,8 +1750,8 @@ function navLightbox(dir) {
   img.style.opacity = '0';
   img.src = p.url;
   img.onload = () => { img.style.transition = 'opacity 0.25s'; img.style.opacity = '1'; };
-  document.getElementById('lbTitle').textContent = p.title;
-  document.getElementById('lbMeta').textContent  = `${p.category} · ${toSinhalaDate(p.date)}`;
+  document.getElementById('lbTitle').textContent = p.title;document.getElementById('lbTitle').textContent = getTitle(p);
+  document.getElementById('lbMeta').textContent = `${CAT_NAMES[curLang][p.category] || p.category} · ${toSinhalaDate(p.date)}`;
 }
 document.addEventListener('keydown', e => {
   if (!document.getElementById('lightbox').classList.contains('open')) return;
@@ -1530,6 +1800,94 @@ db.ref('gallery').on('value', snap => {
   }
   tick();
 })();
+/* ========= LANGUAGE SWITCHER ========= */
+const LANG = {
+  en: { h2:'Photo Gallery', p:'A collection of unforgettable memories and activities from our Dhamma School', search:'Search...', photos:'Photos', dates:'Dates', cats:'Categories', calHint:'Dates with photos are highlighted', all:'All', dl:'⬇ Download', share:'🔗 Share', upload:'📤 Add Photos · Upload Photos', adminBtn:'🔐 Admin', catCount:'Photos', empty:'No photos found.', confirm:'Delete this photo?' },
+  si: { h2:'ඡායාරූප ගැලරිය', p:'අපගේ දහම් පාසලේ අමතක නොවන මතකයන් සහ ක්‍රියාකාරකම් ඡායාරූප එකතුව', search:'සොයන්න...', photos:'ඡායාරූප', dates:'දිනයන්', cats:'කාණ්ඩ', calHint:'ඡායාරූප ඇති දිනයන් ගෙඩි ලෙස පෙන්වේ', all:'සියල්ල', dl:'⬇ බාගන්න', share:'🔗 Share', upload:'📤 ඡායාරූප එකතු කරන්න · Add Photos', adminBtn:'🔐 Admin', catCount:'ඡායාරූප', empty:'ඡායාරූප නොමැත.', confirm:'මෙම ඡායාරූපය මකා දැමීමට අවශ්‍යද?' },
+  ta: { h2:'புகைப்பட தொகுப்பு', p:'எங்கள் தம்ம பள்ளியின் மறக்கமுடியாத நினைவுகள் மற்றும் நடவடிக்கைகளின் புகைப்பட தொகுப்பு', search:'தேடுக...', photos:'புகைப்படங்கள்', dates:'தேதிகள்', cats:'வகைகள்', calHint:'புகைப்படங்கள் உள்ள தேதிகள் தனிப்படுத்தப்படும்', all:'அனைத்தும்', dl:'⬇ பதிவிறக்கவும்', share:'🔗 பகிர்', upload:'📤 புகைப்படங்களை சேர்க்கவும்', adminBtn:'🔐 நிர்வாகி', catCount:'புகைப்படங்கள்', empty:'புகைப்படங்கள் இல்லை.', confirm:'இந்த புகைப்படத்தை நீக்கவா?' }
+};
+let curLang = 'si';
+
+function setLang(lang) {
+  curLang = lang; // Set lang FIRST before any render
+  CAT_DESC = CAT_DESC_ALL[lang];
+
+  // Update all visible badges immediately
+  document.querySelectorAll('.img-date-badge').forEach(badge => {
+    const item = badge.closest('.gallery-item');
+    if (!item) return;
+    // Find the photo data by matching the image src
+    const img = item.querySelector('img');
+    if (!img) return;
+    const photo = allPhotos.find(p => p.url === img.src);
+    if (!photo) return;
+    const cat = photo.category || '';
+    badge.textContent = (CAT_ICONS[cat] || '🖼️') + ' ' + (CAT_NAMES[lang][cat] || cat);
+  });
+
+  // Re-render gallery to update everything else
+  const activeCat = document.querySelector('.filter-btn.active')?.dataset.cat || 'all';
+  let f = activeCat === 'all' ? [...allPhotos] : allPhotos.filter(p => p.category === activeCat);
+  if(currentView === 'photos') renderAllPhotos(f);
+  else if(currentView === 'categories') renderGallery(f);
+  CAT_DESC = CAT_DESC_ALL[lang];
+  document.querySelectorAll('.filter-btn:not([data-cat="all"])').forEach(btn => {
+    const cat = btn.dataset.cat;
+    const badge = btn.querySelector('.filter-count');
+    btn.innerHTML = (CAT_NAMES[lang][cat] || cat) + (badge ? ' ' + badge.outerHTML : '');
+    btn.dataset.cat = cat;
+    btn.onclick = () => filterGallery(cat, btn);
+  });
+  curLang = lang;
+  CAT_DESC = CAT_DESC_ALL[lang];
+  ['en','si','ta'].forEach(l => {
+    const d = document.getElementById('desk-'+l);
+    const m = document.getElementById('mob-'+l);
+    if(d) d.classList.toggle('on', l===lang);
+    if(m) m.classList.toggle('on', l===lang);
+  });
+  const t = LANG[lang];
+  const h2 = document.querySelector('.hero h2');
+  const hp = document.querySelector('.hero p');
+  if(h2) h2.textContent = t.h2;
+  if(hp) hp.textContent = t.p;
+  const si = document.getElementById('searchInput');
+  if(si) si.placeholder = t.search;
+  const spans = document.querySelectorAll('.stat-card-info span');
+  if(spans[0]) spans[0].textContent = t.photos;
+  if(spans[1]) spans[1].textContent = t.dates;
+  if(spans[2]) spans[2].textContent = t.cats;
+  const cl = document.getElementById('calSelectedLabel');
+  if(cl && !cl.textContent.includes('📅')) cl.textContent = t.calHint;
+  const dl = document.querySelector('.lb-action-btn');
+  if(dl) dl.innerHTML = t.dl;
+  const ab = document.querySelector('.filter-btn[data-cat="all"]');
+  if(ab) {
+    const badge = ab.querySelector('.filter-count');
+    ab.innerHTML = t.all + (badge ? ' '+badge.outerHTML : '');
+    ab.dataset.cat = 'all';
+    ab.onclick = () => filterGallery('all', ab);
+  }
+  // Upload panel heading
+  const uph = document.querySelector('.upload-panel h3');
+  if(uph) uph.textContent = t.upload;
+
+  // Admin toggle button (only if not in admin mode)
+  const at = document.querySelector('.admin-toggle');
+  if(at && !isAdmin) at.textContent = t.adminBtn;
+
+  // Share button
+  const sb = document.querySelector('.lb-action-btn:last-child');
+  if(sb) sb.innerHTML = t.share;
+
+  // Category photo count text — update all rendered cat-count badges
+  document.querySelectorAll('.cat-count').forEach(el => {
+    const num = el.textContent.match(/\d+/);
+    if(num) el.textContent = num[0] + ' ' + t.catCount;
+  });
+
+}
+setLang('en');
 </script>
 
 <style>
