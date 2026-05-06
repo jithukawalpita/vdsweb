@@ -33,7 +33,9 @@
       color: #f5deb3;
       min-height: 100vh;
       overflow-x: hidden;
+      position: relative;
     }
+    body::before { content:""; position:absolute; top:0; left:0; width:100%; height:100%; background-image:url('https://img.freepik.com/premium-photo/night-starry-sky-road-countryside_445280-2481.jpg?w=740'); background-size:cover; background-position:center; background-repeat:no-repeat; background-attachment:fixed; opacity:0.4; z-index:-1; }
 
     /* ===== NAV ===== */
     .nav {
@@ -195,7 +197,7 @@
   background: 
     linear-gradient(180deg, rgba(10,4,4,0.52) 0%, rgba(10,4,4,0.72) 100%),
     url('https://scontent.fcmb1-2.fna.fbcdn.net/v/t39.30808-6/482213728_625755436987708_7825576354156848227_n.jpg?_nc_cat=103&ccb=1-7&_nc_sid=7b2446&_nc_eui2=AeHs_znQjxm6c48sgdaBOzs4hHEt2GKGDoqEcS3YYoYOilKf8TJbksX0LPtXNAt3ByQe7KOC-N5WGn-8ObbQNpS_&_nc_ohc=aqhvMyDlBAkQ7kNvwHhX_0D&_nc_oc=AdqV7kgKdcGCYxuAVZUN06jAkyxlDPo-bG360OH1syObAffOJrR9Z5Xen-NquCG87yU&_nc_zt=23&_nc_ht=scontent.fcmb1-2.fna&_nc_gid=u7SHP5UYDOvtchGS2YdyRg&_nc_ss=7c2a8&oh=00_Af7BmZm7GiRWTQF67B0WU1q8nAawlPTxhzneG_7E1zouEw&oe=69FEA94C') center/cover no-repeat;
-  opacity: 0.4;
+  opacity: 0.6;
   z-index: 0;
 }
 .hero h1, .hero h2, .hero p, .hero-badge, .hero-divider {
@@ -615,6 +617,7 @@ text-shadow: none;
     @media(max-width:768px) { .nav-links, .lang-row { display:none; } .hamburger { display:flex; } .strip { flex-direction:column; gap:20px; padding:16px 16px; } .side-card { flex-direction:column; gap:8px; } .fi { flex:none; width:100%; padding:12px 16px; border-radius:8px; } .tagline-bar { flex-direction:column; gap:8px; padding:16px 12px; font-size:9px; } .tagline-bar .tm { font-size:14px; } .tagline-bar .tt { font-size:9px; } }
     @media(max-width:640px) { .wrap { padding:1.5rem 0.8rem 3rem; } .fi { padding:12px 14px; } .lb-nav { display:none; } .controls-bar { padding:0.8rem; } .search-wrap input { width:140px; } }
   </style>
+  <link rel="stylesheet" href="footer-mobile.css">
 </head>
 <body>
 

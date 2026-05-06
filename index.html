@@ -4,44 +4,19 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Vipassi Dhamma School</title>
-<!-- Firebase SDKs — must load BEFORE any firebase.* usage -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Segoe UI',Arial,sans-serif;background:#000000;color:#000000;overflow-x:hidden}
+:root{--gold:#c9a84c;--gold2:#f0d080;--maroon:#7a1010;--dark:#0a0404;--soft:rgba(245,222,179,0.55)}
+body{font-family:'Segoe UI',Arial,sans-serif;background-color:var(--dark);color:#f5deb3;overflow-x:hidden;position:relative;width:100%;max-width:100%}
+body::before{content:"";position:absolute;top:0;left:0;width:100%;height:100%;background-image:url('https://i.ibb.co/ttrDTQf/image.png');background-size:cover;background-position:center;background-repeat:no-repeat;background-attachment:fixed;opacity:0.4;z-index:-1}
 
 /* NAV */
 .nav{background:linear-gradient(90deg,#5a0808 0%,#8b1212 40%,#7a0e0e 70%,#5a0808 100%);padding:0 24px;display:flex;align-items:center;border-bottom:2px solid #c9a84c;position:relative;z-index:100;box-shadow:0 2px 20px rgba(0,0,0,0.6)}
-
-/* Logo with Buddha-ray glow */
-.nav > img{
-  border-radius:50%;
-  position:relative;
-  z-index:2;
-  filter:
-    drop-shadow(0 0 4px rgba(255,225,140,0.7))
-    drop-shadow(0 0 10px rgba(255,200,90,0.5))
-    drop-shadow(0 0 18px rgba(255,170,50,0.3));
-  animation:logoGlow 4s ease-in-out infinite;
-}
-@keyframes logoGlow{
-  0%,100%{
-    filter:
-      drop-shadow(0 0 4px rgba(255,225,140,0.7))
-      drop-shadow(0 0 10px rgba(255,200,90,0.5))
-      drop-shadow(0 0 18px rgba(255,170,50,0.3));
-  }
-  50%{
-    filter:
-      drop-shadow(0 0 6px rgba(255,240,180,0.9))
-      drop-shadow(0 0 14px rgba(255,215,110,0.65))
-      drop-shadow(0 0 24px rgba(255,180,60,0.4));
-  }
-}
-.nav-logo{display:flex;align-items:center;gap:10px;padding:8px 0;margin-right:20px}
-.emblem{width:40px;height:40px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff5a0,#c9a84c 40%,#8b6400);border:2px solid #ffe066;display:flex;align-items:center;justify-content:center;font-size:20px;color:#5a0808;font-weight:900;box-shadow:0 0 10px rgba(201,168,76,0.5)}
+.nav>img{border-radius:50%;position:relative;z-index:2;filter:drop-shadow(0 0 4px rgba(255,225,140,0.7)) drop-shadow(0 0 10px rgba(255,200,90,0.5)) drop-shadow(0 0 18px rgba(255,170,50,0.3));animation:logoGlow 4s ease-in-out infinite}
+@keyframes logoGlow{0%,100%{filter:drop-shadow(0 0 4px rgba(255,225,140,0.7)) drop-shadow(0 0 10px rgba(255,200,90,0.5)) drop-shadow(0 0 18px rgba(255,170,50,0.3))}50%{filter:drop-shadow(0 0 6px rgba(255,240,180,0.9)) drop-shadow(0 0 14px rgba(255,215,110,0.65)) drop-shadow(0 0 24px rgba(255,180,60,0.4))}}
 .brand{color:#f5deb3;font-size:13px;font-weight:700;letter-spacing:.5px;text-shadow:0 1px 3px rgba(0,0,0,0.5)}
 .nav-links{display:flex;flex-wrap:wrap;flex:1}
 .nav-links a{color:rgba(245,222,179,0.88);font-size:11.5px;padding:14px 10px;text-decoration:none;border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap}
@@ -56,75 +31,41 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#000000;color:#000000;ov
 .dropdown-menu a:hover{background:rgba(201,168,76,0.15);color:#ffe066}
 .dropdown:hover .dropdown-menu{display:block}
 
-/* ========== HAMBURGER MENU ========== */
-.hamburger {
-  display: none;
-  align-items: center;
-  gap: 6px;
-  cursor: pointer;
-  padding: 8px 10px;
-  margin-left: auto;
-  background: rgba(255,255,255,0.08);
-  border: 1px solid rgba(255,255,255,0.15);
-  border-radius: 20px;
-}
+/* HAMBURGER */
+.hamburger{display:none;align-items:center;gap:6px;cursor:pointer;padding:8px 10px;margin-left:auto;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:20px}
+.hamburger .dot{display:block;width:13px;height:13px;border-radius:50%;transition:transform 0.2s,filter 0.2s}
+.hamburger .dot.red{background:#ff5f57}
+.hamburger .dot.yellow{background:#ffbd2e}
+.hamburger .dot.green{background:#28c840}
+.hamburger:hover .dot{filter:brightness(1.15)}
+.hamburger:hover .dot.red{transform:scale(1.15)}
+.hamburger:hover .dot.yellow{transform:scale(1.15)}
+.hamburger:hover .dot.green{transform:scale(1.15)}
+.hamburger.open .dot{opacity:0.6}
 
-.hamburger .dot {
-  display: block;
-  width: 13px;
-  height: 13px;
-  border-radius: 50%;
-  transition: transform 0.2s, filter 0.2s;
-}
-
-.hamburger .dot.red    { background: #ff5f57; }
-.hamburger .dot.yellow { background: #ffbd2e; }
-.hamburger .dot.green  { background: #28c840; }
-
-.hamburger:hover .dot { filter: brightness(1.15); }
-.hamburger:hover .dot.red    { transform: scale(1.15); }
-.hamburger:hover .dot.yellow { transform: scale(1.15) translateX(0); }
-.hamburger:hover .dot.green  { transform: scale(1.15); }
-
-/* Remove the open-state transforms since we no longer have bars */
-.hamburger.open .dot { opacity: 0.6; }
-
-/* ========== MOBILE SIDEBAR ========== */
-.mobile-sidebar { position:fixed; top:0; left:-280px; width:280px; height:100vh; background:linear-gradient(180deg,#1a0808 0%,#2a0a0a 100%); z-index:500; transition:left 0.3s ease; box-shadow:2px 0 10px rgba(0,0,0,0.5); overflow-y:auto; }
-.mobile-sidebar.open { left:0; }
-.mobile-sidebar-header { background:linear-gradient(90deg,#5a0808,#8b1212); padding:1rem; display:flex; align-items:center; justify-content:space-between; }
-.mobile-sidebar-header .brand { color:#f5deb3; font-size:14px; font-weight:700; }
-.mobile-close { background:none; border:none; color:#c9a84c; font-size:18px; cursor:pointer; }
-.mobile-nav-links { padding:1rem 0; }
-.mobile-nav-links a { display:block; color:#f5deb3; padding:12px 1.5rem; text-decoration:none; border-bottom:1px solid rgba(201,168,76,0.1); transition:all 0.2s; }
-.mobile-nav-links a:hover { background:rgba(201,168,76,0.1); color:#ffe066; }
-.mobile-lang-row { padding:1rem; border-top:1px solid rgba(201,168,76,0.1); display:flex; flex-wrap:wrap; gap:6px; align-items:center; }
-.mobile-lang-row .lb { margin-right:0; }
-
-/* ========== OVERLAY ========== */
-.mobile-overlay { display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); z-index:400; }
-.mobile-overlay.open { display:block; }
+/* MOBILE SIDEBAR */
+.mobile-sidebar{position:fixed;top:0;left:-280px;width:280px;height:100vh;background:linear-gradient(180deg,#1a0808 0%,#2a0a0a 100%);z-index:500;transition:left 0.3s ease;box-shadow:2px 0 10px rgba(0,0,0,0.5);overflow-y:auto}
+.mobile-sidebar.open{left:0}
+.mobile-sidebar-header{background:linear-gradient(90deg,#5a0808,#8b1212);padding:1rem;display:flex;align-items:center;justify-content:space-between}
+.mobile-sidebar-header .brand{color:#f5deb3;font-size:14px;font-weight:700}
+.mobile-close{background:none;border:none;color:#c9a84c;font-size:18px;cursor:pointer}
+.mobile-nav-links{padding:1rem 0}
+.mobile-nav-links a{display:block;color:#f5deb3;padding:12px 1.5rem;text-decoration:none;border-bottom:1px solid rgba(201,168,76,0.1);transition:all 0.2s}
+.mobile-nav-links a:hover{background:rgba(201,168,76,0.1);color:#ffe066}
+.mobile-lang-row{padding:1rem;border-top:1px solid rgba(201,168,76,0.1);display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.mobile-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:400}
+.mobile-overlay.open{display:block}
 
 /* HERO */
-.hero{position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;min-height:600px}
+.hero{position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;min-height:600px;width:100%}
 .hero-bg{position:absolute;inset:0;background:url('crowd.jpg') center/cover no-repeat;filter:brightness(1.0)}
-.crowd-layer{position:absolute;inset:0;background:
-  radial-gradient(ellipse 100% 50% at 50% 100%,rgba(5,2,0,0.45) 0%,transparent 70%),
-  radial-gradient(ellipse 100% 30% at 50% 0%,rgba(5,2,0,0.2) 0%,transparent 60%),
-  linear-gradient(180deg,rgba(20,5,0,0.1) 0%,rgba(0,0,0,0.05) 40%,rgba(5,2,0,0.2) 100%);
-}
-.pattern-overlay{position:absolute;inset:0;
-  background-image:url('https://i.ibb.co/ttrDTQf/image.png');
-  background-size:1260px 650px;
-  opacity:0.2;}
+.crowd-layer{position:absolute;inset:0;background:radial-gradient(ellipse 100% 50% at 50% 100%,rgba(5,2,0,0.45) 0%,transparent 70%),radial-gradient(ellipse 100% 30% at 50% 0%,rgba(5,2,0,0.2) 0%,transparent 60%),linear-gradient(180deg,rgba(20,5,0,0.1) 0%,rgba(0,0,0,0.05) 40%,rgba(5,2,0,0.2) 100%)}
+.pattern-overlay{position:absolute;inset:0;background-image:url('https://i.ytimg.com/vi/61Ir5iTfTH4/maxresdefault.jpg');background-size:1260px 650px;opacity:0.3}
 .hero-vignette{position:absolute;inset:0;background:radial-gradient(ellipse 140% 100% at 50% 50%,transparent 25%,rgba(0,0,0,0.2) 100%)}
-
 #particles{position:absolute;inset:0;pointer-events:none;z-index:1}
 .arch{position:absolute;top:-60px;left:50%;transform:translateX(-50%);width:700px;height:200px;border-radius:50%;border:1px solid rgba(201,168,76,0.1);pointer-events:none;z-index:1;animation:archPulse 4s ease-in-out infinite}
 .arch2{position:absolute;top:-30px;left:50%;transform:translateX(-50%);width:600px;height:160px;border-radius:50%;border:1px solid rgba(201,168,76,0.06);pointer-events:none;z-index:1;animation:archPulse 4s ease-in-out infinite reverse}
 @keyframes archPulse{0%,100%{opacity:0.4}50%{opacity:1}}
-
-/* Floating glow orbs */
 .orb{position:absolute;border-radius:50%;pointer-events:none;z-index:0}
 .orb1{width:500px;height:500px;top:-100px;left:-120px;background:radial-gradient(circle,rgba(139,10,10,0.18),transparent 70%);animation:orbFloat1 12s ease-in-out infinite}
 .orb2{width:400px;height:400px;bottom:-80px;right:-80px;background:radial-gradient(circle,rgba(201,168,76,0.12),transparent 70%);animation:orbFloat2 15s ease-in-out infinite}
@@ -132,497 +73,105 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#000000;color:#000000;ov
 @keyframes orbFloat1{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(40px,-30px) scale(1.05)}66%{transform:translate(-20px,20px) scale(0.95)}}
 @keyframes orbFloat2{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-35px,25px) scale(1.08)}}
 
-/* ── HERO INNER LAYOUT ── */
-.hero-content{
-  position:relative;z-index:10;
-  width:100%;max-width:1300px;
-  padding:40px 36px 0;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-}
+/* HERO CONTENT */
+.hero-content{position:relative;z-index:10;width:100%;max-width:1300px;padding:40px 36px 32px;display:flex;flex-direction:column;align-items:center}
 
-/* Badge — solid embossed gold pill (high opacity, deeply 3D) */
-.badge{
-  display:inline-flex;align-items:center;gap:10px;
-  /* Solid layered gradient — fully opaque for embossed feel */
-  background:
-    linear-gradient(180deg,
-      #4a2208 0%,
-      #2e1404 45%,
-      #1a0a02 100%);
-  /* Strong polished gold border */
-  border:1.5px solid #d4a850;
-  color:#ffe680;
-  font-size:10px;
-  font-weight:700;
-  letter-spacing:3.5px;
-  text-transform:uppercase;
-  padding:11px 28px;
-  border-radius:40px;
-  margin-bottom:18px;
-  /* Deep embossed shadow stack */
-  box-shadow:
-    /* Outer warm glow */
-    0 0 18px rgba(255,170,50,0.28),
-    0 0 36px rgba(255,130,30,0.14),
-    /* Drop shadow — depth */
-    0 8px 20px rgba(0,0,0,0.85),
-    0 3px 6px rgba(0,0,0,0.6),
-    /* Inner top highlight (raised metal feel) */
-    inset 0 2px 0 rgba(255,235,160,0.55),
-    inset 0 1px 0 rgba(255,250,200,0.35),
-    /* Inner bottom shadow (deep cavity) */
-    inset 0 -2px 3px rgba(0,0,0,0.85),
-    inset 0 -1px 0 rgba(0,0,0,0.6),
-    /* Inner ambient gold sheen */
-    inset 0 0 18px rgba(255,180,80,0.18),
-    /* Outer rim definition */
-    0 0 0 1px rgba(0,0,0,0.4);
-  /* Text shadow — deeply engraved gold */
-  text-shadow:
-    0 1px 0 rgba(0,0,0,1),
-    0 2px 1px rgba(0,0,0,0.7),
-    0 -1px 0 rgba(255,230,150,0.35),
-    0 0 6px rgba(255,180,60,0.45);
+/* BADGE */
+.badge{display:inline-flex;align-items:center;gap:10px;background:linear-gradient(180deg,#4a2208 0%,#2e1404 45%,#1a0a02 100%);border:1.5px solid #d4a850;color:#ffe680;font-size:10px;font-weight:700;letter-spacing:3.5px;text-transform:uppercase;padding:11px 28px;border-radius:40px;margin-bottom:18px;box-shadow:0 0 18px rgba(255,170,50,0.28),0 0 36px rgba(255,130,30,0.14),0 8px 20px rgba(0,0,0,0.85),0 3px 6px rgba(0,0,0,0.6),inset 0 2px 0 rgba(255,235,160,0.55),inset 0 1px 0 rgba(255,250,200,0.35),inset 0 -2px 3px rgba(0,0,0,0.85),inset 0 -1px 0 rgba(0,0,0,0.6),inset 0 0 18px rgba(255,180,80,0.18),0 0 0 1px rgba(0,0,0,0.4);text-shadow:0 1px 0 rgba(0,0,0,1),0 2px 1px rgba(0,0,0,0.7),0 -1px 0 rgba(255,230,150,0.35),0 0 6px rgba(255,180,60,0.45);position:relative;animation:fadeDown 0.8s ease both}
+.badge::after{content:'';position:absolute;top:2px;left:6%;right:6%;height:42%;background:linear-gradient(180deg,rgba(255,235,170,0.22) 0%,rgba(255,200,100,0.08) 60%,transparent 100%);border-radius:40px 40px 50% 50%/100% 100% 30% 30%;pointer-events:none}
+.badge::before{content:'☸';font-size:14px;color:#ffd966;text-shadow:0 0 4px rgba(255,200,80,0.8),0 0 10px rgba(255,160,40,0.5),0 1px 0 rgba(0,0,0,0.9);animation:spin 8s linear infinite;display:inline-block}
+
+/* SCHOOL NAME */
+.school-name{display:block;width:auto;max-width:min(720px,90vw);height:auto;margin:0 auto 12px;text-align:center;position:relative;font-size:clamp(48px,7vw,96px);line-height:1.05;letter-spacing:0.3px;filter:drop-shadow(0 0 2px rgba(255,235,180,0.3)) drop-shadow(0 0 8px rgba(255,200,90,0.18)) drop-shadow(0 4px 8px rgba(0,0,0,0.45));animation:fadeDown 0.9s 0.1s ease both,titleBreathe 6s ease-in-out infinite 1s;overflow:visible;isolation:isolate;z-index:2}
+.school-name::before{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:140%;height:340%;z-index:-1;pointer-events:none;background:radial-gradient(ellipse 50% 60% at 50% 50%,rgba(255,230,150,0.22) 0%,rgba(255,200,90,0.1) 35%,transparent 65%),conic-gradient(from 0deg at 50% 50%,transparent 0deg,rgba(255,220,120,0.18) 8deg,transparent 16deg,transparent 22deg,rgba(255,200,100,0.12) 30deg,transparent 38deg,transparent 45deg,rgba(255,220,120,0.18) 53deg,transparent 61deg,transparent 67deg,rgba(255,200,100,0.12) 75deg,transparent 83deg,transparent 90deg,rgba(255,220,120,0.18) 98deg,transparent 106deg,transparent 112deg,rgba(255,200,100,0.12) 120deg,transparent 128deg,transparent 135deg,rgba(255,220,120,0.18) 143deg,transparent 151deg,transparent 157deg,rgba(255,200,100,0.12) 165deg,transparent 173deg,transparent 180deg,rgba(255,220,120,0.18) 188deg,transparent 196deg,transparent 202deg,rgba(255,200,100,0.12) 210deg,transparent 218deg,transparent 225deg,rgba(255,220,120,0.18) 233deg,transparent 241deg,transparent 247deg,rgba(255,200,100,0.12) 255deg,transparent 263deg,transparent 270deg,rgba(255,220,120,0.18) 278deg,transparent 286deg,transparent 292deg,rgba(255,200,100,0.12) 300deg,transparent 308deg,transparent 315deg,rgba(255,220,120,0.18) 323deg,transparent 331deg,transparent 337deg,rgba(255,200,100,0.12) 345deg,transparent 353deg,transparent 360deg);-webkit-mask:radial-gradient(ellipse 70% 80% at 50% 50%,black 0%,black 30%,transparent 70%);mask:radial-gradient(ellipse 70% 80% at 50% 50%,black 0%,black 30%,transparent 70%);animation:rayRotate 30s linear infinite,rayBreathe 5s ease-in-out infinite}
+@keyframes rayRotate{from{transform:translate(-50%,-50%) rotate(0deg)}to{transform:translate(-50%,-50%) rotate(360deg)}}
+@keyframes rayBreathe{0%,100%{opacity:0.25}50%{opacity:0.45}}
+@keyframes titleBreathe{0%,100%{filter:drop-shadow(0 0 2px rgba(255,235,180,0.3)) drop-shadow(0 0 8px rgba(255,200,90,0.18)) drop-shadow(0 4px 8px rgba(0,0,0,0.45))}50%{filter:drop-shadow(0 0 3px rgba(255,240,200,0.4)) drop-shadow(0 0 12px rgba(255,210,110,0.25)) drop-shadow(0 4px 8px rgba(0,0,0,0.45))}}
+
+/* SUBTITLE */
+.hero-tagline{display:flex;align-items:center;gap:10px;color:#fffd7fa5;font-size:clamp(12px,1.5vw,18px);font-weight:700;font-style:italic;text-shadow:0 2px 10px rgba(0,0,0,0.8);text-align:center;line-height:1.3;justify-content:center;margin-bottom:24px;animation:fadeDown 1s 0.2s ease both}
+.hero-tagline .wheel{font-size:1.5em;animation:spin 8s linear infinite;display:inline-block;flex-shrink:0}
+
+/* HERO ROW — flag only, centred */
+.hero-row{width:100%;display:flex;justify-content:center;align-items:center;gap:24px;animation:fadeIn 1.1s 0.3s ease both;margin-bottom:24px}
+
+/* FLAG — reduced size */
+.hero-flag{
+  width:clamp(160px,22vw,280px);
+  display:flex;align-items:center;justify-content:center;
+  isolation:isolate;
   position:relative;
-  animation:fadeDown 0.8s ease both;
+  filter:drop-shadow(0 0 30px rgba(201,168,76,0.22)) drop-shadow(0 6px 18px rgba(0,0,0,0.7));
+  animation:flagFloat 6s ease-in-out infinite;
 }
-/* Top metallic highlight strip */
-.badge::after{
-  content:'';
-  position:absolute;
-  top:2px;left:6%;right:6%;
-  height:42%;
-  background:linear-gradient(180deg,
-    rgba(255,235,170,0.22) 0%,
-    rgba(255,200,100,0.08) 60%,
-    transparent 100%);
-  border-radius:40px 40px 50% 50%/100% 100% 30% 30%;
-  pointer-events:none;
-}
-.badge::before{
-  content:'☸';
-  font-size:14px;
-  color:#ffd966;
-  text-shadow:
-    0 0 4px rgba(255,200,80,0.8),
-    0 0 10px rgba(255,160,40,0.5),
-    0 1px 0 rgba(0,0,0,0.9);
-  animation:spin 8s linear infinite;
-  display:inline-block;
-}
+.hero-flag img{width:100%;height:auto;mix-blend-mode:screen}
+.flag-glow{position:absolute;width:120%;height:120%;top:-10%;left:-10%;background:radial-gradient(circle,rgba(255,200,80,0.18) 0%,rgba(255,150,50,0.06) 40%,transparent 70%);border-radius:50%;pointer-events:none;z-index:-1;animation:flagGlow 4s ease-in-out infinite}
+@keyframes flagFloat{0%,100%{transform:translateY(0) rotate(-0.3deg)}50%{transform:translateY(-8px) rotate(0.3deg)}}
+@keyframes flagGlow{0%,100%{transform:scale(1);opacity:0.6}50%{transform:scale(1.15);opacity:1}}
 
-/* Sinhala title — image with very subtle glow */
-.school-name{
-  display:block;
-  width:auto;
-  max-width:min(720px,90vw);
-  height:auto;
-  margin:0 auto 12px;
-  text-align:center;
-  position:relative;
+/* QUOTE CARD */
+.quote-card{width:min(880px,90vw);margin:0 auto;padding:32px 26px 24px;background:rgba(209,172,75,0.18);border:1px solid rgba(209,172,75,0.35);border-radius:30px;color:#fff4c3;font-family:'Cormorant Garamond',serif;font-size:clamp(17px,2vw,24px);font-weight:700;text-align:center;line-height:1.55;text-shadow:0 1px 2px rgba(0,0,0,0.25);box-shadow:0 24px 60px rgba(0,0,0,0.14);position:relative;backdrop-filter:blur(10px)}
+.quote-card-dots{position:absolute;top:16px;left:20px;display:flex;gap:8px}
+.quote-card-dots span{width:10px;height:10px;border-radius:50%;display:block;box-shadow:0 1px 2px rgba(0,0,0,0.2)}
+.quote-card-dots span:nth-child(1){background:#ff5f57}
+.quote-card-dots span:nth-child(2){background:#ffbd2e}
+.quote-card-dots span:nth-child(3){background:#28c840}
+.quote-card-text{padding-top:8px;white-space:pre-wrap}
+.quote-card-btns{display:flex;justify-content:space-between;gap:16px;margin-top:20px}
+.qc-btn{flex:1;text-align:center;text-decoration:none;padding:12px 0;border-radius:30px;font-size:15px;font-weight:700;letter-spacing:.5px;color:#f0d890;background:linear-gradient(135deg,rgba(30,8,8,0.45),rgba(60,12,12,0.35));border:1px solid rgba(201,168,76,0.35);box-shadow:0 4px 14px rgba(0,0,0,0.3),inset 0 1px 0 rgba(255,220,80,0.06);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);transition:all .25s ease;font-family:'Segoe UI',Arial,sans-serif}
+.qc-btn:hover{background:linear-gradient(135deg,rgba(50,12,12,0.65),rgba(80,16,16,0.5));border-color:rgba(201,168,76,0.65);color:#ffe066;transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,0.45),0 0 18px rgba(201,168,76,0.15)}
 
-  /* Very subtle aura — barely-there warmth */
-  filter:
-    drop-shadow(0 0 2px rgba(255,235,180,0.3))
-    drop-shadow(0 0 8px rgba(255,200,90,0.18))
-    drop-shadow(0 4px 8px rgba(0,0,0,0.45));
-
-  animation:fadeDown 0.9s 0.1s ease both, titleBreathe 6s ease-in-out infinite 1s;
-}
-.school-name img{
-  display:block;
-  width:100%;
-  height:auto;
-  margin:0 auto;
-}
-
-/* Soft breathing — barely perceptible */
-@keyframes titleBreathe{
-  0%,100%{
-    filter:
-      drop-shadow(0 0 2px rgba(255,235,180,0.3))
-      drop-shadow(0 0 8px rgba(255,200,90,0.18))
-      drop-shadow(0 4px 8px rgba(0,0,0,0.45));
-  }
-  50%{
-    filter:
-      drop-shadow(0 0 3px rgba(255,240,200,0.4))
-      drop-shadow(0 0 12px rgba(255,210,110,0.25))
-      drop-shadow(0 4px 8px rgba(0,0,0,0.45));
-  }
-}
-/* English subtitle */
-.school-sub{
-  font-size:clamp(16px,2.2vw,28px);color:#d4a843;font-weight:700;font-style:italic;
-  letter-spacing:1px;text-align:center;margin-bottom:30px;
-  text-shadow:0 2px 12px rgba(0,0,0,0.7);
-  animation:fadeDown 1s 0.2s ease both;
-}
-
+/* ANIMATIONS */
 @keyframes fadeDown{from{opacity:0;transform:translateY(-22px)}to{opacity:1;transform:none}}
 @keyframes fadeUp{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
-
-/* Three-column row: card | flag | card */
-.hero-row{
-  width:100%;
-  display:grid;
-  grid-template-columns:1fr auto 1fr;
-  align-items:center;
-  gap:24px;
-  animation:fadeIn 1.1s 0.3s ease both;
-}
-
-/* ── OIL LAMP CARDS (පහන්) ── */
-.hero-card{
-  height:160px;
-  position:relative;
-  background:transparent;
-  border:none;
-  padding:0;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:flex-end;
-  min-height:120px;
-  width:100%;
-  max-width:340px;
-  margin:0 auto;
-  overflow:visible;
-  filter:drop-shadow(0 12px 30px rgba(0,0,0,0.7)) drop-shadow(0 0 25px rgba(255,150,40,0.25));
-  transition:transform .4s ease,filter .4s ease;
-}
-.hero-card::before{display:none}
-.hero-card:hover{
-  transform:translateY(-8px) scale(1.03);
-  filter:drop-shadow(0 16px 40px rgba(0,0,0,0.8)) drop-shadow(0 0 40px rgba(255,180,60,0.45));
-  box-shadow:none;
-  background:transparent;
-  border:none;
-}
-
-/* Oil-lamp container holds flame + bowl */
-.lamp{
-  position:relative;
-  width:100%;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-}
-
-/* ── FLAME — teardrop shape ── */
-.flame-wrap{
-  position:relative;
-  width:54px;height:108px;
-  display:flex;align-items:flex-end;justify-content:center;
-  margin-bottom:-4px;
-  z-index:5;
-  animation:flameSway 3.2s ease-in-out infinite;
-  transform-origin:bottom center;
-}
-.flame{
-  position:relative;
-  width:42px;height:96px;
-  background:linear-gradient(180deg,
-    #ff6b1a 0%,
-    #ff8c2a 18%,
-    #ffa840 38%,
-    #ffc04d 60%,
-    #ffd84a 78%,
-    #ff9a2a 100%);
-  border-radius:48% 48% 50% 50% / 70% 70% 30% 30%;
-  clip-path:polygon(
-    50% 0%,62% 6%,78% 18%,88% 36%,92% 56%,
-    88% 76%,78% 90%,62% 98%,38% 98%,22% 90%,
-    12% 76%,8% 56%,12% 36%,22% 18%,38% 6%
-  );
-  box-shadow:
-    0 0 18px rgba(255,160,40,0.7),
-    0 0 38px rgba(255,120,20,0.55),
-    0 0 70px rgba(255,90,15,0.3);
-  animation:flameFlicker 0.2s ease-in-out infinite alternate;
-  transform-origin:bottom center;
-  filter:blur(0.3px);
-}
-.flame::before{
-  content:'';position:absolute;
-  top:18%;left:24%;right:24%;bottom:14%;
-  background:linear-gradient(180deg,
-    #ffd84a 0%,#ffe066 30%,#ffd84a 65%,#ffaa30 100%);
-  clip-path:polygon(50% 0%,72% 12%,88% 38%,88% 72%,72% 92%,50% 100%,28% 92%,12% 72%,12% 38%,28% 12%);
-  animation:flameInner 0.16s ease-in-out infinite alternate;
-}
-.flame::after{
-  content:'';position:absolute;
-  top:8%;left:38%;right:38%;height:25%;
-  background:radial-gradient(ellipse at 50% 80%,#fff8c8 0%,rgba(255,240,160,0.4) 60%,transparent 100%);
-  border-radius:50%;
-  animation:flameBase 0.3s ease-in-out infinite alternate;
-}
-@keyframes flameSway{
-  0%,100%{transform:rotate(-2.5deg) translateX(-1px)}
-  25%{transform:rotate(1.5deg) translateX(1px)}
-  50%{transform:rotate(-0.5deg) translateX(0)}
-  75%{transform:rotate(2.2deg) translateX(1px)}
-}
-@keyframes flameFlicker{
-  from{transform:scale(1,1);opacity:1}
-  to{transform:scale(0.96,1.04);opacity:0.94}
-}
-@keyframes flameInner{
-  from{opacity:1;transform:scale(1)}
-  to{opacity:0.78;transform:scale(0.92,1.08)}
-}
-@keyframes flameBase{
-  from{opacity:0.9;transform:scale(1)}
-  to{opacity:0.65;transform:scale(0.85,1.15)}
-}
-
-/* Glow halo behind flame */
-.flame-wrap::after{
-  content:'';
-  position:absolute;
-  width:200px;height:200px;
-  top:-40px;left:50%;
-  transform:translateX(-50%);
-  background:radial-gradient(circle,rgba(255,170,50,0.45) 0%,rgba(255,130,30,0.18) 35%,transparent 65%);
-  border-radius:50%;
-  z-index:-1;
-  animation:halo 3s ease-in-out infinite;
-  pointer-events:none;
-}
-@keyframes halo{
-  0%,100%{transform:translateX(-50%) scale(1);opacity:0.85}
-  50%{transform:translateX(-50%) scale(1.2);opacity:1}
-}
-
-/* WICK */
-.wick{
-  width:5px;height:10px;
-  background:linear-gradient(180deg,#1a0500 0%,#2a0808 60%,#3a0c0c 100%);
-  margin-top:-2px;margin-bottom:-3px;
-  border-radius:1px;
-  z-index:4;
-  position:relative;
-  box-shadow:0 0 4px rgba(0,0,0,0.6);
-}
-
-/* ══════ MAROON OIL LAMP — SIDE PROFILE VIEW ══════ */
-/* Bowl shape: half-circle profile when viewed from the side */
-.lamp-bowl{
-  position:relative;
-  width:100%;
-  max-width:300px;
-  height:115px;
-  /* Maroon clay body — deep wine red gradient with side-view shading */
-  background:
-    /* Top inner cavity (where oil sits) */
-    radial-gradient(ellipse 78% 30% at 50% 8%,#1a0205 0%,rgba(40,8,12,0.65) 50%,transparent 80%),
-    /* Side-view profile lighting: darker at edges, lighter in middle */
-    radial-gradient(ellipse 80% 100% at 50% 60%,
-      #1f1202 0%,
-      #0c0a00 35%,
-      #280e03 65%,
-      #1b0802 90%,
-      #0f0c06 100%);
-  /* SIDE-VIEW shape: half-ellipse — flat top edge, rounded bottom */
-  border-radius:8% 8% 50% 50% / 8% 8% 100% 100%;
-  /* Dark maroon outline — matches reference style */
-  border:2.5px solid #251b11;
-  box-shadow:
-    /* Inner shading depth */
-    inset 0 -28px 36px rgba(20,2,6,0.7),
-    inset 0 8px 14px rgba(0,0,0,0.5),
-    inset 8px 0 24px rgba(20,2,6,0.4),
-    inset -8px 0 24px rgba(20,2,6,0.4),
-    /* Outer drop shadow */
-    0 8px 18px rgba(0,0,0,0.6),
-    0 14px 30px rgba(0,0,0,0.4);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  padding:22px 22px 18px;
-  z-index:2;
-  overflow:visible;
-}
-
-/* Top opening — visible flat oval at the top of the bowl (oil reservoir) */
-.lamp-bowl::before{
-  content:'';
-  position:absolute;
-  top:-2px;left:5%;right:5%;
-  height:18%;
-  background:
-    /* Oil reservoir surface — darker maroon with shine highlight */
-    radial-gradient(ellipse at 50% 30%,#5a4c10 0%,#3a0810 50%,#1a0408 100%);
-  border:2px solid #2a0408;
-  border-radius:50% / 100%;
-  box-shadow:
-    inset 0 1px 3px rgba(78, 35, 6, 0.5),
-    inset 0 -2px 4px rgba(221, 186, 12, 0.7);
-  z-index:1;
-}
-
-/* Decorative golden rim line on bowl */
-.lamp-bowl::after{
-  content:'';
-  position:absolute;
-  top:24%;left:8%;right:8%;
-  height:1.5px;
-  background:linear-gradient(90deg,
-    transparent 0%,
-    rgba(255,200,80,0.5) 15%,
-    rgba(255,220,120,0.85) 50%,
-    rgba(255,200,80,0.5) 85%,
-    transparent 100%);
-  border-radius:2px;
-  box-shadow:0 1px 2px rgba(255,180,60,0.3);
-  z-index:1;
-}
-
-/* Top rim ridge - the inner edge of the opening */
-.lamp-bowl-top{
-  position:absolute;
-  top:1px;left:50%;
-  transform:translateX(-50%);
-  width:8%;height:14%;
-  background:radial-gradient(ellipse at 50% 30%,#c6b30e 0%,#0e0904 60%,transparent 100%);
-  border-radius:50%;
-  z-index:3;
-}
-
-/* Decorative pattern dots on the maroon bowl */
-.lamp-base{
-  position:absolute;
-  bottom:6%;left:8%;right:8%;
-  height:55%;
-  pointer-events:none;
-  z-index:1;
-  background-image:
-    radial-gradient(circle at 18% 25%,rgba(20,2,6,0.85) 0%,rgba(20,2,6,0.85) 6%,transparent 7%),
-    radial-gradient(circle at 38% 35%,rgba(20,2,6,0.75) 0%,rgba(20,2,6,0.75) 5%,transparent 6%),
-    radial-gradient(circle at 58% 25%,rgba(20,2,6,0.8) 0%,rgba(20,2,6,0.8) 7%,transparent 8%),
-    radial-gradient(circle at 78% 35%,rgba(20,2,6,0.75) 0%,rgba(20,2,6,0.75) 5%,transparent 6%),
-    radial-gradient(circle at 28% 60%,rgba(20,2,6,0.65) 0%,rgba(20,2,6,0.65) 4%,transparent 5%),
-    radial-gradient(circle at 50% 70%,rgba(20,2,6,0.7) 0%,rgba(20,2,6,0.7) 5%,transparent 6%),
-    radial-gradient(circle at 72% 60%,rgba(20,2,6,0.65) 0%,rgba(20,2,6,0.65) 4%,transparent 5%);
-  background-repeat:no-repeat;
-  margin:0;
-  border-radius:0 0 50% 50% / 0 0 100% 100%;
-  width:auto;
-}
-
-/* TEXT — bright on dark maroon */
-.card-txt{
-  position:relative;
-  z-index:3;
-  font-size:clamp(13px,1.6vw,17px);
-  font-weight:900;
-  color:#fff;
-  line-height:1.35;
-  letter-spacing:0.3px;
-  text-align:center;
-  text-shadow:
-    0 0 8px rgba(21, 9, 3, 0.85),
-    0 0 14px rgba(67, 31, 7, 0.6),
-    1px 1px 0 #1a0408,
-    -1px -1px 0 #1a0408,
-    1px -1px 0 #1a0408,
-    -1px 1px 0 #1a0408,
-    0 2px 4px rgba(0,0,0,1);
-  padding:0 6px;
-  margin-top:6%;
-}
-
-/* Hide old card-bar */
-.card-bar{display:none}
-
-/* Centre flag */
-.hero-flag{
-  width:clamp(220px,30vw,430px);
-  display:flex;align-items:center;justify-content:center;
-  isolation:isolate;
-  filter:drop-shadow(0 0 40px rgba(201,168,76,0.22)) drop-shadow(0 8px 24px rgba(0,0,0,0.7));
-  animation:flagFloat 6s ease-in-out infinite;
-}
-.hero-flag img{
-  width:100%;height:auto;
-  mix-blend-mode:screen;
-}
-@keyframes flagFloat{0%,100%{transform:translateY(0) rotate(-0.3deg)}50%{transform:translateY(-10px) rotate(0.3deg)}}
-
-/* ── ACTION BAR ── 3-col grid: button under each lamp, tagline centered */
-.hero-actions{
-  position:relative;z-index:10;
-  width:100%;max-width:1300px;
-  display:grid;
-  grid-template-columns:1fr auto 1fr;
-  align-items:center;
-  gap:24px;
-  padding:20px 36px 32px;
-  animation:fadeUp 1s 0.5s ease both;
-}
-.b1{justify-self:center}
-.b2{justify-self:center}
-.b1,.b2{
-  display:inline-block;
-  text-decoration:none;
-  background:linear-gradient(135deg,rgba(30,8,8,0.35),rgba(60,12,12,0.28));
-  color:#f0d890;font-size:15px;font-weight:800;
-  padding:14px 32px;
-  border:1px solid rgba(201,168,76,0.3);
-  border-radius:40px;cursor:pointer;letter-spacing:.5px;
-  box-shadow:0 4px 14px rgba(0,0,0,0.3),inset 0 1px 0 rgba(255,220,80,0.06);
-  backdrop-filter:blur(10px);
-  -webkit-backdrop-filter:blur(10px);
-  transition:all .25s ease;
-  white-space:nowrap;flex-shrink:0;
-  text-align:center;
-}
-.b1:hover,.b2:hover{
-  background:linear-gradient(135deg,rgba(50,12,12,0.55),rgba(80,16,16,0.45));
-  border-color:rgba(201,168,76,0.6);
-  color:#ffe066;
-  transform:translateY(-2px);
-  box-shadow:0 8px 24px rgba(0,0,0,0.45),0 0 18px rgba(201,168,76,0.15);
-}
-.hero-actions-mid{
-  display:flex;align-items:center;gap:10px;
-  color:#d4a843;font-size:clamp(12px,1.5vw,18px);font-weight:700;font-style:italic;
-  text-shadow:0 2px 10px rgba(0,0,0,0.8);
-  text-align:center;line-height:1.3;
-  justify-content:center;
-}
-.hero-actions-mid .wheel{font-size:1.5em;animation:spin 8s linear infinite;display:inline-block;flex-shrink:0}
 @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 
-/* Legacy classes kept for compat */
-.hero-left{display:none}
-.hero-right{display:none}
-.gold-line,.dot-gold,.tagline-main,.tagline-sub,.btns{display:none}
+/* BG CHAKRA */
+.bg-chakra{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:800px;height:800px;z-index:1;opacity:0.05;pointer-events:none;animation:spin 60s linear infinite}
+.bg-chakra svg{width:100%;height:100%}
 
-/* INFO STRIP */
-.strip{background:linear-gradient(90deg,#4a0606,#7a1010,#8b1212,#7a1010,#4a0606);display:flex;justify-content:center;gap:0;border-top:2px solid #c9a84c;border-bottom:1px solid rgba(201,168,76,0.2);flex-wrap:wrap}
-.si{display:flex;align-items:center;gap:12px;padding:16px 32px;border-right:1px solid rgba(201,168,76,0.15);flex:1;justify-content:center;transition:background .2s;cursor:default;min-width:200px}
-.si:last-child{border-right:none}
-.si:hover{background:rgba(201,168,76,0.06)}
-.sicon{width:38px;height:38px;border-radius:50%;background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.4);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;transition:all .2s}
-.si:hover .sicon{background:rgba(201,168,76,0.2);border-color:#c9a84c}
-.stxt{color:#f5deb3;font-size:11px;line-height:1.5}
-.stxt strong{color:#c9a84c;display:block;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:2px}
+/* FLOATING CHAKRAS */
+.chakra{position:absolute;pointer-events:none;z-index:2;opacity:0;animation:chakraFloat 14s linear infinite}
+.chakra svg{width:100%;height:100%;animation:chakraSpin 12s linear infinite}
+.chakra-1{width:60px;height:60px;left:8%;top:100%;animation-delay:0s}
+.chakra-2{width:45px;height:45px;left:22%;top:100%;animation-delay:3s;animation-duration:18s}
+.chakra-3{width:70px;height:70px;left:38%;top:100%;animation-delay:6s;animation-duration:16s}
+.chakra-4{width:50px;height:50px;left:58%;top:100%;animation-delay:1s;animation-duration:15s}
+.chakra-5{width:65px;height:65px;left:75%;top:100%;animation-delay:4s;animation-duration:17s}
+.chakra-6{width:40px;height:40px;left:90%;top:100%;animation-delay:7s;animation-duration:19s}
+@keyframes chakraFloat{0%{transform:translateY(0) translateX(0);opacity:0}10%{opacity:0.4}50%{transform:translateY(-50vh) translateX(20px);opacity:0.6}90%{opacity:0.3}100%{transform:translateY(-110vh) translateX(-15px);opacity:0}}
+@keyframes chakraSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 
-/* BOTTOM TAGLINE */
-.tagline-bar{background:#050505;text-align:center;padding:20px 32px;border-top:1px solid rgba(201,168,76,0.1);display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap}
-.tagline-bar .tmark{color:#c9a84c;font-size:18px}
-.tagline-bar .ttext{color:rgba(255,255,255,0.45);font-size:11.5px;letter-spacing:2px;text-transform:uppercase}
-.tagline-bar .ttext span{color:#c9a84c}
+/* PETALS */
+.petal{position:absolute;width:24px;height:24px;pointer-events:none;z-index:2;top:-30px;opacity:0;animation:petalFall linear infinite}
+.petal svg{width:100%;height:100%}
+.petal-1{left:5%;animation-duration:10s;animation-delay:0s}
+.petal-2{left:14%;animation-duration:13s;animation-delay:2s;width:18px;height:18px}
+.petal-3{left:23%;animation-duration:11s;animation-delay:5s;width:28px;height:28px}
+.petal-4{left:32%;animation-duration:14s;animation-delay:1s;width:20px;height:20px}
+.petal-5{left:42%;animation-duration:9s;animation-delay:3s}
+.petal-6{left:52%;animation-duration:12s;animation-delay:6s;width:22px;height:22px}
+.petal-7{left:62%;animation-duration:11s;animation-delay:0.5s;width:26px;height:26px}
+.petal-8{left:72%;animation-duration:13s;animation-delay:4s}
+.petal-9{left:82%;animation-duration:10s;animation-delay:2.5s;width:18px;height:18px}
+.petal-10{left:92%;animation-duration:14s;animation-delay:5.5s;width:24px;height:24px}
+.petal-11{left:18%;animation-duration:12s;animation-delay:7s;width:20px;height:20px}
+.petal-12{left:48%;animation-duration:10s;animation-delay:8s;width:26px;height:26px}
+.petal-13{left:78%;animation-duration:13s;animation-delay:1.5s;width:22px;height:22px}
+@keyframes petalFall{0%{transform:translateY(0) translateX(0) rotate(0deg);opacity:0}10%{opacity:0.85}25%{transform:translateY(25vh) translateX(40px) rotate(120deg)}50%{transform:translateY(50vh) translateX(-30px) rotate(240deg);opacity:0.75}75%{transform:translateY(75vh) translateX(35px) rotate(360deg)}90%{opacity:0.4}100%{transform:translateY(110vh) translateX(-20px) rotate(480deg);opacity:0}}
 
-/* ===== LOGIN BUTTON ===== */
+/* SPARKLES */
+.sparkle{position:absolute;width:4px;height:4px;background:radial-gradient(circle,#fff5a0 0%,rgba(255,220,80,0.8) 30%,transparent 70%);border-radius:50%;pointer-events:none;z-index:3;animation:sparkle 3s ease-in-out infinite}
+.sp-1{top:18%;left:12%;animation-delay:0s}.sp-2{top:25%;left:85%;animation-delay:0.7s}.sp-3{top:55%;left:8%;animation-delay:1.4s}.sp-4{top:70%;left:92%;animation-delay:2.1s}.sp-5{top:38%;left:30%;animation-delay:0.4s}.sp-6{top:62%;left:68%;animation-delay:1.8s}.sp-7{top:15%;left:55%;animation-delay:2.5s}.sp-8{top:80%;left:45%;animation-delay:1.1s}
+@keyframes sparkle{0%,100%{opacity:0;transform:scale(0.5)}50%{opacity:1;transform:scale(1.5);box-shadow:0 0 12px #ffe066}}
+
+/* LOGIN BUTTON */
 .login-btn{background:linear-gradient(135deg,#c9a84c,#a07810);color:#1a0800;border:none;padding:5px 16px;border-radius:3px;font-size:10.5px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;margin-left:8px;transition:all .2s;box-shadow:0 2px 8px rgba(201,168,76,0.25)}
 .login-btn:hover{background:linear-gradient(135deg,#e0b95c,#b88a20);box-shadow:0 4px 14px rgba(201,168,76,0.4)}
 .login-btn.logged-in{background:rgba(201,168,76,0.12);color:#c9a84c;border:1px solid rgba(201,168,76,0.35)}
+
+/* AUTH MODAL */
 .auth-overlay{display:none;position:fixed;inset:0;z-index:1000;background:rgba(4,2,4,0.92);backdrop-filter:blur(8px);align-items:center;justify-content:center}
 .auth-overlay.open{display:flex}
 .auth-modal{background:linear-gradient(160deg,#110808 0%,#1a0a0a 60%,#0d0d0a 100%);border:1px solid rgba(201,168,76,0.28);border-radius:8px;width:100%;max-width:420px;margin:1rem;box-shadow:0 0 80px rgba(0,0,0,0.95);animation:mIn .3s ease both;overflow:hidden;max-height:92vh;overflow-y:auto}
@@ -661,435 +210,106 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#000000;color:#000000;ov
 .am-lg-name{font-size:1.3rem;color:#fff;margin-bottom:.25rem}
 .am-lg-email{font-size:.76rem;color:rgba(201,168,76,0.55);letter-spacing:.8px;margin-bottom:1.4rem}
 
-/* ========== DHARMA CHAKRA & LOTUS PETAL ANIMATIONS ========== */
+/* INFO STRIP */
+.strip{background:linear-gradient(90deg,#4a0606,#7a1010,#8b1212,#7a1010,#4a0606);display:flex;justify-content:center;gap:0;border-top:2px solid #c9a84c;border-bottom:1px solid rgba(201,168,76,0.2);flex-wrap:wrap;width:100%}
+.si{display:flex;align-items:center;gap:12px;padding:16px 32px;border-right:1px solid rgba(201,168,76,0.15);flex:1;justify-content:center;transition:background .2s;cursor:default;min-width:200px}
+.si:last-child{border-right:none}
+.si:hover{background:rgba(201,168,76,0.06)}
+.sicon{width:38px;height:38px;border-radius:50%;background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.4);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;transition:all .2s}
+.si:hover .sicon{background:rgba(201,168,76,0.2);border-color:#c9a84c}
+.stxt{color:#f5deb3;font-size:11px;line-height:1.5}
+.stxt strong{color:#c9a84c;display:block;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:2px}
 
-/* Floating Dharma Chakras (wheels) */
-.chakra{
-  position:absolute;
-  pointer-events:none;
-  z-index:2;
-  opacity:0;
-  animation:chakraFloat 14s linear infinite;
-}
-.chakra svg{width:100%;height:100%;animation:chakraSpin 12s linear infinite}
-.chakra-1{width:60px;height:60px;left:8%;top:100%;animation-delay:0s}
-.chakra-2{width:45px;height:45px;left:22%;top:100%;animation-delay:3s;animation-duration:18s}
-.chakra-3{width:70px;height:70px;left:38%;top:100%;animation-delay:6s;animation-duration:16s}
-.chakra-4{width:50px;height:50px;left:58%;top:100%;animation-delay:1s;animation-duration:15s}
-.chakra-5{width:65px;height:65px;left:75%;top:100%;animation-delay:4s;animation-duration:17s}
-.chakra-6{width:40px;height:40px;left:90%;top:100%;animation-delay:7s;animation-duration:19s}
+/* FOOTER */
+.footer-wrap{background:linear-gradient(180deg,rgba(5,3,0,1) 0%,rgba(8,4,1,1) 30%,rgba(10,6,2,1) 60%,rgba(4,2,0,1) 100%);border-top:1px solid rgba(153,101,21,0.35);font-family:'Segoe UI',Arial,sans-serif;color:rgba(245,222,179,0.75);position:relative;overflow:hidden;width:100%;max-width:100%;box-sizing:border-box}
+.footer-wrap *{box-sizing:border-box;margin:0;padding:0}
+.footer-wrap::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent 0%,rgba(153,101,21,0.6) 20%,rgba(201,168,76,0.85) 50%,rgba(153,101,21,0.6) 80%,transparent 100%)}
+.footer-top{display:grid;grid-template-columns:repeat(4,1fr);gap:32px;padding:52px 48px 40px;max-width:1200px;margin:0 auto}
+.footer-col{min-width:0}
+.brand-col{text-align:left}
+.brand-col .brand-name{font-size:14px;font-weight:700;color:rgba(201,168,76,0.9);letter-spacing:0.4px;margin-bottom:5px;line-height:1.3}
+.brand-col .brand-pali{font-size:10px;letter-spacing:1.8px;text-transform:uppercase;color:rgba(153,101,21,0.7);margin-bottom:14px}
+.brand-col p{font-size:12px;line-height:1.7;color:rgba(245,222,179,0.45);margin-bottom:18px}
+.social-row{display:flex;gap:8px;flex-wrap:wrap}
+.soc-btn{width:32px;height:32px;border-radius:50%;border:1px solid rgba(153,101,21,0.35);background:rgba(153,101,21,0.08);display:flex;align-items:center;justify-content:center;color:rgba(201,168,76,0.7);cursor:pointer;transition:all 0.25s;text-decoration:none;flex-shrink:0}
+.soc-btn svg{width:13px;height:13px;fill:currentColor}
+.soc-btn:hover{background:rgba(153,101,21,0.22);border-color:rgba(201,168,76,0.55);color:rgba(201,168,76,0.95);transform:translateY(-2px)}
+.footer-col h4{font-size:10px;letter-spacing:2.2px;text-transform:uppercase;color:rgba(153,101,21,0.85);margin-bottom:18px;font-weight:700;position:relative;padding-bottom:10px}
+.footer-col h4::after{content:'';position:absolute;bottom:0;left:0;width:24px;height:1px;background:rgba(153,101,21,0.5)}
+.footer-col ul{list-style:none}
+.footer-col ul li{margin-bottom:10px}
+.footer-col ul li a{font-size:12.5px;color:rgba(245,222,179,0.42);text-decoration:none;letter-spacing:0.2px;transition:color 0.2s;display:flex;align-items:center;gap:6px}
+.footer-col ul li a::before{content:'›';color:rgba(153,101,21,0.5);font-size:14px;line-height:1}
+.footer-col ul li a:hover{color:rgba(201,168,76,0.85)}
+.contact-item{display:flex;gap:10px;margin-bottom:12px;align-items:flex-start}
+.contact-icon{width:28px;height:28px;border-radius:6px;background:rgba(153,101,21,0.1);border:1px solid rgba(153,101,21,0.25);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:rgba(201,168,76,0.85);transition:all 0.2s}
+.contact-icon svg{width:13px;height:13px;fill:currentColor}
+.contact-item:hover .contact-icon{background:rgba(153,101,21,0.2);border-color:rgba(201,168,76,0.45)}
+.contact-txt{font-size:11px;line-height:1.55;color:rgba(245,222,179,0.45);word-break:break-word;min-width:0}
+.contact-txt strong{display:block;font-size:9px;letter-spacing:1.4px;text-transform:uppercase;color:rgba(153,101,21,0.75);margin-bottom:2px;font-weight:700}
+.footer-divider{max-width:1200px;margin:0 auto;height:1px;background:linear-gradient(90deg,transparent 0%,rgba(153,101,21,0.25) 20%,rgba(153,101,21,0.45) 50%,rgba(153,101,21,0.25) 80%,transparent 100%)}
+.footer-bottom{max-width:1200px;margin:0 auto;padding:18px 48px 22px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.footer-bottom .copy{font-size:11px;color:rgba(245,222,179,0.3);letter-spacing:0.5px}
+.footer-bottom .copy span{color:rgba(153,101,21,0.7)}
+.footer-wheel{font-size:18px;color:rgba(153,101,21,0.45);animation:spinSlow 20s linear infinite;display:inline-block}
+@keyframes spinSlow{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+.footer-bottom .links{display:flex;gap:20px;flex-wrap:wrap}
+.footer-bottom .links a{font-size:10.5px;color:rgba(245,222,179,0.28);text-decoration:none;letter-spacing:0.5px;transition:color 0.2s}
+.footer-bottom .links a:hover{color:rgba(153,101,21,0.85)}
+.dhamma-strip{background:rgba(153,101,21,0.06);border-top:1px solid rgba(153,101,21,0.12);text-align:center;padding:12px;font-size:10.5px;letter-spacing:3px;text-transform:uppercase;color:rgba(153,101,21,0.4)}
+.dhamma-strip span{color:rgba(153,101,21,0.6);margin:0 10px}
 
-@keyframes chakraFloat{
-  0%{transform:translateY(0) translateX(0);opacity:0}
-  10%{opacity:0.4}
-  50%{transform:translateY(-50vh) translateX(20px);opacity:0.6}
-  90%{opacity:0.3}
-  100%{transform:translateY(-110vh) translateX(-15px);opacity:0}
-}
-@keyframes chakraSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+/* TAGLINE BAR */
+.tagline-bar{background:#050505;text-align:center;padding:20px 32px;border-top:1px solid rgba(201,168,76,0.1);display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap;width:100%}
+.tagline-bar .tmark{color:#c9a84c;font-size:18px}
+.tagline-bar .ttext{color:rgba(255,255,255,0.45);font-size:11.5px;letter-spacing:2px;text-transform:uppercase}
+.tagline-bar .ttext span{color:#c9a84c}
 
-/* Falling Lotus Petals (mal pethi) */
-.petal{
-  position:absolute;
-  width:24px;height:24px;
-  pointer-events:none;
-  z-index:2;
-  top:-30px;
-  opacity:0;
-  animation:petalFall linear infinite;
-}
-.petal svg{width:100%;height:100%}
-.petal-1{left:5%;animation-duration:10s;animation-delay:0s}
-.petal-2{left:14%;animation-duration:13s;animation-delay:2s;width:18px;height:18px}
-.petal-3{left:23%;animation-duration:11s;animation-delay:5s;width:28px;height:28px}
-.petal-4{left:32%;animation-duration:14s;animation-delay:1s;width:20px;height:20px}
-.petal-5{left:42%;animation-duration:9s;animation-delay:3s}
-.petal-6{left:52%;animation-duration:12s;animation-delay:6s;width:22px;height:22px}
-.petal-7{left:62%;animation-duration:11s;animation-delay:0.5s;width:26px;height:26px}
-.petal-8{left:72%;animation-duration:13s;animation-delay:4s}
-.petal-9{left:82%;animation-duration:10s;animation-delay:2.5s;width:18px;height:18px}
-.petal-10{left:92%;animation-duration:14s;animation-delay:5.5s;width:24px;height:24px}
-.petal-11{left:18%;animation-duration:12s;animation-delay:7s;width:20px;height:20px}
-.petal-12{left:48%;animation-duration:10s;animation-delay:8s;width:26px;height:26px}
-.petal-13{left:78%;animation-duration:13s;animation-delay:1.5s;width:22px;height:22px}
+/* ── RESPONSIVE ── */
+@media(max-width:600px){.chakra-3,.chakra-5,.chakra-6{display:none}.petal-3,.petal-6,.petal-9,.petal-11,.petal-12,.petal-13{display:none}.bg-chakra{width:500px;height:500px;opacity:0.03}}
 
-@keyframes petalFall{
-  0%{transform:translateY(0) translateX(0) rotate(0deg);opacity:0}
-  10%{opacity:0.85}
-  25%{transform:translateY(25vh) translateX(40px) rotate(120deg)}
-  50%{transform:translateY(50vh) translateX(-30px) rotate(240deg);opacity:0.75}
-  75%{transform:translateY(75vh) translateX(35px) rotate(360deg)}
-  90%{opacity:0.4}
-  100%{transform:translateY(110vh) translateX(-20px) rotate(480deg);opacity:0}
-}
-
-/* Big background dharma chakra (faint, behind everything) */
-.bg-chakra{
-  position:absolute;
-  top:50%;left:50%;
-  transform:translate(-50%,-50%);
-  width:800px;height:800px;
-  z-index:1;
-  opacity:0.05;
-  pointer-events:none;
-  animation:chakraSpin 60s linear infinite;
-}
-.bg-chakra svg{width:100%;height:100%}
-
-/* Pulsing glow behind flag */
-.flag-glow{
-  position:absolute;
-  width:120%;height:120%;top:-10%;left:-10%;
-  background:radial-gradient(circle,rgba(255,200,80,0.18) 0%,rgba(255,150,50,0.06) 40%,transparent 70%);
-  border-radius:50%;
-  pointer-events:none;
-  z-index:-1;
-  animation:flagGlow 4s ease-in-out infinite;
-}
-.hero-flag{position:relative}
-@keyframes flagGlow{
-  0%,100%{transform:scale(1);opacity:0.6}
-  50%{transform:scale(1.15);opacity:1}
-}
-
-/* Sparkle dots */
-.sparkle{
-  position:absolute;
-  width:4px;height:4px;
-  background:radial-gradient(circle,#fff5a0 0%,rgba(255,220,80,0.8) 30%,transparent 70%);
-  border-radius:50%;
-  pointer-events:none;
-  z-index:3;
-  animation:sparkle 3s ease-in-out infinite;
-}
-.sp-1{top:18%;left:12%;animation-delay:0s}
-.sp-2{top:25%;left:85%;animation-delay:0.7s}
-.sp-3{top:55%;left:8%;animation-delay:1.4s}
-.sp-4{top:70%;left:92%;animation-delay:2.1s}
-.sp-5{top:38%;left:30%;animation-delay:0.4s}
-.sp-6{top:62%;left:68%;animation-delay:1.8s}
-.sp-7{top:15%;left:55%;animation-delay:2.5s}
-.sp-8{top:80%;left:45%;animation-delay:1.1s}
-
-@keyframes sparkle{
-  0%,100%{opacity:0;transform:scale(0.5)}
-  50%{opacity:1;transform:scale(1.5);box-shadow:0 0 12px #ffe066}
-}
-
-/* Card subtle entrance — handled in main hero-card rules */
-
-/* Buddha rays (බුදු රැස්) — radiating light beams behind the title */
-.school-name{position:relative;overflow:visible;isolation:isolate;z-index:2}
-.school-name::before{
-  content:'';
-  position:absolute;
-  top:50%;left:50%;
-  transform:translate(-50%,-50%);
-  width:140%;height:340%;
-  z-index:-1;
-  pointer-events:none;
-  background:
-    /* Center halo */
-    radial-gradient(ellipse 50% 60% at 50% 50%,rgba(255,230,150,0.22) 0%,rgba(255,200,90,0.1) 35%,transparent 65%),
-    /* Radiating rays — alternating gold beams */
-    conic-gradient(from 0deg at 50% 50%,
-      transparent 0deg,
-      rgba(255,220,120,0.18) 8deg,
-      transparent 16deg,
-      transparent 22deg,
-      rgba(255,200,100,0.12) 30deg,
-      transparent 38deg,
-      transparent 45deg,
-      rgba(255,220,120,0.18) 53deg,
-      transparent 61deg,
-      transparent 67deg,
-      rgba(255,200,100,0.12) 75deg,
-      transparent 83deg,
-      transparent 90deg,
-      rgba(255,220,120,0.18) 98deg,
-      transparent 106deg,
-      transparent 112deg,
-      rgba(255,200,100,0.12) 120deg,
-      transparent 128deg,
-      transparent 135deg,
-      rgba(255,220,120,0.18) 143deg,
-      transparent 151deg,
-      transparent 157deg,
-      rgba(255,200,100,0.12) 165deg,
-      transparent 173deg,
-      transparent 180deg,
-      rgba(255,220,120,0.18) 188deg,
-      transparent 196deg,
-      transparent 202deg,
-      rgba(255,200,100,0.12) 210deg,
-      transparent 218deg,
-      transparent 225deg,
-      rgba(255,220,120,0.18) 233deg,
-      transparent 241deg,
-      transparent 247deg,
-      rgba(255,200,100,0.12) 255deg,
-      transparent 263deg,
-      transparent 270deg,
-      rgba(255,220,120,0.18) 278deg,
-      transparent 286deg,
-      transparent 292deg,
-      rgba(255,200,100,0.12) 300deg,
-      transparent 308deg,
-      transparent 315deg,
-      rgba(255,220,120,0.18) 323deg,
-      transparent 331deg,
-      transparent 337deg,
-      rgba(255,200,100,0.12) 345deg,
-      transparent 353deg,
-      transparent 360deg);
-  -webkit-mask:radial-gradient(ellipse 70% 80% at 50% 50%,black 0%,black 30%,transparent 70%);
-          mask:radial-gradient(ellipse 70% 80% at 50% 50%,black 0%,black 30%,transparent 70%);
-  animation:rayRotate 30s linear infinite, rayBreathe 5s ease-in-out infinite;
-}
-@keyframes rayRotate{
-  from{transform:translate(-50%,-50%) rotate(0deg)}
-  to{transform:translate(-50%,-50%) rotate(360deg)}
-}
-@keyframes rayBreathe{
-  0%,100%{opacity:0.25}
-  50%{opacity:0.45}
-}
-
-/* Disable heavy animations on mobile for perf */
-@media(max-width:600px){
-  .chakra-3,.chakra-5,.chakra-6{display:none}
-  .petal-3,.petal-6,.petal-9,.petal-11,.petal-12,.petal-13{display:none}
-  .bg-chakra{width:500px;height:500px;opacity:0.03}
-}
-
-/* ========== RESPONSIVE BREAKPOINTS ========== */
-
-/* Small laptop: 1025px–1200px — slight title/card scale-down */
-@media(max-width:1200px) and (min-width:1025px){
-  .hero-content{padding:34px 24px 0}
-  .hero-card{min-height:260px;max-width:300px}
-  .lamp-bowl{height:115px}
-  .flame-wrap{width:42px;height:80px}
-  .flame{width:32px;height:70px}
-  .hero-flag{width:clamp(240px,28vw,400px)}
-  .hero-actions{max-width:1100px}
-}
-
-/* Tablet landscape / small laptop: 769px–1024px */
 @media(max-width:1024px) and (min-width:769px){
-  .hero{min-height:540px}
-  .hero-content{padding:28px 20px 0}
-  .school-name{max-width:min(560px,80vw)}
-  .school-sub{font-size:clamp(16px,2.2vw,24px);margin-bottom:24px}
-  .hero-row{gap:18px}
-  .hero-card{min-height:240px;max-width:260px}
-  .lamp-bowl{height:105px;padding:24px 18px 14px}
-  .flame-wrap{width:38px;height:72px;margin-bottom:-4px}
-  .flame{width:28px;height:62px}
-  .card-txt{font-size:14px}
-  .hero-flag{width:clamp(200px,28vw,340px)}
-  .hero-actions{gap:18px;padding:18px 24px 28px;max-width:100%}
-  .b1,.b2{font-size:13px;padding:12px 24px}
-  .hero-actions-mid{font-size:14px}
-  .si{padding:14px 18px;min-width:160px}
+  .hero-content{padding:28px 20px 28px}
+  .hero-flag{width:clamp(200px,28vw,320px)}
 }
 
-/* Tablet portrait: 481px–768px */
 @media(max-width:768px) and (min-width:481px){
   .nav-links,.lang-row{display:none}
   .hamburger{display:flex}
-
-  .hero{min-height:auto}
-  .hero-content{padding:28px 18px 0}
+  .hero-content{padding:28px 18px 28px}
   .badge{font-size:8.5px;padding:6px 16px;letter-spacing:2px;margin-bottom:14px}
   .school-name{max-width:min(480px,82vw);margin-bottom:8px}
-  .school-sub{font-size:clamp(15px,2.5vw,20px);margin-bottom:22px}
-
-  .hero-row{
-    grid-template-columns:1fr;
-    gap:18px;justify-items:center;
-  }
-  .hero-flag{width:min(360px,72vw);order:-1;margin-bottom:6px}
-  .hero-card{width:100%;max-width:300px;min-height:240px;order:0}
-  .lamp-bowl{height:110px;padding:26px 22px 16px}
-  .flame-wrap{width:40px;height:76px}
-  .flame{width:30px;height:66px}
-  .card-txt{font-size:14px;text-align:center}
-
-  .hero-actions{display:flex;flex-direction:column;align-items:center;flex-wrap:wrap;gap:14px;padding:20px 18px 26px;max-width:560px}
-  .hero-actions-mid{width:100%;order:-1;font-size:14px;margin-bottom:4px}
-  .b1,.b2{font-size:13px;padding:12px 32px;justify-self:auto}
-
+  .hero-flag{width:min(220px,55vw)}
   .strip{flex-wrap:wrap}
-  .si{flex:1 1 calc(50% - 1px);border-right:1px solid rgba(201,168,76,0.15);border-bottom:1px solid rgba(201,168,76,0.15);min-width:0;padding:12px 12px}
+  .si{flex:1 1 calc(50% - 1px);border-right:1px solid rgba(201,168,76,0.15);border-bottom:1px solid rgba(201,168,76,0.15);min-width:0;padding:12px}
   .si:nth-child(2n){border-right:none}
-  .si:nth-child(3),.si:nth-child(4){border-bottom:none}
-  .tagline-bar{gap:8px;padding:16px 12px}
-  .tagline-bar .ttext{font-size:9px;letter-spacing:1px}
-
-  /* Reduce orb intensity on smaller screens */
+  .footer-top{grid-template-columns:repeat(3,1fr);gap:32px 24px;padding:44px 28px 32px}
+  .brand-col{grid-column:1 / -1;text-align:center;padding-bottom:14px;border-bottom:1px solid rgba(153,101,21,0.15);margin-bottom:6px}
+  .brand-col p{max-width:520px;margin-left:auto;margin-right:auto}
+  .social-row{justify-content:center}
   .orb1,.orb2{width:300px;height:300px}
   .orb3{display:none}
+  .quote-card{font-size:clamp(15px,2.5vw,20px)}
 }
 
-/* Mobile: ≤480px */
-/* ════════ MOBILE: ≤480px ════════ */
 @media(max-width:480px){
-  /* Nav */
   .nav{padding:0 12px;min-height:54px}
   .nav-links,.lang-row{display:none}
   .hamburger{display:flex;padding:8px}
   .brand{font-size:11px;letter-spacing:.3px}
-  .nav > img{width:34px!important;height:34px!important;margin-right:8px!important}
-
-  /* Hero */
+  .nav>img{width:28px!important;height:28px!important;margin-right:8px!important}
   .hero{min-height:auto;padding-bottom:8px}
-  .hero-content{padding:24px 14px 4px;width:100%}
-
-  .badge{
-    font-size:8px;padding:5px 12px;
-    letter-spacing:1.5px;margin-bottom:14px;
-    border-radius:20px;
-  }
-
-  /* Sinhala title — image, full width on mobile */
-  .school-name{
-    max-width:90vw;
-    margin-bottom:10px;
-  }
-  .school-sub{
-    font-size:clamp(14px,4vw,18px);
-    margin-bottom:24px;
-    letter-spacing:1.5px;
-    font-weight:600;
-  }
-
-  /* Mobile hero-row: flag on top, both lamps side by side below */
-  .hero-row{
-    grid-template-columns:1fr 1fr;
-    gap:12px;
-    justify-items:center;
-    align-items:start;
-    width:100%;
-  }
-  .hero-flag{
-    grid-column:1 / -1;
-    width:min(260px,72vw);
-    order:-1;
-    margin:0 auto 14px;
-  }
-
-  /* Mobile lamps — more compact, side-by-side */
-  .hero-card{
-    width:100%;
-    max-width:170px;
-    min-height:175px;
-    order:0;
-  }
-  .lamp{gap:0}
-  .lamp-bowl{
-    height:78px;
-    width:95%;
-    padding:16px 8px 10px;
-    border-radius:50% 50% 38% 38% / 28% 28% 72% 72%;
-  }
-  .lamp-bowl::before{display:none}
-  .lamp-bowl-top{width:36px;height:14px}
-  .lamp-base{
-    height:14px;
-    margin-top:-6px;
-    width:65%;
-  }
-  .flame-wrap{width:28px;height:54px;margin-bottom:-3px}
-  .flame{width:20px;height:46px}
-  .flame-wrap::after{width:100px;height:100px;top:-22px}
-  .wick{height:10px;width:2.5px}
-  .card-txt{
-    font-size:10.5px;
-    line-height:1.3;
-    letter-spacing:0.1px;
-    font-weight:800;
-    padding:0 2px;
-  }
-
-  /* Action bar — tagline panel below lamps, then buttons */
-  .hero-actions{
-    display:flex;
-    flex-direction:column;
-    gap:14px;
-    padding:22px 14px 22px;
-    max-width:100%;
-    align-items:stretch;
-  }
-  /* Tagline panel — sits directly below lamps */
-  .hero-actions-mid{
-    width:100%;
-    order:-1;
-    font-size:15px;
-    font-weight:700;
-    font-style:italic;
-    color:#ffd966;
-    gap:14px;
-    margin:0;
-    line-height:1.4;
-    padding:14px 18px;
-    background:linear-gradient(180deg,rgba(40,18,2,0.55),rgba(20,8,0,0.45));
-    border:1px solid rgba(201,168,76,0.28);
-    border-radius:14px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    text-align:center;
-    box-shadow:
-      0 4px 14px rgba(0,0,0,0.5),
-      inset 0 1px 0 rgba(255,220,140,0.1);
-    text-shadow:
-      0 1px 3px rgba(0,0,0,0.9),
-      0 0 8px rgba(255,180,60,0.35);
-  }
-  .hero-actions-mid .wheel{
-    font-size:1.5em;
-    color:#ffd966;
-    text-shadow:0 0 8px rgba(255,180,60,0.6);
-    flex-shrink:0;
-  }
-  /* Wrapper-less button row - sit side by side */
-  .hero-actions{display:flex;flex-wrap:wrap}
-  .b1,.b2{
-    font-size:13px;
-    padding:13px 14px;
-    flex:1 1 0;
-    min-width:0;
-    border-radius:30px;
-    letter-spacing:1px;
-  }
-
-  /* Info strip */
+  .hero-content{padding:24px 14px 24px;width:100%}
+  .badge{font-size:8px;padding:5px 12px;letter-spacing:1.5px;margin-bottom:14px;border-radius:20px}
+  .school-name{max-width:90vw;margin-bottom:10px}
+  .hero-tagline{font-size:13px;margin-bottom:18px}
+  .hero-flag{width:min(180px,60vw)}
+  .quote-card{font-size:14px;padding:28px 16px 20px;border-radius:20px}
+  .quote-card-btns{gap:10px;margin-top:16px}
+  .qc-btn{font-size:13px;padding:11px 0}
   .strip{flex-direction:column}
-  .si{
-    flex:none;width:100%;
-    padding:14px 18px;
-    border-right:none;
-    border-bottom:1px solid rgba(201,168,76,0.15);
-    min-width:0;
-    justify-content:flex-start;
-    gap:14px;
-  }
+  .si{flex:none;width:100%;padding:14px 18px;border-right:none;border-bottom:1px solid rgba(201,168,76,0.15);min-width:0;justify-content:flex-start;gap:14px}
   .si:last-child{border-bottom:none}
-  .sicon{width:34px;height:34px;font-size:14px}
-  .stxt{font-size:11.5px}
-  .stxt strong{font-size:8.5px}
-
-  /* Tagline */
-  .tagline-bar{
-    flex-direction:column;
-    gap:6px;padding:14px 12px;
-    text-align:center;
-  }
-  .tagline-bar .tmark{font-size:14px}
-  .tagline-bar .ttext{font-size:8.5px;letter-spacing:1px;line-height:1.4}
-
-  /* Performance: kill heavy decorations on mobile */
   .orb1,.orb2,.orb3{display:none}
   .arch,.arch2{display:none}
   .bg-chakra{width:380px;height:380px;opacity:0.025}
@@ -1097,42 +317,49 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#000000;color:#000000;ov
   .petal-3,.petal-6,.petal-9,.petal-11,.petal-12,.petal-13,.petal-7,.petal-8{display:none}
   .sparkle{width:3px;height:3px}
   .sp-5,.sp-6,.sp-7,.sp-8{display:none}
+  .tagline-bar{flex-direction:column;gap:6px;padding:14px 12px;text-align:center}
+  .footer-top{grid-template-columns:1fr;gap:26px;padding:32px 22px 22px;text-align:center}
+  .brand-col{grid-column:auto;padding-bottom:14px}
+  .footer-col h4{display:inline-block}
+  .footer-col h4::after{left:50%;transform:translateX(-50%)}
+  .footer-col ul li a{justify-content:center}
+  .contact-item{display:inline-flex;max-width:240px;width:auto;margin:0 auto 12px;text-align:left;align-items:center}
+  .footer-bottom{flex-direction:column;align-items:center;text-align:center;gap:12px;padding:18px 22px 20px}
+  .footer-bottom .links{justify-content:center;gap:14px}
+  .dhamma-strip{font-size:9px;letter-spacing:1.8px;padding:11px 12px;line-height:1.6}
+  .dhamma-strip span{margin:0 6px}
+  .social-row{justify-content:center}
 }
 
-/* ════════ SMALL MOBILE: ≤360px ════════ */
 @media(max-width:360px){
   .nav{padding:0 10px}
   .brand{font-size:10px}
-  .nav > img{width:30px!important;height:30px!important}
-
-  .hero-content{padding:20px 10px 4px}
+  .nav>img{width:24px!important;height:24px!important}
+  .hero-content{padding:20px 10px 20px}
   .school-name{max-width:92vw}
-  .school-sub{font-size:13px;margin-bottom:18px}
+  .hero-flag{width:min(160px,65vw)}
+  .quote-card{font-size:13px;padding:24px 14px 18px}
+  .footer-top{padding:28px 18px 20px}
+  .footer-bottom{padding:16px 18px 18px}
+  .contact-item{max-width:220px}
+}
 
-  .hero-row{gap:8px}
-  .hero-flag{width:min(220px,76vw)}
-  .hero-card{max-width:148px;min-height:155px}
-  .lamp-bowl{height:68px;padding:14px 6px 8px}
-  .flame-wrap{width:24px;height:46px}
-  .flame{width:17px;height:40px}
-  .flame-wrap::after{width:80px;height:80px;top:-18px}
-  .card-txt{font-size:9.5px;line-height:1.25}
-
-  .hero-actions{padding:16px 12px 20px;gap:10px}
-  .b1,.b2{font-size:12px;padding:12px 12px}
-  .hero-actions-mid{font-size:12px}
-
-  .si{padding:12px 14px}
-  .stxt{font-size:11px}
+@media(max-width:1100px){
+  .footer-top{grid-template-columns:repeat(3,1fr);gap:32px 24px;padding:44px 28px 32px}
+  .brand-col{grid-column:1 / -1;text-align:center;padding-bottom:14px;border-bottom:1px solid rgba(153,101,21,0.15);margin-bottom:6px}
+  .brand-col p{max-width:520px;margin-left:auto;margin-right:auto}
+  .social-row{justify-content:center}
+  .contact-txt{font-size:10.5px}
 }
 </style>
+<link rel="stylesheet" href="footer-mobile.css">
 </head>
 <body>
 
 <!-- NAV -->
 <nav class="nav">
- <img src="logo.png" width="40" height="40" alt="photo" align="left" style="margin-right:10px">
-  <div class="brand"> Sri Vipassi Dhamma School<span style="margin-right: 80px;"></span></div>
+  <img src="logo.png" width="28" height="28" alt="logo" style="margin-right:10px;flex-shrink:0">
+  <div class="brand">Sri Vipassi Dhamma School</div>
   <div class="nav-links">
     <a href="index.html">Home</a>
     <a href="Daily Attendance.html">Daily Attendance</a>
@@ -1156,14 +383,14 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#000000;color:#000000;ov
     <button class="lb">தமிழ்</button>
     <button class="login-btn" id="loginBtn" onclick="openAuth('signin')">Login</button>
   </div>
- <button class="hamburger mac-dots" onclick="toggleMobileMenu()" aria-label="Open menu">
-  <span class="dot red"></span>
-  <span class="dot yellow"></span>
-  <span class="dot green"></span>
-</button>
+  <button class="hamburger" onclick="toggleMobileMenu()" aria-label="Open menu">
+    <span class="dot red"></span>
+    <span class="dot yellow"></span>
+    <span class="dot green"></span>
+  </button>
 </nav>
 
-<!-- ========== MOBILE SIDEBAR ========== -->
+<!-- MOBILE SIDEBAR -->
 <div class="mobile-overlay" id="mobileOverlay" onclick="closeMobileMenu()"></div>
 <div class="mobile-sidebar" id="mobileSidebar">
   <div class="mobile-sidebar-header">
@@ -1185,7 +412,7 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#000000;color:#000000;ov
     <button class="lb on">EN</button>
     <button class="lb">සිං</button>
     <button class="lb">தமிழ்</button>
-    <button class="login-btn" id="mobileLoginBtn" onclick="openAuth('signin'); closeMobileMenu()">Login</button>
+    <button class="login-btn" id="mobileLoginBtn" onclick="openAuth('signin');closeMobileMenu()">Login</button>
   </div>
 </div>
 
@@ -1209,14 +436,10 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#000000;color:#000000;ov
       <circle cx="100" cy="100" r="78" fill="none" stroke="#c9a84c" stroke-width="1.5"/>
       <circle cx="100" cy="100" r="14" fill="#c9a84c"/>
       <g stroke="#c9a84c" stroke-width="3" fill="none">
-        <line x1="100" y1="22" x2="100" y2="178"/>
-        <line x1="22" y1="100" x2="178" y2="100"/>
-        <line x1="44.86" y1="44.86" x2="155.14" y2="155.14"/>
-        <line x1="155.14" y1="44.86" x2="44.86" y2="155.14"/>
-        <line x1="100" y1="22" x2="70.13" y2="156.65"/>
-        <line x1="100" y1="22" x2="129.87" y2="156.65"/>
-        <line x1="22" y1="100" x2="156.65" y2="70.13"/>
-        <line x1="22" y1="100" x2="156.65" y2="129.87"/>
+        <line x1="100" y1="22" x2="100" y2="178"/><line x1="22" y1="100" x2="178" y2="100"/>
+        <line x1="44.86" y1="44.86" x2="155.14" y2="155.14"/><line x1="155.14" y1="44.86" x2="44.86" y2="155.14"/>
+        <line x1="100" y1="22" x2="70.13" y2="156.65"/><line x1="100" y1="22" x2="129.87" y2="156.65"/>
+        <line x1="22" y1="100" x2="156.65" y2="70.13"/><line x1="22" y1="100" x2="156.65" y2="129.87"/>
       </g>
     </svg>
   </div>
@@ -1229,163 +452,96 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#000000;color:#000000;ov
   <div class="chakra chakra-5"><svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="46" fill="none" stroke="#ffd966" stroke-width="2"/><circle cx="50" cy="50" r="8" fill="#ffd966"/><g stroke="#ffd966" stroke-width="2"><line x1="50" y1="6" x2="50" y2="94"/><line x1="6" y1="50" x2="94" y2="50"/><line x1="18.9" y1="18.9" x2="81.1" y2="81.1"/><line x1="81.1" y1="18.9" x2="18.9" y2="81.1"/></g></svg></div>
   <div class="chakra chakra-6"><svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="46" fill="none" stroke="#ffd966" stroke-width="2"/><circle cx="50" cy="50" r="8" fill="#ffd966"/><g stroke="#ffd966" stroke-width="2"><line x1="50" y1="6" x2="50" y2="94"/><line x1="6" y1="50" x2="94" y2="50"/><line x1="18.9" y1="18.9" x2="81.1" y2="81.1"/><line x1="81.1" y1="18.9" x2="18.9" y2="81.1"/></g></svg></div>
 
-  <!-- FALLING LOTUS PETALS (mal pethi) -->
-  <div class="petal petal-1"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="pg1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffb3d4"/><stop offset="0.6" stop-color="#ff7eb3"/><stop offset="1" stop-color="#e84393"/></linearGradient></defs><path d="M12 2 C 7 6, 4 12, 12 22 C 20 12, 17 6, 12 2 Z" fill="url(#pg1)" stroke="#c14785" stroke-width="0.4"/></svg></div>
-  <div class="petal petal-2"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="pg2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff0c4"/><stop offset="0.6" stop-color="#ffd966"/><stop offset="1" stop-color="#e0a008"/></linearGradient></defs><path d="M12 2 C 7 6, 4 12, 12 22 C 20 12, 17 6, 12 2 Z" fill="url(#pg2)" stroke="#a07810" stroke-width="0.4"/></svg></div>
-  <div class="petal petal-3"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="pg3" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffd6e8"/><stop offset="0.6" stop-color="#ff9eb8"/><stop offset="1" stop-color="#d4567a"/></linearGradient></defs><path d="M12 2 C 7 6, 4 12, 12 22 C 20 12, 17 6, 12 2 Z" fill="url(#pg3)" stroke="#a83a5a" stroke-width="0.4"/></svg></div>
-  <div class="petal petal-4"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="pg4" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff5a0"/><stop offset="0.6" stop-color="#ffc940"/><stop offset="1" stop-color="#c98c10"/></linearGradient></defs><path d="M12 2 C 7 6, 4 12, 12 22 C 20 12, 17 6, 12 2 Z" fill="url(#pg4)" stroke="#8b6400" stroke-width="0.4"/></svg></div>
-  <div class="petal petal-5"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="pg5" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe0ec"/><stop offset="0.6" stop-color="#ff8fb1"/><stop offset="1" stop-color="#d44d76"/></linearGradient></defs><path d="M12 2 C 7 6, 4 12, 12 22 C 20 12, 17 6, 12 2 Z" fill="url(#pg5)" stroke="#a8345a" stroke-width="0.4"/></svg></div>
-  <div class="petal petal-6"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="pg6" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffeb99"/><stop offset="0.6" stop-color="#ffb340"/><stop offset="1" stop-color="#cc7a00"/></linearGradient></defs><path d="M12 2 C 7 6, 4 12, 12 22 C 20 12, 17 6, 12 2 Z" fill="url(#pg6)" stroke="#8b5a00" stroke-width="0.4"/></svg></div>
-  <div class="petal petal-7"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="pg7" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffc4d8"/><stop offset="0.6" stop-color="#ff7099"/><stop offset="1" stop-color="#c93869"/></linearGradient></defs><path d="M12 2 C 7 6, 4 12, 12 22 C 20 12, 17 6, 12 2 Z" fill="url(#pg7)" stroke="#9c2850" stroke-width="0.4"/></svg></div>
-  <div class="petal petal-8"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="pg8" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff5d4"/><stop offset="0.6" stop-color="#ffcd54"/><stop offset="1" stop-color="#d4a020"/></linearGradient></defs><path d="M12 2 C 7 6, 4 12, 12 22 C 20 12, 17 6, 12 2 Z" fill="url(#pg8)" stroke="#a07810" stroke-width="0.4"/></svg></div>
-  <div class="petal petal-9"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="pg9" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe0e8"/><stop offset="0.6" stop-color="#ff8aa8"/><stop offset="1" stop-color="#d44e74"/></linearGradient></defs><path d="M12 2 C 7 6, 4 12, 12 22 C 20 12, 17 6, 12 2 Z" fill="url(#pg9)" stroke="#a83560" stroke-width="0.4"/></svg></div>
-  <div class="petal petal-10"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="pg10" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff0a8"/><stop offset="0.6" stop-color="#ffc34a"/><stop offset="1" stop-color="#c98810"/></linearGradient></defs><path d="M12 2 C 7 6, 4 12, 12 22 C 20 12, 17 6, 12 2 Z" fill="url(#pg10)" stroke="#8b5e00" stroke-width="0.4"/></svg></div>
-  <div class="petal petal-11"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="pg11" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffd0e0"/><stop offset="0.6" stop-color="#ff80a8"/><stop offset="1" stop-color="#cc4570"/></linearGradient></defs><path d="M12 2 C 7 6, 4 12, 12 22 C 20 12, 17 6, 12 2 Z" fill="url(#pg11)" stroke="#9c305a" stroke-width="0.4"/></svg></div>
-  <div class="petal petal-12"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="pg12" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff8c0"/><stop offset="0.6" stop-color="#ffd066"/><stop offset="1" stop-color="#d49810"/></linearGradient></defs><path d="M12 2 C 7 6, 4 12, 12 22 C 20 12, 17 6, 12 2 Z" fill="url(#pg12)" stroke="#a07000" stroke-width="0.4"/></svg></div>
-  <div class="petal petal-13"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="pg13" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffc8dc"/><stop offset="0.6" stop-color="#ff7aa0"/><stop offset="1" stop-color="#c84068"/></linearGradient></defs><path d="M12 2 C 7 6, 4 12, 12 22 C 20 12, 17 6, 12 2 Z" fill="url(#pg13)" stroke="#982c54" stroke-width="0.4"/></svg></div>
+  <!-- LOTUS PETALS -->
+  <div class="petal petal-1"><svg viewBox="0 0 24 24"><defs><linearGradient id="pg1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffb3d4"/><stop offset="0.6" stop-color="#ff7eb3"/><stop offset="1" stop-color="#e84393"/></linearGradient></defs><path d="M12 2 C 7 6, 4 12, 12 22 C 20 12, 17 6, 12 2 Z" fill="url(#pg1)" stroke="#c14785" stroke-width="0.4"/></svg></div>
+  <div class="petal petal-2"><svg viewBox="0 0 24 24"><defs><linearGradient id="pg2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff0c4"/><stop offset="0.6" stop-color="#ffd966"/><stop offset="1" stop-color="#e0a008"/></linearGradient></defs><path d="M12 2 C 7 6, 4 12, 12 22 C 20 12, 17 6, 12 2 Z" fill="url(#pg2)" stroke="#a07810" stroke-width="0.4"/></svg></div>
+  <div class="petal petal-3"><svg viewBox="0 0 24 24"><defs><linearGradient id="pg3" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffd6e8"/><stop offset="0.6" stop-color="#ff9eb8"/><stop offset="1" stop-color="#d4567a"/></linearGradient></defs><path d="M12 2 C 7 6, 4 12, 12 22 C 20 12, 17 6, 12 2 Z" fill="url(#pg3)" stroke="#a83a5a" stroke-width="0.4"/></svg></div>
+  <div class="petal petal-4"><svg viewBox="0 0 24 24"><defs><linearGradient id="pg4" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff5a0"/><stop offset="0.6" stop-color="#ffc940"/><stop offset="1" stop-color="#c98c10"/></linearGradient></defs><path d="M12 2 C 7 6, 4 12, 12 22 C 20 12, 17 6, 12 2 Z" fill="url(#pg4)" stroke="#8b6400" stroke-width="0.4"/></svg></div>
+  <div class="petal petal-5"><svg viewBox="0 0 24 24"><defs><linearGradient id="pg5" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe0ec"/><stop offset="0.6" stop-color="#ff8fb1"/><stop offset="1" stop-color="#d44d76"/></linearGradient></defs><path d="M12 2 C 7 6, 4 12, 12 22 C 20 12, 17 6, 12 2 Z" fill="url(#pg5)" stroke="#a8345a" stroke-width="0.4"/></svg></div>
+  <div class="petal petal-6"><svg viewBox="0 0 24 24"><defs><linearGradient id="pg6" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffeb99"/><stop offset="0.6" stop-color="#ffb340"/><stop offset="1" stop-color="#cc7a00"/></linearGradient></defs><path d="M12 2 C 7 6, 4 12, 12 22 C 20 12, 17 6, 12 2 Z" fill="url(#pg6)" stroke="#8b5a00" stroke-width="0.4"/></svg></div>
+  <div class="petal petal-7"><svg viewBox="0 0 24 24"><defs><linearGradient id="pg7" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffc4d8"/><stop offset="0.6" stop-color="#ff7099"/><stop offset="1" stop-color="#c93869"/></linearGradient></defs><path d="M12 2 C 7 6, 4 12, 12 22 C 20 12, 17 6, 12 2 Z" fill="url(#pg7)" stroke="#9c2850" stroke-width="0.4"/></svg></div>
+  <div class="petal petal-8"><svg viewBox="0 0 24 24"><defs><linearGradient id="pg8" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff5d4"/><stop offset="0.6" stop-color="#ffcd54"/><stop offset="1" stop-color="#d4a020"/></linearGradient></defs><path d="M12 2 C 7 6, 4 12, 12 22 C 20 12, 17 6, 12 2 Z" fill="url(#pg8)" stroke="#a07810" stroke-width="0.4"/></svg></div>
+  <div class="petal petal-9"><svg viewBox="0 0 24 24"><defs><linearGradient id="pg9" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe0e8"/><stop offset="0.6" stop-color="#ff8aa8"/><stop offset="1" stop-color="#d44e74"/></linearGradient></defs><path d="M12 2 C 7 6, 4 12, 12 22 C 20 12, 17 6, 12 2 Z" fill="url(#pg9)" stroke="#a83560" stroke-width="0.4"/></svg></div>
+  <div class="petal petal-10"><svg viewBox="0 0 24 24"><defs><linearGradient id="pg10" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff0a8"/><stop offset="0.6" stop-color="#ffc34a"/><stop offset="1" stop-color="#c98810"/></linearGradient></defs><path d="M12 2 C 7 6, 4 12, 12 22 C 20 12, 17 6, 12 2 Z" fill="url(#pg10)" stroke="#8b5e00" stroke-width="0.4"/></svg></div>
+  <div class="petal petal-11"><svg viewBox="0 0 24 24"><defs><linearGradient id="pg11" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffd0e0"/><stop offset="0.6" stop-color="#ff80a8"/><stop offset="1" stop-color="#cc4570"/></linearGradient></defs><path d="M12 2 C 7 6, 4 12, 12 22 C 20 12, 17 6, 12 2 Z" fill="url(#pg11)" stroke="#9c305a" stroke-width="0.4"/></svg></div>
+  <div class="petal petal-12"><svg viewBox="0 0 24 24"><defs><linearGradient id="pg12" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff8c0"/><stop offset="0.6" stop-color="#ffd066"/><stop offset="1" stop-color="#d49810"/></linearGradient></defs><path d="M12 2 C 7 6, 4 12, 12 22 C 20 12, 17 6, 12 2 Z" fill="url(#pg12)" stroke="#a07000" stroke-width="0.4"/></svg></div>
+  <div class="petal petal-13"><svg viewBox="0 0 24 24"><defs><linearGradient id="pg13" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffc8dc"/><stop offset="0.6" stop-color="#ff7aa0"/><stop offset="1" stop-color="#c84068"/></linearGradient></defs><path d="M12 2 C 7 6, 4 12, 12 22 C 20 12, 17 6, 12 2 Z" fill="url(#pg13)" stroke="#982c54" stroke-width="0.4"/></svg></div>
 
   <!-- SPARKLES -->
-  <div class="sparkle sp-1"></div>
-  <div class="sparkle sp-2"></div>
-  <div class="sparkle sp-3"></div>
-  <div class="sparkle sp-4"></div>
-  <div class="sparkle sp-5"></div>
-  <div class="sparkle sp-6"></div>
-  <div class="sparkle sp-7"></div>
-  <div class="sparkle sp-8"></div>
+  <div class="sparkle sp-1"></div><div class="sparkle sp-2"></div>
+  <div class="sparkle sp-3"></div><div class="sparkle sp-4"></div>
+  <div class="sparkle sp-5"></div><div class="sparkle sp-6"></div>
+  <div class="sparkle sp-7"></div><div class="sparkle sp-8"></div>
 
+  <!-- HERO CONTENT -->
+  
+<!-- HERO CONTENT -->
   <div class="hero-content">
-    <!-- Badge -->
     <div class="badge">Kande Viharaya · Horana · Sri Lanka</div>
-    <!-- Sinhala title -->
-    <div class="school-name"><img src="title.png" alt="ශ්‍රී විපස්සි දහම් පාසල"></div>
-    <!-- English subtitle -->
-    <div class="school-sub">Sri Vipassi Dhamma School</div>
 
-    <!-- Three-column: left card | flag | right card -->
-    <div class="hero-row">
-      <!-- Left oil lamp -->
-      <div class="hero-card">
-        <div class="lamp">
-          <div class="flame-wrap">
-            <div class="flame"></div>
-          </div>
-          <div class="wick"></div>
-          <div class="lamp-bowl">
-            <div class="lamp-bowl-top"></div>
-            <div class="card-txt">A human society that develops wisdom</div>
-          </div>
-          <div class="lamp-base"></div>
-        </div>
-      </div>
+    <div class="school-name">ශ්‍රී විපස්සි දහම් පාසල</div>
 
-      <!-- Centre flag -->
-      <div class="hero-flag">
-        <div class="flag-glow"></div>
-        <img src="flag.png" alt="Sri Vipassi Dhamma School Flag" style="mix-blend-mode:screen;width:100%;height:auto;filter:drop-shadow(0 4px 24px rgba(201,168,76,0.3))">
-      </div>
-
-      <!-- Right oil lamp -->
-      <div class="hero-card">
-        <div class="lamp">
-          <div class="flame-wrap" style="animation-delay:-1.6s">
-            <div class="flame"></div>
-          </div>
-          <div class="wick"></div>
-          <div class="lamp-bowl">
-            <div class="lamp-bowl-top"></div>
-            <div class="card-txt">Walking the Noble Eightfold Path · Since founded</div>
-          </div>
-          <div class="lamp-base"></div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Action bar inside hero, below the row -->
-  <div class="hero-actions">
-    <a href="About.html" class="b1">Explore</a>
-    <div class="hero-actions-mid">
+    <div class="hero-tagline">
       <span class="wheel">☸</span>
       We are making an encouragable society
       <span class="wheel">☸</span>
     </div>
-    <a href="Contact.html" class="b2">Help</a>
+
+    <div class="hero-row">
+      <div class="hero-flag">
+        <div class="flag-glow"></div>
+        <img src="logo.png" alt="Sri Vipassi Dhamma School Flag">
+      </div>
+    </div>
+
+    <div class="quote-card">
+      <div class="quote-card-dots">
+        <span></span><span></span><span></span>
+      </div>
+      <div class="quote-card-text">"අපපදාන සෝභනී පඤඤා - නුවණින් චරිතය බබලනුයේ වේ"</div>
+      <div class="quote-card-btns">
+        <a href="About.html" class="qc-btn">Explore</a>
+        <a href="Contact.html" class="qc-btn">Help</a>
+      </div>
+    </div>
   </div>
+  
+    
 </div>
 
 
+<!-- INFO STRIP -->
+<div class="strip">
+  <div class="si">
+    <div class="sicon">🏫</div>
+    <div class="stxt"><strong>Established</strong>Kande Viharaya, Horana</div>
+  </div>
+  <div class="si">
+    <div class="sicon">📚</div>
+    <div class="stxt"><strong>Dhamma Education</strong>Weekly Classes & Programs</div>
+  </div>
+  <div class="si">
+    <div class="sicon">☸</div>
+    <div class="stxt"><strong>Buddhist Values</strong>Wisdom · Compassion · Peace</div>
+  </div>
+  <div class="si">
+    <div class="sicon">🌸</div>
+    <div class="stxt"><strong>Community</strong>Serving Sri Lanka</div>
+  </div>
+</div>
 
-<script>
-/* ========= PARTICLES ========= */
-(function(){
-  const cv=document.getElementById('particles');
-  const cx=cv.getContext('2d');
-  function resize(){cv.width=cv.parentElement.offsetWidth;cv.height=cv.parentElement.offsetHeight;}
-  resize();window.addEventListener('resize',resize);
-  const pts=[];
-  for(let i=0;i<55;i++){
-    pts.push({
-      x:Math.random()*cv.width,y:Math.random()*cv.height,
-      r:Math.random()*1.8+0.4,
-      vx:(Math.random()-.5)*0.3,vy:-(Math.random()*0.4+0.1),
-      life:Math.random(),decay:Math.random()*0.003+0.001,
-      gold:Math.random()<0.4
-    });
-  }
-  function tick(){
-    cx.clearRect(0,0,cv.width,cv.height);
-    for(const p of pts){
-      p.x+=p.vx;p.y+=p.vy;p.life-=p.decay;
-      if(p.life<=0||p.y<0){
-        p.x=Math.random()*cv.width;p.y=cv.height+5;
-        p.life=Math.random()*0.6+0.2;
-      }
-      cx.beginPath();cx.arc(p.x,p.y,p.r,0,Math.PI*2);
-      cx.fillStyle=p.gold
-        ?`rgba(201,168,76,${p.life*0.5})`
-        :`rgba(255,255,255,${p.life*0.25})`;
-      cx.fill();
-    }
-    requestAnimationFrame(tick);
-  }
-  tick();
-})();
-
-// ========== MOBILE MENU FUNCTIONS ==========
-function toggleMobileMenu(){
-  const sidebar = document.getElementById('mobileSidebar');
-  const overlay = document.getElementById('mobileOverlay');
-  const hamburger = document.querySelector('.hamburger');
-  sidebar.classList.toggle('open');
-  overlay.classList.toggle('open');
-  hamburger.classList.toggle('open');
-}
-
-function closeMobileMenu(){
-  const sidebar = document.getElementById('mobileSidebar');
-  const overlay = document.getElementById('mobileOverlay');
-  const hamburger = document.querySelector('.hamburger');
-  sidebar.classList.remove('open');
-  overlay.classList.remove('open');
-  hamburger.classList.remove('open');
-}
-</script>
-
-<!-- ===== AUTH MODAL ===== -->
+<!-- AUTH MODAL -->
 <div class="auth-overlay" id="authOverlay" onclick="overlayClick(event)">
   <div class="auth-modal">
     <div class="am-head">
-      <span class="am-wheel">☸</span>
+    
       <span class="am-brand">Sri Vipassi Dhamma School</span>
       <button class="am-close" onclick="closeAuth()">✕</button>
     </div>
     <div class="am-tabs">
       <button class="am-tab on" id="tabSI" onclick="switchTab('si')">Sign In</button>
-      <button class="am-tab"    id="tabSU" onclick="switchTab('su')">Sign Up</button>
+      <button class="am-tab" id="tabSU" onclick="switchTab('su')">Sign Up</button>
     </div>
-
-    <!-- Sign In Panel -->
     <div class="am-body" id="panSI">
       <div class="am-field"><label class="am-label">Email</label><input class="am-input" id="siEmail" type="email" placeholder="you@email.com" autocomplete="email"></div>
       <div class="am-field"><label class="am-label">Password</label><input class="am-input" id="siPass" type="password" placeholder="Password" autocomplete="current-password"></div>
@@ -1400,8 +556,6 @@ function closeMobileMenu(){
         </button>
       </div>
     </div>
-
-    <!-- Sign Up Panel -->
     <div class="am-body" id="panSU" style="display:none">
       <div class="am-field"><label class="am-label">Full Name</label><input class="am-input" id="suName" type="text" placeholder="Your name" autocomplete="name"></div>
       <div class="am-field"><label class="am-label">Email</label><input class="am-input" id="suEmail" type="email" placeholder="you@email.com" autocomplete="email"></div>
@@ -1414,8 +568,6 @@ function closeMobileMenu(){
         <button class="am-soc google" onclick="doGoogle()"><svg width="15" height="15" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>Continue with Google</button>
       </div>
     </div>
-
-    <!-- Logged In Panel -->
     <div class="am-body am-loggedin" id="panLI" style="display:none">
       <div class="am-avatar" id="lgAvatar">☸</div>
       <div class="am-lg-name" id="lgName">Welcome!</div>
@@ -1425,321 +577,9 @@ function closeMobileMenu(){
   </div>
 </div>
 
-<script>
-const firebaseConfig = {
-  apiKey:            "AIzaSyAWpPP3OevjIRAsoGIjOJTofV6l2jgyhNI",
-  authDomain:        "signin-f9656.firebaseapp.com",
-  projectId:         "signin-f9656",
-  storageBucket:     "signin-f9656.firebasestorage.app",
-  messagingSenderId: "1074665165821",
-  appId:             "1:1074665165821:web:91ef329a0472fa138e7f94",
-  measurementId:     "G-SG9TZSLP6E"
-};
-
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db   = firebase.firestore();
-
-const providers = {
-  google: new firebase.auth.GoogleAuthProvider()
-};
-providers.google.addScope('email');
-providers.google.addScope('profile');
-
-async function saveUser(user, extra={}) {
-  try {
-    const ref  = db.collection("users").doc(user.uid);
-    const snap = await ref.get();
-    if (!snap.exists) {
-      await ref.set({
-        uid: user.uid,
-        email: user.email || "",
-        displayName: user.displayName || extra.name || "",
-        photoURL: user.photoURL || "",
-        role: "student",
-        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-        ...extra
-      });
-    }
-  } catch(e) { console.warn("Firestore save:", e.message); }
-}
-
-auth.onAuthStateChanged(u => {
-  const btn = document.getElementById("loginBtn");
-  if (u) {
-    const first = (u.displayName || u.email || "User").split(/[ @]/)[0];
-    btn.textContent = first;
-    btn.classList.add("logged-in");
-    const av = document.getElementById("lgAvatar");
-    if (av) {
-      if (u.photoURL) {
-        av.innerHTML = `<img src="${u.photoURL}" style="width:100%;height:100%;border-radius:50%;object-fit:cover">`;
-      } else {
-        av.textContent = first.charAt(0).toUpperCase();
-      }
-    }
-    const lgName  = document.getElementById("lgName");
-    const lgEmail = document.getElementById("lgEmail");
-    if (lgName)  lgName.textContent  = "Welcome, " + (u.displayName || u.email);
-    if (lgEmail) lgEmail.textContent = u.email || "";
-  } else {
-    btn.textContent = "Login";
-    btn.classList.remove("logged-in");
-  }
-});
-
-function openAuth(tab) {
-  document.getElementById("authOverlay").classList.add("open");
-  if (auth.currentUser) { showPan("panLI"); return; }
-  switchTab(tab || "si");
-}
-function closeAuth() {
-  document.getElementById("authOverlay").classList.remove("open");
-  clearErrs();
-}
-function overlayClick(e) {
-  if (e.target === document.getElementById("authOverlay")) closeAuth();
-}
-function switchTab(t) {
-  document.getElementById("tabSI").classList.toggle("on", t === "si");
-  document.getElementById("tabSU").classList.toggle("on", t === "su");
-  showPan(t === "si" ? "panSI" : "panSU");
-}
-function showPan(id) {
-  ["panSI","panSU","panLI"].forEach(p => {
-    document.getElementById(p).style.display = p === id ? "block" : "none";
-  });
-}
-function clearErrs() {
-  ["siErr","suErr"].forEach(id => {
-    const el = document.getElementById(id);
-    el.textContent = ""; el.className = "am-err";
-  });
-}
-function errMsg(id, m) {
-  const el = document.getElementById(id);
-  el.textContent = m; el.className = "am-err";
-}
-function okMsg(id, m) {
-  const el = document.getElementById(id);
-  el.textContent = m; el.className = "am-err am-ok";
-}
-function fErr(c) {
-  return ({
-    "auth/user-not-found":                          "No account found with that email.",
-    "auth/wrong-password":                          "Incorrect password.",
-    "auth/invalid-credential":                      "Invalid email or password.",
-    "auth/email-already-in-use":                    "Email already registered — try Sign In.",
-    "auth/invalid-email":                           "Please enter a valid email.",
-    "auth/weak-password":                           "Password must be at least 6 characters.",
-    "auth/popup-closed-by-user":                    "Sign-in popup was closed.",
-    "auth/popup-blocked":                           "Popup was blocked — please allow popups for this site.",
-    "auth/network-request-failed":                  "Network error. Check your connection.",
-    "auth/too-many-requests":                       "Too many attempts — try again later.",
-    "auth/account-exists-with-different-credential":"An account already exists with this email using a different sign-in method.",
-    "auth/cancelled-popup-request":                 "Another popup is already open.",
-    "auth/operation-not-allowed":                   "This sign-in method is not enabled. Please contact the administrator.",
-    "auth/unauthorized-domain":                     "This domain is not authorized. Please open via a proper web server."
-  })[c] || "Something went wrong. Please try again. (" + c + ")";
-}
-
-async function doSignIn() {
-  const email = document.getElementById("siEmail").value.trim();
-  const pass  = document.getElementById("siPass").value;
-  if (!email || !pass) { errMsg("siErr","Please fill in all fields."); return; }
-  const btn = document.getElementById("siBtn");
-  btn.disabled = true;
-  try {
-    await auth.signInWithEmailAndPassword(email, pass);
-    showPan("panLI");
-    setTimeout(closeAuth, 1400);
-  } catch(e) {
-    errMsg("siErr", fErr(e.code));
-  } finally {
-    btn.disabled = false;
-  }
-}
-
-async function doSignUp() {
-  const name  = document.getElementById("suName").value.trim();
-  const email = document.getElementById("suEmail").value.trim();
-  const pass  = document.getElementById("suPass").value;
-  const conf  = document.getElementById("suConf").value;
-  if (!name || !email || !pass)    { errMsg("suErr","Please fill in all fields."); return; }
-  if (pass !== conf)               { errMsg("suErr","Passwords do not match."); return; }
-  if (pass.length < 6)             { errMsg("suErr","Password must be at least 6 characters."); return; }
-  const btn = document.getElementById("suBtn");
-  btn.disabled = true;
-  try {
-    const cred = await auth.createUserWithEmailAndPassword(email, pass);
-    await cred.user.updateProfile({ displayName: name });
-    await saveUser(cred.user, { name });
-    showPan("panLI");
-    setTimeout(closeAuth, 1400);
-  } catch(e) {
-    errMsg("suErr", fErr(e.code));
-  } finally {
-    btn.disabled = false;
-  }
-}
-
-async function doSocial(providerKey) {
-  clearErrs();
-  const provider = providers[providerKey];
-  if (!provider) { errMsg("siErr","Provider not configured."); return; }
-  try {
-    const result = await auth.signInWithPopup(provider);
-    await saveUser(result.user);
-    showPan("panLI");
-    setTimeout(closeAuth, 1400);
-  } catch(e) {
-    const activeErr = document.getElementById("panSU").style.display === "block" ? "suErr" : "siErr";
-    errMsg(activeErr, fErr(e.code));
-    console.error("Social auth error:", e.code, e.message);
-  }
-}
-
-function doGoogle()    { doSocial("google"); }
-
-async function doSignOut() {
-  await auth.signOut();
-  showPan("panSI");
-  closeAuth();
-}
-
-async function forgotPw() {
-  const email = document.getElementById("siEmail").value.trim();
-  if (!email) { errMsg("siErr","Enter your email above first."); return; }
-  try {
-    await auth.sendPasswordResetEmail(email);
-    okMsg("siErr","Reset email sent — check your inbox.");
-  } catch(e) {
-    errMsg("siErr", fErr(e.code));
-  }
-}
-</script>
-
-<style>
-  .footer-wrap *{box-sizing:border-box;margin:0;padding:0}
-
-  .footer-wrap{
-    background:linear-gradient(180deg,
-      rgba(5,3,0,1) 0%,
-      rgba(8,4,1,1) 30%,
-      rgba(10,6,2,1) 60%,
-      rgba(4,2,0,1) 100%);
-    border-top:1px solid rgba(153,101,21,0.35);
-    font-family:'Segoe UI',Arial,sans-serif;
-    color:rgba(245,222,179,0.75);
-    position:relative;
-    overflow:hidden;
-  }
-  .footer-wrap::before{
-    content:'';position:absolute;top:0;left:0;right:0;height:1px;
-    background:linear-gradient(90deg,
-      transparent 0%,
-      rgba(153,101,21,0.6) 20%,
-      rgba(201,168,76,0.85) 50%,
-      rgba(153,101,21,0.6) 80%,
-      transparent 100%);
-  }
-
-  .footer-top{
-    display:grid;
-    grid-template-columns:repeat(4,1fr);
-    gap:32px;
-    padding:52px 48px 40px;
-    max-width:1200px;
-    margin:0 auto;
-  }
-  .footer-col{min-width:0}
-
-  .brand-col{text-align:left}
-  .brand-col .brand-name{font-size:14px;font-weight:700;color:rgba(201,168,76,0.9);letter-spacing:0.4px;margin-bottom:5px;line-height:1.3}
-  .brand-col .brand-pali{font-size:10px;letter-spacing:1.8px;text-transform:uppercase;color:rgba(153,101,21,0.7);margin-bottom:14px}
-  .brand-col p{font-size:12px;line-height:1.7;color:rgba(245,222,179,0.45);margin-bottom:18px}
-
-  .social-row{display:flex;gap:8px;flex-wrap:wrap}
-  .soc-btn{width:32px;height:32px;border-radius:50%;border:1px solid rgba(153,101,21,0.35);background:rgba(153,101,21,0.08);display:flex;align-items:center;justify-content:center;color:rgba(201,168,76,0.7);cursor:pointer;transition:all 0.25s;text-decoration:none;flex-shrink:0}
-  .soc-btn svg{width:13px;height:13px;fill:currentColor}
-  .soc-btn:hover{background:rgba(153,101,21,0.22);border-color:rgba(201,168,76,0.55);color:rgba(201,168,76,0.95);transform:translateY(-2px)}
-
-  .footer-col h4{font-size:10px;letter-spacing:2.2px;text-transform:uppercase;color:rgba(153,101,21,0.85);margin-bottom:18px;font-weight:700;position:relative;padding-bottom:10px}
-  .footer-col h4::after{content:'';position:absolute;bottom:0;left:0;width:24px;height:1px;background:rgba(153,101,21,0.5)}
-
-  .footer-col ul{list-style:none}
-  .footer-col ul li{margin-bottom:10px}
-  .footer-col ul li a{font-size:12.5px;color:rgba(245,222,179,0.42);text-decoration:none;letter-spacing:0.2px;transition:color 0.2s;display:flex;align-items:center;gap:6px}
-  .footer-col ul li a::before{content:'›';color:rgba(153,101,21,0.5);font-size:14px;line-height:1}
-  .footer-col ul li a:hover{color:rgba(201,168,76,0.85)}
-
-  .contact-item{display:flex;gap:10px;margin-bottom:12px;align-items:flex-start}
-  .contact-icon{width:28px;height:28px;border-radius:6px;background:rgba(153,101,21,0.1);border:1px solid rgba(153,101,21,0.25);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:rgba(201,168,76,0.85);transition:all 0.2s}
-  .contact-icon svg{width:13px;height:13px;fill:currentColor}
-  .contact-item:hover .contact-icon{background:rgba(153,101,21,0.2);border-color:rgba(201,168,76,0.45)}
-  .contact-txt{font-size:11px;line-height:1.55;color:rgba(245,222,179,0.45);word-break:break-word;min-width:0}
-  .contact-txt strong{display:block;font-size:9px;letter-spacing:1.4px;text-transform:uppercase;color:rgba(153,101,21,0.75);margin-bottom:2px;font-weight:700}
-
-  .footer-divider{max-width:1200px;margin:0 auto;height:1px;background:linear-gradient(90deg,transparent 0%,rgba(153,101,21,0.25) 20%,rgba(153,101,21,0.45) 50%,rgba(153,101,21,0.25) 80%,transparent 100%)}
-
-  .footer-bottom{max-width:1200px;margin:0 auto;padding:18px 48px 22px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
-  .footer-bottom .copy{font-size:11px;color:rgba(245,222,179,0.3);letter-spacing:0.5px}
-  .footer-bottom .copy span{color:rgba(153,101,21,0.7)}
-  .footer-wheel{font-size:18px;color:rgba(153,101,21,0.45);animation:spinSlow 20s linear infinite;display:inline-block}
-  @keyframes spinSlow{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
-  .footer-bottom .links{display:flex;gap:20px;flex-wrap:wrap}
-  .footer-bottom .links a{font-size:10.5px;color:rgba(245,222,179,0.28);text-decoration:none;letter-spacing:0.5px;transition:color 0.2s}
-  .footer-bottom .links a:hover{color:rgba(153,101,21,0.85)}
-
-  .dhamma-strip{background:rgba(153,101,21,0.06);border-top:1px solid rgba(153,101,21,0.12);text-align:center;padding:12px;font-size:10.5px;letter-spacing:3px;text-transform:uppercase;color:rgba(153,101,21,0.4)}
-  .dhamma-strip span{color:rgba(153,101,21,0.6);margin:0 10px}
-
-  /* TABLET (≤1100px): brand on top, 3 cols below */
-  @media (max-width:1100px){
-    .footer-top{grid-template-columns:repeat(3,1fr);gap:32px 24px;padding:44px 28px 32px}
-    .brand-col{grid-column:1 / -1;text-align:center;padding-bottom:14px;border-bottom:1px solid rgba(153,101,21,0.15);margin-bottom:6px}
-    .brand-col p{max-width:520px;margin-left:auto;margin-right:auto}
-    .social-row{justify-content:center}
-    .contact-txt{font-size:10.5px}
-  }
-
-  /* SMALL PHONE (≤500px): single column, fully centered */
-  @media (max-width:500px){
-    .footer-top{grid-template-columns:1fr;gap:26px;padding:32px 22px 22px;text-align:center}
-    .brand-col{grid-column:auto;padding-bottom:14px}
-    .brand-col p{max-width:320px}
-
-    .footer-col h4{margin-bottom:14px;padding-bottom:8px;font-size:9.5px;display:inline-block}
-    .footer-col h4::after{left:50%;transform:translateX(-50%);width:24px}
-
-    .footer-col ul li{margin-bottom:8px}
-    .footer-col ul li a{font-size:13px;justify-content:center}
-
-    .contact-item{display:inline-flex;max-width:240px;width:auto;margin:0 auto 12px;text-align:left;align-items:center}
-    .contact-icon{width:32px;height:32px;border-radius:8px}
-    .contact-icon svg{width:14px;height:14px}
-    .contact-txt{font-size:12px}
-    .contact-txt strong{font-size:9px}
-
-    .footer-bottom{flex-direction:column;align-items:center;text-align:center;gap:12px;padding:18px 22px 20px}
-    .footer-bottom .copy{font-size:10.5px;line-height:1.5}
-    .footer-bottom .links{justify-content:center;gap:14px}
-    .footer-bottom .links a{font-size:10px}
-    .dhamma-strip{font-size:9px;letter-spacing:1.8px;padding:11px 12px;line-height:1.6}
-    .dhamma-strip span{margin:0 6px}
-  }
-
-  @media (max-width:360px){
-    .footer-top{padding:28px 18px 20px}
-    .footer-bottom{padding:16px 18px 18px}
-    .contact-item{max-width:220px}
-  }
-</style>
-
+<!-- FOOTER -->
 <div class="footer-wrap">
-
   <div class="footer-top">
-
     <div class="brand-col footer-col">
       <div class="brand-name">Sri Vipassi Dhamma School</div>
       <div class="brand-pali">Kande Viharaya · Horana</div>
@@ -1751,7 +591,6 @@ async function forgotPw() {
         <a class="soc-btn" title="Instagram" href="#"><svg viewBox="0 0 24 24"><path d="M12 2.16c3.2 0 3.58 0 4.85.07 3.25.15 4.77 1.69 4.92 4.92.06 1.27.07 1.65.07 4.85s0 3.58-.07 4.85c-.15 3.23-1.66 4.77-4.92 4.92-1.27.06-1.64.07-4.85.07s-3.58 0-4.85-.07c-3.26-.15-4.77-1.7-4.92-4.92-.06-1.27-.07-1.64-.07-4.85s0-3.58.07-4.85C2.5 3.92 4.01 2.38 7.15 2.23 8.42 2.18 8.8 2.16 12 2.16zM12 0C8.74 0 8.33.01 7.05.07 2.7.27.27 2.69.07 7.05.01 8.33 0 8.74 0 12s.01 3.67.07 4.95c.2 4.36 2.62 6.78 6.98 6.98C8.33 23.99 8.74 24 12 24s3.67-.01 4.95-.07c4.35-.2 6.78-2.62 6.98-6.98.06-1.28.07-1.69.07-4.95s-.01-3.67-.07-4.95c-.2-4.35-2.62-6.78-6.98-6.98C15.67.01 15.26 0 12 0zm0 5.84a6.16 6.16 0 100 12.32 6.16 6.16 0 000-12.32zm0 10.16a4 4 0 110-8 4 4 0 010 8zm6.41-11.85a1.44 1.44 0 100 2.88 1.44 1.44 0 000-2.88z"/></svg></a>
       </div>
     </div>
-
     <div class="footer-col">
       <h4>Quick Links</h4>
       <ul>
@@ -1763,7 +602,6 @@ async function forgotPw() {
         <li><a href="#">Achievements</a></li>
       </ul>
     </div>
-
     <div class="footer-col">
       <h4>Programs</h4>
       <ul>
@@ -1774,7 +612,6 @@ async function forgotPw() {
         <li><a href="Contact.html">Contact Us</a></li>
       </ul>
     </div>
-
     <div class="footer-col contact-col">
       <h4>Contact</h4>
       <div class="contact-item">
@@ -1790,26 +627,70 @@ async function forgotPw() {
         <div class="contact-txt"><strong>Email</strong>srivipassidhamma<br>school@gmail.com</div>
       </div>
     </div>
-
   </div>
-
   <div class="footer-divider"></div>
-
   <div class="footer-bottom">
     <div class="copy">© 2025 <span>Sri Vipassi Dhamma School</span> · All rights reserved</div>
-    
     <div class="links">
       <a href="#">Privacy Policy</a>
       <a href="#">Terms of Use</a>
       <a href="#">Sitemap</a>
     </div>
   </div>
-
   <div class="dhamma-strip">
     <span>☸</span> Developing Wisdom Through Dhamma <span>☸</span> Sri Lanka <span>☸</span>
   </div>
-
 </div>
 
+<script>
+/* PARTICLES */
+(function(){
+  const cv=document.getElementById('particles');
+  const cx=cv.getContext('2d');
+  function resize(){cv.width=cv.parentElement.offsetWidth;cv.height=cv.parentElement.offsetHeight}
+  resize();window.addEventListener('resize',resize);
+  const pts=[];
+  for(let i=0;i<55;i++){pts.push({x:Math.random()*cv.width,y:Math.random()*cv.height,r:Math.random()*1.8+0.4,vx:(Math.random()-.5)*0.3,vy:-(Math.random()*0.4+0.1),life:Math.random(),decay:Math.random()*0.003+0.001,gold:Math.random()<0.4})}
+  function tick(){
+    cx.clearRect(0,0,cv.width,cv.height);
+    for(const p of pts){p.x+=p.vx;p.y+=p.vy;p.life-=p.decay;if(p.life<=0||p.y<0){p.x=Math.random()*cv.width;p.y=cv.height+5;p.life=Math.random()*0.6+0.2}cx.beginPath();cx.arc(p.x,p.y,p.r,0,Math.PI*2);cx.fillStyle=p.gold?`rgba(201,168,76,${p.life*0.5})`:`rgba(255,255,255,${p.life*0.25})`;cx.fill()}
+    requestAnimationFrame(tick);
+  }
+  tick();
+})();
+
+/* MOBILE MENU */
+function toggleMobileMenu(){const s=document.getElementById('mobileSidebar'),o=document.getElementById('mobileOverlay'),h=document.querySelector('.hamburger');s.classList.toggle('open');o.classList.toggle('open');h.classList.toggle('open')}
+function closeMobileMenu(){const s=document.getElementById('mobileSidebar'),o=document.getElementById('mobileOverlay'),h=document.querySelector('.hamburger');s.classList.remove('open');o.classList.remove('open');h.classList.remove('open')}
+</script>
+
+<script>
+const firebaseConfig={apiKey:"AIzaSyAWpPP3OevjIRAsoGIjOJTofV6l2jgyhNI",authDomain:"signin-f9656.firebaseapp.com",projectId:"signin-f9656",storageBucket:"signin-f9656.firebasestorage.app",messagingSenderId:"1074665165821",appId:"1:1074665165821:web:91ef329a0472fa138e7f94",measurementId:"G-SG9TZSLP6E"};
+firebase.initializeApp(firebaseConfig);
+const auth=firebase.auth();const db=firebase.firestore();
+const providers={google:new firebase.auth.GoogleAuthProvider()};
+providers.google.addScope('email');providers.google.addScope('profile');
+
+async function saveUser(user,extra={}){try{const ref=db.collection("users").doc(user.uid);const snap=await ref.get();if(!snap.exists){await ref.set({uid:user.uid,email:user.email||"",displayName:user.displayName||extra.name||"",photoURL:user.photoURL||"",role:"student",createdAt:firebase.firestore.FieldValue.serverTimestamp(),...extra})}}catch(e){console.warn("Firestore save:",e.message)}}
+
+auth.onAuthStateChanged(u=>{const btn=document.getElementById("loginBtn");if(u){const first=(u.displayName||u.email||"User").split(/[ @]/)[0];btn.textContent=first;btn.classList.add("logged-in");const av=document.getElementById("lgAvatar");if(av){if(u.photoURL){av.innerHTML=`<img src="${u.photoURL}" style="width:100%;height:100%;border-radius:50%;object-fit:cover">`}else{av.textContent=first.charAt(0).toUpperCase()}}const lgName=document.getElementById("lgName");const lgEmail=document.getElementById("lgEmail");if(lgName)lgName.textContent="Welcome, "+(u.displayName||u.email);if(lgEmail)lgEmail.textContent=u.email||""}else{btn.textContent="Login";btn.classList.remove("logged-in")}});
+
+function openAuth(tab){document.getElementById("authOverlay").classList.add("open");if(auth.currentUser){showPan("panLI");return}switchTab(tab||"si")}
+function closeAuth(){document.getElementById("authOverlay").classList.remove("open");clearErrs()}
+function overlayClick(e){if(e.target===document.getElementById("authOverlay"))closeAuth()}
+function switchTab(t){document.getElementById("tabSI").classList.toggle("on",t==="si");document.getElementById("tabSU").classList.toggle("on",t==="su");showPan(t==="si"?"panSI":"panSU")}
+function showPan(id){["panSI","panSU","panLI"].forEach(p=>{document.getElementById(p).style.display=p===id?"block":"none"})}
+function clearErrs(){["siErr","suErr"].forEach(id=>{const el=document.getElementById(id);el.textContent="";el.className="am-err"})}
+function errMsg(id,m){const el=document.getElementById(id);el.textContent=m;el.className="am-err"}
+function okMsg(id,m){const el=document.getElementById(id);el.textContent=m;el.className="am-err am-ok"}
+function fErr(c){return({"auth/user-not-found":"No account found with that email.","auth/wrong-password":"Incorrect password.","auth/invalid-credential":"Invalid email or password.","auth/email-already-in-use":"Email already registered — try Sign In.","auth/invalid-email":"Please enter a valid email.","auth/weak-password":"Password must be at least 6 characters.","auth/popup-closed-by-user":"Sign-in popup was closed.","auth/popup-blocked":"Popup was blocked — please allow popups for this site.","auth/network-request-failed":"Network error. Check your connection.","auth/too-many-requests":"Too many attempts — try again later.","auth/account-exists-with-different-credential":"An account already exists with this email using a different sign-in method.","auth/cancelled-popup-request":"Another popup is already open.","auth/operation-not-allowed":"This sign-in method is not enabled. Please contact the administrator.","auth/unauthorized-domain":"This domain is not authorized. Please open via a proper web server."})[c]||"Something went wrong. Please try again. ("+c+")"}
+
+async function doSignIn(){const email=document.getElementById("siEmail").value.trim();const pass=document.getElementById("siPass").value;if(!email||!pass){errMsg("siErr","Please fill in all fields.");return}const btn=document.getElementById("siBtn");btn.disabled=true;try{await auth.signInWithEmailAndPassword(email,pass);showPan("panLI");setTimeout(closeAuth,1400)}catch(e){errMsg("siErr",fErr(e.code))}finally{btn.disabled=false}}
+async function doSignUp(){const name=document.getElementById("suName").value.trim();const email=document.getElementById("suEmail").value.trim();const pass=document.getElementById("suPass").value;const conf=document.getElementById("suConf").value;if(!name||!email||!pass){errMsg("suErr","Please fill in all fields.");return}if(pass!==conf){errMsg("suErr","Passwords do not match.");return}if(pass.length<6){errMsg("suErr","Password must be at least 6 characters.");return}const btn=document.getElementById("suBtn");btn.disabled=true;try{const cred=await auth.createUserWithEmailAndPassword(email,pass);await cred.user.updateProfile({displayName:name});await saveUser(cred.user,{name});showPan("panLI");setTimeout(closeAuth,1400)}catch(e){errMsg("suErr",fErr(e.code))}finally{btn.disabled=false}}
+async function doSocial(providerKey){clearErrs();const provider=providers[providerKey];if(!provider){errMsg("siErr","Provider not configured.");return}try{const result=await auth.signInWithPopup(provider);await saveUser(result.user);showPan("panLI");setTimeout(closeAuth,1400)}catch(e){const activeErr=document.getElementById("panSU").style.display==="block"?"suErr":"siErr";errMsg(activeErr,fErr(e.code));console.error("Social auth error:",e.code,e.message)}}
+function doGoogle(){doSocial("google")}
+async function doSignOut(){await auth.signOut();showPan("panSI");closeAuth()}
+async function forgotPw(){const email=document.getElementById("siEmail").value.trim();if(!email){errMsg("siErr","Enter your email above first.");return}try{await auth.sendPasswordResetEmail(email);okMsg("siErr","Reset email sent — check your inbox.")}catch(e){errMsg("siErr",fErr(e.code))}}
+</script>
 </body>
 </html>
