@@ -195,13 +195,35 @@
 
     /* ========== PORTAL CARDS ========== */
     .main-card {
-      max-width: 500px;
-      margin: 0 auto;
-      background: rgba(0, 0, 0, 0.678);
-      border-radius: 32px;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(201,168,76,0.2);
-      padding: 2rem;
-    }
+  max-width: 500px;
+  margin: 0 auto;
+  background: rgba(0, 0, 0, 0.678);
+  border-radius: 32px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(201,168,76,0.2);
+  padding: 0;
+  overflow: hidden;
+}
+
+.mac-bar {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 14px 18px;
+  
+  border-bottom: 1px solid rgba(201,168,76,0.15);
+}
+.mac-bar span {
+  width: 13px; height: 13px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.mac-bar .d-red    { background: #ff5f57; box-shadow: 0 0 4px rgba(255,95,87,0.5); }
+.mac-bar .d-yellow { background: #ffbd2e; box-shadow: 0 0 4px rgba(255,189,46,0.5); }
+.mac-bar .d-green  { background: #28c840; box-shadow: 0 0 4px rgba(40,200,64,0.5); }
+
+.mac-inner {
+  padding: 2rem;
+}
     .full-card { max-width: 1300px; }
 
     .header {
@@ -214,23 +236,22 @@
       padding-bottom: 1rem;
     }
     .brand-inner h1 {
-      font-family: 'Cormorant Garamond', serif;
-      font-weight: 600; font-size: 1.6rem;
-      background: linear-gradient(135deg, #2c5f6e 0%, #b8860b 90%);
-      background-clip: text; -webkit-background-clip: text; color: transparent;
-    }
-    .brand-inner p { font-size: 0.75rem; color: var(--text-soft); }
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 600; font-size: 1.6rem;
+  color: #f5e6a0;  /* plain light yellow */
+}
+.brand-inner p { font-size: 0.75rem; color: #7ed8a0; } /* plain light green */
 
     /* Login Form */
     .login-box {
-      background: rgba(31, 12, 2, 0.726);
-      border-radius: 28px;
+        background: rgba(60, 25, 8, 0.5);
+      border-radius: 2%;
       padding: 2rem 1.8rem;
       text-align: center;
-      border: 1px solid var(--border);
+      
     }
     .login-icon { font-size: 3rem; margin-bottom: 1rem; }
-    .login-box h2 { font-family: 'Cormorant Garamond', serif; color: var(--deep-forest); margin-bottom: 0.5rem; }
+    .login-box h2 { font-family: 'Cormorant Garamond', serif; color: #7ed8a0; margin-bottom: 0.5rem; }
     .login-box p.sub { font-size: 0.75rem; color: var(--text-soft); margin-bottom: 1.5rem; }
     .input-group { margin-bottom: 1.2rem; text-align: left; }
     .input-group label { font-size: 0.75rem; font-weight: 600; color: var(--text-soft); display: block; margin-bottom: 6px; }
@@ -470,12 +491,20 @@
 <div class="page-content">
 
   <!-- LOGIN PAGE -->
-  <div id="loginContainer" class="main-card">
+ <div id="loginContainer" class="main-card">
+  <div class="mac-bar">
+    <span class="d-red"></span>
+    <span class="d-yellow"></span>
+    <span class="d-green"></span>
+  </div>
+  <div class="mac-inner">
     <div class="header" style="border-bottom: none; justify-content: center;">
-      <div class="brand-inner"><h1>Vipassi Dhamma School</h1><p>Student Attendance History Portal</p></div>
+      <div class="brand-inner">
+        <h1>Vipassi Dhamma School</h1>
+        <p>Student Attendance History Portal</p>
+      </div>
     </div>
     <div class="login-box">
-      
       <h2>Student Access Portal</h2>
       <p class="sub">Enter your Name or NIC number to view attendance history</p>
       <div id="loginAlert"></div>
@@ -483,10 +512,11 @@
         <label>🪪 Full Name or NIC Number</label>
         <input type="text" id="loginCode" placeholder="e.g., Nimal Perera or 199523456789">
       </div>
-      <button class="btn btn-gold" onclick="verifyAccess()"> View My Attendance History</button>
+      <button class="btn btn-gold" onclick="verifyAccess()">View My Attendance History</button>
       <p style="font-size: 0.7rem; color: var(--text-soft); margin-top: 1.5rem;">All registered students can access their attendance records using their name or NIC.</p>
     </div>
   </div>
+</div>
 
   <!-- HISTORY PAGE (hidden until login) -->
   <div id="historyContainer" class="main-card full-card" style="display: none;">
