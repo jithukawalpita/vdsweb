@@ -626,7 +626,9 @@
     /* ========== PASSWORD GATE ========== */
     .pw-gate { padding: 20px 18px; text-align: center; }
     .pw-gate p { font-size: 12px; color: rgba(245,222,179,0.5); margin-bottom: 12px; }
-    .pw-row { display: flex; gap: 8px; max-width: 300px; margin: 0 auto; }
+    .pw-row { display: flex; flex-direction: column; gap: 8px; max-width: 300px; margin: 0 auto; }
+.pw-btn { width: 100%; }
+@media(min-width: 420px) { .pw-row { flex-direction: row; } .pw-btn { width: auto; } }
     .pw-input {
       flex: 1;
       padding: 9px 14px;
