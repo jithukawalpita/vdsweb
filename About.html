@@ -855,10 +855,80 @@ body::after{content:'';position:fixed;inset:0;z-index:-1;background:rgba(15,3,3,
       </div>
 
       <!-- Content -->
-      <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.2rem;padding:2.5rem 2rem;text-align:center;">
+      <!-- Content -->
+<div style="flex:1;position:relative;overflow:hidden;">
 
-        
-      </div>
+  <!-- PAGE 1 - empty, add your content here -->
+  <!-- REPLACE your existing #boxPage1 div with this -->
+<div id="boxPage1" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:0.65rem 1rem 0.65rem;text-align:center;transition:transform 0.6s cubic-bezier(.77,0,.18,1),opacity 0.5s ease;transform:translateX(0);opacity:1;overflow:hidden;">
+
+  <!-- Rounded square monk image -->
+  <img src="nandathero.png" alt="වැලිවැව නන්ද හිමි" style="width:150px;height:150px;object-fit:cover;object-position:center top;border-radius:16px;border:2px solid rgba(201,168,76,0.5);box-shadow:0 0 18px rgba(201,168,76,0.2);flex-shrink:0;">
+
+  <!-- Gold divider -->
+  <div style="display:flex;align-items:center;gap:6px;width:100%;flex-shrink:0;">
+    <div style="flex:1;height:1px;background:linear-gradient(90deg,transparent,rgba(201,168,76,0.4));"></div>
+    <span style="color:rgba(201,168,76,0.55);font-size:9px;">☸</span>
+    <div style="flex:1;height:1px;background:linear-gradient(90deg,rgba(201,168,76,0.4),transparent);"></div>
+  </div>
+
+  <!-- Opening quote -->
+  <p style="font-family:'Cormorant Garamond',serif;font-size:0.68rem;font-style:italic;color:rgba(201,168,76,0.85);line-height:1.55;flex-shrink:0;">
+    "දැනුමෙන් සන්නද්ධ, ගුණයෙන් පොහොසත් මනුෂ්‍යත්වයේ මාවත..."
+  </p>
+
+  <!-- Body text -->
+  <div style="font-size:0.62rem;line-height:1.72;color:rgba(245,222,179,0.68);text-align:left;width:100%;flex-shrink:0;">
+    <p style="margin-bottom:0.38rem;">කනන්විල ශ්‍රී විපස්සි දහම් පාසලේ ඩිජිටල් අවකාශයට ඔබ සැම ගෞරවයෙන් පිළිගනිමු. අපගේ අධ්‍යාපනික මෙහෙවරෙහි පරම අභිලාෂය වන්නේ හුදෙක් කරුණු මතක තබා ගන්නා ශිෂ්‍ය පිරිසකට එහා ගිය, චරිතවත්, විනයවත් සහ විචාරශීලී දරු පරපුරක් නිර්මාණය කිරීමයි.</p>
+    <p style="margin-bottom:0.38rem;">වර්තමාන ගෝලීය අභියෝග හමුවේ නොසැලී සිටිය හැකි, බෞද්ධ සාරධර්ම මත පදනම් වූ ශක්තිමත් පෞරුෂයක් දරුවන් තුළ ගොඩනැගීමට අපි කැපවී සිටිමු. දහම් අධ්‍යාපනයට අමතරව නායකත්ව පුහුණුව, ආකල්ප සංවර්ධනය සහ අපගේ සංස්කෘතික උරුමයන් අගය කිරීමට දරුවන් හුරු කිරීම අප පාසලේ සුවිශේෂී ලක්ෂණයකි.</p>
+    <p>අප හා එක්වන සෑම දරුවෙකුම සමාජයට ආලෝකයක් වන උදාර පුරවැසියෙකු බවට පත් කිරීම අපගේ පොදු වගකීමයි.</p>
+  </div>
+
+  <!-- Signature -->
+  <div style="padding:0.42rem 0.8rem;background:rgba(201,168,76,0.05);border-left:2px solid rgba(201,168,76,0.4);border-radius:0 3px 3px 0;width:100%;text-align:left;flex-shrink:0;">
+    <div style="font-family:'Cormorant Garamond',serif;font-size:0.8rem;color:#f5deb3;font-weight:600;">වැලිවැව නන්ද හිමි</div>
+    <div style="font-size:7px;letter-spacing:0;color:rgba(201,168,76,0.55);margin-top:1px;">ප්‍රධානාචාර්ය, </div>
+    <div style="font-size:7px;letter-spacing:0;color:rgba(201,168,76,0.38);margin-top:1px;">ශ්‍රී විපස්සි දහම් පාසල කනන්විල, ශ්‍රී ලංකාව.</div>
+  </div>
+
+</div>
+
+  <!-- PAGE 2 - empty, add your content here -->
+  <div id="boxPage2" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.2rem;padding:2.5rem 2rem;text-align:center;transition:transform 0.6s cubic-bezier(.77,0,.18,1),opacity 0.5s ease;transform:translateX(100%);opacity:0;">
+  </div>
+
+</div>
+<!-- Flip button — minimal bar with small icon -->
+<div style="padding:5px 10px;border-top:1px solid rgba(201,168,76,0.08);display:flex;align-items:center;justify-content:flex-end;flex-shrink:0;">
+  <button onclick="flipBoxPage()" id="flipBtn" title="Next page" style="width:22px;height:22px;border-radius:50%;background:rgba(201,168,76,0.08);border:1px solid rgba(201,168,76,0.25);color:rgba(201,168,76,0.6);font-size:0.6rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background 0.2s,transform 0.4s;" onmouseover="this.style.background='rgba(201,168,76,0.2)'" onmouseout="this.style.background='rgba(201,168,76,0.08)'">❯</button>
+</div>
+
+<script>
+(function(){
+  let onPage1=true;
+  function flip(){
+    const p1=document.getElementById('boxPage1');
+    const p2=document.getElementById('boxPage2');
+    const btn=document.getElementById('flipBtn');
+    if(onPage1){
+      p1.style.transform='translateX(-100%)';p1.style.opacity='0';
+      p2.style.transform='translateX(0)';p2.style.opacity='1';
+      btn.style.transform='rotate(180deg)';
+    }else{
+      p1.style.transform='translateX(0)';p1.style.opacity='1';
+      p2.style.transform='translateX(100%)';p2.style.opacity='0';
+      btn.style.transform='rotate(0deg)';
+    }
+    onPage1=!onPage1;
+  }
+  window.flipBoxPage=function(){
+    clearInterval(timer);
+    flip();
+    timer=setInterval(flip,30000);
+  };
+  let timer=setInterval(flip,30000);
+})();
+</script>
     </div>
 
   </div>
