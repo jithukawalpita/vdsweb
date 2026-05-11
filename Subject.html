@@ -156,8 +156,8 @@
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
       z-index: 0;
-      background-image: url('https://img3.schoolandcollegelistings.com/003/931/928572720039310.jpg');
-      opacity: 0.18;
+      background-image: url('praba.jpg');
+      opacity: 0.6;
       background-size: 1300px 800px;
     }
     .page-overlay {
@@ -187,11 +187,12 @@
       transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1); text-align: center; overflow: hidden;
       animation: fadeUp 0.7s ease both; text-decoration: none; display: block;
       box-shadow: -3px -3px 7px rgba(201,168,76,0.18), 3px 3px 8px rgba(0,0,0,0.85), inset 1px 1px 1px rgba(201,168,76,0.12), inset -1px -1px 1px rgba(0,0,0,0.6);
+      background: linear-gradient(145deg, rgba(23, 23, 22, 0.737) 0%, rgba(43, 44, 42, 0.824) 60%, rgba(26, 26, 25, 0.646) 100%);
     }
     .grade-card:nth-child(1){animation-delay:0.05s}.grade-card:nth-child(2){animation-delay:0.10s}.grade-card:nth-child(3){animation-delay:0.15s}.grade-card:nth-child(4){animation-delay:0.20s}.grade-card:nth-child(5){animation-delay:0.25s}.grade-card:nth-child(6){animation-delay:0.30s}.grade-card:nth-child(7){animation-delay:0.35s}.grade-card:nth-child(8){animation-delay:0.40s}.grade-card:nth-child(9){animation-delay:0.45s}.grade-card:nth-child(10){animation-delay:0.50s}.grade-card:nth-child(11){animation-delay:0.55s}.grade-card:nth-child(12){animation-delay:0.60s}
     .grade-card::before { content:''; position:absolute; inset:0; background:var(--card-gradient,linear-gradient(135deg,rgba(201,168,76,0.08),rgba(44,95,110,0.08))); opacity:0; transition:opacity 0.3s; border-radius:24px; }
     .grade-card::after { content:''; position:absolute; bottom:0; left:0; right:0; height:3px; background:var(--card-accent,linear-gradient(90deg,#c9a84c,#8b6914)); border-radius:0 0 24px 24px; transform:scaleX(0); transition:transform 0.3s ease; }
-    .grade-card:hover { transform:translateY(-10px) scale(1.03); background:linear-gradient(145deg,rgba(80,30,12,0.9) 0%,rgba(40,12,5,0.98) 60%,rgba(70,22,10,0.92) 100%); box-shadow:-5px -5px 12px rgba(201,168,76,0.28),6px 6px 14px rgba(0,0,0,0.95),inset 2px 2px 2px rgba(201,168,76,0.18),inset -2px -2px 2px rgba(0,0,0,0.7),0 0 22px rgba(201,168,76,0.1); }
+    .grade-card:hover { transform:translateY(-10px) scale(1.03); background:linear-gradient(145deg,rgba(20, 8, 3, 0.877) 0%,rgba(40,12,5,0.98) 60%,rgba(18, 14, 13, 0.92) 100%); box-shadow:-5px -5px 12px rgba(201,168,76,0.28),6px 6px 14px rgba(0,0,0,0.95),inset 2px 2px 2px rgba(201,168,76,0.18),inset -2px -2px 2px rgba(0,0,0,0.7),0 0 22px rgba(201,168,76,0.1); }
     .grade-card:hover::before{opacity:1}.grade-card:hover::after{transform:scaleX(1)}
     .grade-card.active { transform:translateY(2px) scale(0.98); background:linear-gradient(145deg,rgba(20,6,2,0.98) 0%,rgba(50,18,6,0.92) 60%,rgba(25,8,2,0.98) 100%); box-shadow:3px 3px 6px rgba(0,0,0,0.95),-2px -2px 5px rgba(201,168,76,0.10),inset -2px -2px 4px rgba(201,168,76,0.22),inset 2px 2px 5px rgba(0,0,0,0.8),0 0 0 2px rgba(201,168,76,0.55),0 0 18px rgba(201,168,76,0.15); }
     .grade-card.active::after{transform:scaleX(1)}
@@ -369,7 +370,7 @@
 
 <div class="page-bg"></div>
 <div class="page-overlay"></div>
-<canvas id="bubbleCanvas"></canvas>
+
 
 <!-- NAV -->
 <nav class="nav">
@@ -565,6 +566,60 @@
 </div>
 
 <script>
+  /* ============================================================ LOTUS PETAL ANIMATION ============================================================ */
+(function(){
+  const style = document.createElement('style');
+  style.textContent = `
+    .petal {
+      position: fixed;
+      top: -40px;
+      pointer-events: none;
+      z-index: 1;
+      opacity: 0;
+      animation: petalFall linear infinite;
+    }
+    @keyframes petalFall {
+      0%   { transform: translateY(0) rotate(0deg) translateX(0); opacity: 0; }
+      5%   { opacity: 1; }
+      90%  { opacity: 0.6; }
+      100% { transform: translateY(110vh) rotate(360deg) translateX(30px); opacity: 0; }
+    }
+  `;
+  document.head.appendChild(style);
+
+  const COLORS = [
+    'rgba(220,160,190,0.45)',
+    'rgba(245,195,215,0.38)',
+    'rgba(200,140,170,0.40)',
+    'rgba(230,175,200,0.35)',
+    'rgba(210,150,180,0.42)',
+  ];
+
+  function createPetal() {
+    const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
+    const w = 10 + Math.random() * 10;
+    svg.setAttribute('width', w);
+    svg.setAttribute('height', w * 1.5);
+    svg.setAttribute('viewBox','0 0 20 30');
+    svg.setAttribute('xmlns','http://www.w3.org/2000/svg');
+    const color = COLORS[Math.floor(Math.random() * COLORS.length)];
+    const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+    path.setAttribute('d','M10 0 C16 4, 20 12, 10 30 C0 12, 4 4, 10 0 Z');
+    path.setAttribute('fill', color);
+    svg.appendChild(path);
+
+    const el = document.createElement('div');
+    el.className = 'petal';
+    el.style.left = (Math.random() * 100) + 'vw';
+    el.style.animationDuration = (12 + Math.random() * 16) + 's';
+    el.style.animationDelay = (Math.random() * 20) + 's';
+    el.style.transform = `rotate(${Math.random()*360}deg)`;
+    el.appendChild(svg);
+    document.body.appendChild(el);
+  }
+
+  for (let i = 0; i < 22; i++) createPetal();
+})();
 /* ============================================================ BUBBLE ANIMATION ============================================================ */
 (function(){
   const cv=document.getElementById('bubbleCanvas'),cx=cv.getContext('2d');
