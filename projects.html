@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Projects | Sri Vipassi Dhamma School</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=Cinzel:wght@400;600;700&family=Lato:wght@300;400;700&family=Noto+Sans+Sinhala:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;overflow-x:hidden}
+body{font-family:'Lato',sans-serif;color:#f5deb3;min-height:100vh;overflow-x:hidden;position:relative;}
+
+/* BACKGROUND */
+.page-bg{position:fixed;inset:0;z-index:-2;background:#0a0404;}
+.page-bg-img{position:fixed;inset:0;z-index:-2;background-image:url('project.jpg');background-size:cover;background-position:center;background-attachment:fixed;}
+.page-bg-overlay{position:fixed;inset:0;z-index:-1;background:radial-gradient(ellipse at top left,rgba(80,6,6,0.55) 0%,transparent 60%),radial-gradient(ellipse at bottom right,rgba(60,40,5,0.4) 0%,transparent 60%),rgba(8,3,3,0.5);pointer-events:none;}
+
+/* NAV */
+.nav{background:linear-gradient(90deg,rgba(40,4,4,0.98) 0%,rgba(90,10,10,0.98) 40%,rgba(70,8,8,0.98) 70%,rgba(40,4,4,0.98) 100%);padding:0 24px;display:flex;align-items:center;border-bottom:2px solid #c9a84c;position:sticky;top:0;z-index:200;box-shadow:0 2px 20px rgba(0,0,0,0.6);}
+.brand{color:#f5deb3;font-size:13px;font-weight:700;letter-spacing:.5px;white-space:nowrap;text-shadow:0 1px 3px rgba(0,0,0,0.5);}
+.nav-links{display:flex;flex:1;flex-wrap:wrap}
+.nav-links a{color:rgba(245,222,179,0.88);font-size:11.5px;padding:14px 10px;text-decoration:none;border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap;}
+.nav-links a:hover,.nav-links a.active{color:#ffe066;border-bottom-color:#ffe066;background:rgba(255,255,255,0.05);}
+.hamburger{display:none;align-items:center;gap:6px;cursor:pointer;padding:8px 10px;margin-left:auto;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:20px;}
+.hamburger .dot{display:block;width:13px;height:13px;border-radius:50%}
+.hamburger .dot.red{background:#ff5f57}
+.hamburger .dot.yellow{background:#ffbd2e}
+.hamburger .dot.green{background:#28c840}
+
+/* MOBILE SIDEBAR */
+.mobile-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:400}
+.mobile-overlay.open{display:block}
+.mobile-sidebar{position:fixed;top:0;left:-280px;width:280px;height:100vh;background:linear-gradient(180deg,rgba(15,4,4,0.99),rgba(25,6,6,0.99));z-index:500;transition:left .3s ease;box-shadow:2px 0 10px rgba(0,0,0,0.5);overflow-y:auto}
+.mobile-sidebar.open{left:0}
+.mobile-sidebar-header{background:linear-gradient(90deg,rgba(40,4,4,0.98),rgba(90,10,10,0.98));padding:1rem;display:flex;align-items:center;justify-content:space-between}
+.mobile-sidebar-header .brand{color:#f5deb3;font-size:14px;font-weight:700}
+.mobile-close{background:none;border:none;color:#c9a84c;font-size:18px;cursor:pointer}
+.mobile-nav-links{padding:1rem 0}
+.mobile-nav-links a{display:block;color:#f5deb3;padding:12px 1.5rem;text-decoration:none;border-bottom:1px solid rgba(201,168,76,0.14);transition:all .2s}
+.mobile-nav-links a:hover{background:rgba(201,168,76,0.1);color:#ffe066}
+
+/* HERO */
+.hero{
+  padding:5rem 2rem 3rem;
+  text-align:center;
+  position:relative;
+}
+.hero-eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  color:#c9a84c;font-family:'Cinzel',serif;
+  font-size:9px;letter-spacing:4px;text-transform:uppercase;
+  border:1px solid rgba(201,168,76,0.3);padding:6px 20px;border-radius:30px;
+  background:rgba(201,168,76,0.05);margin-bottom:1.5rem;
+}
+.hero h1{
+  font-family:'Cormorant Garamond',serif;
+  font-size:clamp(2.4rem,6vw,4.5rem);
+  font-weight:300;color:#fff;line-height:1.1;
+  text-shadow:0 0 60px rgba(201,168,76,0.15);
+  margin-bottom:1rem;
+}
+.hero h1 em{font-style:italic;color:#c9a84c;font-weight:400}
+.hero-sub{
+  font-family:'Cormorant Garamond',serif;
+  font-size:1rem;font-style:italic;
+  color:rgba(245,222,179,0.65);
+  letter-spacing:1px;
+}
+
+/* ===== GOLD DIVIDER ===== */
+.gold-divider{
+  display:flex;align-items:center;gap:16px;
+  margin:2.5rem auto;max-width:320px;
+}
+.gold-divider::before,.gold-divider::after{
+  content:'';flex:1;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(201,168,76,0.4));
+}
+.gold-divider::after{background:linear-gradient(90deg,rgba(201,168,76,0.4),transparent)}
+.divider-gem{color:#c9a84c;font-size:16px}
+
+/* ===== PROJECTS GRID ===== */
+.projects-wrap{
+  max-width:960px;margin:0 auto;
+  padding:0 2rem 6rem;
+}
+
+.section-label{
+  font-family:'Cinzel',serif;font-size:9px;
+  letter-spacing:4px;color:#c9a84c;
+  text-transform:uppercase;text-align:center;
+  margin-bottom:2.5rem;display:block;
+}
+
+.projects-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:1.6rem;
+}
+
+
+/* MAC OS CARD */
+.proj-card{border-radius:14px;overflow:hidden;text-decoration:none;display:flex;flex-direction:column;min-height:240px;position:relative;transition:transform 0.3s cubic-bezier(.34,1.56,.64,1),box-shadow 0.3s;cursor:pointer;border:1px solid rgba(255,255,255,0.08);animation:fadeUp 0.7s ease both;}
+.proj-card:hover{transform:translateY(-6px) scale(1.01);}
+.proj-card.card-teal{background:linear-gradient(145deg,rgba(10,80,70,0.72),rgba(8,55,50,0.65));box-shadow:0 8px 32px rgba(0,120,100,0.2);}
+.proj-card.card-wine{background:linear-gradient(145deg,rgba(90,10,30,0.72),rgba(60,6,20,0.65));box-shadow:0 8px 32px rgba(150,20,50,0.2);}
+.proj-card.card-gold{background:linear-gradient(145deg,rgba(90,65,5,0.72),rgba(60,45,4,0.65));box-shadow:0 8px 32px rgba(180,130,10,0.2);}
+.proj-card.card-indigo{background:linear-gradient(145deg,rgba(30,20,90,0.72),rgba(20,14,65,0.65));box-shadow:0 8px 32px rgba(60,40,160,0.2);}
+.proj-card.card-teal:hover{box-shadow:0 20px 60px rgba(0,120,100,0.35),0 0 0 1px rgba(0,200,160,0.2)}
+.proj-card.card-wine:hover{box-shadow:0 20px 60px rgba(150,20,50,0.35),0 0 0 1px rgba(220,60,90,0.2)}
+.proj-card.card-gold:hover{box-shadow:0 20px 60px rgba(180,130,10,0.35),0 0 0 1px rgba(201,168,76,0.3)}
+.proj-card.card-indigo:hover{box-shadow:0 20px 60px rgba(60,40,160,0.35),0 0 0 1px rgba(120,100,220,0.2)}
+.proj-card::before{content:'';position:absolute;inset:0;backdrop-filter:blur(12px) saturate(1.4);-webkit-backdrop-filter:blur(12px) saturate(1.4);z-index:0;border-radius:14px;}
+.proj-card:nth-child(1){animation-delay:0.1s}
+.proj-card:nth-child(2){animation-delay:0.2s}
+.proj-card:nth-child(3){animation-delay:0.3s}
+.proj-card:nth-child(4){animation-delay:0.4s}
+
+/* MAC TITLEBAR */
+.card-titlebar{position:relative;z-index:1;padding:10px 14px;display:flex;align-items:center;gap:7px;border-bottom:1px solid rgba(255,255,255,0.08);flex-shrink:0;}
+.card-teal .card-titlebar{background:linear-gradient(90deg,rgba(0,60,50,0.6),rgba(0,80,65,0.2))}
+.card-wine .card-titlebar{background:linear-gradient(90deg,rgba(70,6,20,0.6),rgba(90,10,30,0.2))}
+.card-gold .card-titlebar{background:linear-gradient(90deg,rgba(70,50,4,0.6),rgba(90,65,5,0.2))}
+.card-indigo .card-titlebar{background:linear-gradient(90deg,rgba(20,14,70,0.6),rgba(30,20,90,0.2))}
+.mac-dot{width:11px;height:11px;border-radius:50%;flex-shrink:0;transition:filter 0.2s;}
+.mac-dot.r{background:#ff5f57;box-shadow:0 0 5px rgba(255,95,87,0.5)}
+.mac-dot.y{background:#ffbd2e;box-shadow:0 0 5px rgba(255,189,46,0.5)}
+.mac-dot.g{background:#28c840;box-shadow:0 0 5px rgba(40,200,64,0.5)}
+.proj-card:hover .mac-dot{filter:brightness(1.2)}
+.card-tab{font-family:'Cinzel',serif;font-size:7.5px;letter-spacing:2px;color:rgba(245,222,179,0.45);text-transform:uppercase;margin-left:4px;}
+
+/* CARD BODY */
+.card-body{position:relative;z-index:1;padding:1.6rem 1.8rem 2rem;flex:1;display:flex;flex-direction:column;justify-content:space-between;}
+.card-icon{font-size:2.4rem;margin-bottom:1rem;display:inline-block;filter:drop-shadow(0 0 10px rgba(255,255,255,0.15));transition:transform 0.3s;}
+.proj-card:hover .card-icon{transform:scale(1.1) rotate(-3deg)}
+.card-title{font-family:'Cormorant Garamond',serif;font-size:1.75rem;font-weight:600;color:#fff;line-height:1.2;margin-bottom:0.7rem;text-shadow:0 2px 12px rgba(0,0,0,0.5);}
+.card-title-si{font-family:'Cormorant Garamond',serif;font-size:1.55rem;font-weight:600;color:#fff;line-height:1.3;margin-bottom:0.7rem;}
+.card-desc{font-size:0.92rem;line-height:1.8;color:rgba(245,222,179,0.6);flex:1;margin-bottom:1.2rem;}
+.card-arrow{display:inline-flex;align-items:center;gap:6px;font-family:'Cinzel',serif;font-size:7.5px;letter-spacing:2px;text-transform:uppercase;transition:gap 0.2s,color 0.2s;}
+.card-arrow::after{content:'→';font-size:11px}
+.proj-card:hover .card-arrow{gap:10px}
+.card-teal .card-arrow{color:rgba(80,200,170,0.7)}.card-teal:hover .card-arrow{color:rgba(80,220,180,1)}
+.card-wine .card-arrow{color:rgba(220,100,120,0.7)}.card-wine:hover .card-arrow{color:rgba(240,120,140,1)}
+.card-gold .card-arrow{color:rgba(201,168,76,0.7)}.card-gold:hover .card-arrow{color:#c9a84c}
+.card-indigo .card-arrow{color:rgba(140,120,240,0.7)}.card-indigo:hover .card-arrow{color:rgba(160,140,255,1)}
+.proj-card::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;opacity:0;transition:opacity 0.3s;z-index:2;border-radius:14px 14px 0 0;}
+.proj-card:hover::after{opacity:1}
+.card-teal::after{background:linear-gradient(90deg,transparent,rgba(80,220,180,0.6),transparent)}
+.card-wine::after{background:linear-gradient(90deg,transparent,rgba(240,100,130,0.6),transparent)}
+.card-gold::after{background:linear-gradient(90deg,transparent,rgba(201,168,76,0.7),transparent)}
+.card-indigo::after{background:linear-gradient(90deg,transparent,rgba(140,120,255,0.6),transparent)}
+
+/* FOOTER */
+/* FOOTER */
+.footer-wrap { background:linear-gradient(180deg,rgba(5,3,0,1),rgba(4,2,0,1)); border-top:1px solid rgba(153,101,21,0.35); font-family:'Segoe UI',Arial,sans-serif; color:rgba(245,222,179,0.75); }
+.footer-top { display:grid; grid-template-columns:repeat(4,1fr); gap:32px; padding:52px 48px 40px; max-width:1200px; margin:0 auto; }
+.footer-col { min-width:0; }
+.brand-col .brand-name { font-size:14px; font-weight:700; color:rgba(201,168,76,0.9); margin-bottom:5px; }
+.brand-col .brand-pali { font-size:10px; letter-spacing:1.8px; text-transform:uppercase; color:rgba(153,101,21,0.7); margin-bottom:14px; }
+.brand-col p { font-size:12px; line-height:1.7; color:rgba(245,222,179,0.45); margin-bottom:18px; }
+.social-row { display:flex; gap:8px; flex-wrap:wrap; }
+.soc-btn { width:32px; height:32px; border-radius:50%; border:1px solid rgba(153,101,21,0.35); background:rgba(153,101,21,0.08); display:flex; align-items:center; justify-content:center; color:rgba(201,168,76,0.7); cursor:pointer; transition:all 0.25s; text-decoration:none; flex-shrink:0; }
+.soc-btn svg { width:13px; height:13px; fill:currentColor; }
+.soc-btn:hover { background:rgba(153,101,21,0.22); border-color:rgba(201,168,76,0.55); transform:translateY(-2px); }
+.footer-col h4 { font-size:10px; letter-spacing:2.2px; text-transform:uppercase; color:rgba(153,101,21,0.85); margin-bottom:18px; font-weight:700; position:relative; padding-bottom:10px; }
+.footer-col h4::after { content:''; position:absolute; bottom:0; left:0; width:24px; height:1px; background:rgba(153,101,21,0.5); }
+.footer-col ul { list-style:none; }
+.footer-col ul li { margin-bottom:10px; }
+.footer-col ul li a { font-size:12.5px; color:rgba(245,222,179,0.42); text-decoration:none; transition:color 0.2s; display:flex; align-items:center; gap:6px; }
+.footer-col ul li a::before { content:'›'; color:rgba(153,101,21,0.5); font-size:14px; }
+.footer-col ul li a:hover { color:rgba(201,168,76,0.85); }
+.contact-item { display:flex; gap:10px; margin-bottom:12px; align-items:flex-start; }
+.contact-icon { width:28px; height:28px; border-radius:6px; background:rgba(153,101,21,0.1); border:1px solid rgba(153,101,21,0.25); display:flex; align-items:center; justify-content:center; flex-shrink:0; color:rgba(201,168,76,0.85); }
+.contact-icon svg { width:13px; height:13px; fill:currentColor; }
+.contact-txt { font-size:11px; line-height:1.55; color:rgba(245,222,179,0.45); word-break:break-word; }
+.contact-txt strong { display:block; font-size:9px; letter-spacing:1.4px; text-transform:uppercase; color:rgba(153,101,21,0.75); margin-bottom:2px; font-weight:700; }
+.footer-divider { max-width:1200px; margin:0 auto; height:1px; background:linear-gradient(90deg,transparent,rgba(153,101,21,0.45) 50%,transparent); }
+.footer-bottom { max-width:1200px; margin:0 auto; padding:18px 48px 22px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; }
+.footer-bottom .copy { font-size:11px; color:rgba(245,222,179,0.3); }
+.footer-bottom .copy span { color:rgba(153,101,21,0.7); }
+.footer-bottom .links { display:flex; gap:20px; }
+.footer-bottom .links a { font-size:10.5px; color:rgba(245,222,179,0.28); text-decoration:none; transition:color 0.2s; }
+.footer-bottom .links a:hover { color:rgba(153,101,21,0.85); }
+.dhamma-strip { background:rgba(153,101,21,0.06); border-top:1px solid rgba(153,101,21,0.12); text-align:center; padding:12px; font-size:10.5px; letter-spacing:3px; text-transform:uppercase; color:rgba(153,101,21,0.4); }
+.dhamma-strip span { color:rgba(153,101,21,0.6); margin:0 10px; }
+
+
+/* ANIMATIONS */
+@keyframes fadeUp{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}
+@keyframes spinSlow{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+
+/* RESPONSIVE */
+@media(max-width:1100px){
+  .footer-top{grid-template-columns:repeat(3,1fr);gap:32px 24px;padding:44px 28px 32px}
+  .brand-col{grid-column:1 / -1;text-align:center;padding-bottom:14px;border-bottom:1px solid rgba(153,101,21,0.15);margin-bottom:6px}
+  .brand-col p{max-width:520px;margin-left:auto;margin-right:auto}
+  .social-row{justify-content:center}
+  .footer-contact-txt{font-size:10.5px}
+}
+@media(max-width:768px){
+  .nav-links{display:none}
+  .hamburger{display:flex;margin-left:auto}
+  .projects-grid{grid-template-columns:1fr;gap:1.2rem}
+  .hero{padding:3rem 1.5rem 2rem}
+  .projects-wrap{padding:0 1.2rem 4rem}
+  .proj-card{min-height:200px}
+  .card-title{font-size:1.25rem}
+  .card-body{padding:1.2rem 1.4rem 1.5rem}
+ 
+@media(max-width:480px){
+  .hero h1{font-size:2.6rem}
+}
+@media(max-width:400px){
+  .hero h1{font-size:2rem}
+}
+</style>
+<link rel="stylesheet" href="footer-mobile.css">
+</head>
+<body>
+
+<!-- BACKGROUND -->
+<div class="page-bg"></div>
+<div class="page-bg-img"></div>
+<div class="page-bg-overlay"></div>
+
+<!-- NAV -->
+<nav class="nav">
+  <img src="logo.png" width="40" height="40" alt="logo" style="margin-right:12px;flex-shrink:0;">
+  <div class="brand">Sri Vipassi Dhamma School</div>
+  <div class="nav-links">
+    <a href="index.html">Home</a>
+    <a href="Daily Attendance.html">Daily Attendance</a>
+    <a href="About.html">About</a>
+    <a href="galery.html">Gallery</a>
+    <a href="#">Achievements</a>
+    <a href="#">Daily Quotes</a>
+    <a href="Contact.html">Contact us</a>
+    <a href="project.html" class="active">Projects</a>
+    <a href="Subject.html">Syllabus</a>
+  </div>
+  <button class="hamburger" onclick="toggleMobileMenu()" aria-label="Open menu">
+    <span class="dot red"></span>
+    <span class="dot yellow"></span>
+    <span class="dot green"></span>
+  </button>
+</nav>
+
+<!-- MOBILE SIDEBAR -->
+<div class="mobile-overlay" id="mobileOverlay" onclick="closeMobileMenu()"></div>
+<div class="mobile-sidebar" id="mobileSidebar">
+  <div class="mobile-sidebar-header">
+    <div class="brand">Sri Vipassi Dhamma School</div>
+    <button class="mobile-close" onclick="closeMobileMenu()">✕</button>
+  </div>
+  <div class="mobile-nav-links">
+    <a href="index.html" onclick="closeMobileMenu()">Home</a>
+    <a href="Daily Attendance.html" onclick="closeMobileMenu()">Daily Attendance</a>
+    <a href="About.html" onclick="closeMobileMenu()">About</a>
+    <a href="galery.html" onclick="closeMobileMenu()">Gallery</a>
+    <a href="#" onclick="closeMobileMenu()">Achievements</a>
+    <a href="#" onclick="closeMobileMenu()">Daily Quotes</a>
+    <a href="Contact.html" onclick="closeMobileMenu()">Contact us</a>
+    <a href="project.html" onclick="closeMobileMenu()">Projects</a>
+    <a href="Subject.html" onclick="closeMobileMenu()">Syllabus</a>
+  </div>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+  <h1><em>අපගේ ව්‍යාපෘති</em></h1>
+  <p class="hero-sub">"ධර්මයේ ආලෝකයෙන් සමාජය දිනිමු"</p>
+  <div class="gold-divider"><span class="divider-gem">✦</span></div>
+  <span class="section-label">ශ්‍රී විපස්සී දහම් පාසල – ව්‍යාපෘති</span>
+</section>
+
+</section>
+
+<!-- PROJECTS GRID -->
+<div class="projects-wrap">
+  <div class="projects-grid">
+
+    <!-- CARD 1 — Teal -->
+    <a href="#" class="proj-card card-teal">
+      <div class="card-titlebar">
+        <span class="mac-dot r"></span>
+        <span class="mac-dot y"></span>
+        <span class="mac-dot g"></span>
+        <span class="card-tab">දෛනික ව්‍යාපෘති</span>
+      </div>
+      <div class="card-body">
+        <div>
+          <span class="card-icon">🎬</span>
+          <div class="card-title">විපස්සී මාධ්‍ය<br>ඒකකය</div>
+          <p class="card-desc">දහම් පාසලක් යනු විෂය කරුණු හා තරග, විභාග පමණක් අරමුණු කර ගත් දෙයක් නොව සාමූහික ක්‍රියාකාරකම්, නායකත්ව කුසලතා වර්ධනය, මෙන් ම සාරධර්ම මනාව දරුවන් හට කියා දෙන ඉතා වැදගත් සමාජ ආයතනයක් බව සමාජයට පෙන්වීම සඳහා පිහිටුවන ලදී. </p>
+        </div>
+        <span class="card-arrow">Visit Project</span>
+      </div>
+    </a>
+
+    <!-- CARD 2 — Wine -->
+    <a href="#" class="proj-card card-wine">
+      <div class="card-titlebar">
+        <span class="mac-dot r"></span>
+        <span class="mac-dot y"></span>
+        <span class="mac-dot g"></span>
+        <span class="card-tab">දෛනික ව්‍යාපෘති</span>
+      </div>
+      <div class="card-body">
+        <div>
+          <span class="card-icon">🤝</span>
+          <div class="card-title">විපස්සී ශුභසාධක<br>සංගමය</div>
+          <p class="card-desc">ගම මුල් කරගත් දහම් පාසල් පද්ධතිය තුළ පවත්නා දරුවන්ගේ සම්පත් විෂමතුලිතතාවය දහම් පාසල් සීමාව තුළ සිට හැකි උපරිමයෙන් අවම කර පිරිපුන් ගුණවත් පුරවැසියන් පිරිසක් සමාජයට දායාද කිරීමේ අරමුණින් පිහිටුවන ලදී.</p>
+        </div>
+        <span class="card-arrow">Visit Project</span>
+      </div>
+    </a>
+
+    <!-- CARD 3 — Gold -->
+    <a href="#" class="proj-card card-gold">
+      <div class="card-titlebar">
+        <span class="mac-dot r"></span>
+        <span class="mac-dot y"></span>
+        <span class="mac-dot g"></span>
+        <span class="card-tab">වාර්ෂික ව්‍යාපෘති</span>
+      </div>
+      <div class="card-body">
+        <div>
+          <span class="card-icon">🏆</span>
+          <div class="card-title">විපස්සී වාර්ෂික<br>තෑගි ප්‍රදානෝත්සවය</div>
+          <p class="card-desc">දහම් පාසල තුල විශේෂ කුසලතාවයන් දැක් වූ සහ විවිධ තරගාවලිවලට සහභාගි වී ජයග්‍රහණ ලබා ගත් සිසු දරුවන් ඇගයීම පිණිසත් දරුවන් සතු කලා සහ අනෙකුත් විභවයන් ඔප්නැංවීම පිණිසත් මෙම ව්‍යාතිය පිහිටුවන ලදී. </p>
+        </div>
+        <span class="card-arrow">Visit Project</span>
+      </div>
+    </a>
+
+    <!-- CARD 4 — Indigo -->
+    <a href="#" class="proj-card card-indigo">
+      <div class="card-titlebar">
+        <span class="mac-dot r"></span>
+        <span class="mac-dot y"></span>
+        <span class="mac-dot g"></span>
+        <span class="card-tab">වාර්ෂික ව්‍යාපෘති</span>
+      </div>
+      <div class="card-body">
+        <div>
+          <span class="card-icon">🌟</span>
+          <div class="card-title-si">විපස්සී වාර්ෂික ලේ දන් දීමේ<br>කඳවුර</div>
+          <p class="card-desc">ජීවිත රැකීමේ මහඟු කාර්යයේ කොටස්කරුවන් ලෙස, ශිෂ්‍යයන්ගේ, ගුරුවරුන්ගේ සහ දෙමව්පියන්ගේ සහභාගීත්වයෙන් පවත්වනු ලබන රුධිරදාන ව්‍යාපෘතිය.</p>
+        </div>
+        <span class="card-arrow">Visit Project</span>
+      </div>
+    </a>
+
+  </div>
+</div>
+
+<!-- FOOTER -->
+<div class="footer-wrap">
+  <div class="footer-top">
+    <div class="brand-col footer-col">
+      <div class="brand-name">Sri Vipassi Dhamma School</div>
+      <div class="brand-pali">Kande Viharaya · Horana</div>
+      <p>Nurturing wisdom, compassion, and the noble Dhamma — guiding Sri Lanka toward a virtuous society.</p>
+      <div class="social-row">
+        <a class="soc-btn" title="Facebook" href="#"><svg viewBox="0 0 24 24"><path d="M22 12c0-5.52-4.48-10-10-10S2 6.48 2 12c0 4.84 3.44 8.87 8 9.8V15H8v-3h2V9.5C10 7.57 11.57 6 13.5 6H16v3h-2c-.55 0-1 .45-1 1v2h3v3h-3v6.95c5.05-.5 9-4.76 9-9.95z"/></svg></a>
+        <a class="soc-btn" title="YouTube" href="#"><svg viewBox="0 0 24 24"><path d="M23.5 6.2c-.3-1-1.1-1.8-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6c-1 .3-1.8 1.1-2.1 2.1C0 8.1 0 12 0 12s0 3.9.5 5.8c.3 1 1.1 1.8 2.1 2.1 1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6c1-.3 1.8-1.1 2.1-2.1.5-1.9.5-5.8.5-5.8s0-3.9-.5-5.8zM9.6 15.6V8.4l6.3 3.6-6.3 3.6z"/></svg></a>
+        <a class="soc-btn" title="WhatsApp" href="#"><svg viewBox="0 0 24 24"><path d="M17.5 14.4c-.3-.1-1.7-.8-2-.9-.3-.1-.5-.1-.7.1-.2.3-.7.9-.9 1.1-.2.2-.3.2-.6.1-.9-.4-1.7-.9-2.5-1.7-.7-.7-1.2-1.5-1.7-2.4-.1-.3 0-.4.1-.6.1-.1.3-.3.4-.5.1-.2.2-.3.3-.5.1-.2 0-.4 0-.5-.1-.1-.7-1.6-.9-2.2-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-1 1-1.6 2.4-1.6 3.9.1 1.7.9 3.3 1.6 4.4 1.4 2.1 3.1 3.7 5.4 4.6 1 .4 1.8.7 2.4.9.7.2 1.4.2 2 .1.6-.1 1.7-.7 1.9-1.4.2-.7.2-1.3.2-1.4-.1-.1-.3-.2-.6-.4l.3.1zM12 2C6.5 2 2 6.5 2 12c0 1.7.5 3.4 1.3 4.9L2 22l5.3-1.4c1.4.8 3 1.2 4.7 1.2 5.5 0 10-4.5 10-10S17.5 2 12 2z"/></svg></a>
+        <a class="soc-btn" title="Instagram" href="#"><svg viewBox="0 0 24 24"><path d="M12 2.16c3.2 0 3.58 0 4.85.07 3.25.15 4.77 1.69 4.92 4.92.06 1.27.07 1.65.07 4.85s0 3.58-.07 4.85c-.15 3.23-1.66 4.77-4.92 4.92-1.27.06-1.64.07-4.85.07s-3.58 0-4.85-.07c-3.26-.15-4.77-1.7-4.92-4.92-.06-1.27-.07-1.64-.07-4.85s0-3.58.07-4.85C2.5 3.92 4.01 2.38 7.15 2.23 8.42 2.18 8.8 2.16 12 2.16zM12 0C8.74 0 8.33.01 7.05.07 2.7.27.27 2.69.07 7.05.01 8.33 0 8.74 0 12s.01 3.67.07 4.95c.2 4.36 2.62 6.78 6.98 6.98C8.33 23.99 8.74 24 12 24s3.67-.01 4.95-.07c4.35-.2 6.78-2.62 6.98-6.98.06-1.28.07-1.69.07-4.95s-.01-3.67-.07-4.95c-.2-4.35-2.62-6.78-6.98-6.98C15.67.01 15.26 0 12 0zm0 5.84a6.16 6.16 0 100 12.32 6.16 6.16 0 000-12.32zm0 10.16a4 4 0 110-8 4 4 0 010 8zm6.41-11.85a1.44 1.44 0 100 2.88 1.44 1.44 0 000-2.88z"/></svg></a>
+      </div>
+    </div>
+    <div class="footer-col">
+      <h4>Quick Links</h4>
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="About.html">About Us</a></li>
+        <li><a href="Daily Attendance.html">Daily Attendance</a></li>
+        <li><a href="galery.html">Gallery</a></li>
+        <li><a href="Subject.html">Syllabus</a></li>
+        <li><a href="#">Achievements</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Programs</h4>
+      <ul>
+        <li><a href="#">Dhamma Classes</a></li>
+        <li><a href="#">Daily Quotes</a></li>
+        <li><a href="#">Welfare Unit</a></li>
+        <li><a href="#">Media Unit</a></li>
+        <li><a href="Contact.html">Contact Us</a></li>
+      </ul>
+    </div>
+    <div class="footer-col contact-col">
+  <h4>Contact</h4>
+  <div class="contact-item">
+        <div class="contact-icon"><svg viewBox="0 0 24 24"><path d="M12 2C7.58 2 4 5.58 4 10c0 5.25 7 12 8 12s8-6.75 8-12c0-4.42-3.58-8-8-8zm0 11a3 3 0 110-6 3 3 0 010 6z"/></svg></div>
+        <div class="contact-txt"><strong>Location</strong>Kananwila, Horana<br>Sri Lanka 12418</div>
+      </div>
+      <div class="contact-item">
+        <div class="contact-icon"><svg viewBox="0 0 24 24"><path d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56a.977.977 0 00-1.01.24l-1.57 1.97c-2.83-1.35-5.48-3.9-6.89-6.83l1.95-1.66c.27-.27.35-.65.24-1A11.36 11.36 0 018.62 4c0-.55-.45-1-1-1H4.19C3.65 3 3 3.24 3 4c0 9.16 7.83 17 17 17 .72 0 1-.63 1-1.18v-3.43c0-.55-.45-1-1-1z"/></svg></div>
+        <div class="contact-txt"><strong>Phone</strong>077 798 0889</div>
+      </div>
+      <div class="contact-item">
+        <div class="contact-icon"><svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg></div>
+        <div class="contact-txt"><strong>Email</strong>srivipassidhammaschool@gmail.com</div>
+      </div>
+    </div>
+  </div>
+  <div class="footer-divider"></div>
+  <div class="footer-bottom">
+    <div class="copy">© 2025 <span>Sri Vipassi Dhamma School</span> · All rights reserved</div>
+    <div class="links">
+      <a href="#">Privacy Policy</a>
+      <a href="#">Terms of Use</a>
+      <a href="#">Sitemap</a>
+    </div>
+  </div>
+  <div class="dhamma-strip">
+    <span>☸</span> Developing Wisdom Through Dhamma <span>☸</span> Sri Lanka <span>☸</span>
+  </div>
+</div>
+<script>
+function toggleMobileMenu(){
+  document.getElementById('mobileSidebar').classList.toggle('open');
+  document.getElementById('mobileOverlay').classList.toggle('open');
+}
+function closeMobileMenu(){
+  document.getElementById('mobileSidebar').classList.remove('open');
+  document.getElementById('mobileOverlay').classList.remove('open');
+}
+</script>
+</body>
+</html>
