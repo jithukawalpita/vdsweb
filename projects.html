@@ -12,7 +12,7 @@ body{font-family:'Lato',sans-serif;color:#f5deb3;min-height:100vh;overflow-x:hid
 
 /* BACKGROUND */
 .page-bg{position:fixed;inset:0;z-index:-2;background:#0a0404;}
-.page-bg-img{position:fixed;inset:0;z-index:-2;background-image:url('project.jpg');background-size:cover;background-position:center;background-attachment:fixed;}
+.page-bg-img{position:fixed;inset:0;z-index:-2;background-image:url('project.jpg');background-size:cover;background-position:center;background-attachment:fixed;opacity: 0.25;}
 .page-bg-overlay{position:fixed;inset:0;z-index:-1;background:radial-gradient(ellipse at top left,rgba(80,6,6,0.55) 0%,transparent 60%),radial-gradient(ellipse at bottom right,rgba(60,40,5,0.4) 0%,transparent 60%),rgba(8,3,3,0.5);pointer-events:none;}
 
 /* NAV */
@@ -27,7 +27,52 @@ body{font-family:'Lato',sans-serif;color:#f5deb3;min-height:100vh;overflow-x:hid
 .hamburger .dot.yellow{background:#ffbd2e}
 .hamburger .dot.green{background:#28c840}
 
-/* MOBILE SIDEBAR */
+.lang-row{display:flex;gap:5px;align-items:center;padding:6px 0;margin-left:auto}
+.lb{background:rgba(255,255,255,0.08);color:#f5deb3;border:1px solid rgba(255,255,255,0.2);padding:4px 10px;border-radius:3px;font-size:10.5px;cursor:pointer;transition:all .2s}
+.lb:hover{background:rgba(255,255,255,0.15)}
+.lb.on{background:linear-gradient(135deg,#c9a84c,#a07810);color:#1a0800;border-color:#c9a84c;font-weight:700}
+.login-btn{background:linear-gradient(135deg,#c9a84c,#a07810);color:#1a0800;border:none;padding:5px 16px;border-radius:3px;font-size:10.5px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;margin-left:8px;transition:all .2s;box-shadow:0 2px 8px rgba(201,168,76,0.25)}
+.login-btn:hover{background:linear-gradient(135deg,#e0b95c,#b88a20);box-shadow:0 4px 14px rgba(201,168,76,0.4)}
+.login-btn.logged-in{background:rgba(201,168,76,0.12);color:#c9a84c;border:1px solid rgba(201,168,76,0.35)}
+.mobile-lang-row{padding:1rem;border-top:1px solid rgba(201,168,76,0.1);display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.auth-overlay{display:none;position:fixed;inset:0;z-index:1000;background:rgba(4,2,4,0.92);backdrop-filter:blur(8px);align-items:center;justify-content:center}
+.auth-overlay.open{display:flex}
+.auth-modal{background:linear-gradient(160deg,#110808 0%,#1a0a0a 60%,#0d0d0a 100%);border:1px solid rgba(201,168,76,0.28);border-radius:8px;width:100%;max-width:420px;margin:1rem;box-shadow:0 0 80px rgba(0,0,0,0.95);animation:mIn .3s ease both;overflow:hidden;max-height:92vh;overflow-y:auto}
+@keyframes mIn{from{opacity:0;transform:translateY(-20px) scale(0.96)}to{opacity:1;transform:none}}
+.am-head{background:linear-gradient(90deg,#5a0808,#7a0e0e,#5a0808);border-bottom:1px solid rgba(201,168,76,0.3);padding:1rem 1.4rem;display:flex;align-items:center;gap:10px;position:relative}
+.am-wheel{font-size:1.3rem;filter:drop-shadow(0 0 7px rgba(201,168,76,0.6))}
+.am-brand{font-size:10px;letter-spacing:2px;color:#c9a84c;text-transform:uppercase;flex:1}
+.am-close{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:rgba(245,222,179,0.45);font-size:14px;cursor:pointer;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.am-close:hover{background:rgba(255,255,255,0.1);color:#f5deb3}
+.am-tabs{display:flex;border-bottom:1px solid rgba(201,168,76,0.1)}
+.am-tab{flex:1;padding:11px;background:none;border:none;color:rgba(245,222,179,0.4);font-size:9.5px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;border-bottom:2px solid transparent;transition:all .2s}
+.am-tab.on{color:#c9a84c;border-bottom-color:#c9a84c;background:rgba(201,168,76,0.04)}
+.am-tab:hover:not(.on){color:rgba(245,222,179,0.65)}
+.am-body{padding:1.4rem}
+.am-field{margin-bottom:.9rem}
+.am-label{display:block;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:#c9a84c;margin-bottom:5px}
+.am-input{width:100%;background:rgba(255,255,255,0.04);border:1px solid rgba(201,168,76,0.18);border-radius:3px;padding:9px 13px;color:#f5deb3;font-size:0.87rem;outline:none;transition:border-color .2s}
+.am-input:focus{border-color:rgba(201,168,76,0.5);background:rgba(201,168,76,0.03)}
+.am-input::placeholder{color:rgba(245,222,179,0.18)}
+.am-forgot{text-align:right;margin-top:-3px;margin-bottom:.8rem}
+.am-forgot a{font-size:0.75rem;color:rgba(201,168,76,0.55);text-decoration:none}
+.am-forgot a:hover{color:#c9a84c}
+.am-btn{width:100%;padding:11px;background:linear-gradient(135deg,#c9a84c,#a07810);border:none;border-radius:3px;color:#1a0800;font-weight:700;font-size:10.5px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all .2s}
+.am-btn:hover{background:linear-gradient(135deg,#e0b95c,#b88a20);box-shadow:0 4px 18px rgba(201,168,76,0.28)}
+.am-btn:disabled{opacity:.5;cursor:not-allowed}
+.am-err{margin-top:.65rem;font-size:.77rem;color:#e05555;min-height:1rem;text-align:center}
+.am-ok{color:#6dbf6d!important}
+.am-div{display:flex;align-items:center;gap:10px;margin:1rem 0;color:rgba(245,222,179,0.22);font-size:.72rem}
+.am-div::before,.am-div::after{content:'';flex:1;height:1px;background:rgba(201,168,76,0.1)}
+.am-socials{display:grid;grid-template-columns:1fr;gap:8px;margin-bottom:.4rem}
+.am-soc{padding:9px 6px;background:rgba(255,255,255,0.04);border:1px solid rgba(201,168,76,0.14);border-radius:3px;color:rgba(245,222,179,0.7);font-size:.78rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:all .2s;white-space:nowrap}
+.am-soc:hover{background:rgba(255,255,255,0.09);border-color:rgba(201,168,76,0.3);color:#f5deb3}
+.am-soc.google:hover{border-color:rgba(234,67,53,0.5)}
+.am-loggedin{text-align:center;padding:2rem 1.4rem}
+.am-avatar{width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,rgba(201,168,76,0.2),rgba(90,8,8,0.5));border:2px solid rgba(201,168,76,0.4);display:flex;align-items:center;justify-content:center;font-size:1.8rem;margin:0 auto .8rem}
+.am-lg-name{font-size:1.3rem;color:#fff;margin-bottom:.25rem}
+.am-lg-email{font-size:.76rem;color:rgba(201,168,76,0.55);letter-spacing:.8px;margin-bottom:1.4rem}
+
 .mobile-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:400}
 .mobile-overlay.open{display:block}
 .mobile-sidebar{position:fixed;top:0;left:-280px;width:280px;height:100vh;background:linear-gradient(180deg,rgba(15,4,4,0.99),rgba(25,6,6,0.99));z-index:500;transition:left .3s ease;box-shadow:2px 0 10px rgba(0,0,0,0.5);overflow-y:auto}
@@ -198,7 +243,7 @@ body{font-family:'Lato',sans-serif;color:#f5deb3;min-height:100vh;overflow-x:hid
   .footer-contact-txt{font-size:10.5px}
 }
 @media(max-width:768px){
-  .nav-links{display:none}
+  .nav-links,.lang-row{display:none}
   .hamburger{display:flex;margin-left:auto}
   .projects-grid{grid-template-columns:1fr;gap:1.2rem}
   .hero{padding:3rem 1.5rem 2rem}
@@ -223,11 +268,56 @@ body{font-family:'Lato',sans-serif;color:#f5deb3;min-height:100vh;overflow-x:hid
 <div class="page-bg-img"></div>
 <div class="page-bg-overlay"></div>
 
+<!-- AUTH MODAL -->
+<div class="auth-overlay" id="authOverlay" onclick="overlayClick(event)">
+  <div class="auth-modal">
+    <div class="am-head">
+      <span class="am-wheel">☸</span>
+      <span class="am-brand">Sri Vipassi Dhamma School</span>
+      <button class="am-close" onclick="closeAuth()">✕</button>
+    </div>
+    <div class="am-tabs">
+      <button class="am-tab on" id="tabSI" onclick="switchTab('si')">Sign In</button>
+      <button class="am-tab" id="tabSU" onclick="switchTab('su')">Sign Up</button>
+    </div>
+    <div class="am-body" id="panSI">
+      <div class="am-field"><label class="am-label">Email</label><input class="am-input" id="siEmail" type="email" placeholder="you@email.com" autocomplete="email"></div>
+      <div class="am-field"><label class="am-label">Password</label><input class="am-input" id="siPass" type="password" placeholder="Password" autocomplete="current-password"></div>
+      <div class="am-forgot"><a href="#" onclick="forgotPw();return false">Forgot password?</a></div>
+      <button class="am-btn" id="siBtn" onclick="doSignIn()">Sign In</button>
+      <div class="am-err" id="siErr"></div>
+      <div class="am-div"><span>or continue with</span></div>
+      <div class="am-socials">
+        <button class="am-soc google" onclick="doGoogle()">Continue with Google</button>
+      </div>
+    </div>
+    <div class="am-body" id="panSU" style="display:none">
+      <div class="am-field"><label class="am-label">Full Name</label><input class="am-input" id="suName" type="text" placeholder="Your name" autocomplete="name"></div>
+      <div class="am-field"><label class="am-label">Email</label><input class="am-input" id="suEmail" type="email" placeholder="you@email.com" autocomplete="email"></div>
+      <div class="am-field"><label class="am-label">Password</label><input class="am-input" id="suPass" type="password" placeholder="Min. 6 characters" autocomplete="new-password"></div>
+      <div class="am-field"><label class="am-label">Confirm Password</label><input class="am-input" id="suConf" type="password" placeholder="Repeat password" autocomplete="new-password"></div>
+      <button class="am-btn" id="suBtn" onclick="doSignUp()">Create Account</button>
+      <div class="am-err" id="suErr"></div>
+      <div class="am-div"><span>or sign up with</span></div>
+      <div class="am-socials">
+        <button class="am-soc google" onclick="doGoogle()">Continue with Google</button>
+      </div>
+    </div>
+    <div class="am-body am-loggedin" id="panLI" style="display:none">
+      <div class="am-avatar" id="lgAvatar">☸</div>
+      <div class="am-lg-name" id="lgName">Welcome!</div>
+      <div class="am-lg-email" id="lgEmail"></div>
+      <button class="am-btn" onclick="doSignOut()">Sign Out</button>
+    </div>
+  </div>
+</div>
+
 <!-- NAV -->
 <nav class="nav">
-  <img src="logo.png" width="40" height="40" alt="logo" style="margin-right:12px;flex-shrink:0;">
+ <img src="logo.png" width="30" height="30" alt="logo" style="margin-right:10px;flex-shrink:0">
   <div class="brand">Sri Vipassi Dhamma School</div>
-  <div class="nav-links">
+  
+  <div class="nav-links" style="margin-left: 80px;">
     <a href="index.html">Home</a>
     <a href="Daily Attendance.html">Daily Attendance</a>
     <a href="About.html">About</a>
@@ -235,8 +325,14 @@ body{font-family:'Lato',sans-serif;color:#f5deb3;min-height:100vh;overflow-x:hid
     <a href="#">Achievements</a>
     <a href="#">Daily Quotes</a>
     <a href="Contact.html">Contact us</a>
-    <a href="project.html" class="active">Projects</a>
+    <a href="projects.html" class="active">Projects</a>
     <a href="Subject.html">Syllabus</a>
+  </div>
+  <div class="lang-row">
+    <button class="lb on">EN</button>
+    <button class="lb">සිං</button>
+    <button class="lb">தமிழ்</button>
+    <button class="login-btn" id="loginBtn" onclick="openAuth('si')">Login</button>
   </div>
   <button class="hamburger" onclick="toggleMobileMenu()" aria-label="Open menu">
     <span class="dot red"></span>
@@ -260,8 +356,14 @@ body{font-family:'Lato',sans-serif;color:#f5deb3;min-height:100vh;overflow-x:hid
     <a href="#" onclick="closeMobileMenu()">Achievements</a>
     <a href="#" onclick="closeMobileMenu()">Daily Quotes</a>
     <a href="Contact.html" onclick="closeMobileMenu()">Contact us</a>
-    <a href="project.html" onclick="closeMobileMenu()">Projects</a>
+    <a href="projects.html" onclick="closeMobileMenu()">Projects</a>
     <a href="Subject.html" onclick="closeMobileMenu()">Syllabus</a>
+  </div>
+  <div class="mobile-lang-row">
+    <button class="lb on">EN</button>
+    <button class="lb">සිං</button>
+    <button class="lb">தமிழ்</button>
+    <button class="login-btn" id="mobileLoginBtn" onclick="openAuth('si');closeMobileMenu()">Login</button>
   </div>
 </div>
 
@@ -426,6 +528,127 @@ function toggleMobileMenu(){
 function closeMobileMenu(){
   document.getElementById('mobileSidebar').classList.remove('open');
   document.getElementById('mobileOverlay').classList.remove('open');
+}
+</script>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
+<script>
+if(!firebase.apps.length){
+  firebase.initializeApp({
+    apiKey:"AIzaSyAWpPP3OevjIRAsoGIjOJTofV6l2jgyhNI",
+    authDomain:"signin-f9656.firebaseapp.com",
+    projectId:"signin-f9656",
+    storageBucket:"signin-f9656.firebasestorage.app",
+    messagingSenderId:"1074665165821",
+    appId:"1:1074665165821:web:91ef329a0472fa138e7f94"
+  });
+}
+const auth=firebase.auth();
+const db=firebase.firestore();
+const googleProvider=new firebase.auth.GoogleAuthProvider();
+googleProvider.addScope('email');
+googleProvider.addScope('profile');
+
+async function saveUser(user,extra={}){
+  try{
+    const ref=db.collection("users").doc(user.uid);
+    const snap=await ref.get();
+    if(!snap.exists){
+      await ref.set({
+        uid:user.uid,email:user.email||"",
+        displayName:user.displayName||extra.name||"",
+        photoURL:user.photoURL||"",role:"student",
+        createdAt:firebase.firestore.FieldValue.serverTimestamp(),...extra
+      });
+    }
+  }catch(e){console.warn("Firestore:",e.message);}
+}
+
+auth.onAuthStateChanged(u=>{
+  const btn=document.getElementById("loginBtn");
+  if(!btn)return;
+  if(u){
+    const first=(u.displayName||u.email||"User").split(/[ @]/)[0];
+    btn.textContent=first;
+    btn.classList.add("logged-in");
+    const av=document.getElementById("lgAvatar");
+    if(av){av.innerHTML=u.photoURL?`<img src="${u.photoURL}" style="width:100%;height:100%;border-radius:50%;object-fit:cover">`:first.charAt(0).toUpperCase();}
+    const lgName=document.getElementById("lgName");
+    const lgEmail=document.getElementById("lgEmail");
+    if(lgName)lgName.textContent="Welcome, "+(u.displayName||u.email);
+    if(lgEmail)lgEmail.textContent=u.email||"";
+  }else{
+    btn.textContent="Login";
+    btn.classList.remove("logged-in");
+  }
+});
+
+function openAuth(tab){
+  document.getElementById("authOverlay").classList.add("open");
+  if(auth.currentUser){showPan("panLI");return;}
+  switchTab(tab||"si");
+}
+function closeAuth(){document.getElementById("authOverlay").classList.remove("open");clearErrs();}
+function overlayClick(e){if(e.target===document.getElementById("authOverlay"))closeAuth();}
+function switchTab(t){
+  document.getElementById("tabSI").classList.toggle("on",t==="si");
+  document.getElementById("tabSU").classList.toggle("on",t==="su");
+  showPan(t==="si"?"panSI":"panSU");
+}
+function showPan(id){["panSI","panSU","panLI"].forEach(p=>document.getElementById(p).style.display=p===id?"block":"none");}
+function clearErrs(){["siErr","suErr"].forEach(id=>{const el=document.getElementById(id);el.textContent="";el.className="am-err";});}
+function errMsg(id,m){const el=document.getElementById(id);el.textContent=m;el.className="am-err";}
+function okMsg(id,m){const el=document.getElementById(id);el.textContent=m;el.className="am-err am-ok";}
+function fErr(c){
+  return({"auth/user-not-found":"No account found with that email.","auth/wrong-password":"Incorrect password.","auth/invalid-credential":"Invalid email or password.","auth/email-already-in-use":"Email already registered — try Sign In.","auth/invalid-email":"Please enter a valid email.","auth/weak-password":"Password must be at least 6 characters.","auth/popup-closed-by-user":"Sign-in popup was closed.","auth/popup-blocked":"Popup was blocked — please allow popups.","auth/network-request-failed":"Network error. Check your connection.","auth/too-many-requests":"Too many attempts — try again later.","auth/unauthorized-domain":"This domain is not authorized. Please open via a proper web server.","auth/operation-not-supported-in-this-environment":"Please open via a web server, not a file."})[c]||"Something went wrong. ("+c+")";
+}
+
+async function doSignIn(){
+  const email=document.getElementById("siEmail").value.trim();
+  const pass=document.getElementById("siPass").value;
+  if(!email||!pass){errMsg("siErr","Please fill in all fields.");return;}
+  const btn=document.getElementById("siBtn");btn.disabled=true;
+  try{await auth.signInWithEmailAndPassword(email,pass);showPan("panLI");setTimeout(closeAuth,1400);}catch(e){errMsg("siErr",fErr(e.code));}finally{btn.disabled=false;}
+}
+
+async function doSignUp(){
+  const name=document.getElementById("suName").value.trim();
+  const email=document.getElementById("suEmail").value.trim();
+  const pass=document.getElementById("suPass").value;
+  const conf=document.getElementById("suConf").value;
+  if(!name||!email||!pass){errMsg("suErr","Please fill in all fields.");return;}
+  if(pass!==conf){errMsg("suErr","Passwords do not match.");return;}
+  if(pass.length<6){errMsg("suErr","Password must be at least 6 characters.");return;}
+  const btn=document.getElementById("suBtn");btn.disabled=true;
+  try{
+    const cred=await auth.createUserWithEmailAndPassword(email,pass);
+    await cred.user.updateProfile({displayName:name});
+    await saveUser(cred.user,{name});
+    showPan("panLI");setTimeout(closeAuth,1400);
+  }catch(e){errMsg("suErr",fErr(e.code));}finally{btn.disabled=false;}
+}
+
+async function doGoogle(){
+  try{
+    const result=await auth.signInWithPopup(googleProvider);
+    await saveUser(result.user);showPan("panLI");setTimeout(closeAuth,1400);
+  }catch(e){
+    const activeErr=document.getElementById("panSU").style.display==="block"?"suErr":"siErr";
+    errMsg(activeErr,fErr(e.code));
+  }
+}
+
+async function doSignOut(){await auth.signOut();showPan("panSI");closeAuth();}
+
+async function forgotPw(){
+  const email=document.getElementById("siEmail").value.trim();
+  if(!email){errMsg("siErr","Enter your email above first.");return;}
+  try{await auth.sendPasswordResetEmail(email);okMsg("siErr","Reset email sent — check your inbox.");}
+  catch(e){errMsg("siErr",fErr(e.code));}
 }
 </script>
 </body>
