@@ -101,7 +101,7 @@
     .mobile-lang-row { padding:1rem; border-top:1px solid rgba(201,168,76,0.1); display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
     .mobile-lang-row .lb-lang { background:rgba(255,255,255,0.08); color:#f5deb3; border:1px solid rgba(255,255,255,0.2); padding:7px 14px; border-radius:6px; font-size:12px; cursor:pointer; transition:all .2s; flex:1; text-align:center; }
     .mobile-lang-row .lb-lang.on { background:linear-gradient(135deg,#c9a84c,#a07810); color:#1a0800; border-color:var(--gold); font-weight:700; }
-    .mobile-lang-row .login-btn { width:100%; text-align:center; margin-top:4px; margin-left:0; padding:9px; font-size:11px; border-radius:6px; }
+    .mobile-lang-row .login-btn { display:block !important; width:100%; text-align:center; margin-top:4px; margin-left:0; padding:9px; font-size:11px; border-radius:6px; }
 
     /* ========== OVERLAY ========== */
     .mobile-overlay { display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); z-index:400; }
@@ -309,7 +309,7 @@
       .brand { font-size:10.5px; letter-spacing:0; flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:calc(100vw - 150px); margin-right:0; }
       .nav-links, .lang-row { display:none; }
       .hamburger { display:flex; flex-shrink:0; margin-left:6px; padding:6px 8px; }
-      .login-btn { padding:5px 9px; font-size:9px; letter-spacing:1px; flex-shrink:0; margin-left:4px; white-space:nowrap; }
+      .login-btn { display:none !important; }
 
       /* MOBILE SIDEBAR */
       .mobile-sidebar { width:255px; }
