@@ -554,13 +554,24 @@ background-position: center center;
   .footer-wrap .dhamma-strip { font-size:16px !important; letter-spacing:2.8px; padding:12px; }
 
   /* AUTH MODAL */
-  .auth-modal { max-width:420px; }
-  .am-tab { font-size:9.5px; padding:11px; }
-  .am-body { padding:1.4rem; }
-  .am-label { font-size:9px; }
-  .am-input { font-size:0.87rem; padding:9px 13px; }
-  .am-btn { font-size:10.5px; padding:11px; }
-  .am-soc { font-size:0.78rem; padding:9px 6px; }
+  .auth-modal  { max-width:620px; }
+  .am-brand    { font-size:17px !important; letter-spacing:2px; }
+  .am-wheel    { font-size:1.9rem !important; }
+  .am-close    { font-size:26px !important; width:42px !important; height:42px !important; }
+  .am-tab      { font-size:16px !important; padding:17px !important; letter-spacing:2.2px; }
+  .am-body     { padding:2rem; }
+  .am-field    { margin-bottom:1.1rem; }
+  .am-label    { font-size:13px !important; letter-spacing:1.8px; }
+  .am-input    { font-size:1.1rem !important; padding:13px 17px !important; }
+  .am-btn      { font-size:14px !important; padding:15px !important; }
+  .am-soc      { font-size:1rem !important; padding:13px 10px !important; }
+  .am-div      { font-size:1rem !important; gap:14px; margin:1.4rem 0; }
+  .am-forgot a { font-size:0.95rem !important; }
+  .am-err      { font-size:0.92rem !important; }
+  .am-lg-name  { font-size:1.8rem !important; }
+  .am-lg-email { font-size:1.05rem !important; letter-spacing:0.8px; }
+  .am-avatar   { width:92px !important; height:92px !important; font-size:2.4rem !important; }
+  .am-loggedin { padding:2.6rem 2rem; }
 }
 
 /* ============================================================
@@ -756,13 +767,29 @@ background-position: center center;
   .footer-wrap .footer-bottom .links { gap:24px; }
   .footer-wrap .dhamma-strip { font-size:22.5px !important; letter-spacing:3px; padding:13px; }
 
-  /* AUTH MODAL */
-  .auth-modal { max-width:450px; }
-  .am-tab { font-size:10px; padding:12px; }
-  .am-body { padding:1.5rem; }
-  .am-input { font-size:0.9rem; padding:10px 14px; }
-  .am-btn { font-size:11px; padding:12px; }
-}
+ /* AUTH MODAL */
+  .auth-overlay { align-items:center; justify-content:center; }
+  .auth-modal   { max-width:1100px; max-height:95vh; border-radius:18px; }
+  .am-head      { padding:1.8rem 2.4rem; gap:16px; }
+  .am-brand     { font-size:28px !important; letter-spacing:3px; }
+  .am-wheel     { font-size:2.8rem !important; }
+  .am-close     { font-size:38px !important; width:58px !important; height:58px !important; right:18px !important; }
+  .am-tabs      { }
+  .am-tab       { font-size:22px !important; padding:24px !important; letter-spacing:3px; }
+  .am-body      { padding:3rem 3.2rem; }
+  .am-field     { margin-bottom:1.6rem; }
+  .am-label     { font-size:18px !important; letter-spacing:2.5px; margin-bottom:8px; }
+  .am-input     { font-size:1.55rem !important; padding:18px 24px !important; border-radius:6px; }
+  .am-btn       { font-size:20px !important; padding:22px !important; border-radius:6px; }
+  .am-soc       { font-size:1.45rem !important; padding:20px 14px !important; border-radius:6px; gap:12px; }
+  .am-soc svg   { width:22px !important; height:22px !important; }
+  .am-div       { font-size:1.4rem !important; gap:18px; margin:2rem 0; }
+  .am-forgot a  { font-size:1.25rem !important; }
+  .am-err       { font-size:1.15rem !important; margin-top:0.8rem; }
+  .am-lg-name   { font-size:2.6rem !important; }
+  .am-lg-email  { font-size:1.4rem !important; letter-spacing:1px; margin-bottom:2rem; }
+  .am-avatar    { width:130px !important; height:130px !important; font-size:3.4rem !important; margin-bottom:1.4rem; }
+  .am-loggedin  { padding:3.6rem 3rem; }
 
 /* ============================================================
    2560px
@@ -2189,6 +2216,7 @@ async function forgotPw(){const email=document.getElementById("siEmail").value.t
   @media(max-width:1100px){.footer-top{grid-template-columns:repeat(3,1fr);gap:32px 24px;padding:44px 28px 32px}.brand-col{grid-column:1 / -1;text-align:center;padding-bottom:14px;border-bottom:1px solid rgba(153,101,21,0.15);margin-bottom:6px}.brand-col p{max-width:520px;margin-left:auto;margin-right:auto}.social-row{justify-content:center}.contact-txt{font-size:10.5px}}
   @media(max-width:500px){.footer-top{grid-template-columns:1fr;gap:26px;padding:32px 22px 22px;text-align:center}.brand-col{grid-column:auto;padding-bottom:14px}.brand-col p{max-width:320px}.footer-col h4{margin-bottom:14px;padding-bottom:8px;font-size:9.5px;display:inline-block}.footer-col h4::after{left:50%;transform:translateX(-50%);width:24px}.footer-col ul li{margin-bottom:8px}.footer-col ul li a{font-size:13px;justify-content:center}.contact-item{display:inline-flex;max-width:240px;width:auto;margin:0 auto 12px;text-align:left;align-items:center}.contact-icon{width:32px;height:32px;border-radius:8px}.contact-icon svg{width:14px;height:14px}.contact-txt{font-size:12px}.contact-txt strong{font-size:9px}.footer-bottom{flex-direction:column;align-items:center;text-align:center;gap:12px;padding:18px 22px 20px}.footer-bottom .copy{font-size:10.5px;line-height:1.5}.footer-bottom .links{justify-content:center;gap:14px}.footer-bottom .links a{font-size:10px}.dhamma-strip{font-size:9px;letter-spacing:1.8px;padding:11px 12px;line-height:1.6}.dhamma-strip span{margin:0 6px}}
   @media(max-width:360px){.footer-top{padding:28px 18px 20px}.footer-bottom{padding:16px 18px 18px}.contact-item{max-width:220px}}
+  
 </style>
 
 <div class="footer-wrap">

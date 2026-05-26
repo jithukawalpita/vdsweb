@@ -1257,6 +1257,503 @@ body.ta .login-btn .lang-ta { display:inline !important; }
   .footer-bottom .links { gap:64px; }
   .dhamma-strip { font-size:26px; letter-spacing:7px; padding:32px; }
 }
+/* ============================================================
+   large-screen.css — Sri Vipassi Dhamma School
+   Covers: Navigation, Login Box, Auth Modal, Footer
+   Breakpoints: 1440px → 1920px → 2560px → 3440px → 3840px
+   ============================================================ */
+
+/* ============================================================
+   NAV SIDEBAR TRIGGER
+   ============================================================ */
+@media(max-width:1200px){
+  .nav-links { display:none !important; }
+  .lang-row  { display:none !important; }
+  .login-btn { display:none !important; }
+  .hamburger { display:flex !important; }
+}
+@media(min-width:1201px){
+  .nav-links { display:flex !important; flex-wrap:nowrap !important; }
+  .lang-row  { display:flex !important; }
+  .login-btn { display:inline-block !important; }
+  .hamburger { display:none !important; }
+}
+
+/* ============================================================
+   BASE — applies to all sizes as foundation
+   ============================================================ */
+.main-card        { max-width:680px; border-radius:36px; }
+.mac-inner        { padding:2.8rem; }
+.brand-inner h1   { font-size:2.2rem !important; margin-bottom:0.5rem; }
+.brand-inner p    { font-size:1rem !important; }
+.login-box        { padding:2.8rem 2.4rem; border-radius:18px; }
+.login-box h2     { font-size:1.8rem !important; margin-bottom:0.8rem; }
+.login-box p.sub  { font-size:1rem !important; margin-bottom:2rem; }
+.login-icon       { font-size:3.8rem; margin-bottom:1.2rem; }
+.input-group      { margin-bottom:1.5rem; }
+.input-group label{ font-size:0.95rem; margin-bottom:8px; }
+.input-group input{ font-size:1rem !important; padding:14px 22px !important; border-radius:70px; }
+.btn              { font-size:1.05rem !important; padding:15px 32px !important; border-radius:50px; }
+.btn-gold         { margin-top:0.5rem; }
+.alert            { font-size:0.92rem !important; padding:12px 18px; }
+.login-disclaimer { font-size:0.92rem !important; }
+
+.page-content {
+  min-height: calc(100vh - 60px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem 1.2rem 3rem;
+}
+
+/* AUTH MODAL BASE */
+.am-brand    { font-size:14px !important; letter-spacing:1.5px; }
+.am-wheel    { font-size:1.6rem !important; }
+.am-close    { font-size:22px !important; width:36px !important; height:36px !important; right:12px !important; left:auto !important; }
+.am-div      { font-size:0.95rem !important; gap:14px; margin:1.2rem 0; }
+.am-lg-email { font-size:1rem !important; letter-spacing:0.5px; }
+.am-lg-name  { font-size:1.4rem !important; }
+.am-tab      { font-size:13px !important; padding:13px !important; letter-spacing:2px; }
+.am-label    { font-size:11px !important; letter-spacing:1.5px; }
+.am-input    { font-size:0.95rem !important; padding:11px 14px !important; }
+.am-btn      { font-size:12px !important; padding:13px !important; }
+.am-soc      { font-size:0.9rem !important; padding:11px 8px !important; }
+.am-forgot a { font-size:0.85rem !important; }
+.am-err      { font-size:0.85rem !important; }
+.auth-modal  { max-width:460px; }
+.am-avatar   { width:72px !important; height:72px !important; }
+
+
+/* ============================================================
+   1440px
+   ============================================================ */
+@media(min-width:1440px){
+
+  /* ── NAV ── */
+  .nav          { padding:0 48px; }
+  .nav img      { width:36px !important; height:36px !important; margin-right:12px !important; }
+  .brand        { font-size:17px; }
+  .nav-links    { margin-left:40px !important; }
+  .nav-links a  { font-size:15.5px; padding:14px 10px; }
+  .lang-row     { gap:6px; }
+ .lb-lang      { font-size:14px; padding:4px 12px; }
+  .login-btn    { font-size:14px; padding:5px 16px; }
+
+  /* ── LOGIN BOX ── */
+  .page-content { padding:3.5rem 2rem 5rem; }
+  .main-card    { max-width:760px; border-radius:42px; }
+  .mac-bar      { padding:16px 22px; gap:9px; }
+  .mac-bar span { width:15px; height:15px; }
+  .mac-inner    { padding:3.2rem; }
+  .brand-inner h1 { font-size:2.6rem !important; }
+  .brand-inner p  { font-size:1.1rem !important; }
+  .login-box    { padding:3.2rem 2.8rem; border-radius:22px; }
+  .login-box h2 { font-size:2.1rem !important; }
+  .login-box p.sub { font-size:1.1rem !important; }
+  .login-icon   { font-size:4.2rem; }
+  .input-group label { font-size:1.05rem; }
+  .input-group input { font-size:1.1rem !important; padding:16px 26px !important; }
+  .btn          { font-size:1.15rem !important; padding:16px 38px !important; }
+  .login-disclaimer { font-size:1rem !important; }
+
+  /* ── AUTH MODAL ── */
+  .auth-modal  { max-width:480px; }
+  .am-brand    { font-size:15px !important; }
+  .am-wheel    { font-size:1.7rem !important; }
+  .am-close    { font-size:24px !important; width:38px !important; height:38px !important; }
+  .am-div      { font-size:1rem !important; }
+  .am-lg-email { font-size:1.05rem !important; }
+  .am-lg-name  { font-size:1.5rem !important; }
+  .am-tab      { font-size:13.5px !important; padding:13px !important; }
+  .am-label    { font-size:11.5px !important; }
+  .am-input    { font-size:0.97rem !important; padding:11px 15px !important; }
+  .am-btn      { font-size:12.5px !important; padding:13px !important; }
+  .am-soc      { font-size:0.92rem !important; }
+  .am-avatar   { width:76px !important; height:76px !important; }
+
+  /* ── FOOTER ── */
+  .footer-wrap .footer-top {
+    display:grid !important;
+    grid-template-columns:1.5fr 1fr 1fr 1.2fr !important;
+    gap:32px !important;
+    padding:52px 5% 44px !important;
+    max-width:100% !important;
+    width:100% !important;
+    box-sizing:border-box !important;
+  }
+  .footer-wrap .brand-col { grid-column:auto !important; text-align:left !important; }
+  .footer-wrap .footer-bottom {
+    padding:20px 5% 26px !important;
+    max-width:100% !important;
+    width:100% !important;
+    box-sizing:border-box !important;
+  }
+  .footer-wrap .brand-col .brand-name  { font-size:21px !important; font-weight:700; }
+  .footer-wrap .brand-col .brand-pali  { font-size:16px !important; letter-spacing:2px; }
+  .footer-wrap .brand-col p            { font-size:18px !important; line-height:1.7; }
+  .footer-wrap .footer-col h4          { font-size:16px !important; letter-spacing:2px; margin-bottom:16px; padding-bottom:9px; }
+  .footer-wrap .footer-col ul li       { margin-bottom:9px; }
+  .footer-wrap .footer-col ul li a     { font-size:18px !important; }
+  .footer-wrap .contact-txt            { font-size:17px !important; line-height:1.55; }
+  .footer-wrap .contact-txt strong     { font-size:14.5px !important; letter-spacing:1.3px; }
+  .footer-wrap .contact-icon           { width:28px; height:28px; }
+  .footer-wrap .contact-icon svg       { width:13px; height:13px; }
+  .footer-wrap .soc-btn                { width:32px; height:32px; }
+  .footer-wrap .soc-btn svg            { width:13px; height:13px; }
+  .footer-wrap .social-row             { gap:8px; }
+  .footer-wrap .footer-bottom .copy   { font-size:17px !important; }
+  .footer-wrap .footer-bottom .links a { font-size:16.5px !important; }
+  .footer-wrap .footer-bottom .links  { gap:22px; }
+  .footer-wrap .dhamma-strip           { font-size:16px !important; letter-spacing:2.8px; padding:12px; }
+}
+
+
+/* ============================================================
+   1920px
+   ============================================================ */
+@media(min-width:1920px){
+
+  /* ── NAV ── */
+  .nav          { padding:0 64px; min-height:58px; }
+  .nav img      { width:38px !important; height:38px !important; margin-right:13px !important; }
+  .brand        { font-size:28.5px; }
+  .nav-links    { margin-left:50px !important; }
+  .nav-links a  { font-size:27px; padding:15px 11px; }
+  .lb-lang      { font-size:25.5px; padding:5px 13px; }
+  .login-btn    { font-size:25.5px; padding:5px 18px; }
+
+  /* ── LOGIN BOX ── */
+  .page-content { padding:5rem 3rem 7rem; }
+  .main-card    { max-width:980px; border-radius:52px; }
+  .mac-bar      { padding:20px 28px; gap:11px; }
+  .mac-bar span { width:18px; height:18px; }
+  .mac-inner    { padding:4rem; }
+  .brand-inner h1 { font-size:3.2rem !important; }
+  .brand-inner p  { font-size:1.4rem !important; }
+  .login-box    { padding:4rem 3.6rem; border-radius:28px; }
+  .login-box h2 { font-size:2.6rem !important; }
+  .login-box p.sub { font-size:1.35rem !important; margin-bottom:2.5rem; }
+  .login-icon   { font-size:5.5rem; margin-bottom:1.8rem; }
+  .input-group  { margin-bottom:2rem; }
+  .input-group label { font-size:1.3rem; margin-bottom:10px; }
+  .input-group input { font-size:1.4rem !important; padding:20px 32px !important; }
+  .btn          { font-size:1.45rem !important; padding:20px 50px !important; }
+  .alert        { font-size:1.1rem !important; }
+  .login-disclaimer { font-size:1.2rem !important; }
+
+  /* ── AUTH MODAL ── */
+  .auth-modal  { max-width:560px; }
+  .am-brand    { font-size:18px !important; }
+  .am-wheel    { font-size:2rem !important; }
+  .am-close    { font-size:28px !important; width:44px !important; height:44px !important; }
+  .am-div      { font-size:1.1rem !important; }
+  .am-lg-email { font-size:1.2rem !important; }
+  .am-lg-name  { font-size:1.8rem !important; }
+  .am-tab      { font-size:15px !important; padding:15px !important; }
+  .am-label    { font-size:13px !important; }
+  .am-input    { font-size:1.1rem !important; padding:13px 18px !important; }
+  .am-btn      { font-size:14px !important; padding:15px !important; }
+  .am-soc      { font-size:1.05rem !important; padding:13px 10px !important; }
+  .am-forgot a { font-size:1rem !important; }
+  .am-err      { font-size:0.95rem !important; }
+  .am-avatar   { width:88px !important; height:88px !important; }
+
+  /* ── FOOTER ── */
+  .footer-wrap .footer-top {
+    grid-template-columns:1.5fr 1fr 1fr 1.2fr !important;
+    gap:40px !important;
+    padding:60px 5.5% 50px !important;
+    max-width:100% !important;
+    width:100% !important;
+    box-sizing:border-box !important;
+  }
+  .footer-wrap .brand-col { grid-column:auto !important; text-align:left !important; }
+  .footer-wrap .footer-bottom {
+    padding:22px 5.5% 28px !important;
+    max-width:100% !important;
+    width:100% !important;
+    box-sizing:border-box !important;
+  }
+  .footer-wrap .brand-col .brand-name  { font-size:28px !important; }
+  .footer-wrap .brand-col .brand-pali  { font-size:22.5px !important; letter-spacing:2px; }
+  .footer-wrap .brand-col p            { font-size:24.5px !important; line-height:1.75; }
+  .footer-wrap .footer-col h4          { font-size:22.5px !important; letter-spacing:2.2px; margin-bottom:17px; }
+  .footer-wrap .footer-col ul li       { margin-bottom:10px; }
+  .footer-wrap .footer-col ul li a     { font-size:24.5px !important; }
+  .footer-wrap .contact-txt            { font-size:23.5px !important; line-height:1.6; }
+  .footer-wrap .contact-txt strong     { font-size:21px !important; }
+  .footer-wrap .contact-icon           { width:29px; height:29px; }
+  .footer-wrap .soc-btn                { width:33px; height:33px; }
+  .footer-wrap .soc-btn svg            { width:14px; height:14px; }
+  .footer-wrap .social-row             { gap:9px; }
+  .footer-wrap .footer-bottom .copy   { font-size:23.5px !important; }
+  .footer-wrap .footer-bottom .links a { font-size:23px !important; }
+  .footer-wrap .footer-bottom .links  { gap:24px; }
+  .footer-wrap .dhamma-strip           { font-size:22.5px !important; letter-spacing:3px; padding:13px; }
+}
+
+
+/* ============================================================
+   2560px
+   ============================================================ */
+@media(min-width:2560px){
+
+  /* ── NAV ── */
+  .nav          { padding:0 100px; min-height:68px; }
+  .nav img      { width:48px !important; height:48px !important; margin-right:16px !important; }
+  .brand        { font-size:29px; }
+  .nav-links    { margin-left:80px !important; }
+  .nav-links a  { font-size:27px; padding:20px 16px; }
+  .lb-lang      { font-size:25px; padding:6px 18px; }
+  .login-btn    { font-size:25px; padding:7px 24px; }
+
+  /* ── LOGIN BOX ── */
+  .page-content { padding:7rem 5rem 10rem; }
+  .main-card    { max-width:1280px; border-radius:68px; }
+  .mac-bar      { padding:26px 36px; gap:14px; }
+  .mac-bar span { width:22px; height:22px; }
+  .mac-inner    { padding:5.5rem; }
+  .brand-inner h1 { font-size:4.2rem !important; }
+  .brand-inner p  { font-size:1.85rem !important; }
+  .login-box    { padding:5.5rem 5rem; border-radius:36px; }
+  .login-box h2 { font-size:3.5rem !important; }
+  .login-box p.sub { font-size:1.8rem !important; margin-bottom:3.5rem; }
+  .login-icon   { font-size:7rem; margin-bottom:2.2rem; }
+  .input-group  { margin-bottom:2.8rem; }
+  .input-group label { font-size:1.7rem; margin-bottom:14px; }
+  .input-group input { font-size:1.85rem !important; padding:26px 42px !important; }
+  .btn          { font-size:1.9rem !important; padding:26px 68px !important; }
+  .alert        { font-size:1.45rem !important; padding:18px 28px; }
+  .login-disclaimer { font-size:1.5rem !important; }
+
+  /* ── AUTH MODAL ── */
+  .auth-modal  { max-width:720px; }
+  .am-brand    { font-size:22px !important; }
+  .am-wheel    { font-size:2.4rem !important; }
+  .am-close    { font-size:36px !important; width:56px !important; height:56px !important; }
+  .am-div      { font-size:1.4rem !important; }
+  .am-lg-email { font-size:1.5rem !important; }
+  .am-lg-name  { font-size:2.2rem !important; }
+  .am-tab      { font-size:18px !important; padding:20px !important; }
+  .am-label    { font-size:16px !important; }
+  .am-input    { font-size:1.4rem !important; padding:16px 22px !important; }
+  .am-btn      { font-size:18px !important; padding:18px !important; }
+  .am-soc      { font-size:1.3rem !important; padding:16px 12px !important; }
+  .am-forgot a { font-size:1.2rem !important; }
+  .am-err      { font-size:1.1rem !important; }
+  .am-avatar   { width:110px !important; height:110px !important; }
+
+  /* ── FOOTER ── */
+  .footer-wrap .footer-top {
+    grid-template-columns:1.5fr 1fr 1fr 1.2fr !important;
+    gap:56px !important;
+    padding:80px 6% 66px !important;
+    max-width:100% !important;
+    width:100% !important;
+    box-sizing:border-box !important;
+  }
+  .footer-wrap .brand-col { grid-column:auto !important; text-align:left !important; }
+  .footer-wrap .footer-bottom {
+    padding:28px 6% 36px !important;
+    max-width:100% !important;
+    width:100% !important;
+    box-sizing:border-box !important;
+  }
+  .footer-wrap .brand-col .brand-name  { font-size:40px !important; }
+  .footer-wrap .brand-col .brand-pali  { font-size:32px !important; letter-spacing:2.5px; }
+  .footer-wrap .brand-col p            { font-size:34px !important; line-height:1.8; margin-bottom:20px; }
+  .footer-wrap .footer-col h4          { font-size:32px !important; letter-spacing:2.8px; margin-bottom:22px; padding-bottom:11px; }
+  .footer-wrap .footer-col ul li       { margin-bottom:12px; }
+  .footer-wrap .footer-col ul li a     { font-size:34.5px !important; }
+  .footer-wrap .contact-txt            { font-size:33px !important; line-height:1.6; }
+  .footer-wrap .contact-txt strong     { font-size:28px !important; letter-spacing:1.6px; }
+  .footer-wrap .contact-item           { gap:12px; margin-bottom:14px; }
+  .footer-wrap .contact-icon           { width:34px; height:34px; border-radius:8px; }
+  .footer-wrap .contact-icon svg       { width:15px; height:15px; }
+  .footer-wrap .soc-btn                { width:38px; height:38px; }
+  .footer-wrap .soc-btn svg            { width:16px; height:16px; }
+  .footer-wrap .social-row             { gap:10px; }
+  .footer-wrap .footer-bottom .copy   { font-size:33px !important; }
+  .footer-wrap .footer-bottom .links a { font-size:32.5px !important; }
+  .footer-wrap .footer-bottom .links  { gap:36px; }
+  .footer-wrap .dhamma-strip           { font-size:32px !important; letter-spacing:4px; padding:16px; }
+}
+
+
+/* ============================================================
+   3440px
+   ============================================================ */
+@media(min-width:3440px){
+
+  /* ── NAV ── */
+  .nav          { padding:0 140px; min-height:82px; }
+  .nav img      { width:62px !important; height:62px !important; margin-right:20px !important; }
+  .brand        { font-size:40px; }
+  .nav-links    { margin-left:120px !important; }
+  .nav-links a  { font-size:38px; padding:26px 20px; }
+  .lb-lang      { font-size:35px; padding:9px 24px; }
+  .login-btn    { font-size:34px; padding:10px 32px; }
+
+  /* ── LOGIN BOX ── */
+  .page-content { padding:10rem 8rem 14rem; }
+  .main-card    { max-width:1680px; border-radius:88px; }
+  .mac-bar      { padding:34px 48px; gap:18px; }
+  .mac-bar span { width:28px; height:28px; }
+  .mac-inner    { padding:7rem; }
+  .brand-inner h1 { font-size:5.5rem !important; }
+  .brand-inner p  { font-size:2.4rem !important; }
+  .login-box    { padding:7rem 6.5rem; border-radius:46px; }
+  .login-box h2 { font-size:4.5rem !important; }
+  .login-box p.sub { font-size:2.4rem !important; margin-bottom:4.5rem; }
+  .login-icon   { font-size:9rem; margin-bottom:2.8rem; }
+  .input-group  { margin-bottom:3.5rem; }
+  .input-group label { font-size:2.2rem; margin-bottom:18px; }
+  .input-group input { font-size:2.4rem !important; padding:34px 54px !important; }
+  .btn          { font-size:2.5rem !important; padding:34px 90px !important; }
+  .alert        { font-size:1.9rem !important; padding:24px 36px; }
+  .login-disclaimer { font-size:1.9rem !important; }
+
+  /* ── AUTH MODAL ── */
+  .auth-modal  { max-width:960px; }
+  .am-brand    { font-size:28px !important; }
+  .am-wheel    { font-size:3rem !important; }
+  .am-close    { font-size:44px !important; width:68px !important; height:68px !important; }
+  .am-div      { font-size:1.8rem !important; }
+  .am-lg-email { font-size:2rem !important; }
+  .am-lg-name  { font-size:2.8rem !important; }
+  .am-tab      { font-size:22px !important; padding:24px !important; }
+  .am-label    { font-size:20px !important; }
+  .am-input    { font-size:1.8rem !important; padding:20px 28px !important; }
+  .am-btn      { font-size:22px !important; padding:22px !important; }
+  .am-soc      { font-size:1.7rem !important; padding:20px 14px !important; }
+  .am-forgot a { font-size:1.5rem !important; }
+  .am-err      { font-size:1.4rem !important; }
+  .am-avatar   { width:140px !important; height:140px !important; }
+
+  /* ── FOOTER ── */
+  .footer-wrap .footer-top {
+    grid-template-columns:1.5fr 1fr 1fr 1.2fr !important;
+    gap:80px !important;
+    padding:110px 7% 90px !important;
+    max-width:100% !important;
+    width:100% !important;
+    box-sizing:border-box !important;
+  }
+  .footer-wrap .brand-col { grid-column:auto !important; text-align:left !important; }
+  .footer-wrap .footer-bottom {
+    padding:40px 7% 50px !important;
+    max-width:100% !important;
+    width:100% !important;
+    box-sizing:border-box !important;
+  }
+  .footer-wrap .brand-col .brand-name  { font-size:46px !important; }
+  .footer-wrap .brand-col .brand-pali  { font-size:35px !important; letter-spacing:3px; }
+  .footer-wrap .brand-col p            { font-size:38px !important; line-height:1.85; margin-bottom:26px; }
+  .footer-wrap .footer-col h4          { font-size:35px !important; letter-spacing:3.5px; margin-bottom:28px; padding-bottom:12px; }
+  .footer-wrap .footer-col ul li       { margin-bottom:16px; }
+  .footer-wrap .footer-col ul li a     { font-size:39px !important; }
+  .footer-wrap .contact-txt            { font-size:37px !important; line-height:1.65; }
+  .footer-wrap .contact-txt strong     { font-size:33px !important; letter-spacing:2px; }
+  .footer-wrap .contact-item           { gap:16px; margin-bottom:20px; }
+  .footer-wrap .contact-icon           { width:42px; height:42px; border-radius:10px; }
+  .footer-wrap .contact-icon svg       { width:19px; height:19px; }
+  .footer-wrap .soc-btn                { width:48px; height:48px; }
+  .footer-wrap .soc-btn svg            { width:20px; height:20px; }
+  .footer-wrap .social-row             { gap:13px; }
+  .footer-wrap .footer-bottom .copy   { font-size:37px !important; }
+  .footer-wrap .footer-bottom .links a { font-size:36px !important; }
+  .footer-wrap .footer-bottom .links  { gap:52px; }
+  .footer-wrap .dhamma-strip           { font-size:35px !important; letter-spacing:5px; padding:22px; }
+}
+
+
+/* ============================================================
+   3840px (4K)
+   ============================================================ */
+@media(min-width:3840px){
+
+  /* ── NAV ── */
+  .nav          { padding:0 200px; min-height:100px; }
+  .nav img      { width:76px !important; height:76px !important; margin-right:26px !important; }
+  .brand        { font-size:50px; }
+  .nav-links    { margin-left:160px !important; }
+  .nav-links a  { font-size:47px; padding:32px 26px; }
+  .lb-lang      { font-size:43px; padding:11px 30px; }
+  .login-btn    { font-size:42px; padding:12px 40px; }
+
+  /* ── LOGIN BOX ── */
+  .page-content { padding:14rem 12rem 18rem; }
+  .main-card    { max-width:2100px; border-radius:110px; }
+  .mac-bar      { padding:44px 62px; gap:22px; }
+  .mac-bar span { width:36px; height:36px; }
+  .mac-inner    { padding:9rem; }
+  .brand-inner h1 { font-size:7rem !important; }
+  .brand-inner p  { font-size:3rem !important; }
+  .login-box    { padding:9rem 8.5rem; border-radius:58px; }
+  .login-box h2 { font-size:5.8rem !important; }
+  .login-box p.sub { font-size:3rem !important; margin-bottom:5.5rem; }
+  .login-icon   { font-size:11.5rem; margin-bottom:3.5rem; }
+  .input-group  { margin-bottom:4.5rem; }
+  .input-group label { font-size:2.8rem; margin-bottom:24px; }
+  .input-group input { font-size:3rem !important; padding:44px 70px !important; }
+  .btn          { font-size:3.2rem !important; padding:44px 120px !important; }
+  .alert        { font-size:2.4rem !important; padding:30px 46px; }
+  .login-disclaimer { font-size:2.4rem !important; }
+
+  /* ── AUTH MODAL ── */
+  .auth-modal  { max-width:1200px; max-height:1500px; border-radius:26px; }
+  .am-head     { padding:2.2rem 3.2rem; }
+  .am-brand    { font-size:36px !important; }
+  .am-wheel    { font-size:3.8rem !important; }
+  .am-close    { font-size:52px !important; width:80px !important; height:80px !important; }
+  .am-div      { font-size:2.2rem !important; }
+  .am-lg-email { font-size:2.5rem !important; }
+  .am-lg-name  { font-size:3.5rem !important; }
+  .am-tab      { font-size:28px !important; padding:28px !important; }
+  .am-label    { font-size:26px !important; }
+  .am-input    { font-size:2.4rem !important; padding:26px 36px !important; }
+  .am-btn      { font-size:28px !important; padding:28px !important; }
+  .am-soc      { font-size:2.2rem !important; padding:26px 18px !important; }
+  .am-forgot a { font-size:1.9rem !important; }
+  .am-err      { font-size:1.8rem !important; }
+  .am-avatar   { width:180px !important; height:180px !important; }
+
+  /* ── FOOTER ── */
+  .footer-wrap .footer-top {
+    grid-template-columns:1.5fr 1fr 1fr 1.2fr !important;
+    gap:120px !important;
+    padding:150px 8% 130px !important;
+    max-width:100% !important;
+    width:100% !important;
+    box-sizing:border-box !important;
+  }
+  .footer-wrap .brand-col { grid-column:auto !important; text-align:left !important; }
+  .footer-wrap .footer-bottom {
+    padding:55px 8% 68px !important;
+    max-width:100% !important;
+    width:100% !important;
+    box-sizing:border-box !important;
+  }
+  .footer-wrap .brand-col .brand-name  { font-size:54px !important; }
+  .footer-wrap .brand-col .brand-pali  { font-size:40px !important; letter-spacing:3.5px; }
+  .footer-wrap .brand-col p            { font-size:44px !important; line-height:1.9; margin-bottom:32px; }
+  .footer-wrap .footer-col h4          { font-size:40px !important; letter-spacing:4.5px; margin-bottom:36px; padding-bottom:15px; }
+  .footer-wrap .footer-col ul li       { margin-bottom:45px; }
+  .footer-wrap .footer-col ul li a     { font-size:46px !important; }
+  .footer-wrap .contact-txt            { font-size:43px !important; line-height:1.7; }
+  .footer-wrap .contact-txt strong     { font-size:40px !important; letter-spacing:2.5px; }
+  .footer-wrap .contact-item           { gap:20px; margin-bottom:26px; }
+  .footer-wrap .contact-icon           { width:54px; height:54px; border-radius:13px; }
+  .footer-wrap .contact-icon svg       { width:24px; height:24px; }
+  .footer-wrap .soc-btn                { width:62px; height:62px; }
+  .footer-wrap .soc-btn svg            { width:26px; height:26px; }
+  .footer-wrap .social-row             { gap:16px; }
+  .footer-wrap .footer-bottom .copy   { font-size:43px !important; }
+  .footer-wrap .footer-bottom .links a { font-size:43px !important; }
+  .footer-wrap .footer-bottom .links  { gap:68px; }
+  .footer-wrap .dhamma-strip           { font-size:40px !important; letter-spacing:6px; padding:28px; }
+}
   </style>
   <link rel="stylesheet" href="footer-mobile.css">
 </head>
