@@ -1,0 +1,4416 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+<link rel="icon" type="image/png" href="logo.png">
+<link rel="shortcut icon" href="logo.png">
+<link rel="apple-touch-icon" href="logo.png">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Achievements - Sri Vipassi Dhamma School</title>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Noto+Sans+Sinhala:wght@400;600;700&family=Cormorant+Garamond:wght@400;500;600&family=Lora:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Cormorant Garamond', 'Noto Sans Sinhala', serif;
+    background: #1a0d05;
+    color: #f3e7c9;
+    min-height: 100vh;
+    overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
+    background-image: url('forest.png'); 
+    background-size: cover;
+    background-position: center top;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-color: rgba(26, 13, 5, 0.6);
+    background-blend-mode: darken;
+  }
+  img { max-width: 100%; display: block; }
+  a { color: inherit; text-decoration: none; }
+  button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+
+  :root {
+    --gold: #d4a437;
+    --gold-bright: #f5c84a;
+    --gold-soft: #b88a2c;
+    --dark-bg: #1a0d05;
+    --dark-card: #2a1810;
+    --maroon: #4a1818;
+    --maroon-dark: #2a0d0d;
+    --teal: #0d4f4a;
+    --purple: #4a1d5a;
+  }
+
+  :root{--gold-i:#c9a84c;--gold2-i:#f0d080;--maroon-i:#7a1010;}
+
+  /* NAV */
+  .nav{background:linear-gradient(90deg,#5a0808 0%,#8b1212 40%,#7a0e0e 70%,#5a0808 100%);padding:0 24px;display:flex;align-items:center;border-bottom:2px solid #c9a84c;position:relative;z-index:100;box-shadow:0 2px 20px rgba(0,0,0,0.6)}
+  .nav>img{border-radius:50%;position:relative;z-index:2;filter:drop-shadow(0 0 4px rgba(255,225,140,0.7)) drop-shadow(0 0 10px rgba(255,200,90,0.5)) drop-shadow(0 0 18px rgba(255,170,50,0.3));animation:logoGlow 4s ease-in-out infinite}
+  @keyframes logoGlow{0%,100%{filter:drop-shadow(0 0 4px rgba(255,225,140,0.7)) drop-shadow(0 0 10px rgba(255,200,90,0.5)) drop-shadow(0 0 18px rgba(255,170,50,0.3))}50%{filter:drop-shadow(0 0 6px rgba(255,240,180,0.9)) drop-shadow(0 0 14px rgba(255,215,110,0.65)) drop-shadow(0 0 24px rgba(255,180,60,0.4))}}
+  .nav .brand{color:#f5deb3;font-size:13px;font-weight:700;letter-spacing:.5px;text-shadow:0 1px 3px rgba(0,0,0,0.5);background:none;border:none;display:inline;padding:0;width:auto;height:auto;font-family:'Lora',Georgia,serif;}
+  .nav .nav-links{display:flex;flex-wrap:wrap;flex:1;list-style:none;padding:0;margin:0 0 0 80px;gap:0;}
+  .nav .nav-links a{color:rgba(245,222,179,0.88);font-size:11.5px;padding:14px 10px;text-decoration:none;border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap;font-family:'Segoe UI',Arial,sans-serif;letter-spacing:normal;font-weight:normal;border-radius:0;background:none;}
+  .nav .nav-links a:hover{color:#ffe066;border-bottom-color:#ffe066;background:rgba(255,255,255,0.05)}
+  .nav .nav-links a.active{color:#ffe066;border-bottom-color:#ffe066;background:rgba(255,255,255,0.05)}
+  .lang-row{display:flex;gap:5px;align-items:center;padding:6px 0;margin-left:auto}
+  .lb{background:rgba(255,255,255,0.08);color:#f5deb3;border:1px solid rgba(255,255,255,0.2);padding:4px 10px;border-radius:3px;font-size:10.5px;cursor:pointer;transition:all .2s}
+  .lb:hover{background:rgba(255,255,255,0.15)}
+  .lb.on{background:linear-gradient(135deg,#c9a84c,#a07810);color:#1a0800;border-color:#c9a84c;font-weight:700}
+  .login-btn{background:linear-gradient(135deg,#c9a84c,#a07810);color:#1a0800;border:none;padding:5px 16px;border-radius:3px;font-size:10.5px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;margin-left:8px;transition:all .2s;box-shadow:0 2px 8px rgba(201,168,76,0.25);font-family:inherit;}
+  .login-btn:hover{background:linear-gradient(135deg,#e0b95c,#b88a20);box-shadow:0 4px 14px rgba(201,168,76,0.4)}
+  .login-btn.logged-in{background:rgba(201,168,76,0.12);color:#c9a84c;border:1px solid rgba(201,168,76,0.35)}
+  .hamburger{display:none;align-items:center;gap:6px;cursor:pointer;padding:8px 10px;margin-left:auto;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:20px}
+  .hamburger .dot{display:block;width:13px;height:13px;border-radius:50%;transition:transform 0.2s,filter 0.2s}
+  .hamburger .dot.red{background:#ff5f57}
+  .hamburger .dot.yellow{background:#ffbd2e}
+  .hamburger .dot.green{background:#28c840}
+  .hamburger:hover .dot{filter:brightness(1.15)}
+  .hamburger:hover .dot{transform:scale(1.15)}
+  .hamburger.open .dot{opacity:0.6}
+  .mobile-sidebar{position:fixed;top:0;left:-280px;width:280px;height:100vh;background:linear-gradient(180deg,#1a0808 0%,#2a0a0a 100%);z-index:500;transition:left 0.3s ease;box-shadow:2px 0 10px rgba(0,0,0,0.5);overflow-y:auto}
+  .mobile-sidebar.open{left:0}
+  .mobile-sidebar-header{background:linear-gradient(90deg,#5a0808,#8b1212);padding:1rem;display:flex;align-items:center;justify-content:space-between}
+  .mobile-sidebar-header .brand{color:#f5deb3;font-size:14px;font-weight:700;background:none;border:none;width:auto;height:auto;padding:0;display:inline;font-family:'Lora',Georgia,serif;letter-spacing:.5px;}
+  .mobile-close{background:none;border:none;color:#c9a84c;font-size:18px;cursor:pointer}
+  .mobile-nav-links{padding:1rem 0}
+  .mobile-nav-links a{display:block;color:#f5deb3;padding:12px 1.5rem;text-decoration:none;border-bottom:1px solid rgba(201,168,76,0.1);transition:all 0.2s;font-family:'Lora',Georgia,serif;font-size:13px;font-weight:normal;letter-spacing:normal;}
+  .mobile-nav-links a:hover{background:rgba(201,168,76,0.1);color:#ffe066}
+  .mobile-lang-row{padding:1rem;border-top:1px solid rgba(201,168,76,0.1);display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-family:'Lora',Georgia,serif;}
+  .mobile-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:400}
+  .mobile-overlay.open{display:block}
+
+  /* AUTH MODAL */
+  .auth-overlay{display:none;position:fixed;inset:0;z-index:1000;background:rgba(4,2,4,0.92);backdrop-filter:blur(8px);align-items:center;justify-content:center}
+  .auth-overlay.open{display:flex}
+  .auth-modal{background:linear-gradient(160deg,#110808 0%,#1a0a0a 60%,#0d0d0a 100%);border:1px solid rgba(201,168,76,0.28);border-radius:8px;width:100%;max-width:420px;margin:1rem;box-shadow:0 0 80px rgba(0,0,0,0.95);overflow:hidden;max-height:92vh;overflow-y:auto}
+  .am-head{background:linear-gradient(90deg,#5a0808,#7a0e0e,#5a0808);border-bottom:1px solid rgba(201,168,76,0.3);padding:1rem 1.4rem;display:flex;align-items:center;gap:10px;position:relative}
+  .am-brand{font-size:10px;letter-spacing:2px;color:#c9a84c;text-transform:uppercase;flex:1}
+  .am-close{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:rgba(245,222,179,0.45);font-size:14px;cursor:pointer;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:all .2s}
+  .am-close:hover{background:rgba(255,255,255,0.1);color:#f5deb3}
+  .am-tabs{display:flex;border-bottom:1px solid rgba(201,168,76,0.1)}
+  .am-tab{flex:1;padding:11px;background:none;border:none;color:rgba(245,222,179,0.4);font-size:9.5px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;font-family:inherit;}
+  .am-tab.on{color:#c9a84c;border-bottom-color:#c9a84c;background:rgba(201,168,76,0.04)}
+  .am-tab:hover:not(.on){color:rgba(245,222,179,0.65)}
+  .am-body{padding:1.4rem}
+  .am-field{margin-bottom:.9rem}
+  .am-label{display:block;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:#c9a84c;margin-bottom:5px}
+  .am-input{width:100%;background:rgba(255,255,255,0.04);border:1px solid rgba(201,168,76,0.18);border-radius:3px;padding:9px 13px;color:#f5deb3;font-size:0.87rem;outline:none;transition:border-color .2s;font-family:inherit;}
+  .am-input:focus{border-color:rgba(201,168,76,0.5);background:rgba(201,168,76,0.03)}
+  .am-input::placeholder{color:rgba(245,222,179,0.18)}
+  .am-forgot{text-align:right;margin-top:-3px;margin-bottom:.8rem}
+  .am-forgot a{font-size:0.75rem;color:rgba(201,168,76,0.55);text-decoration:none}
+  .am-forgot a:hover{color:#c9a84c}
+  .am-btn{width:100%;padding:11px;background:linear-gradient(135deg,#c9a84c,#a07810);border:none;border-radius:3px;color:#1a0800;font-weight:700;font-size:10.5px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all .2s;font-family:inherit;}
+  .am-btn:hover{background:linear-gradient(135deg,#e0b95c,#b88a20);box-shadow:0 4px 18px rgba(201,168,76,0.28)}
+  .am-btn:disabled{opacity:.5;cursor:not-allowed}
+  .am-err{margin-top:.65rem;font-size:.77rem;color:#e05555;min-height:1rem;text-align:center}
+  .am-ok{color:#6dbf6d!important}
+  .am-div{display:flex;align-items:center;gap:10px;margin:1rem 0;color:rgba(245,222,179,0.22);font-size:.72rem}
+  .am-div::before,.am-div::after{content:'';flex:1;height:1px;background:rgba(201,168,76,0.1)}
+  .am-socials{display:grid;grid-template-columns:1fr;gap:8px;margin-bottom:.4rem}
+  .am-soc{padding:9px 6px;background:rgba(255,255,255,0.04);border:1px solid rgba(201,168,76,0.14);border-radius:3px;color:rgba(245,222,179,0.7);font-size:.78rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:all .2s;white-space:nowrap;font-family:inherit;}
+  .am-soc:hover{background:rgba(255,255,255,0.09);border-color:rgba(201,168,76,0.3);color:#f5deb3}
+  .am-soc.google:hover{border-color:rgba(234,67,53,0.5)}
+  .am-loggedin{text-align:center;padding:2rem 1.4rem}
+  .am-avatar{width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,rgba(201,168,76,0.2),rgba(90,8,8,0.5));border:2px solid rgba(201,168,76,0.4);display:flex;align-items:center;justify-content:center;font-size:1.8rem;margin:0 auto .8rem}
+  .am-lg-name{font-size:1.3rem;color:#fff;margin-bottom:.25rem}
+  .am-lg-email{font-size:.76rem;color:rgba(201,168,76,0.55);letter-spacing:.8px;margin-bottom:1.4rem}
+
+  /* FOOTER */
+  .footer-wrap{background:linear-gradient(180deg,rgba(5,3,0,1) 0%,rgba(8,4,1,1) 30%,rgba(10,6,2,1) 60%,rgba(4,2,0,1) 100%);border-top:1px solid rgba(153,101,21,0.35);font-family:'Segoe UI',Arial,sans-serif;color:rgba(245,222,179,0.75);position:relative;overflow:hidden;width:100%;max-width:100%;box-sizing:border-box;margin-top:auto}
+  .footer-wrap *{box-sizing:border-box;margin:0;padding:0}
+  .footer-wrap::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent 0%,rgba(153,101,21,0.6) 20%,rgba(201,168,76,0.85) 50%,rgba(153,101,21,0.6) 80%,transparent 100%)}
+  .footer-wrap .footer-top{display:grid;grid-template-columns:repeat(4,1fr);gap:32px;padding:52px 48px 40px;max-width:1200px;margin:0 auto}
+  .footer-wrap .footer-col{min-width:0}
+  .footer-wrap .brand-col{text-align:left}
+  .footer-wrap .brand-col .brand-name{font-size:14px;font-weight:700;color:rgba(201,168,76,0.9);letter-spacing:0.4px;margin-bottom:5px;line-height:1.3}
+  .footer-wrap .brand-col .brand-pali{font-size:10px;letter-spacing:1.8px;text-transform:uppercase;color:rgba(153,101,21,0.7);margin-bottom:14px}
+  .footer-wrap .brand-col p{font-size:12px;line-height:1.7;color:rgba(245,222,179,0.45);margin-bottom:18px}
+  .footer-wrap .social-row{display:flex;gap:8px;flex-wrap:wrap}
+  .footer-wrap .soc-btn{width:32px;height:32px;border-radius:50%;border:1px solid rgba(153,101,21,0.35);background:rgba(153,101,21,0.08);display:flex;align-items:center;justify-content:center;color:rgba(201,168,76,0.7);cursor:pointer;transition:all 0.25s;text-decoration:none;flex-shrink:0}
+  .footer-wrap .soc-btn svg{width:13px;height:13px;fill:currentColor}
+  .footer-wrap .soc-btn:hover{background:rgba(153,101,21,0.22);border-color:rgba(201,168,76,0.55);color:rgba(201,168,76,0.95);transform:translateY(-2px)}
+  .footer-wrap .footer-col h4{font-size:10px;letter-spacing:2.2px;text-transform:uppercase;color:rgba(153,101,21,0.85);margin-bottom:18px;font-weight:700;position:relative;padding-bottom:10px}
+  .footer-wrap .footer-col h4::after{content:'';position:absolute;bottom:0;left:0;width:24px;height:1px;background:rgba(153,101,21,0.5)}
+  .footer-wrap .footer-col ul{list-style:none}
+  .footer-wrap .footer-col ul li{margin-bottom:10px}
+  .footer-wrap .footer-col ul li a{font-size:12.5px;color:rgba(245,222,179,0.42);text-decoration:none;letter-spacing:0.2px;transition:color 0.2s;display:flex;align-items:center;gap:6px}
+  .footer-wrap .footer-col ul li a::before{content:'›';color:rgba(153,101,21,0.5);font-size:14px;line-height:1}
+  .footer-wrap .footer-col ul li a:hover{color:rgba(201,168,76,0.85)}
+  .footer-wrap .contact-item{display:flex;gap:10px;margin-bottom:12px;align-items:flex-start}
+  .footer-wrap .contact-icon{width:28px;height:28px;border-radius:6px;background:rgba(153,101,21,0.1);border:1px solid rgba(153,101,21,0.25);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:rgba(201,168,76,0.85);transition:all 0.2s}
+  .footer-wrap .contact-icon svg{width:13px;height:13px;fill:currentColor}
+  .footer-wrap .contact-item:hover .contact-icon{background:rgba(153,101,21,0.2);border-color:rgba(201,168,76,0.45)}
+  .footer-wrap .contact-txt{font-size:11px;line-height:1.55;color:rgba(245,222,179,0.45);word-break:break-word;min-width:0}
+  .footer-wrap .contact-txt strong{display:block;font-size:9px;letter-spacing:1.4px;text-transform:uppercase;color:rgba(153,101,21,0.75);margin-bottom:2px;font-weight:700}
+  .footer-wrap .footer-divider{max-width:1200px;margin:0 auto;height:1px;background:linear-gradient(90deg,transparent 0%,rgba(153,101,21,0.25) 20%,rgba(153,101,21,0.45) 50%,rgba(153,101,21,0.25) 80%,transparent 100%)}
+  .footer-wrap .footer-bottom{max-width:1200px;margin:0 auto;padding:18px 48px 22px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+  .footer-wrap .footer-bottom .copy{font-size:11px;color:rgba(245,222,179,0.3);letter-spacing:0.5px}
+  .footer-wrap .footer-bottom .copy span{color:rgba(153,101,21,0.7)}
+  .footer-wrap .footer-bottom .links{display:flex;gap:20px;flex-wrap:wrap}
+  .footer-wrap .footer-bottom .links a{font-size:10.5px;color:rgba(245,222,179,0.28);text-decoration:none;letter-spacing:0.5px;transition:color 0.2s}
+  .footer-wrap .footer-bottom .links a:hover{color:rgba(153,101,21,0.85)}
+  .footer-wrap .dhamma-strip{background:rgba(153,101,21,0.06);border-top:1px solid rgba(153,101,21,0.12);text-align:center;padding:12px;font-size:10.5px;letter-spacing:3px;text-transform:uppercase;color:rgba(153,101,21,0.4)}
+  .footer-wrap .dhamma-strip span{color:rgba(153,101,21,0.6);margin:0 10px}
+
+  @media(max-width:1200px){.nav .nav-links{display:none !important;}.lang-row{display:none !important;}.login-btn{display:none !important;}.hamburger{display:flex !important;}}
+  @media(max-width:768px){.footer-wrap .footer-top{grid-template-columns:repeat(3,1fr);gap:32px 24px;padding:44px 28px 32px}.footer-wrap .brand-col{grid-column:1 / -1;text-align:center;padding-bottom:14px;border-bottom:1px solid rgba(153,101,21,0.15);margin-bottom:6px}.footer-wrap .brand-col p{max-width:520px;margin-left:auto;margin-right:auto}.footer-wrap .social-row{justify-content:center}}
+  @media(max-width:480px){.nav{padding:0 12px;min-height:54px}.nav .brand{font-size:11px;letter-spacing:.3px}.nav>img{width:28px!important;height:28px!important;margin-right:8px!important}.footer-wrap .footer-top{grid-template-columns:1fr;gap:26px;padding:32px 22px 22px;text-align:center}.footer-wrap .brand-col{grid-column:auto;padding-bottom:14px}.footer-wrap .footer-col h4{display:inline-block}.footer-wrap .footer-col h4::after{left:50%;transform:translateX(-50%)}.footer-wrap .footer-col ul li a{justify-content:center}.footer-wrap .contact-item{display:inline-flex;max-width:240px;width:auto;margin:0 auto 12px;text-align:left;align-items:center}.footer-wrap .footer-bottom{flex-direction:column;align-items:center;text-align:center;gap:12px;padding:18px 22px 20px}.footer-wrap .footer-bottom .links{justify-content:center;gap:14px}.footer-wrap .dhamma-strip{font-size:9px;letter-spacing:1.8px;padding:11px 12px;line-height:1.6}.footer-wrap .dhamma-strip span{margin:0 6px}.footer-wrap .social-row{justify-content:center}}
+
+  /* ---------- HERO TITLE ---------- */
+  .hero-title {
+    text-align: center;
+    padding: 140px 20px 18px;
+    background: linear-gradient(180deg, rgba(74,24,24,0.4) 0%, transparent 100%);
+  }
+  .hero-title h1 {
+    font-family: 'Noto Sans Sinhala', serif;
+    font-size: clamp(2.4rem, 5vw, 4.2rem);
+    font-weight: 700;
+    color: var(--gold-bright);
+    text-shadow:
+      0 2px 0 #6b4a14,
+      0 4px 12px rgba(0,0,0,0.7),
+      0 0 30px rgba(245,200,74,0.3);
+    letter-spacing: 2px;
+  }
+
+  /* ========== 3D GAME PATH SECTION ========== */
+.path-section {
+  position: relative;
+  padding: 20px 16px 60px;
+  overflow: hidden;
+}
+.path-section::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 20% 50%, rgba(212,164,55,0.06) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 50%, rgba(74,29,90,0.08) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+}
+.path-stage {
+  position: relative;
+  width: 100%;
+  max-width: 1100px;
+  min-width: 320px;
+  margin: 0 auto;
+}
+.path-section {
+  position: relative;
+  padding: 20px 16px 60px;
+  overflow: hidden;
+}
+.path-road-wrap {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+  display: block;
+}
+.path-nodes {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+}
+
+@media (max-width: 1200px) {
+  .path-stage {
+    width: 100%;
+    min-width: 280px;
+  }
+  :root {
+    --node-size: clamp(40px, 6vw, 64px);
+    --plat-w: calc(var(--node-size) * 1.24);
+    --plat-h: calc(var(--node-size) * 0.52);
+    --gem-size: clamp(6px, 1vw, 10px);
+    --add-size: clamp(38px, 7.5vw, 64px);
+    --add-font: clamp(1.1rem, 2vw, 2rem);
+    --add-lbl: clamp(5.5px, 0.9vw, 8.5px);
+  }
+}
+
+@media (max-width: 940px) {
+  :root {
+    --node-size: clamp(36px, 7vw, 56px);
+    --plat-w: calc(var(--node-size) * 1.22);
+    --plat-h: calc(var(--node-size) * 0.53);
+    --add-size: clamp(34px, 8vw, 56px);
+    --add-font: clamp(1rem, 2.5vw, 1.8rem);
+    --add-lbl: clamp(5.5px, 0.95vw, 8px);
+  }
+}
+:root {
+  --path-node-scale: 1;
+  --node-size: clamp(80px, 6vw, 120px);
+  --node-yr:   clamp(18px, 1.2vw, 28px);
+  --node-lbl:  clamp(8px, 0.75vw, 12px);
+  --plat-w:    calc(var(--node-size) * 1.32);
+  --plat-h:    calc(var(--node-size) * 0.56);
+  --gem-size:  clamp(12px, 1vw, 16px);
+  --add-size:  clamp(60px, 5vw, 100px);
+  --add-font:  clamp(1.6rem, 1.8vw, 3rem);
+  --add-lbl:   clamp(8px,  0.8vw, 12px);
+}
+@media (max-width: 360px) {
+  :root {
+    --node-size: clamp(22px, 12vw, 36px) !important;
+    --node-yr:   clamp(6px,  2.8vw, 9px) !important;
+    --node-lbl:  clamp(3.5px, 1.4vw, 5.5px) !important;
+    --plat-w:    calc(var(--node-size) * 1.1) !important;
+    --plat-h:    calc(var(--node-size) * 0.4) !important;
+    --gem-size:  clamp(3px,  1.2vw, 5px) !important;
+    --add-size:  clamp(20px, 11vw, 34px) !important;
+    --add-font:  clamp(0.7rem, 3vw, 1.1rem) !important;
+    --add-lbl:   clamp(3px,  1.2vw, 5px) !important;
+  }
+  .path-section { padding: 16px 6px 24px !important; }
+  .path-stage { min-width: 0 !important; width: 100% !important; }
+  .start-badge { font-size: 4.5px !important; padding: 1px 3px !important; bottom: -14px !important; letter-spacing: 0.3px !important; }
+  .add-year-label { font-size: 4.5px !important; padding: 1px 3px !important; }
+  .node-badge::before { width: 3px !important; height: 3px !important; }
+  .node-delete { width: 12px !important; height: 12px !important; font-size: 8px !important; top: -3px !important; right: -3px !important; }
+}
+
+@media (min-width: 768px) {
+  :root {
+    --node-size: clamp(100px, 5.2vw, 160px);
+    --node-yr:   clamp(20px, 1.2vw, 30px);
+    --node-lbl:  clamp(9px, 0.7vw, 12px);
+    --add-size:  clamp(72px, 5vw, 100px);
+    --add-font:  clamp(1.6rem, 1.5vw, 3rem);
+  }
+}
+@media (min-width: 1440px) {
+  :root {
+    --path-node-scale: 1.2;
+    --node-size: clamp(140px, 5vw, 220px);
+    --node-yr:   clamp(25px, 1.2vw, 34px);
+    --node-lbl:  clamp(12px, 0.7vw, 14px);
+    --gem-size:  clamp(14px,  0.75vw, 18px);
+    --add-size:  clamp(92px, 5vw, 120px);
+    --add-font:  clamp(2.2rem, 1.8vw, 3.8rem);
+    --add-lbl:   clamp(10px,  0.8vw, 14px);
+  }
+  .path-section { padding: 60px 24px 90px; }
+  .path-stage   { max-width: 1400px; }
+  .hero-title h1 { font-size: clamp(3.5rem, 5vw, 5.5rem) !important; }
+}
+
+@media (min-width: 1920px) {
+  :root {
+    --path-node-scale: 1.4;
+    --node-size: clamp(180px, 5vw, 300px);
+    --node-yr:   clamp(30px, 1.1vw, 40px);
+    --node-lbl:  clamp(12.5px, 0.65vw, 16px);
+    --gem-size:  clamp(16px, 0.72vw, 22px);
+    --add-size:  clamp(110px, 4.5vw, 150px);
+    --add-font:  clamp(2.8rem, 1.8vw, 4rem);
+    --add-lbl:   clamp(12px, 0.7vw, 16px);
+  }
+  .path-section { padding: 70px 32px 120px; }
+  .path-stage   { max-width: 1800px; }
+  .hero-title h1 { font-size: clamp(4.5rem, 5.5vw, 7rem) !important; }
+}
+
+@media (min-width: 2560px) {
+  :root {
+    --path-node-scale: 1.6;
+    --node-size: clamp(260px, 6vw, 380px);
+    --node-yr:   clamp(40px,  1.4vw,  60px);
+    --node-lbl:  clamp(18px,  0.8vw,  26px);
+    --gem-size:  clamp(22px,  1vw,    32px);
+    --add-size:  clamp(180px, 6vw,   260px);
+    --add-font:  clamp(3.5rem,  2.4vw,  6rem);
+    --add-lbl:   clamp(18px,  0.9vw,  28px);
+  }
+  .path-section { padding: 90px 48px 140px; }
+  .path-stage   { max-width: 2400px; }
+  .hero-title h1 { font-size: clamp(6rem, 6vw, 10rem) !important; }
+}
+
+@media (min-width: 3440px) {
+  :root {
+    --path-node-scale: 1.8;
+    --node-size: clamp(340px, 6vw, 520px);
+    --node-yr:   clamp(55px,  1.4vw,  80px);
+    --node-lbl:  clamp(24px,  0.75vw, 30px);
+    --gem-size:  clamp(30px,  0.9vw,  42px);
+    --add-size:  clamp(260px, 5.6vw, 360px);
+    --add-font:  clamp(5rem,  2.3vw,  8rem);
+    --add-lbl:   clamp(24px,  0.85vw, 36px);
+  }
+  .path-section { padding: 60px 64px 160px; }
+  .path-stage   { max-width: 4200px; }
+  .hero-title { padding: 120px 20px 18px; }
+  .hero-title h1 { font-size: clamp(8rem, 6.5vw, 13rem) !important; }
+}
+
+@media (min-width: 3840px) {
+  :root {
+    --path-node-scale: 2.0;
+    --node-size: clamp(420px, 5.8vw, 720px);
+    --node-yr:   clamp(70px,  1.3vw, 100px);
+    --node-lbl:  clamp(28px,  0.7vw,  40px);
+    --gem-size:  clamp(36px,  0.85vw, 52px);
+    --add-size:  clamp(320px, 5.4vw, 420px);
+    --add-font:  clamp(6rem,  2.2vw, 10rem);
+    --add-lbl:   clamp(30px,  0.8vw,  46px);
+  }
+  .path-section { padding: 80px 80px 180px; }
+  .path-stage   { max-width: 4800px; }
+  .hero-title { padding: 120px 20px 50px; }
+  .hero-title h1 { font-size: clamp(10rem, 7vw, 16rem) !important; }
+}
+
+.path-node {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  cursor: pointer;
+  transform-origin: center center;
+  transform: translate(-50%, -50%) scale(var(--path-node-scale, 1));
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  z-index: 3;
+}
+.path-node:hover { transform: translate(-50%, -58%) scale(var(--path-node-scale, 1)); z-index: 10; }
+
+.node-badge {
+  width:  var(--node-size);
+  height: var(--node-size);
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #9b3fa8, #5a1070 55%, #2d0640 100%);
+  border: 3px solid rgba(255,255,255,0.35);
+  box-shadow:
+    0 0 0 1px rgba(180,100,220,0.4),
+    0 4px 16px rgba(0,0,0,0.5),
+    inset 0 1px 4px rgba(255,255,255,0.25),
+    0 0 20px rgba(180,80,220,0.3);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 2;
+  transition: box-shadow 0.3s ease, border-color 0.3s ease;
+  animation: badgePulse 3s ease-in-out infinite;
+  animation-delay: var(--delay, 0s);
+}
+.path-node:hover .node-badge {
+  box-shadow:
+    0 0 0 2px rgba(245,200,74,0.8),
+    0 6px 24px rgba(0,0,0,0.6),
+    inset 0 1px 6px rgba(255,255,255,0.3),
+    0 0 40px rgba(245,200,74,0.5);
+  border-color: var(--gold-bright);
+  animation-play-state: paused;
+}
+@keyframes badgePulse {
+  0%,100% { box-shadow: 0 0 0 1px rgba(180,100,220,0.4), 0 4px 16px rgba(0,0,0,0.5), inset 0 1px 4px rgba(255,255,255,0.25), 0 0 20px rgba(180,80,220,0.3); }
+  50%     { box-shadow: 0 0 0 2px rgba(200,130,240,0.6), 0 4px 20px rgba(0,0,0,0.5), inset 0 1px 4px rgba(255,255,255,0.25), 0 0 35px rgba(180,80,220,0.5); }
+}
+.node-badge::before {
+  content: '';
+  position: absolute;
+  top: 18%; left: 20%;
+  width: clamp(4px, 0.7vw, 7px);
+  height: clamp(4px, 0.7vw, 7px);
+  border-radius: 50%;
+  background: rgba(255,255,255,0.5);
+}
+.node-badge .yr {
+  font-family: 'Cinzel', serif;
+  font-size: var(--node-yr);
+  font-weight: 700;
+  color: #fff;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.7);
+  line-height: 1;
+  letter-spacing: 0.5px;
+}
+.node-badge .lbl {
+  font-family: 'Cinzel', serif;
+  font-size: var(--node-lbl);
+  color: rgba(255,255,255,0.7);
+  letter-spacing: 0.5px;
+  margin-top: 2px;
+}
+
+.node-platform {
+  width: var(--plat-w);
+  height: var(--plat-h);
+  position: relative;
+  margin-top: -8px;
+  z-index: 1;
+}
+.platform-top {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 62%;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at 40% 35%, #5a5870, #3a3650 55%, #22203a 100%);
+  border: 1px solid rgba(255,255,255,0.12);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.5), inset 0 1px 3px rgba(255,255,255,0.1), inset 0 -1px 3px rgba(0,0,0,0.4);
+}
+.platform-top::after {
+  content: '';
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%,-50%);
+  width: 55%; height: 45%;
+  border-radius: 50%;
+  border: 1px solid rgba(180,160,220,0.25);
+}
+.platform-side {
+  position: absolute;
+  bottom: 0; left: 5%; right: 5%;
+  height: 45%;
+  background: linear-gradient(180deg, #2a2840 0%, #1a1628 100%);
+  border-radius: 0 0 50% 50% / 0 0 8px 8px;
+  border: 1px solid rgba(120,100,180,0.2);
+  border-top: none;
+}
+.platform-rim {
+  position: absolute;
+  bottom: 2px; left: 3%; right: 3%;
+  height: 28%;
+  background: linear-gradient(180deg, #d4889a 0%, #a85068 100%);
+  border-radius: 0 0 40% 40% / 0 0 6px 6px;
+  opacity: 0.85;
+  box-shadow: 0 2px 6px rgba(180,80,120,0.4);
+}
+.platform-gem {
+  position: absolute;
+  top: 22%; left: 50%;
+  transform: translateX(-50%);
+  width: var(--gem-size);
+  height: var(--gem-size);
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #ff80e0, #a020c0 60%, #500080);
+  box-shadow: 0 0 8px rgba(200,50,220,0.8), 0 0 16px rgba(200,50,220,0.4);
+  z-index: 2;
+  animation: gemGlow 2s ease-in-out infinite;
+  animation-delay: var(--delay, 0s);
+}
+@keyframes gemGlow {
+  0%,100% { box-shadow: 0 0 8px rgba(200,50,220,0.8), 0 0 16px rgba(200,50,220,0.4); }
+  50%     { box-shadow: 0 0 14px rgba(200,50,220,1), 0 0 28px rgba(200,50,220,0.6); }
+}
+
+.path-node.teal .node-badge  { background: radial-gradient(circle at 35% 30%, #2a9a8a, #0d5f55 55%, #053028 100%); box-shadow: 0 0 0 1px rgba(80,200,180,0.4), 0 4px 16px rgba(0,0,0,0.5), inset 0 1px 4px rgba(255,255,255,0.2), 0 0 20px rgba(40,180,160,0.3); }
+.path-node.teal:hover .node-badge { box-shadow: 0 0 0 2px rgba(245,200,74,0.8), 0 6px 24px rgba(0,0,0,0.6), inset 0 1px 6px rgba(255,255,255,0.3), 0 0 40px rgba(245,200,74,0.5); }
+.path-node.teal .platform-gem { background: radial-gradient(circle at 35% 30%, #80ffe0, #20c0a0 60%, #008060); box-shadow: 0 0 8px rgba(50,200,170,0.8), 0 0 16px rgba(50,200,170,0.4); }
+.path-node.gold .node-badge  { background: radial-gradient(circle at 35% 30%, #c9901a, #8a5f08 55%, #4a3005 100%); box-shadow: 0 0 0 1px rgba(220,170,60,0.5), 0 4px 16px rgba(0,0,0,0.5), inset 0 1px 4px rgba(255,255,255,0.2), 0 0 20px rgba(200,150,40,0.3); }
+.path-node.gold:hover .node-badge  { box-shadow: 0 0 0 2px rgba(245,200,74,0.9), 0 6px 24px rgba(0,0,0,0.6), inset 0 1px 6px rgba(255,255,255,0.3), 0 0 45px rgba(245,200,74,0.6); }
+.path-node.gold .platform-gem { background: radial-gradient(circle at 35% 30%, #ffe060, #e0a020 60%, #806000); box-shadow: 0 0 8px rgba(220,170,50,0.9), 0 0 20px rgba(220,170,50,0.5); }
+.path-node.maroon .node-badge { background: radial-gradient(circle at 35% 30%, #8a2030, #501020 55%, #280808 100%); box-shadow: 0 0 0 1px rgba(200,80,100,0.4), 0 4px 16px rgba(0,0,0,0.5), inset 0 1px 4px rgba(255,255,255,0.2), 0 0 20px rgba(180,60,80,0.3); }
+.path-node.maroon:hover .node-badge { box-shadow: 0 0 0 2px rgba(245,200,74,0.8), 0 6px 24px rgba(0,0,0,0.6), inset 0 1px 6px rgba(255,255,255,0.3), 0 0 40px rgba(245,200,74,0.5); }
+.path-node.maroon .platform-gem { background: radial-gradient(circle at 35% 30%, #ff8090, #c02040 60%, #700020); box-shadow: 0 0 8px rgba(200,60,90,0.8), 0 0 16px rgba(200,60,90,0.4); }
+
+.start-badge {
+  position: absolute;
+  background: #b81820;
+  color: #fff;
+  font-family: 'Cinzel', serif;
+  font-size: clamp(5px, 1vw, 10px);
+  font-weight: 700;
+  letter-spacing: 1px;
+  padding: clamp(2px, 0.5vw, 5px) clamp(4px, 1vw, 10px);
+  border-radius: 3px;
+  white-space: nowrap;
+  bottom: calc(-1 * var(--node-size) * 0.4);
+  left: 50%;
+  transform: translateX(-50%);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+}
+.start-badge::before {
+  content: '';
+  position: absolute;
+  top: -5px; left: 50%;
+  transform: translateX(-50%);
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-bottom: 5px solid #b81820;
+}
+
+.node-delete {
+  position: absolute;
+  top: -8px; right: -8px;
+  width:  clamp(18px, 2.5vw, 22px);
+  height: clamp(18px, 2.5vw, 22px);
+  border-radius: 50%;
+  background: #c93838;
+  color: #fff;
+  font-size: clamp(11px, 1.6vw, 14px);
+  font-weight: 700;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #2a0d0d;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.6);
+  cursor: pointer;
+  z-index: 9;
+  line-height: 1;
+  padding: 0;
+}
+.path-node.custom:hover .node-delete { display: flex; }
+.node-delete:hover { background: #e84545; transform: scale(1.15); }
+
+.add-year-node {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  z-index: 4;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.add-year-node:hover { transform: translate(-50%, -58%); }
+
+.add-year-badge {
+  width:  var(--add-size);
+  height: var(--add-size);
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #4a3208 0%, #2e1f04 60%, #1a1002 100%);
+  border: 3px dashed var(--gold);
+  color: var(--gold-bright);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--add-font);
+  font-weight: 300;
+  line-height: 1;
+  box-shadow: 0 0 0 1px rgba(245,200,74,0.4), 0 4px 16px rgba(0,0,0,0.5), inset 0 1px 4px rgba(255,235,160,0.2), 0 0 20px rgba(245,200,74,0.3);
+  transition: all 0.3s ease;
+  animation: addPulse 2.5s ease-in-out infinite;
+}
+.add-year-node:hover .add-year-badge {
+  border-style: solid;
+  border-color: var(--gold-bright);
+  background: radial-gradient(circle at 35% 30%, #6a4a10 0%, #4a3208 60%, #2e1f04 100%);
+  color: #fff8c0;
+  box-shadow: 0 0 0 2px rgba(245,200,74,0.7), 0 6px 24px rgba(0,0,0,0.6), inset 0 1px 6px rgba(255,235,160,0.3), 0 0 35px rgba(245,200,74,0.6);
+}
+@keyframes addPulse {
+  0%,100% { box-shadow: 0 0 0 1px rgba(245,200,74,0.4), 0 4px 16px rgba(0,0,0,0.5), inset 0 1px 4px rgba(255,235,160,0.2), 0 0 20px rgba(245,200,74,0.3); }
+  50%     { box-shadow: 0 0 0 2px rgba(245,200,74,0.6), 0 4px 18px rgba(0,0,0,0.5), inset 0 1px 4px rgba(255,235,160,0.25), 0 0 32px rgba(245,200,74,0.5); }
+}
+.add-year-label {
+  margin-top: 6px;
+  font-family: 'Cinzel', serif;
+  font-size: var(--add-lbl);
+  letter-spacing: 1px;
+  color: var(--gold);
+  text-transform: uppercase;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+  background: rgba(26,13,5,0.7);
+  padding: 2px 8px;
+  border-radius: 12px;
+  border: 1px solid rgba(245,200,74,0.3);
+  white-space: nowrap;
+}
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(10,5,2,0.85);
+    backdrop-filter: blur(6px);
+    z-index: 200;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    animation: fadeIn 0.3s ease;
+  }
+  #pwdModal { z-index: 300; }
+  #uploadModal { z-index: 310; }
+  #placeModal { z-index: 320; }
+  #yearModal { z-index: 330; }
+  #categoryModal { z-index: 340; }
+  .modal-overlay.show { display: flex; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes modalPop { from { transform: scale(0.85); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+  .modal-card {
+    position: relative;
+    background: linear-gradient(135deg, #1f1208 0%, #2a1810 100%);
+    border: 2px solid var(--gold);
+    border-radius: 16px;
+    max-width: 1000px;
+    width: 100%;
+    max-height: 92vh;
+    overflow-y: auto;
+    padding: 40px 30px 30px;
+    box-shadow:
+      0 0 0 1px rgba(245,200,74,0.2),
+      0 20px 80px rgba(0,0,0,0.8),
+      inset 0 1px 0 rgba(255,255,255,0.05);
+    animation: modalPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .modal-card::before, .modal-card::after {
+    content: '';
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    border: 2px solid var(--gold-bright);
+    pointer-events: none;
+  }
+  .modal-card::before { top: 0; left: 0; border-right: none; border-bottom: none; border-radius: 8px 0 0 0; }
+  .modal-card::after { bottom: 0; right: 0; border-left: none; border-top: none; border-radius: 0 0 8px 0; }
+
+  .modal-close {
+    position: absolute;
+    top: 14px; right: 18px;
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: rgba(245,200,74,0.1);
+    color: var(--gold-bright);
+    font-size: 22px;
+    font-weight: 700;
+    display: grid;
+    place-items: center;
+    transition: all 0.2s ease;
+    z-index: 10;
+    border: 1px solid rgba(245,200,74,0.3);
+  }
+  .modal-close:hover { background: var(--gold); color: var(--maroon-dark); transform: rotate(90deg); }
+
+  .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 2px solid rgba(245,200,74,0.3);
+    padding-bottom: 18px;
+    margin-bottom: 25px;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+  .modal-header h2 {
+    font-family: 'Noto Sans Sinhala', serif;
+    font-size: clamp(1.6rem, 3vw, 2.2rem);
+    color: var(--gold-bright);
+    font-weight: 700;
+    text-shadow: 0 2px 6px rgba(0,0,0,0.5);
+  }
+  .modal-year {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(2.2rem, 4vw, 3rem);
+    font-weight: 700;
+    color: var(--gold);
+    letter-spacing: 3px;
+    text-shadow: 0 0 20px rgba(245,200,74,0.3);
+  }
+
+  .ach-section { margin-bottom: 30px; }
+
+  /* ---- ADD CATEGORY BUTTON (in modal header area) ---- */
+  .add-category-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    background: rgba(245,200,74,0.1);
+    border: 1px dashed rgba(245,200,74,0.5);
+    border-radius: 6px;
+    color: var(--gold);
+    font-family: 'Cinzel', serif;
+    font-size: 0.72rem;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.25s ease;
+  }
+  .add-category-btn:hover {
+    background: var(--gold);
+    color: var(--maroon-dark);
+    border-color: var(--gold);
+    border-style: solid;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(245,200,74,0.2);
+  }
+  .add-category-btn .plus-icon-sm { font-size: 1rem; font-weight: 300; line-height: 1; }
+
+  /* ---- CATEGORY SECTION ---- */
+  .category-section {
+    margin-bottom: 28px;
+    position: relative;
+  }
+  .category-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    margin-bottom: 16px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(245,200,74,0.25);
+    flex-wrap: wrap;
+  }
+  .category-title {
+    font-family: 'Noto Sans Sinhala', serif;
+    font-size: 1.15rem;
+    color: var(--gold-bright);
+    font-weight: 700;
+    padding-left: 14px;
+    border-left: 3px solid var(--gold);
+    text-shadow: 0 1px 4px rgba(0,0,0,0.4);
+    flex: 1;
+    min-width: 0;
+  }
+  .category-delete {
+    background: rgba(201, 56, 56, 0.15);
+    border: 1px solid rgba(201, 56, 56, 0.4);
+    color: #e87a7a;
+    font-size: 0.7rem;
+    font-family: 'Cinzel', serif;
+    letter-spacing: 1px;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .category-delete:hover {
+    background: rgba(220, 60, 60, 0.3);
+    border-color: #e84545;
+    color: #fff;
+  }
+  .category-delete .del-x {
+    font-size: 1rem;
+    line-height: 1;
+    font-weight: 700;
+  }
+
+  /* ---- CATEGORY TAB MENU (top) ---- */
+  .category-tabs {
+    display: flex;
+    gap: 4px;
+    margin: 0 0 22px 0;
+    padding: 0 2px 2px 2px;
+    border-bottom: 2px solid rgba(245,200,74,0.2);
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(245,200,74,0.4) transparent;
+  }
+  .category-tabs::-webkit-scrollbar { height: 4px; }
+  .category-tabs::-webkit-scrollbar-track { background: transparent; }
+  .category-tabs::-webkit-scrollbar-thumb {
+    background: rgba(245,200,74,0.3);
+    border-radius: 2px;
+  }
+  .category-tabs.hidden { display: none; }
+
+  .category-tab {
+    flex-shrink: 0;
+    padding: 10px 18px;
+    background: transparent;
+    border: 1px solid transparent;
+    border-bottom: none;
+    border-radius: 8px 8px 0 0;
+    color: rgba(245,200,74,0.55);
+    font-family: 'Noto Sans Sinhala', 'Cinzel', serif;
+    font-size: 0.92rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.22s ease;
+    white-space: nowrap;
+    position: relative;
+    top: 2px;
+    letter-spacing: 0.3px;
+  }
+  .category-tab:hover {
+    color: var(--gold-bright);
+    background: rgba(245,200,74,0.08);
+  }
+  .category-tab.active {
+    color: var(--gold-bright);
+    background: linear-gradient(180deg, rgba(245,200,74,0.18) 0%, rgba(245,200,74,0.06) 100%);
+    border-color: rgba(245,200,74,0.4);
+    border-bottom: 2px solid #1f1208;
+    margin-bottom: -2px;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.4);
+  }
+  .category-tab .tab-icon {
+    display: inline-block;
+    margin-right: 6px;
+    font-size: 0.85em;
+    opacity: 0.8;
+  }
+  .category-tab.active .tab-icon { opacity: 1; }
+  @media (max-width: 560px) {
+    .category-tab { padding: 8px 14px; font-size: 0.85rem; }
+  }
+
+  /* ---- CATEGORY PAGINATION (bottom arrows + dots) ---- */
+  .category-page {
+    display: none;
+    animation: pageFadeIn 0.35s ease;
+  }
+  .category-page.active { display: block; }
+  @keyframes pageFadeIn {
+    from { opacity: 0; transform: translateX(8px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+  .category-nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+    margin: 22px 0 14px;
+    padding: 12px 16px;
+    background: rgba(0,0,0,0.25);
+    border-top: 1px solid rgba(245,200,74,0.2);
+    border-bottom: 1px solid rgba(245,200,74,0.2);
+    border-radius: 8px;
+    flex-wrap: wrap;
+  }
+  .category-nav.hidden { display: none; }
+  .cat-arrow {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: linear-gradient(180deg, rgba(245,200,74,0.18) 0%, rgba(245,200,74,0.08) 100%);
+    border: 1px solid rgba(245,200,74,0.4);
+    color: var(--gold-bright);
+    font-size: 1.3rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    line-height: 1;
+    padding: 0 0 2px 0;
+  }
+  .cat-arrow:hover:not(:disabled) {
+    background: var(--gold);
+    color: var(--maroon-dark);
+    border-color: var(--gold);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 14px rgba(245,200,74,0.3);
+  }
+  .cat-arrow:disabled {
+    opacity: 0.25;
+    cursor: not-allowed;
+  }
+  .cat-dots {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .cat-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: rgba(245,200,74,0.3);
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    padding: 0;
+  }
+  .cat-dot:hover { background: rgba(245,200,74,0.6); }
+  .cat-dot.active {
+    background: var(--gold-bright);
+    transform: scale(1.4);
+    box-shadow: 0 0 8px rgba(245,200,74,0.6);
+  }
+  .cat-page-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.78rem;
+    letter-spacing: 1.2px;
+    color: var(--gold);
+    text-transform: uppercase;
+    min-width: 110px;
+    text-align: center;
+  }
+  @media (max-width: 560px) {
+    .category-nav { gap: 10px; padding: 10px; }
+    .cat-arrow { width: 32px; height: 32px; font-size: 1.1rem; }
+    .cat-page-label { font-size: 0.7rem; min-width: 0; }
+  }
+  .student-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 16px;
+  }
+  .student-card {
+    background: linear-gradient(180deg, #3a1818 0%, #2a0e0e 100%);
+    border: 1px solid rgba(245,200,74,0.4);
+    border-radius: 10px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    position: relative;
+  }
+  .student-card:hover { transform: translateY(-4px); border-color: var(--gold-bright); box-shadow: 0 8px 20px rgba(245,200,74,0.15); }
+
+  /* Delete button on student cards */
+  .student-card .card-delete {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: rgba(201, 56, 56, 0.92);
+    color: #fff;
+    font-size: 16px;
+    font-weight: 700;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid rgba(0,0,0,0.5);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.6);
+    cursor: pointer;
+    z-index: 9;
+    line-height: 1;
+    padding: 0;
+    transition: all 0.2s ease;
+  }
+  .student-card:hover .card-delete { display: flex; }
+  .student-card .card-delete:hover {
+    background: #e84545;
+    transform: scale(1.15);
+    box-shadow: 0 3px 12px rgba(232,69,69,0.5);
+  }
+  .student-photo {
+    width: 100%;
+    aspect-ratio: 1;
+    background: linear-gradient(180deg, #4a2818, #2a1208);
+    display: grid;
+    place-items: center;
+    color: var(--gold);
+    font-size: 2.2rem;
+    font-family: 'Cinzel', serif;
+    font-weight: 700;
+    border-bottom: 1px solid rgba(245,200,74,0.3);
+  }
+  .student-info { padding: 8px 6px 10px; text-align: center; }
+  .student-name { font-family: 'Noto Sans Sinhala', sans-serif; font-size: 0.78rem; color: #f3e7c9; line-height: 1.3; font-weight: 600; }
+  .student-rank { font-family: 'Cinzel', serif; font-size: 0.7rem; color: var(--gold-bright); margin-top: 3px; letter-spacing: 0.5px; }
+  .student-grade { font-family: 'Cormorant Garamond', serif; font-size: 0.72rem; color: #b8a878; margin-top: 4px; padding-top: 4px; border-top: 1px dashed rgba(245,200,74,0.2); font-style: italic; }
+  .modal-summary { margin-top: 20px; padding: 14px 18px; background: rgba(212,164,55,0.08); border-left: 3px solid var(--gold); border-radius: 4px; font-family: 'Noto Sans Sinhala', sans-serif; font-size: 0.95rem; color: #e8d9b3; }
+
+  .place-block {
+    margin-top: 24px;
+    padding: 18px 20px;
+    background: linear-gradient(135deg, rgba(74,29,90,0.25) 0%, rgba(13,79,74,0.2) 100%);
+    border: 1px solid rgba(245,200,74,0.35);
+    border-radius: 10px;
+    position: relative;
+    overflow: hidden;
+  }
+  .place-block::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: linear-gradient(180deg, var(--gold-bright), var(--gold-soft)); }
+  .place-header { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 8px; flex-wrap: wrap; }
+  .place-label { font-family: 'Cinzel', serif; color: var(--gold-bright); font-size: 0.78rem; letter-spacing: 1.5px; text-transform: uppercase; font-weight: 600; }
+  .place-add-btn { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; background: rgba(245,200,74,0.1); border: 1px solid rgba(245,200,74,0.4); border-radius: 6px; color: var(--gold); font-family: 'Cinzel', serif; font-size: 0.72rem; letter-spacing: 1px; cursor: pointer; transition: all 0.25s ease; }
+  .place-add-btn:hover { background: var(--gold); color: var(--maroon-dark); border-color: var(--gold); transform: translateY(-1px); }
+  .plus-icon-sm { font-size: 1.1rem; font-weight: 300; line-height: 1; }
+  .place-value { font-family: 'Cinzel', serif; font-size: 1.4rem; color: #f3e7c9; font-weight: 600; letter-spacing: 1px; }
+  .place-value .place-num { color: var(--gold-bright); font-size: 2rem; text-shadow: 0 0 12px rgba(245,200,74,0.3); margin-right: 8px; }
+  .place-value .place-note { display: block; font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 0.95rem; color: #c9b890; font-weight: 400; letter-spacing: 0.5px; margin-top: 4px; }
+  .place-empty { color: #8a7855; font-style: italic; font-family: 'Cormorant Garamond', serif; font-weight: 400; font-size: 1rem; letter-spacing: 0.5px; }
+
+  .add-card {
+    background: linear-gradient(180deg, rgba(212,164,55,0.08) 0%, rgba(212,164,55,0.03) 100%);
+    border: 2px dashed rgba(245,200,74,0.5);
+    border-radius: 10px;
+    aspect-ratio: 3 / 4;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    color: var(--gold);
+    font-family: 'Cinzel', serif;
+    font-size: 1rem;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-height: 180px;
+  }
+  .add-card:hover { border-color: var(--gold-bright); background: linear-gradient(180deg, rgba(212,164,55,0.15) 0%, rgba(212,164,55,0.08) 100%); color: var(--gold-bright); transform: translateY(-3px); box-shadow: 0 8px 20px rgba(245,200,74,0.15); }
+  .add-card .plus-icon { font-size: 3rem; font-weight: 300; line-height: 1; }
+  .add-card .add-lbl { font-size: 1rem; text-transform: uppercase; }
+
+  .empty-state { text-align: center; padding: 30px 20px; color: #a89770; font-family: 'Noto Sans Sinhala', sans-serif; display: none; font-size: 1rem; }
+  .empty-state.show { display: block; }
+  .empty-state .empty-hint { font-size: 1rem; margin-top: 6px; color: var(--gold-soft); }
+  .empty-state strong { color: var(--gold-bright); }
+
+  .pwd-card { max-width: 460px !important; text-align: center; padding: 40px 35px 30px !important; }
+  .pwd-icon { font-size: 3rem; margin-bottom: 12px; filter: drop-shadow(0 4px 8px rgba(245,200,74,0.3)); }
+  .pwd-title { font-family: 'Cinzel', serif; color: var(--gold-bright); font-size: 1.5rem; letter-spacing: 1px; margin-bottom: 8px; }
+  .pwd-sub { color: #b8a878; font-size: 0.92rem; margin-bottom: 22px; font-family: 'Cormorant Garamond', serif; }
+  .pwd-form { display: flex; flex-direction: column; gap: 12px; }
+  .pwd-input { width: 100%; padding: 12px 16px; background: rgba(0,0,0,0.3); border: 1px solid rgba(245,200,74,0.3); border-radius: 6px; color: #f3e7c9; font-size: 1rem; font-family: 'Noto Sans Sinhala', 'Cormorant Garamond', serif; transition: all 0.25s ease; }
+  .pwd-input:focus { outline: none; border-color: var(--gold-bright); background: rgba(0,0,0,0.5); box-shadow: 0 0 0 3px rgba(245,200,74,0.15); }
+  .pwd-input::placeholder { color: #6a5a3a; }
+  .pwd-error { display: none; color: #e87a7a; font-size: 0.85rem; text-align: left; padding-left: 4px; }
+  .pwd-error.show { display: block; }
+  .pwd-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 8px; }
+  .btn-primary, .btn-secondary { padding: 10px 22px; border-radius: 6px; font-family: 'Cinzel', serif; font-size: 0.85rem; letter-spacing: 1px; font-weight: 600; cursor: pointer; transition: all 0.25s ease; }
+  .btn-primary { background: linear-gradient(180deg, var(--gold-bright) 0%, var(--gold) 100%); color: var(--maroon-dark); border: 1px solid var(--gold); }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(245,200,74,0.3); }
+  .btn-secondary { background: transparent; color: var(--gold); border: 1px solid rgba(245,200,74,0.4); }
+  .btn-secondary:hover { background: rgba(245,200,74,0.1); border-color: var(--gold); }
+
+  .upload-zone { display: flex; align-items: center; justify-content: center; aspect-ratio: 16 / 9; border: 2px dashed rgba(245,200,74,0.4); border-radius: 8px; cursor: pointer; overflow: hidden; background: rgba(0,0,0,0.2); color: var(--gold); transition: all 0.25s ease; text-align: center; }
+  .upload-zone:hover { border-color: var(--gold-bright); background: rgba(245,200,74,0.05); }
+  .upload-icon { font-size: 2rem; margin-bottom: 6px; }
+  #uploadPreview { width: 100%; height: 100%; object-fit: cover; }
+
+  /* ---- DATA LOADING OVERLAY ---- */
+  .data-loading {
+    position: fixed;
+    inset: 0;
+    background: rgba(10,5,2,0.94);
+    backdrop-filter: blur(8px);
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+    color: var(--gold-bright);
+    font-family: 'Cinzel', serif;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-size: 0.95rem;
+    transition: opacity 0.4s ease;
+  }
+  .data-loading.hidden { opacity: 0; pointer-events: none; }
+  .data-loading.gone { display: none; }
+  .loading-spinner {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    border: 4px solid rgba(245,200,74,0.18);
+    border-top-color: var(--gold-bright);
+    animation: spin 0.9s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Inline upload status */
+  .upload-status {
+    font-size: 0.85rem;
+    color: var(--gold);
+    text-align: center;
+    margin-top: 6px;
+    min-height: 1.2em;
+  }
+  .upload-status.error { color: #e87a7a; }
+
+  /* ===== RESPONSIVE MEDIA QUERIES ===== */
+  
+  /* Tablet (768px and below) */
+ @media (max-width: 512px) {
+    .modal-overlay { padding: 10px !important; }
+    .modal-card {
+      padding: 22px 14px 16px !important;
+      border-radius: 8px !important;
+      max-height: 88vh !important;
+    }
+    .modal-card::before, .modal-card::after { width: 28px !important; height: 28px !important; }
+    .modal-card::before { top: 5px !important; left: 5px !important; }
+    .modal-card::after { bottom: 5px !important; right: 5px !important; }
+    .modal-close { width: 26px !important; height: 26px !important; font-size: 15px !important; top: 8px !important; right: 10px !important; }
+    .modal-header { padding-bottom: 10px !important; margin-bottom: 12px !important; gap: 6px !important; flex-wrap: wrap !important; }
+    .modal-year { font-size: clamp(1.2rem, 5vw, 1.8rem) !important; letter-spacing: 1px !important; }
+    .add-category-btn { font-size: 0.55rem !important; padding: 4px 8px !important; }
+    .category-title { font-size: 0.82rem !important; padding-left: 7px !important; }
+    .student-grid { grid-template-columns: repeat(auto-fill, minmax(75px, 1fr)) !important; gap: 8px !important; }
+    .student-name { font-size: 0.6rem !important; }
+    .student-rank { font-size: 0.55rem !important; }
+    .student-grade { font-size: 0.55rem !important; }
+    .add-card { min-height: 100px !important; font-size: 0.6rem !important; }
+    .add-card .plus-icon { font-size: 1.5rem !important; }
+    .place-block { padding: 8px 10px !important; margin-top: 8px !important; }
+    .place-label { font-size: 0.58rem !important; }
+    .place-value { font-size: 0.85rem !important; }
+    .place-value .place-num { font-size: 1.1rem !important; }
+    .modal-summary { font-size: 0.68rem !important; padding: 5px 8px !important; margin-top: 6px !important; }
+    .category-tab { padding: 5px 8px !important; font-size: 0.7rem !important; }
+    .cat-arrow { width: 24px !important; height: 24px !important; font-size: 0.85rem !important; }
+    .pwd-card { max-width: calc(100vw - 20px) !important; padding: 16px 12px 14px !important; }
+    .pwd-title { font-size: 0.95rem !important; }
+    .pwd-sub { font-size: 0.7rem !important; margin-bottom: 12px !important; }
+    .pwd-input { padding: 8px 10px !important; font-size: 0.82rem !important; }
+    .btn-primary, .btn-secondary { padding: 7px 12px !important; font-size: 0.65rem !important; }
+  }
+
+  @media (max-width: 360px) {
+    .modal-overlay { padding: 6px !important; }
+    .modal-card { padding: 16px 8px 10px !important; max-height: 85vh !important; }
+    .modal-year { font-size: clamp(1rem, 4vw, 1.4rem) !important; }
+    .student-grid { grid-template-columns: repeat(auto-fill, minmax(62px, 1fr)) !important; gap: 6px !important; }
+    .add-card { min-height: 85px !important; }
+    .add-card .plus-icon { font-size: 1.3rem !important; }
+    .modal-card::before, .modal-card::after { width: 20px !important; height: 20px !important; }
+    .pwd-card { max-width: calc(100vw - 12px) !important; padding: 14px 8px 10px !important; }
+  }
+  @media (max-width: 768px) {
+    .hero-title {
+      padding: 24px 16px 8px;
+    }
+    .hero-title h1 {
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      letter-spacing: 1px;
+    }
+    
+    .path-section {
+      padding: 40px 16px 60px;
+    }
+    
+    .path-stage {
+      max-width: 100%;
+    }
+    
+    .node-badge {
+      width: 56px;
+      height: 56px;
+    }
+    .node-badge .yr {
+      font-size: 13px;
+    }
+    .node-badge .lbl {
+      font-size: 6.5px;
+    }
+    
+    .node-platform {
+      width: 72px;
+      height: 30px;
+    }
+    
+    .add-year-badge {
+      width: 56px;
+      height: 56px;
+      font-size: 1.8rem;
+    }
+    .add-year-label {
+      font-size: 7.5px;
+      padding: 2px 8px;
+    }
+    
+    .modal-card {
+      padding: 30px 24px 24px;
+      border-radius: 12px;
+    }
+    .modal-card::before,
+    .modal-card::after {
+      width: 45px;
+      height: 45px;
+    }
+    
+    .modal-header {
+      padding-bottom: 14px;
+      margin-bottom: 18px;
+      gap: 12px;
+    }
+    .modal-year {
+      font-size: clamp(1.8rem, 3vw, 2.4rem);
+      letter-spacing: 2px;
+    }
+    
+    .add-category-btn {
+      font-size: 0.65rem;
+      padding: 6px 12px;
+    }
+    .add-category-btn .plus-icon-sm {
+      font-size: 0.9rem;
+    }
+    
+    .category-title {
+      font-size: 1rem;
+      padding-left: 10px;
+    }
+    
+    .category-tab {
+      padding: 8px 14px;
+      font-size: 0.8rem;
+    }
+    
+    .student-grid {
+      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      gap: 12px;
+    }
+    .student-photo {
+      font-size: 1.8rem;
+    }
+    .student-name {
+      font-size: 0.72rem;
+    }
+    .student-rank {
+      font-size: 0.65rem;
+    }
+    .student-grade {
+      font-size: 0.65rem;
+    }
+    
+    .place-block {
+      padding: 14px 16px;
+      margin-top: 18px;
+    }
+    .place-label {
+      font-size: 0.72rem;
+    }
+    .place-value {
+      font-size: 1.2rem;
+    }
+    .place-value .place-num {
+      font-size: 1.6rem;
+    }
+    
+    .add-card {
+      min-height: 160px;
+      font-size: 0.78rem;
+      gap: 6px;
+    }
+    .add-card .plus-icon {
+      font-size: 2rem;
+    }
+    
+    .modal-summary {
+      margin-top: 16px;
+      padding: 10px 14px;
+      font-size: 0.88rem;
+    }
+    
+    .pwd-card {
+      max-width: 380px !important;
+      padding: 30px 24px 24px !important;
+    }
+    .pwd-title {
+      font-size: 1.3rem;
+    }
+    .pwd-sub {
+      font-size: 0.85rem;
+      margin-bottom: 18px;
+    }
+    
+    .pwd-input {
+      padding: 10px 14px;
+      font-size: 0.95rem;
+    }
+    
+    .btn-primary,
+    .btn-secondary {
+      padding: 9px 18px;
+      font-size: 0.78rem;
+    }
+    
+    .upload-zone {
+      aspect-ratio: 16 / 10;
+    }
+  }
+  
+  /* Small tablets and large phones (560px and below) */
+  @media (max-width: 560px) {
+    .hero-title {
+      padding: 20px 12px 6px;
+    }
+    .hero-title h1 {
+      font-size: clamp(1.5rem, 3.5vw, 2.2rem);
+      letter-spacing: 0.5px;
+    }
+    
+    .path-section {
+      padding: 32px 12px 50px;
+    }
+    
+    .node-badge {
+      width: 48px;
+      height: 48px;
+    }
+    .node-badge .yr {
+      font-size: 11px;
+    }
+    .node-badge .lbl {
+      font-size: 6px;
+    }
+    
+    .node-platform {
+      width: 62px;
+      height: 25px;
+    }
+    .platform-top {
+      height: 20px;
+    }
+    .platform-side {
+      height: 14px;
+    }
+    
+    .add-year-badge {
+      width: 48px;
+      height: 48px;
+      font-size: 1.5rem;
+    }
+    .add-year-label {
+      font-size: 7px;
+      padding: 2px 6px;
+      margin-top: 6px;
+    }
+    
+    .modal-overlay {
+      padding: 12px;
+    }
+    
+    .modal-card {
+      padding: 24px 18px 18px;
+      border-radius: 8px;
+    }
+    .modal-card::before,
+    .modal-card::after {
+      width: 35px;
+      height: 35px;
+    }
+    .modal-card::before {
+      top: 6px;
+      left: 6px;
+    }
+    .modal-card::after {
+      bottom: 6px;
+      right: 6px;
+    }
+    
+    .modal-close {
+      width: 30px;
+      height: 30px;
+      font-size: 18px;
+      right: 12px;
+      top: 12px;
+    }
+    
+    .modal-header {
+      padding-bottom: 12px;
+      margin-bottom: 14px;
+      gap: 10px;
+    }
+    .modal-year {
+      font-size: clamp(1.4rem, 2.5vw, 1.8rem);
+      letter-spacing: 1.5px;
+    }
+    
+    .add-category-btn {
+      font-size: 0.6rem;
+      padding: 5px 10px;
+      gap: 4px;
+    }
+    .add-category-btn .plus-icon-sm {
+      font-size: 0.8rem;
+    }
+    
+    .category-header {
+      gap: 8px;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+    }
+    .category-title {
+      font-size: 0.9rem;
+      padding-left: 8px;
+    }
+    
+    .category-tabs {
+      margin: 0 0 16px 0;
+      padding: 0 1px 1px 1px;
+      gap: 2px;
+    }
+    .category-tab {
+      padding: 7px 12px;
+      font-size: 0.75rem;
+    }
+    .category-tab .tab-icon {
+      font-size: 0.75em;
+      margin-right: 4px;
+    }
+    
+    .category-nav {
+      gap: 8px;
+      padding: 8px;
+      margin: 16px 0 10px;
+    }
+    .cat-arrow {
+      width: 30px;
+      height: 30px;
+      font-size: 1rem;
+    }
+    .cat-page-label {
+      font-size: 0.65rem;
+      min-width: 0;
+    }
+    
+    .student-grid {
+      grid-template-columns: repeat(auto-fill, minmax(85px, 1fr));
+      gap: 10px;
+    }
+    .student-card {
+      border-radius: 8px;
+    }
+    .student-photo {
+      font-size: 1.5rem;
+    }
+    .student-info {
+      padding: 6px 4px 8px;
+    }
+    .student-name {
+      font-size: 0.65rem;
+    }
+    .student-rank {
+      font-size: 0.6rem;
+    }
+    .student-grade {
+      font-size: 0.6rem;
+      margin-top: 2px;
+      padding-top: 2px;
+    }
+    
+    .place-block {
+      padding: 12px 14px;
+      margin-top: 14px;
+      border-radius: 8px;
+    }
+    .place-header {
+      gap: 8px;
+      margin-bottom: 6px;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    .place-label {
+      font-size: 0.65rem;
+      letter-spacing: 1px;
+    }
+    .place-add-btn {
+      font-size: 0.65rem;
+      padding: 4px 10px;
+      gap: 4px;
+    }
+    .place-add-btn .plus-icon-sm {
+      font-size: 0.95rem;
+    }
+    .place-value {
+      font-size: 1rem;
+    }
+    .place-value .place-num {
+      font-size: 1.4rem;
+      margin-right: 4px;
+    }
+    .place-value .place-note {
+      font-size: 0.85rem;
+      margin-top: 2px;
+    }
+    .place-empty {
+      font-size: 0.9rem;
+    }
+    
+    .add-card {
+      min-height: 140px;
+      font-size: 0.72rem;
+      gap: 5px;
+    }
+    .add-card .plus-icon {
+      font-size: 1.8rem;
+    }
+    .add-card .add-lbl {
+      font-size: 0.65rem;
+    }
+    
+    .ach-section {
+      margin-bottom: 20px;
+    }
+    
+    .modal-summary {
+      margin-top: 12px;
+      padding: 8px 12px;
+      font-size: 0.82rem;
+    }
+    
+    .pwd-card {
+      max-width: 300px !important;
+      padding: 24px 20px 18px !important;
+    }
+    .pwd-icon {
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+    }
+    .pwd-title {
+      font-size: 1.1rem;
+      letter-spacing: 0.5px;
+    }
+    .pwd-sub {
+      font-size: 0.78rem;
+      margin-bottom: 16px;
+    }
+    
+    .pwd-form {
+      gap: 10px;
+    }
+    
+    .pwd-input {
+      padding: 9px 12px;
+      font-size: 0.9rem;
+    }
+    
+    .pwd-error {
+      font-size: 0.78rem;
+    }
+    
+    .pwd-actions {
+      gap: 8px;
+      margin-top: 6px;
+    }
+    
+    .btn-primary,
+    .btn-secondary {
+      padding: 8px 16px;
+      font-size: 0.72rem;
+      letter-spacing: 0.5px;
+    }
+    
+    .upload-zone {
+      aspect-ratio: 16 / 12;
+      border-radius: 6px;
+    }
+    .upload-icon {
+      font-size: 1.6rem;
+      margin-bottom: 4px;
+    }
+  }
+  
+  /* Extra small phones (400px and below) */
+  @media (max-width: 400px) {
+    .hero-title {
+      padding: 18px 10px 4px;
+    }
+    .hero-title h1 {
+      font-size: clamp(1.3rem, 3vw, 1.8rem);
+      letter-spacing: 0px;
+      text-shadow:
+        0 1px 0 #6b4a14,
+        0 2px 8px rgba(0,0,0,0.6),
+        0 0 20px rgba(245,200,74,0.2);
+    }
+    
+    .path-section {
+      padding: 28px 10px 45px;
+    }
+    
+    .node-badge {
+      width: 44px;
+      height: 44px;
+    }
+    .node-badge .yr {
+      font-size: 10px;
+    }
+    .node-badge .lbl {
+      font-size: 5.5px;
+    }
+    .node-badge::before {
+      top: 8px;
+      left: 10px;
+      width: 5px;
+      height: 5px;
+    }
+    
+    .node-platform {
+      width: 56px;
+      height: 22px;
+      margin-top: -6px;
+    }
+    
+    .path-node:hover {
+      transform: translate(-50%, -54%);
+    }
+    
+    .add-year-badge {
+      width: 44px;
+      height: 44px;
+      font-size: 1.3rem;
+    }
+    .add-year-label {
+      font-size: 6px;
+      padding: 1px 5px;
+      margin-top: 4px;
+      letter-spacing: 0.5px;
+    }
+    
+    .modal-overlay {
+      padding: 8px;
+    }
+    
+    .modal-card {
+      padding: 20px 16px 16px;
+      border-radius: 8px;
+    }
+    .modal-card::before,
+    .modal-card::after {
+      width: 30px;
+      height: 30px;
+    }
+    .modal-card::before {
+      top: 4px;
+      left: 4px;
+    }
+    .modal-card::after {
+      bottom: 4px;
+      right: 4px;
+    }
+    
+    .modal-close {
+      width: 28px;
+      height: 28px;
+      font-size: 16px;
+      right: 10px;
+      top: 10px;
+    }
+    
+    .modal-header {
+      padding-bottom: 10px;
+      margin-bottom: 12px;
+      gap: 8px;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    .modal-year {
+      font-size: clamp(1.2rem, 2vw, 1.6rem);
+      letter-spacing: 1px;
+      align-self: center;
+      width: 100%;
+      text-align: center;
+    }
+    
+    .add-category-btn {
+      font-size: 0.55rem;
+      padding: 4px 8px;
+      width: 100%;
+      justify-content: center;
+    }
+    
+    .category-header {
+      flex-direction: column;
+      gap: 8px;
+      align-items: flex-start;
+    }
+    .category-title {
+      font-size: 0.85rem;
+      padding-left: 6px;
+      width: 100%;
+    }
+    .category-delete {
+      font-size: 0.65rem;
+      padding: 4px 8px;
+      width: 100%;
+      justify-content: center;
+    }
+    
+    .category-tabs {
+      margin: 0 0 12px 0;
+      gap: 1px;
+    }
+    .category-tab {
+      padding: 6px 10px;
+      font-size: 0.7rem;
+    }
+    
+    .category-nav {
+      gap: 6px;
+      padding: 6px;
+      margin: 12px 0 8px;
+    }
+    .cat-arrow {
+      width: 28px;
+      height: 28px;
+      font-size: 0.9rem;
+    }
+    .cat-dots {
+      gap: 6px;
+    }
+    .cat-dot {
+      width: 7px;
+      height: 7px;
+    }
+    .cat-page-label {
+      font-size: 0.6rem;
+      min-width: 0;
+      word-spacing: -0.1em;
+    }
+    
+    .student-grid {
+      grid-template-columns: repeat(auto-fill, minmax(75px, 1fr));
+      gap: 8px;
+    }
+    .student-photo {
+      font-size: 1.2rem;
+    }
+    .student-info {
+      padding: 4px 3px 6px;
+    }
+    .student-name {
+      font-size: 0.6rem;
+      line-height: 1.2;
+    }
+    .student-rank {
+      font-size: 0.55rem;
+    }
+    .student-grade {
+      font-size: 0.55rem;
+      margin-top: 1px;
+      padding-top: 1px;
+    }
+    .student-card .card-delete {
+      width: 20px;
+      height: 20px;
+      font-size: 14px;
+    }
+    
+    .place-block {
+      padding: 10px 12px;
+      margin-top: 12px;
+      border-radius: 6px;
+    }
+    .place-header {
+      flex-direction: column;
+      gap: 6px;
+      align-items: flex-start;
+    }
+    .place-label {
+      font-size: 0.6rem;
+      letter-spacing: 0.5px;
+    }
+    .place-add-btn {
+      font-size: 0.6rem;
+      padding: 3px 8px;
+      width: 100%;
+      justify-content: center;
+    }
+    .place-add-btn .plus-icon-sm {
+      font-size: 0.85rem;
+    }
+    .place-value {
+      font-size: 0.95rem;
+    }
+    .place-value .place-num {
+      font-size: 1.3rem;
+      margin-right: 3px;
+    }
+    .place-value .place-note {
+      font-size: 0.8rem;
+    }
+    .place-empty {
+      font-size: 0.85rem;
+    }
+    
+    .add-card {
+      min-height: 120px;
+      font-size: 0.65rem;
+      gap: 4px;
+    }
+    .add-card .plus-icon {
+      font-size: 1.6rem;
+    }
+    .add-card .add-lbl {
+      font-size: 0.6rem;
+    }
+    
+    .empty-state {
+      padding: 20px 14px;
+    }
+    .empty-state .empty-hint {
+      font-size: 0.75rem;
+    }
+    
+    .modal-summary {
+      margin-top: 10px;
+      padding: 6px 10px;
+      font-size: 0.75rem;
+    }
+    
+    .pwd-card {
+      max-width: 280px !important;
+      padding: 20px 16px 16px !important;
+    }
+    .pwd-icon {
+      font-size: 2.2rem;
+      margin-bottom: 8px;
+    }
+    .pwd-title {
+      font-size: 1rem;
+      letter-spacing: 0px;
+    }
+    .pwd-sub {
+      font-size: 0.72rem;
+      margin-bottom: 14px;
+    }
+    
+    .pwd-form {
+      gap: 8px;
+    }
+    
+    .pwd-input {
+      padding: 8px 10px;
+      font-size: 0.85rem;
+    }
+    
+    .pwd-error {
+      font-size: 0.72rem;
+    }
+    
+    .pwd-actions {
+      gap: 6px;
+      margin-top: 4px;
+      justify-content: center;
+    }
+    
+    .btn-primary,
+    .btn-secondary {
+      padding: 7px 14px;
+      font-size: 0.65rem;
+      letter-spacing: 0px;
+    }
+    
+    .upload-zone {
+      aspect-ratio: 16 / 14;
+      border-radius: 5px;
+    }
+    .upload-icon {
+      font-size: 1.4rem;
+      margin-bottom: 2px;
+    }
+  }
+  
+  /* Large screens (1440px and above) */
+  @media (min-width: 1440px) {
+    .hero-title {
+      padding: 40px 24px 12px;
+    }
+    .hero-title h1 {
+      font-size: 5.2rem;
+      letter-spacing: 3px;
+    }
+    
+    .path-section {
+      padding: 80px 24px 100px;
+    }
+    
+    .path-stage {
+      max-width: 1400px;
+    }
+    
+    .node-badge {
+      width: 72px;
+      height: 72px;
+    }
+    .node-badge .yr {
+      font-size: 18px;
+    }
+    .node-badge .lbl {
+      font-size: 9px;
+    }
+    
+    .node-platform {
+      width: 98px;
+      height: 42px;
+    }
+    
+    .add-year-badge {
+      width: 72px;
+      height: 72px;
+      font-size: 2.6rem;
+    }
+    .add-year-label {
+      font-size: 11px;
+      padding: 4px 12px;
+    }
+    
+    .modal-card {
+      padding: 50px 40px 40px;
+    }
+    
+    .modal-year {
+      font-size: 3.6rem;
+    }
+    
+    .add-category-btn {
+      font-size: 0.95rem;
+      padding: 10px 16px;
+    }
+    .add-category-btn .plus-icon-sm {
+      font-size: 1.2rem;
+    }
+    .category-title {
+      font-size: 1.1rem;
+      padding-left: 10px;
+    }
+    .empty-state {
+      padding: 36px 24px;
+    }
+    .empty-state p {
+      font-size: 1rem;
+    }
+    .empty-state .empty-hint {
+      font-size: 1rem;
+    }
+    .add-card {
+      font-size: 1.15rem !important;
+      min-height: 220px;
+    }
+    .add-card .plus-icon {
+      font-size: 3.2rem !important;
+    }
+    .add-card .add-lbl {
+      font-size: 1.1rem !important;
+    }
+    
+    .student-grid {
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 20px;
+    }
+    
+    .place-block {
+      padding: 22px 24px;
+    }
+    .place-label {
+      font-size: 1rem;
+    }
+    .place-value {
+      font-size: 2.2rem;
+    }
+    .place-value .place-num {
+      font-size: 3rem;
+    }
+    .place-value .place-note {
+      font-size: 1.1rem;
+    }
+    .place-add-btn {
+      font-size: 0.95rem;
+    }
+    
+    .pwd-card {
+      max-width: 500px !important;
+    }
+  }
+
+  /* Large screens (1840px and above) */
+  @media (min-width: 1840px) {
+    .hero-title {
+      padding: 80px 24px 100px;
+    }
+    .hero-title h1 {
+      font-size: 5.8rem;
+      letter-spacing: 3px;
+    }
+    
+    .path-section {
+      padding: 80px 24px 100px;
+    }
+    
+    .path-stage {
+      max-width: 1400px;
+    }
+    
+    .node-badge {
+      width: 76px;
+      height: 76px;
+    }
+    .node-badge .yr {
+      font-size: 19px;
+    }
+    .node-badge .lbl {
+      font-size: 10px;
+    }
+    
+    .node-platform {
+      width: 102px;
+      height: 44px;
+    }
+    
+    .add-year-badge {
+      width: 76px;
+      height: 76px;
+      font-size: 2.8rem;
+    }
+    .add-year-label {
+      font-size: 12px;
+      padding: 4px 12px;
+    }
+    
+    .modal-card {
+      padding: 50px 40px 40px;
+    }
+    
+    .modal-year {
+      font-size: 4rem;
+    }
+    
+    .add-category-btn {
+      font-size: 1rem;
+      padding: 12px 18px;
+    }
+    .add-category-btn .plus-icon-sm {
+      font-size: 1.4rem;
+    }
+    .category-title {
+      font-size: 1.2rem;
+      padding-left: 12px;
+    }
+    .empty-state {
+      padding: 40px 28px;
+    }
+    .empty-state p {
+      font-size: 1.1rem;
+    }
+    .empty-state .empty-hint {
+      font-size: 1.1rem;
+    }
+    .add-card {
+      font-size: 1.25rem !important;
+      min-height: 240px;
+    }
+    .add-card .plus-icon {
+      font-size: 3.5rem !important;
+    }
+    .add-card .add-lbl {
+      font-size: 1.2rem !important;
+    }
+    
+    .student-grid {
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 22px;
+    }
+    
+    .place-block {
+      padding: 24px 26px;
+    }
+    .place-label {
+      font-size: 1.1rem;
+    }
+    .place-value {
+      font-size: 2.6rem;
+    }
+    .place-value .place-num {
+      font-size: 3.4rem;
+    }
+    .place-value .place-note {
+      font-size: 1.2rem;
+    }
+    .place-add-btn {
+      font-size: 1rem;
+    }
+    
+    .pwd-card {
+      max-width: 520px !important;
+    }
+  }
+  
+  /* Extra large screens (1920px and above) */
+  @media (min-width: 1920px) {
+    .hero-title h1 {
+      font-size: 5rem;
+    }
+    
+    .path-section {
+      padding: 100px 32px 120px;
+    }
+    
+    .path-stage {
+      max-width: 1800px;
+    }
+    
+    .node-badge {
+      width: 80px;
+      height: 80px;
+    }
+    .node-badge .yr {
+      font-size: 18px;
+    }
+    
+    .student-grid {
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 24px;
+    }
+  }
+  @media (min-width: 2560px) {
+    .path-stage {
+      max-width: 2400px;
+    }
+  }
+  @media (min-width: 3440px) {
+    .path-stage {
+      max-width: 3200px;
+    }
+    .modal-card {
+      max-width: 2200px;
+      padding: 80px 70px 70px;
+    }
+    .modal-header h2 {
+      font-size: 5rem;
+    }
+    .modal-year {
+      font-size: 6rem;
+    }
+    .modal-summary {
+      font-size: 1.8rem;
+      padding: 22px 26px;
+    }
+    .place-label {
+      font-size: 1.8rem;
+    }
+    .place-add-btn {
+      font-size: 1.5rem;
+      padding: 12px 16px;
+    }
+    .place-value {
+      font-size: 2.6rem;
+    }
+    .place-value .place-num {
+      font-size: 4rem;
+    }
+    .place-value .place-note {
+      font-size: 1.5rem;
+    }
+    .btn-primary,
+    .btn-secondary {
+      font-size: 1.6rem;
+      padding: 16px 28px;
+    }
+    .pwd-title {
+      font-size: 3rem;
+    }
+    .pwd-sub {
+      font-size: 1.9rem;
+    }
+    .pwd-input {
+      font-size: 1.6rem;
+      padding: 18px 20px;
+    }
+    .upload-icon {
+      font-size: 3.5rem;
+    }
+    .pwd-card {
+      max-width: 1200px !important;
+      padding: 70px 60px 60px !important;
+    }
+  }
+  @media (min-width: 3840px) {
+    .path-stage {
+      max-width: 4000px;
+    }
+    .modal-card {
+      max-width: 2400px;
+      padding: 90px 80px 80px;
+    }
+    .modal-header h2 {
+      font-size: 6rem;
+    }
+    .modal-year {
+      font-size: 7.5rem;
+    }
+    .modal-summary {
+      font-size: 2.1rem;
+      padding: 26px 32px;
+    }
+    .place-label {
+      font-size: 2rem;
+    }
+    .place-add-btn {
+      font-size: 1.8rem;
+      padding: 16px 20px;
+    }
+    .place-value {
+      font-size: 3.2rem;
+    }
+    .place-value .place-num {
+      font-size: 4.8rem;
+    }
+    .place-value .place-note {
+      font-size: 1.8rem;
+    }
+    .btn-primary,
+    .btn-secondary {
+      font-size: 1.9rem;
+      padding: 18px 32px;
+    }
+    .pwd-title {
+      font-size: 3.6rem;
+    }
+    .pwd-sub {
+      font-size: 2.2rem;
+    }
+    .pwd-input {
+      font-size: 1.9rem;
+      padding: 20px 24px;
+    }
+    .upload-icon {
+      font-size: 4rem;
+    }
+    .pwd-card {
+      max-width: 1400px !important;
+      padding: 80px 70px 70px !important;
+    }
+  }
+  @media(max-width:380px){
+    html, body { overflow-x:hidden; }
+  }
+
+  @media(max-width:768px){
+    /* NAV */
+    .nav { padding:0 10px; min-height:52px; gap:6px; flex-wrap:nowrap; overflow:hidden; }
+    .nav img { width:32px; height:32px; flex-shrink:0; margin-right:6px !important; }
+    .nav .brand { font-size:10.5px; letter-spacing:0; flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:calc(100vw - 150px); margin-right:0; }
+    .hamburger { display:flex; flex-shrink:0; margin-left:6px; padding:6px 8px; }
+    .login-btn { display:none !important; }
+
+    /* MOBILE SIDEBAR */
+    .mobile-sidebar { width:255px; }
+    .mobile-sidebar-header { padding:0.85rem 1rem; }
+    .mobile-sidebar-header .brand { font-size:12px; }
+    .mobile-nav-links a { padding:11px 1.2rem; font-size:13px; }
+
+    /* AUTH MODAL */
+    .auth-modal { max-width:calc(100% - 1.5rem); margin:0.75rem; border-radius:14px; }
+    .am-head { padding:0.85rem 1rem; }
+    .am-brand { font-size:8.5px; letter-spacing:1.5px; }
+    .am-body { padding:1rem; }
+    .am-input { font-size:0.84rem; padding:9px 11px; }
+    .am-btn { font-size:9.5px; letter-spacing:1.5px; padding:10px; }
+
+    /* FOOTER — 3-col grid matching Image 2 */
+    .footer-wrap .footer-top {
+      grid-template-columns: 1fr 1fr 1fr !important;
+      grid-template-rows: auto auto !important;
+      gap: 16px 10px !important;
+      padding: 24px 16px 18px !important;
+      max-width: 100% !important;
+      width: 100% !important;
+      margin: 0 !important;
+      box-sizing: border-box !important;
+      text-align: left !important;
+    }
+    .footer-wrap .brand-col {
+      grid-column: 1 / -1 !important;
+      text-align: center !important;
+      padding-bottom: 14px !important;
+      border-bottom: 1px solid rgba(153,101,21,0.15) !important;
+      margin-bottom: 4px !important;
+    }
+    .footer-wrap .brand-col .brand-name { font-size:13px !important; }
+    .footer-wrap .brand-col p { font-size:11.5px !important; max-width:320px; margin:0 auto 12px !important; }
+    .footer-wrap .social-row { justify-content:center !important; }
+    .footer-wrap .footer-col { min-width:0; }
+    .footer-wrap .footer-col h4 {
+      font-size: 9px !important;
+      letter-spacing: 1px !important;
+      margin-bottom: 10px !important;
+      padding-bottom: 6px !important;
+      text-align: left !important;
+    }
+    .footer-wrap .footer-col h4::after { left:0 !important; transform:none !important; width:16px !important; }
+    .footer-wrap .footer-col ul li { margin-bottom:5px !important; }
+    .footer-wrap .footer-col ul li a {
+      font-size: 10px !important;
+      justify-content: flex-start !important;
+      word-break: break-word !important;
+      display: block !important;
+    }
+    .footer-wrap .contact-item { display:flex !important; gap:5px !important; margin-bottom:7px !important; width:100% !important; align-items:flex-start !important; }
+    .footer-wrap .contact-icon { width:22px !important; height:22px !important; border-radius:4px !important; flex-shrink:0 !important; }
+    .footer-wrap .contact-icon svg { width:10px !important; height:10px !important; }
+    .footer-wrap .contact-txt { font-size:9.5px !important; line-height:1.4 !important; word-break:break-word !important; }
+    .footer-wrap .contact-txt strong { font-size:8px !important; letter-spacing:0.8px !important; }
+    .footer-wrap .footer-bottom {
+      flex-direction: column !important;
+      align-items: center !important;
+      text-align: center !important;
+      gap: 8px !important;
+      padding: 14px 16px 18px !important;
+      max-width: 100% !important;
+      width: 100% !important;
+      margin: 0 !important;
+      box-sizing: border-box !important;
+    }
+    .footer-wrap .footer-bottom .links { justify-content:center !important; gap:14px !important; }
+    .footer-wrap .footer-bottom .copy { font-size:10px !important; }
+    .footer-wrap .footer-bottom .links a { font-size:10px !important; }
+    .footer-wrap .footer-divider {
+      max-width: 100% !important;
+      width: 100% !important;
+      margin: 0 !important;
+    }
+    .footer-wrap .dhamma-strip { font-size:8px !important; letter-spacing:1.5px !important; padding:9px 10px !important; line-height:1.6 !important; }
+  }
+
+ @media(max-width:480px){
+    .footer-wrap .footer-top {
+      grid-template-columns: 1fr 1fr 1fr !important;
+      gap: 14px 8px !important;
+      padding: 20px 12px 16px !important;
+      max-width: 100% !important;
+      width: 100% !important;
+      margin: 0 !important;
+      box-sizing: border-box !important;
+    }
+    .footer-wrap .footer-col h4 { font-size:8px !important; letter-spacing:0.8px !important; }
+    .footer-wrap .footer-col ul li a { font-size:9px !important; }
+    .footer-wrap .contact-txt { font-size:8.5px !important; }
+    .footer-wrap .contact-item { display:flex !important; flex-direction:column !important; align-items:flex-start !important; gap:3px !important; }
+    .footer-wrap .contact-icon { width:20px !important; height:20px !important; }
+    .footer-wrap .contact-icon svg { width:9px !important; height:9px !important; }
+  }
+
+  @media(max-width:400px){
+    .footer-wrap .footer-top {
+      grid-template-columns: 1fr 1fr 1fr !important;
+      gap: 12px 6px !important;
+      padding: 16px 10px 12px !important;
+      max-width: 100% !important;
+      width: 100% !important;
+      margin: 0 !important;
+      box-sizing: border-box !important;
+    }
+    .footer-wrap .brand-col {
+      grid-column: 1 / -1 !important;
+      text-align: center !important;
+      padding-bottom: 10px !important;
+      border-bottom: 1px solid rgba(153,101,21,0.15) !important;
+      margin-bottom: 3px !important;
+    }
+    .footer-wrap .brand-col .brand-name { font-size: 11px !important; }
+    .footer-wrap .brand-col p { font-size: 9.5px !important; }
+    .footer-wrap .footer-col h4 { font-size: 7.5px !important; letter-spacing: 0.6px !important; margin-bottom: 7px !important; }
+    .footer-wrap .footer-col ul li { margin-bottom: 4px !important; }
+    .footer-wrap .footer-col ul li a { font-size: 8.5px !important; word-break: break-word !important; display: block !important; }
+    .footer-wrap .contact-item { display:flex !important; flex-direction:column !important; align-items:flex-start !important; gap:2px !important; margin-bottom:6px !important; }
+    .footer-wrap .contact-icon { width:18px !important; height:18px !important; flex-shrink:0 !important; }
+    .footer-wrap .contact-icon svg { width:8px !important; height:8px !important; }
+    .footer-wrap .contact-txt { font-size: 8px !important; line-height:1.3 !important; word-break:break-word !important; }
+    .footer-wrap .contact-txt strong { font-size: 7px !important; }
+    .footer-wrap .footer-bottom {
+      flex-direction: column !important;
+      align-items: center !important;
+      text-align: center !important;
+      gap: 6px !important;
+      padding: 10px 10px 14px !important;
+      max-width: 100% !important;
+      width: 100% !important;
+      margin: 0 !important;
+      box-sizing: border-box !important;
+    }
+    .footer-wrap .footer-bottom .copy { font-size: 8.5px !important; }
+    .footer-wrap .footer-bottom .links { justify-content:center !important; gap:10px !important; }
+    .footer-wrap .footer-bottom .links a { font-size: 8.5px !important; }
+    .footer-wrap .dhamma-strip { font-size: 7.5px !important; letter-spacing: 1.2px !important; padding: 8px 8px !important; }
+  }
+
+ @media(max-width:360px){
+  .nav{padding:0 10px}
+  .brand{font-size:10px}
+  .nav>img{width:24px!important;height:24px!important}
+  .hero-content{padding:20px 10px 20px}
+  .school-name{max-width:92vw}
+  .hero-flag{width:min(160px,65vw)}
+  .quote-card{font-size:13px;padding:24px 14px 18px}
+  .footer-top{padding:28px 18px 20px}
+  .footer-bottom{padding:16px 18px 18px}
+  .contact-item{max-width:220px}
+}
+
+  
+  /*=======================================================
+   large-screen.css — Sri Vipassi Dhamma School
+   Covers: Navigation, Login Box, Auth Modal, Footer
+   Breakpoints: 1440px → 1920px → 2560px → 3440px → 3840px
+   ============================================================ */
+
+/* ============================================================
+   NAV SIDEBAR TRIGGER
+   ============================================================ */
+@media(max-width:1200px){
+  .nav-links { display:none !important; }
+  .lang-row  { display:none !important; }
+  .login-btn { display:none !important; }
+  .hamburger { display:flex !important; }
+}
+@media(min-width:1201px){
+  .nav-links { display:flex !important; flex-wrap:nowrap !important; }
+  .lang-row  { display:flex !important; }
+  .login-btn { display:inline-block !important; }
+  .hamburger { display:none !important; }
+}
+
+/* ============================================================
+   BASE — applies to all sizes as foundation
+   ============================================================ */
+.main-card        { max-width:680px; border-radius:36px; }
+.mac-inner        { padding:2.8rem; }
+.brand-inner h1   { font-size:2.2rem !important; margin-bottom:0.5rem; }
+.brand-inner p    { font-size:1rem !important; }
+.login-box        { padding:2.8rem 2.4rem; border-radius:18px; }
+.login-box h2     { font-size:1.8rem !important; margin-bottom:0.8rem; }
+.login-box p.sub  { font-size:1rem !important; margin-bottom:2rem; }
+.login-icon       { font-size:3.8rem; margin-bottom:1.2rem; }
+.input-group      { margin-bottom:1.5rem; }
+.input-group label{ font-size:0.95rem; margin-bottom:8px; }
+.input-group input{ font-size:1rem !important; padding:14px 22px !important; border-radius:70px; }
+.btn              { font-size:1.05rem !important; padding:15px 32px !important; border-radius:50px; }
+.btn-gold         { margin-top:0.5rem; }
+.alert            { font-size:0.92rem !important; padding:12px 18px; }
+.login-disclaimer { font-size:0.92rem !important; }
+
+.page-content {
+  min-height: calc(100vh - 60px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem 1.2rem 3rem;
+}
+
+/* AUTH MODAL BASE */
+.am-brand    { font-size:14px !important; letter-spacing:1.5px; }
+.am-wheel    { font-size:1.6rem !important; }
+.am-close    { font-size:22px !important; width:36px !important; height:36px !important; right:12px !important; left:auto !important; }
+.am-div      { font-size:0.95rem !important; gap:14px; margin:1.2rem 0; }
+.am-lg-email { font-size:1rem !important; letter-spacing:0.5px; }
+.am-lg-name  { font-size:1.4rem !important; }
+.am-tab      { font-size:13px !important; padding:13px !important; letter-spacing:2px; }
+.am-label    { font-size:11px !important; letter-spacing:1.5px; }
+.am-input    { font-size:0.95rem !important; padding:11px 14px !important; }
+.am-btn      { font-size:12px !important; padding:13px !important; }
+.am-soc      { font-size:0.9rem !important; padding:11px 8px !important; }
+.am-forgot a { font-size:0.85rem !important; }
+.am-err      { font-size:0.85rem !important; }
+.auth-modal  { max-width:460px; }
+.am-avatar   { width:72px !important; height:72px !important; }
+
+
+/* ============================================================
+   1440px
+   ============================================================ */
+@media(min-width:1440px){
+
+  /* ── NAV ── */
+  .nav          { padding:0 48px; }
+  .nav img      { width:36px !important; height:36px !important; margin-right:12px !important; }
+  .brand        { font-size:17px; }
+  .nav-links    { margin-left:40px !important; }
+  .nav-links a  { font-size:15.5px; padding:14px 10px; }
+  .lang-row     { gap:6px; }
+  .lb-lang      { font-size:14px; padding:4px 12px; }
+  .login-btn    { font-size:14px; padding:5px 16px; }
+
+  /* ── LOGIN BOX ── */
+  .page-content { padding:3.5rem 2rem 5rem; }
+  .main-card    { max-width:760px; border-radius:42px; }
+  .mac-bar      { padding:16px 22px; gap:9px; }
+  .mac-bar span { width:15px; height:15px; }
+  .mac-inner    { padding:3.2rem; }
+  .brand-inner h1 { font-size:2.6rem !important; }
+  .brand-inner p  { font-size:1.1rem !important; }
+  .login-box    { padding:3.2rem 2.8rem; border-radius:22px; }
+  .login-box h2 { font-size:2.1rem !important; }
+  .login-box p.sub { font-size:1.1rem !important; }
+  .login-icon   { font-size:4.2rem; }
+  .input-group label { font-size:1.05rem; }
+  .input-group input { font-size:1.1rem !important; padding:16px 26px !important; }
+  .btn          { font-size:1.15rem !important; padding:16px 38px !important; }
+  .login-disclaimer { font-size:1rem !important; }
+
+  /* ── AUTH MODAL ── */
+  .auth-modal  { max-width:480px; }
+  .am-brand    { font-size:15px !important; }
+  .am-wheel    { font-size:1.7rem !important; }
+  .am-close    { font-size:24px !important; width:38px !important; height:38px !important; }
+  .am-div      { font-size:1rem !important; }
+  .am-lg-email { font-size:1.05rem !important; }
+  .am-lg-name  { font-size:1.5rem !important; }
+  .am-tab      { font-size:13.5px !important; padding:13px !important; }
+  .am-label    { font-size:11.5px !important; }
+  .am-input    { font-size:0.97rem !important; padding:11px 15px !important; }
+  .am-btn      { font-size:12.5px !important; padding:13px !important; }
+  .am-soc      { font-size:0.92rem !important; }
+  .am-avatar   { width:76px !important; height:76px !important; }
+
+  /* ── FOOTER ── */
+  .footer-wrap .footer-top {
+    display:grid !important;
+    grid-template-columns:1.5fr 1fr 1fr 1.2fr !important;
+    gap:32px !important;
+    padding:52px 5% 44px !important;
+    max-width:100% !important;
+    width:100% !important;
+    box-sizing:border-box !important;
+  }
+  .footer-wrap .brand-col { grid-column:auto !important; text-align:left !important; }
+  .footer-wrap .footer-bottom {
+    padding:20px 5% 26px !important;
+    max-width:100% !important;
+    width:100% !important;
+    box-sizing:border-box !important;
+  }
+  .footer-wrap .brand-col .brand-name  { font-size:21px !important; font-weight:700; }
+  .footer-wrap .brand-col .brand-pali  { font-size:16px !important; letter-spacing:2px; }
+  .footer-wrap .brand-col p            { font-size:18px !important; line-height:1.7; }
+  .footer-wrap .footer-col h4          { font-size:16px !important; letter-spacing:2px; margin-bottom:16px; padding-bottom:9px; }
+  .footer-wrap .footer-col ul li       { margin-bottom:9px; }
+  .footer-wrap .footer-col ul li a     { font-size:18px !important; }
+  .footer-wrap .contact-txt            { font-size:17px !important; line-height:1.55; }
+  .footer-wrap .contact-txt strong     { font-size:14.5px !important; letter-spacing:1.3px; }
+  .footer-wrap .contact-icon           { width:28px; height:28px; }
+  .footer-wrap .contact-icon svg       { width:13px; height:13px; }
+  .footer-wrap .soc-btn                { width:32px; height:32px; }
+  .footer-wrap .soc-btn svg            { width:13px; height:13px; }
+  .footer-wrap .social-row             { gap:8px; }
+  .footer-wrap .footer-bottom .copy   { font-size:17px !important; }
+  .footer-wrap .footer-bottom .links a { font-size:16.5px !important; }
+  .footer-wrap .footer-bottom .links  { gap:22px; }
+  .footer-wrap .dhamma-strip           { font-size:16px !important; letter-spacing:2.8px; padding:12px; }
+}
+
+
+/* ============================================================
+   1920px
+   ============================================================ */
+@media(min-width:1920px){
+
+  /* ── NAV ── */
+  .nav          { padding:0 64px; min-height:58px; }
+  .nav img      { width:38px !important; height:38px !important; margin-right:13px !important; }
+  .brand        { font-size:28.5px; }
+  .nav-links    { margin-left:50px !important; }
+  .nav-links a  { font-size:27px; padding:15px 11px; }
+  .lb-lang      { font-size:25.5px; padding:5px 13px; }
+  .login-btn    { font-size:25.5px; padding:5px 18px; }
+
+  /* ── LOGIN BOX ── */
+  .page-content { padding:5rem 3rem 7rem; }
+  .main-card    { max-width:980px; border-radius:52px; }
+  .mac-bar      { padding:20px 28px; gap:11px; }
+  .mac-bar span { width:18px; height:18px; }
+  .mac-inner    { padding:4rem; }
+  .brand-inner h1 { font-size:3.2rem !important; }
+  .brand-inner p  { font-size:1.4rem !important; }
+  .login-box    { padding:4rem 3.6rem; border-radius:28px; }
+  .login-box h2 { font-size:2.6rem !important; }
+  .login-box p.sub { font-size:1.35rem !important; margin-bottom:2.5rem; }
+  .login-icon   { font-size:5.5rem; margin-bottom:1.8rem; }
+  .input-group  { margin-bottom:2rem; }
+  .input-group label { font-size:1.3rem; margin-bottom:10px; }
+  .input-group input { font-size:1.4rem !important; padding:20px 32px !important; }
+  .btn          { font-size:1.45rem !important; padding:20px 50px !important; }
+  .alert        { font-size:1.1rem !important; }
+  .login-disclaimer { font-size:1.2rem !important; }
+
+  /* ── AUTH MODAL ── */
+  .auth-modal  { max-width:560px; }
+  .am-brand    { font-size:18px !important; }
+  .am-wheel    { font-size:2rem !important; }
+  .am-close    { font-size:28px !important; width:44px !important; height:44px !important; }
+  .am-div      { font-size:1.1rem !important; }
+  .am-lg-email { font-size:1.2rem !important; }
+  .am-lg-name  { font-size:1.8rem !important; }
+  .am-tab      { font-size:15px !important; padding:15px !important; }
+  .am-label    { font-size:13px !important; }
+  .am-input    { font-size:1.1rem !important; padding:13px 18px !important; }
+  .am-btn      { font-size:14px !important; padding:15px !important; }
+  .am-soc      { font-size:1.05rem !important; padding:13px 10px !important; }
+  .am-forgot a { font-size:1rem !important; }
+  .am-err      { font-size:0.95rem !important; }
+  .am-avatar   { width:88px !important; height:88px !important; }
+
+  /* ── FOOTER ── */
+  .footer-wrap .footer-top {
+    grid-template-columns:1.5fr 1fr 1fr 1.2fr !important;
+    gap:40px !important;
+    padding:60px 5.5% 50px !important;
+    max-width:100% !important;
+    width:100% !important;
+    box-sizing:border-box !important;
+  }
+  .footer-wrap .brand-col { grid-column:auto !important; text-align:left !important; }
+  .footer-wrap .footer-bottom {
+    padding:22px 5.5% 28px !important;
+    max-width:100% !important;
+    width:100% !important;
+    box-sizing:border-box !important;
+  }
+  .footer-wrap .brand-col .brand-name  { font-size:28px !important; }
+  .footer-wrap .brand-col .brand-pali  { font-size:22.5px !important; letter-spacing:2px; }
+  .footer-wrap .brand-col p            { font-size:24.5px !important; line-height:1.75; }
+  .footer-wrap .footer-col h4          { font-size:22.5px !important; letter-spacing:2.2px; margin-bottom:17px; }
+  .footer-wrap .footer-col ul li       { margin-bottom:10px; }
+  .footer-wrap .footer-col ul li a     { font-size:24.5px !important; }
+  .footer-wrap .contact-txt            { font-size:23.5px !important; line-height:1.6; }
+  .footer-wrap .contact-txt strong     { font-size:21px !important; }
+  .footer-wrap .contact-icon           { width:29px; height:29px; }
+  .footer-wrap .soc-btn                { width:33px; height:33px; }
+  .footer-wrap .soc-btn svg            { width:14px; height:14px; }
+  .footer-wrap .social-row             { gap:9px; }
+  .footer-wrap .footer-bottom .copy   { font-size:23.5px !important; }
+  .footer-wrap .footer-bottom .links a { font-size:23px !important; }
+  .footer-wrap .footer-bottom .links  { gap:24px; }
+  .footer-wrap .dhamma-strip           { font-size:22.5px !important; letter-spacing:3px; padding:13px; }
+}
+
+
+/* ============================================================
+   2560px
+   ============================================================ */
+@media(min-width:2560px){
+
+  /* ── NAV ── */
+  .nav          { padding:0 100px; min-height:68px; }
+  .nav img      { width:48px !important; height:48px !important; margin-right:16px !important; }
+  .brand        { font-size:29px; }
+  .nav-links    { margin-left:80px !important; }
+  .nav-links a  { font-size:27px; padding:20px 16px; }
+  .lb-lang      { font-size:25px; padding:6px 18px; }
+  .login-btn    { font-size:25px; padding:7px 24px; }
+
+  /* ── LOGIN BOX ── */
+  .page-content { padding:7rem 5rem 10rem; }
+  .main-card    { max-width:1280px; border-radius:68px; }
+  .mac-bar      { padding:26px 36px; gap:14px; }
+  .mac-bar span { width:22px; height:22px; }
+  .mac-inner    { padding:5.5rem; }
+  .brand-inner h1 { font-size:4.2rem !important; }
+  .brand-inner p  { font-size:1.85rem !important; }
+  .login-box    { padding:5.5rem 5rem; border-radius:36px; }
+  .login-box h2 { font-size:3.5rem !important; }
+  .login-box p.sub { font-size:1.8rem !important; margin-bottom:3.5rem; }
+  .login-icon   { font-size:7rem; margin-bottom:2.2rem; }
+  .input-group  { margin-bottom:2.8rem; }
+  .input-group label { font-size:1.7rem; margin-bottom:14px; }
+  .input-group input { font-size:1.85rem !important; padding:26px 42px !important; }
+  .btn          { font-size:1.9rem !important; padding:26px 68px !important; }
+  .alert        { font-size:1.45rem !important; padding:18px 28px; }
+  .login-disclaimer { font-size:1.5rem !important; }
+
+  /* ── AUTH MODAL ── */
+  .auth-modal  { max-width:720px; }
+  .am-brand    { font-size:22px !important; }
+  .am-wheel    { font-size:2.4rem !important; }
+  .am-close    { font-size:36px !important; width:56px !important; height:56px !important; }
+  .am-div      { font-size:1.4rem !important; }
+  .am-lg-email { font-size:1.5rem !important; }
+  .am-lg-name  { font-size:2.2rem !important; }
+  .am-tab      { font-size:18px !important; padding:20px !important; }
+  .am-label    { font-size:16px !important; }
+  .am-input    { font-size:1.4rem !important; padding:16px 22px !important; }
+  .am-btn      { font-size:18px !important; padding:18px !important; }
+  .am-soc      { font-size:1.3rem !important; padding:16px 12px !important; }
+  .am-forgot a { font-size:1.2rem !important; }
+  .am-err      { font-size:1.1rem !important; }
+  .am-avatar   { width:110px !important; height:110px !important; }
+
+  /* ── FOOTER ── */
+  .footer-wrap .footer-top {
+    grid-template-columns:1.5fr 1fr 1fr 1.2fr !important;
+    gap:56px !important;
+    padding:80px 6% 66px !important;
+    max-width:100% !important;
+    width:100% !important;
+    box-sizing:border-box !important;
+  }
+  .footer-wrap .brand-col { grid-column:auto !important; text-align:left !important; }
+  .footer-wrap .footer-bottom {
+    padding:28px 6% 36px !important;
+    max-width:100% !important;
+    width:100% !important;
+    box-sizing:border-box !important;
+  }
+  .footer-wrap .brand-col .brand-name  { font-size:40px !important; }
+  .footer-wrap .brand-col .brand-pali  { font-size:32px !important; letter-spacing:2.5px; }
+  .footer-wrap .brand-col p            { font-size:34px !important; line-height:1.8; margin-bottom:20px; }
+  .footer-wrap .footer-col h4          { font-size:32px !important; letter-spacing:2.8px; margin-bottom:22px; padding-bottom:11px; }
+  .footer-wrap .footer-col ul li       { margin-bottom:12px; }
+  .footer-wrap .footer-col ul li a     { font-size:34.5px !important; }
+  .footer-wrap .contact-txt            { font-size:33px !important; line-height:1.6; }
+  .footer-wrap .contact-txt strong     { font-size:28px !important; letter-spacing:1.6px; }
+  .footer-wrap .contact-item           { gap:12px; margin-bottom:14px; }
+  .footer-wrap .contact-icon           { width:34px; height:34px; border-radius:8px; }
+  .footer-wrap .contact-icon svg       { width:15px; height:15px; }
+  .footer-wrap .soc-btn                { width:38px; height:38px; }
+  .footer-wrap .soc-btn svg            { width:16px; height:16px; }
+  .footer-wrap .social-row             { gap:10px; }
+  .footer-wrap .footer-bottom .copy   { font-size:33px !important; }
+  .footer-wrap .footer-bottom .links a { font-size:32.5px !important; }
+  .footer-wrap .footer-bottom .links  { gap:36px; }
+  .footer-wrap .dhamma-strip           { font-size:32px !important; letter-spacing:4px; padding:16px; }
+}
+
+
+/* ============================================================
+   3440px
+   ============================================================ */
+@media(min-width:3440px){
+
+  /* ── NAV ── */
+  .nav          { padding:0 140px; min-height:82px; }
+  .nav img      { width:62px !important; height:62px !important; margin-right:20px !important; }
+  .brand        { font-size:40px; }
+  .nav-links    { margin-left:120px !important; }
+  .nav-links a  { font-size:38px; padding:26px 20px; }
+  .lb-lang      { font-size:35px; padding:9px 24px; }
+  .login-btn    { font-size:34px; padding:10px 32px; }
+
+  /* ── LOGIN BOX ── */
+  .page-content { padding:10rem 8rem 14rem; }
+  .main-card    { max-width:1680px; border-radius:88px; }
+  .mac-bar      { padding:34px 48px; gap:18px; }
+  .mac-bar span { width:28px; height:28px; }
+  .mac-inner    { padding:7rem; }
+  .brand-inner h1 { font-size:5.5rem !important; }
+  .brand-inner p  { font-size:2.4rem !important; }
+  .login-box    { padding:7rem 6.5rem; border-radius:46px; }
+  .login-box h2 { font-size:4.5rem !important; }
+  .login-box p.sub { font-size:2.4rem !important; margin-bottom:4.5rem; }
+  .login-icon   { font-size:9rem; margin-bottom:2.8rem; }
+  .input-group  { margin-bottom:3.5rem; }
+  .input-group label { font-size:2.2rem; margin-bottom:18px; }
+  .input-group input { font-size:2.4rem !important; padding:34px 54px !important; }
+  .btn          { font-size:2.5rem !important; padding:34px 90px !important; }
+  .alert        { font-size:1.9rem !important; padding:24px 36px; }
+  .login-disclaimer { font-size:1.9rem !important; }
+
+  /* ── AUTH MODAL ── */
+  .auth-modal  { max-width:960px; }
+  .am-brand    { font-size:28px !important; }
+  .am-wheel    { font-size:3rem !important; }
+  .am-close    { font-size:44px !important; width:68px !important; height:68px !important; }
+  .am-div      { font-size:1.8rem !important; }
+  .am-lg-email { font-size:2rem !important; }
+  .am-lg-name  { font-size:2.8rem !important; }
+  .am-tab      { font-size:22px !important; padding:24px !important; }
+  .am-label    { font-size:20px !important; }
+  .am-input    { font-size:1.8rem !important; padding:20px 28px !important; }
+  .am-btn      { font-size:22px !important; padding:22px !important; }
+  .am-soc      { font-size:1.7rem !important; padding:20px 14px !important; }
+  .am-forgot a { font-size:1.5rem !important; }
+  .am-err      { font-size:1.4rem !important; }
+  .am-avatar   { width:140px !important; height:140px !important; }
+
+  /* ── FOOTER ── */
+  .footer-wrap .footer-top {
+    grid-template-columns:1.5fr 1fr 1fr 1.2fr !important;
+    gap:80px !important;
+    padding:110px 7% 90px !important;
+    max-width:100% !important;
+    width:100% !important;
+    box-sizing:border-box !important;
+  }
+  .footer-wrap .brand-col { grid-column:auto !important; text-align:left !important; }
+  .footer-wrap .footer-bottom {
+    padding:40px 7% 50px !important;
+    max-width:100% !important;
+    width:100% !important;
+    box-sizing:border-box !important;
+  }
+  .footer-wrap .brand-col .brand-name  { font-size:46px !important; }
+  .footer-wrap .brand-col .brand-pali  { font-size:35px !important; letter-spacing:3px; }
+  .footer-wrap .brand-col p            { font-size:38px !important; line-height:1.85; margin-bottom:26px; }
+  .footer-wrap .footer-col h4          { font-size:35px !important; letter-spacing:3.5px; margin-bottom:28px; padding-bottom:12px; }
+  .footer-wrap .footer-col ul li       { margin-bottom:16px; }
+  .footer-wrap .footer-col ul li a     { font-size:39px !important; }
+  .footer-wrap .contact-txt            { font-size:37px !important; line-height:1.65; }
+  .footer-wrap .contact-txt strong     { font-size:33px !important; letter-spacing:2px; }
+  .footer-wrap .contact-item           { gap:16px; margin-bottom:20px; }
+  .footer-wrap .contact-icon           { width:42px; height:42px; border-radius:10px; }
+  .footer-wrap .contact-icon svg       { width:19px; height:19px; }
+  .footer-wrap .soc-btn                { width:48px; height:48px; }
+  .footer-wrap .soc-btn svg            { width:20px; height:20px; }
+  .footer-wrap .social-row             { gap:13px; }
+  .footer-wrap .footer-bottom .copy   { font-size:37px !important; }
+  .footer-wrap .footer-bottom .links a { font-size:36px !important; }
+  .footer-wrap .footer-bottom .links  { gap:52px; }
+  .footer-wrap .dhamma-strip           { font-size:35px !important; letter-spacing:5px; padding:22px; }
+}
+/* ============================================================
+   LARGE SCREEN NAV FIX — matches index.html scaling
+   ============================================================ */
+@media(min-width:1440px){
+  .nav { padding:0 48px; }
+  .nav > img { width:36px !important; height:36px !important; margin-right:12px !important; }
+  .nav .brand { font-size:17px !important; }
+  .nav .nav-links { margin-left:40px !important; }
+  .nav .nav-links a { font-size:15.5px !important; padding:14px 10px !important; }
+  .lang-row { gap:6px; }
+  .lb { font-size:14px !important; padding:4px 12px !important; }
+  .login-btn { font-size:14px !important; padding:5px 16px !important; }
+}
+
+@media(min-width:1920px){
+  .nav { padding:0 64px; min-height:58px; }
+  .nav > img { width:38px !important; height:38px !important; margin-right:13px !important; }
+  .nav .brand { font-size:28.5px !important; }
+  .nav .nav-links { margin-left:50px !important; }
+  .nav .nav-links a { font-size:27px !important; padding:15px 11px !important; }
+  .lb { font-size:25.5px !important; padding:5px 13px !important; }
+  .login-btn { font-size:25.5px !important; padding:5px 18px !important; }
+}
+
+@media(min-width:2560px){
+  .nav { padding:0 100px; min-height:68px; }
+  .nav > img { width:48px !important; height:48px !important; margin-right:16px !important; }
+  .nav .brand { font-size:29px !important; }
+  .nav .nav-links { margin-left:80px !important; }
+  .nav .nav-links a { font-size:27px !important; padding:20px 16px !important; }
+  .lb { font-size:25px !important; padding:6px 18px !important; }
+  .login-btn { font-size:25px !important; padding:7px 24px !important; }
+}
+
+@media(min-width:3440px){
+  .nav { padding:0 140px; min-height:82px; }
+  .nav > img { width:62px !important; height:62px !important; margin-right:20px !important; }
+  .nav .brand { font-size:40px !important; }
+  .nav .nav-links { margin-left:120px !important; }
+  .nav .nav-links a { font-size:38px !important; padding:26px 20px !important; }
+  .lb { font-size:35px !important; padding:9px 24px !important; }
+  .login-btn { font-size:34px !important; padding:10px 32px !important; }
+}
+
+@media(min-width:3840px){
+  .nav { padding:0 200px; min-height:100px; }
+  .nav > img { width:76px !important; height:76px !important; margin-right:26px !important; }
+  .nav .brand { font-size:50px !important; }
+  .nav .nav-links { margin-left:160px !important; }
+  .nav .nav-links a { font-size:47px !important; padding:32px 26px !important; }
+  .lb { font-size:43px !important; padding:11px 30px !important; }
+  .login-btn { font-size:42px !important; padding:12px 40px !important; }
+}
+
+/* ============================================================
+   3840px (4K)
+   ============================================================ */
+@media(min-width:3840px){
+  /* ── NAV ── */
+  .nav          { padding:0 200px; min-height:100px; }
+  .nav img      { width:76px !important; height:76px !important; margin-right:26px !important; }
+  .brand        { font-size:50px; }
+  .nav-links    { margin-left:160px !important; }
+  .nav-links a  { font-size:47px; padding:32px 26px; }
+  .lb-lang      { font-size:43px; padding:11px 30px; }
+  .login-btn    { font-size:42px; padding:12px 40px; }
+
+  /* ── FOOTER ── */
+  .footer-wrap .footer-top {
+    grid-template-columns:1.5fr 1fr 1fr 1.2fr !important;
+    gap:120px !important;
+    padding:150px 8% 130px !important;
+    max-width:100% !important;
+    width:100% !important;
+    box-sizing:border-box !important;
+  }
+  .footer-wrap .brand-col { grid-column:auto !important; text-align:left !important; }
+  .footer-wrap .footer-bottom {
+    padding:55px 8% 68px !important;
+    max-width:100% !important;
+    width:100% !important;
+    box-sizing:border-box !important;
+  }
+  .footer-wrap .brand-col .brand-name  { font-size:54px !important; }
+  .footer-wrap .brand-col .brand-pali  { font-size:40px !important; letter-spacing:3.5px; }
+  .footer-wrap .brand-col p            { font-size:44px !important; line-height:1.9; margin-bottom:32px; }
+  .footer-wrap .footer-col h4          { font-size:40px !important; letter-spacing:4.5px; margin-bottom:36px; padding-bottom:15px; }
+  .footer-wrap .footer-col ul li       { margin-bottom:45px; }
+  .footer-wrap .footer-col ul li a     { font-size:46px !important; }
+  .footer-wrap .contact-txt            { font-size:43px !important; line-height:1.7; }
+  .footer-wrap .contact-txt strong     { font-size:40px !important; letter-spacing:2.5px; }
+  .footer-wrap .contact-item           { gap:20px; margin-bottom:26px; }
+  .footer-wrap .contact-icon           { width:54px; height:54px; border-radius:13px; }
+  .footer-wrap .contact-icon svg       { width:24px; height:24px; }
+  .footer-wrap .soc-btn                { width:62px; height:62px; }
+  .footer-wrap .soc-btn svg            { width:26px; height:26px; }
+  .footer-wrap .social-row             { gap:16px; }
+  .footer-wrap .footer-bottom .copy   { font-size:43px !important; }
+  .footer-wrap .footer-bottom .links a { font-size:43px !important; }
+  .footer-wrap .footer-bottom .links  { gap:68px; }
+  .footer-wrap .dhamma-strip           { font-size:40px !important; letter-spacing:6px; padding:28px; }
+}
+/* ============================================================
+   FOOTER FULL-WIDTH FIX — force footer to behave like
+   index.html at all zoom levels by overriding the
+   max-width:1200px / margin:auto constraint in base styles
+   ============================================================ */
+@media(min-width:1440px){
+  .footer-wrap .footer-top {
+    max-width:100% !important;
+    width:100% !important;
+    margin:0 !important;
+    padding-left:5% !important;
+    padding-right:5% !important;
+    box-sizing:border-box !important;
+    grid-template-columns:1.5fr 1fr 1fr 1.2fr !important;
+  }
+  .footer-wrap .footer-bottom {
+    max-width:100% !important;
+    width:100% !important;
+    margin:0 !important;
+    padding-left:5% !important;
+    padding-right:5% !important;
+    box-sizing:border-box !important;
+  }
+  .footer-wrap .footer-divider {
+    max-width:100% !important;
+    width:100% !important;
+    margin:0 !important;
+  }
+  .footer-wrap .brand-col {
+    grid-column:auto !important;
+    text-align:left !important;
+  }
+}
+@media(min-width:1920px){
+  .footer-wrap .footer-top {
+    padding-left:5.5% !important;
+    padding-right:5.5% !important;
+  }
+  .footer-wrap .footer-bottom {
+    padding-left:5.5% !important;
+    padding-right:5.5% !important;
+  }
+  .footer-wrap .footer-divider {
+    max-width:100% !important;
+    width:100% !important;
+    margin:0 !important;
+  }
+}
+@media(min-width:2560px){
+  .footer-wrap .footer-top {
+    padding-left:6% !important;
+    padding-right:6% !important;
+  }
+  .footer-wrap .footer-bottom {
+    padding-left:6% !important;
+    padding-right:6% !important;
+  }
+  .footer-wrap .footer-divider {
+    max-width:100% !important;
+    width:100% !important;
+    margin:0 !important;
+  }
+}
+@media(min-width:3440px){
+  .footer-wrap .footer-top {
+    padding-left:7% !important;
+    padding-right:7% !important;
+  }
+  .footer-wrap .footer-bottom {
+    padding-left:7% !important;
+    padding-right:7% !important;
+  }
+  .footer-wrap .footer-divider {
+    max-width:100% !important;
+    width:100% !important;
+    margin:0 !important;
+  }
+}
+@media(min-width:3840px){
+  .footer-wrap .footer-top {
+    padding-left:8% !important;
+    padding-right:8% !important;
+  }
+  .footer-wrap .footer-bottom {
+    padding-left:8% !important;
+    padding-right:8% !important;
+  }
+  .footer-wrap .footer-divider {
+    max-width:100% !important;
+    width:100% !important;
+    margin:0 !important;
+  }
+}
+@media (min-width: 3440px) {
+  .node-badge {
+    width:  clamp(120px, 3.5vw, 170px) !important;
+    height: clamp(120px, 3.5vw, 170px) !important;
+    border-width: 5px !important;
+  }
+  .node-badge .yr {
+    font-size: clamp(26px, 0.8vw, 36px) !important;
+  }
+  .node-badge .lbl {
+    font-size: clamp(12px, 0.38vw, 17px) !important;
+    margin-top: 4px !important;
+  }
+  .node-platform {
+    width:  clamp(158px, 4.6vw, 224px) !important;
+    height: clamp(68px,  2vw,   96px) !important;
+    margin-top: -10px !important;
+  }
+  .platform-gem {
+    width:  clamp(16px, 0.5vw, 22px) !important;
+    height: clamp(16px, 0.5vw, 22px) !important;
+  }
+  .add-year-badge {
+    width:  clamp(112px, 3.3vw, 160px) !important;
+    height: clamp(112px, 3.3vw, 160px) !important;
+    font-size: clamp(3rem, 1.6vw, 5rem) !important;
+    border-width: 5px !important;
+  }
+  .add-year-label {
+    font-size: clamp(12px, 0.38vw, 17px) !important;
+    padding: 4px 14px !important;
+    margin-top: 8px !important;
+  }
+  .start-badge {
+    font-size: clamp(10px, 0.3vw, 14px) !important;
+    padding: 4px 10px !important;
+    border-radius: 3px !important;
+    letter-spacing: 1.5px !important;
+    bottom: -32px !important;
+  }
+  .node-delete {
+    width:  clamp(20px, 0.6vw, 28px) !important;
+    height: clamp(20px, 0.6vw, 28px) !important;
+    font-size: clamp(13px, 0.4vw, 18px) !important;
+    top: -6px !important;
+    right: -6px !important;
+  }
+}
+
+</style>
+</head>
+<body>
+
+  <!-- ===== DATA LOADING OVERLAY ===== -->
+  <div class="data-loading" id="dataLoading">
+    <div class="loading-spinner"></div>
+    <div>Loading achievements…</div>
+  </div>
+
+  <!-- ===== TOP NAV ===== -->
+  <nav class="nav">
+    <img src="logo.png" width="28" height="28" alt="logo" style="margin-right:10px;flex-shrink:0">
+    <div class="brand">Sri Vipassi Dhamma School</div>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="Daily Attendance.html">Daily Attendance</a>
+      <a href="About.html">About</a>
+      <a href="galery.html">Gallery</a>
+      <a href="achievements (2).html" class="active">Achievements</a>
+      <a href="#">Daily Quotes</a>
+      <a href="Contact.html">Contact us</a>
+      <a href="projects.html">Projects</a>
+      <a href="Subject.html">Syllabus</a>
+    </div>
+    <div class="lang-row">
+      <button class="lb on">EN</button>
+      <button class="lb">සිං</button>
+      <button class="lb">தமிழ்</button>
+      <button class="login-btn" id="loginBtn" onclick="openAuth('signin')">Login</button>
+    </div>
+    <button class="hamburger" onclick="toggleMobileMenu()" aria-label="Open menu">
+      <span class="dot red"></span>
+      <span class="dot yellow"></span>
+      <span class="dot green"></span>
+    </button>
+  </nav>
+
+  <!-- MOBILE SIDEBAR -->
+  <div class="mobile-overlay" id="mobileOverlay" onclick="closeMobileMenu()"></div>
+  <div class="mobile-sidebar" id="mobileSidebar">
+    <div class="mobile-sidebar-header">
+      <div class="brand">Sri Vipassi Dhamma School</div>
+      <button class="mobile-close" onclick="closeMobileMenu()">✕</button>
+    </div>
+    <div class="mobile-nav-links">
+      <a href="index.html" onclick="closeMobileMenu()">Home</a>
+      <a href="Daily Attendance.html" onclick="closeMobileMenu()">Daily Attendance</a>
+      <a href="About.html" onclick="closeMobileMenu()">About</a>
+      <a href="galery.html" onclick="closeMobileMenu()">Gallery</a>
+      <a href="achievements (2).html" onclick="closeMobileMenu()">Achievements</a>
+      <a href="#" onclick="closeMobileMenu()">Daily Quotes</a>
+      <a href="Contact.html" onclick="closeMobileMenu()">Contact us</a>
+      <a href="projects.html" onclick="closeMobileMenu()">Projects</a>
+      <a href="Subject.html" onclick="closeMobileMenu()">Syllabus</a>
+    </div>
+    <div class="mobile-lang-row">
+      <button class="lb on">EN</button>
+      <button class="lb">සිං</button>
+      <button class="lb">தமிழ்</button>
+      <button class="login-btn" id="mobileLoginBtn" onclick="openAuth('signin');closeMobileMenu()">Login</button>
+    </div>
+  </div>
+
+  <!-- AUTH MODAL -->
+  <div class="auth-overlay" id="authOverlay" onclick="overlayClick(event)">
+    <div class="auth-modal">
+      <div class="am-head">
+        <span class="am-brand">Sri Vipassi Dhamma School</span>
+        <button class="am-close" onclick="closeAuth()">✕</button>
+      </div>
+      <div class="am-tabs">
+        <button class="am-tab on" id="tabSI" onclick="switchTab('si')">Sign In</button>
+        <button class="am-tab" id="tabSU" onclick="switchTab('su')">Sign Up</button>
+      </div>
+      <div class="am-body" id="panSI">
+        <div class="am-field"><label class="am-label">Email</label><input class="am-input" id="siEmail" type="email" placeholder="you@email.com" autocomplete="email"></div>
+        <div class="am-field"><label class="am-label">Password</label><input class="am-input" id="siPass" type="password" placeholder="Password" autocomplete="current-password"></div>
+        <div class="am-forgot"><a href="#" onclick="forgotPw();return false">Forgot password?</a></div>
+        <button class="am-btn" id="siBtn" onclick="doSignIn()">Sign In</button>
+        <div class="am-err" id="siErr"></div>
+        <div class="am-div"><span>or continue with</span></div>
+        <div class="am-socials">
+          <button class="am-soc google" onclick="doGoogle()">
+            <svg width="15" height="15" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+            Continue with Google
+          </button>
+        </div>
+      </div>
+      <div class="am-body" id="panSU" style="display:none">
+        <div class="am-field"><label class="am-label">Full Name</label><input class="am-input" id="suName" type="text" placeholder="Your name" autocomplete="name"></div>
+        <div class="am-field"><label class="am-label">Email</label><input class="am-input" id="suEmail" type="email" placeholder="you@email.com" autocomplete="email"></div>
+        <div class="am-field"><label class="am-label">Password</label><input class="am-input" id="suPass" type="password" placeholder="Min. 6 characters" autocomplete="new-password"></div>
+        <div class="am-field"><label class="am-label">Confirm Password</label><input class="am-input" id="suConf" type="password" placeholder="Repeat password" autocomplete="new-password"></div>
+        <button class="am-btn" id="suBtn" onclick="doSignUp()">Create Account</button>
+        <div class="am-err" id="suErr"></div>
+        <div class="am-div"><span>or sign up with</span></div>
+        <div class="am-socials">
+          <button class="am-soc google" onclick="doGoogle()"><svg width="15" height="15" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>Continue with Google</button>
+        </div>
+      </div>
+      <div class="am-body am-loggedin" id="panLI" style="display:none">
+        <div class="am-avatar" id="lgAvatar">☸</div>
+        <div class="am-lg-name" id="lgName">Welcome!</div>
+        <div class="am-lg-email" id="lgEmail"></div>
+        <button class="am-btn" onclick="doSignOut()">Sign Out</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== HERO TITLE ===== -->
+  <section class="hero-title">
+    <h1>අපගේ ජයග්‍රහණ</h1>
+  </section>
+
+  <!-- ===== 3D GAME PATH SECTION ===== -->
+  <section class="path-section">
+    <div class="path-stage" id="pathStage">
+
+      <!-- SVG winding road drawn behind the nodes (viewBox set dynamically by JS) -->
+      <svg class="path-road-wrap" id="pathRoad" viewBox="0 0 1100 400" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <defs>
+          <filter id="roadGlow" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur stdDeviation="3" result="blur"/>
+            <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+          </filter>
+        </defs>
+        <!-- Road paths (rendered dynamically by JS based on node positions) -->
+        <path id="roadShadow" fill="none" stroke="rgba(0,0,0,0.5)" stroke-width="22" stroke-linecap="round" filter="url(#roadGlow)"/>
+        <path id="roadMain"   fill="none" stroke="#1a0a0a" stroke-width="16" stroke-linecap="round"/>
+        <path id="roadRed"    fill="none" stroke="#8b1010" stroke-width="10" stroke-linecap="round"/>
+        <path id="roadDash"   fill="none" stroke="rgba(200,100,100,0.35)" stroke-width="4" stroke-linecap="round" stroke-dasharray="2,8"/>
+      </svg>
+
+      <!-- Nodes container (built dynamically) -->
+      <div class="path-nodes" id="pathNodes"></div>
+
+    </div>
+  </section>
+
+  <!-- ===== PASSWORD MODAL ===== -->
+  <div class="modal-overlay" id="pwdModal">
+    <div class="modal-card pwd-card">
+      <button class="modal-close" id="pwdClose" aria-label="Close">&times;</button>
+      <div class="pwd-icon">🔒</div>
+      <h3 class="pwd-title">Admin Access Required</h3>
+      <p class="pwd-sub">Enter the password to make changes.</p>
+      <form id="pwdForm" class="pwd-form">
+        <input type="password" id="pwdInput" class="pwd-input" placeholder="Enter password" autocomplete="off" />
+        <div class="pwd-error" id="pwdError">Incorrect password. Please try again.</div>
+        <div class="pwd-actions">
+          <button type="button" class="btn-secondary" id="pwdCancel">Cancel</button>
+          <button type="submit" class="btn-primary">Unlock</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===== UPLOAD MODAL ===== -->
+  <div class="modal-overlay" id="uploadModal">
+    <div class="modal-card pwd-card">
+      <button class="modal-close" id="uploadClose" aria-label="Close">&times;</button>
+      <h3 class="pwd-title">Add Achievement</h3>
+      <p class="pwd-sub">Upload a photo and enter the student's details.</p>
+      <form id="uploadForm" class="pwd-form">
+        <label class="upload-zone" id="uploadZone">
+          <input type="file" id="photoInput" accept="image/*" hidden />
+          <div id="uploadPlaceholder">
+            <div class="upload-icon">📷</div>
+            <div>Click to select a photo</div>
+          </div>
+          <img id="uploadPreview" style="display:none;" alt="Preview"/>
+        </label>
+        <input type="text" id="nameInput" class="pwd-input" placeholder="Student name (e.g. නිමල් පෙරේරා)" />
+        <input type="text" id="placeInput" class="pwd-input" placeholder="Place / Achievement (e.g. 1st, Best Speech)" />
+        <input type="text" id="gradeInput" class="pwd-input" placeholder="Current school grade (e.g. Grade 8)" />
+        <div class="upload-status" id="uploadStatus"></div>
+        <div class="pwd-actions">
+          <button type="button" class="btn-secondary" id="uploadCancel">Cancel</button>
+          <button type="submit" class="btn-primary" id="uploadSubmit">Add Card</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===== ACHIEVEMENT MODAL ===== -->
+  <div class="modal-overlay" id="achModal">
+    <div class="modal-card">
+      <button class="modal-close" id="modalClose" aria-label="Close">&times;</button>
+      <div class="modal-header">
+        <button type="button" class="add-category-btn" id="addCategoryBtn" title="Add another achievement category">
+          <span class="plus-icon-sm">+</span>
+          <span>Add Category</span>
+        </button>
+        <div class="modal-year" id="modalYear">2022</div>
+      </div>
+
+      <!-- Top category tab bar -->
+      <div class="category-tabs hidden" id="categoryTabs"></div>
+
+      <!-- Categories pager (one page per category) -->
+      <div id="categoriesPager">
+        <!-- Default page (සිසු නිපුණතා) -->
+        <div class="category-page active" data-cat-key="default">
+          <div class="category-header">
+            <div class="category-title">සිසු නිපුණතා</div>
+          </div>
+          <div class="ach-section">
+            <div class="student-grid" id="studentGrid"></div>
+            <div class="empty-state" id="emptyState">
+              <p>No achievements added yet for this year.</p>
+              <p class="empty-hint">Click the <strong>+ Add Photo</strong> tile to upload one.</p>
+            </div>
+          </div>
+        </div>
+        <!-- Custom category pages inserted here -->
+      </div>
+
+      <!-- Pagination nav -->
+      <div class="category-nav hidden" id="categoryNav">
+        <button class="cat-arrow" id="catPrev" type="button" aria-label="Previous category">‹</button>
+        <div class="cat-dots" id="catDots"></div>
+        <div class="cat-page-label" id="catPageLabel">Page 1 of 1</div>
+        <button class="cat-arrow" id="catNext" type="button" aria-label="Next category">›</button>
+      </div>
+
+      <div class="place-block" id="placeBlock">
+        <div class="place-header">
+          <div class="place-label">Horana Division — Dhamma School Place</div>
+          <button type="button" class="place-add-btn" id="placeAddBtn" title="Set Dhamma school place">
+            <span class="plus-icon-sm">+</span>
+            <span>Set Place</span>
+          </button>
+        </div>
+        <div class="place-value" id="placeValue">
+          <span class="place-empty">Not yet recorded for this year</span>
+        </div>
+      </div>
+      <div class="modal-summary" id="modalSummary">Year — 0 achievements recorded</div>
+    </div>
+  </div>
+
+  <!-- ===== ADD CATEGORY MODAL ===== -->
+  <div class="modal-overlay" id="categoryModal">
+    <div class="modal-card pwd-card">
+      <button class="modal-close" id="categoryClose" aria-label="Close">&times;</button>
+      <div class="pwd-icon">🏷️</div>
+      <h3 class="pwd-title">Add New Category</h3>
+      <p class="pwd-sub">Create a new achievement category for <span id="categoryYearLabel">this year</span> (e.g. ක්‍රීඩා, දහම් විභාග, නායකත්වය).</p>
+      <form id="categoryForm" class="pwd-form">
+        <input type="text" id="categoryNameInput" class="pwd-input" placeholder="Category name (e.g. ක්‍රීඩා / Sports)" />
+        <div class="pwd-error" id="categoryError">A category with this name already exists.</div>
+        <div class="pwd-actions">
+          <button type="button" class="btn-secondary" id="categoryCancel">Cancel</button>
+          <button type="submit" class="btn-primary">Add Category</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===== PLACE INPUT MODAL ===== -->
+  <div class="modal-overlay" id="placeModal">
+    <div class="modal-card pwd-card">
+      <button class="modal-close" id="placeClose" aria-label="Close">&times;</button>
+      <div class="pwd-icon">🏆</div>
+      <h3 class="pwd-title">Dhamma School Place</h3>
+      <p class="pwd-sub">Enter the school's ranking in the Horana Division for <span id="placeYearLabel">this year</span>.</p>
+      <form id="placeForm" class="pwd-form">
+        <input type="text" id="placeNumInput" class="pwd-input" placeholder="e.g. 1, 2, 3 or 1st" />
+        <input type="text" id="placeNoteInput" class="pwd-input" placeholder="Optional note (e.g. Provincial Champions)" />
+        <div class="pwd-actions">
+          <button type="button" class="btn-secondary" id="placeCancel">Cancel</button>
+          <button type="submit" class="btn-primary">Save Place</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===== ADD YEAR MODAL ===== -->
+  <div class="modal-overlay" id="yearModal">
+    <div class="modal-card pwd-card">
+      <button class="modal-close" id="yearClose" aria-label="Close">&times;</button>
+      <div class="pwd-icon">📅</div>
+      <h3 class="pwd-title">Add a New Year</h3>
+      <p class="pwd-sub">Enter a year to add a new platform to the path.</p>
+      <form id="yearForm" class="pwd-form">
+        <input type="number" id="yearInput" class="pwd-input" placeholder="e.g. 2028" min="2000" max="2100" />
+        <div class="pwd-error" id="yearError">Year already exists or is invalid.</div>
+        <div class="pwd-actions">
+          <button type="button" class="btn-secondary" id="yearCancel">Cancel</button>
+          <button type="submit" class="btn-primary">Add to Path</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===== FOOTER ===== -->
+  <div class="footer-wrap">
+    <div class="footer-top">
+      <div class="brand-col footer-col">
+        <div class="brand-name">Sri Vipassi Dhamma School</div>
+        <div class="brand-pali">Kande Viharaya · Horana</div>
+        <p>Nurturing wisdom, compassion, and the noble Dhamma — guiding Sri Lanka toward a virtuous society.</p>
+        <div class="social-row">
+          <a class="soc-btn" title="Facebook" href="https://web.facebook.com/srivipassi/?_rdc=1&_rdr#"><svg viewBox="0 0 24 24"><path d="M22 12c0-5.52-4.48-10-10-10S2 6.48 2 12c0 4.84 3.44 8.87 8 9.8V15H8v-3h2V9.5C10 7.57 11.57 6 13.5 6H16v3h-2c-.55 0-1 .45-1 1v2h3v3h-3v6.95c5.05-.5 9-4.76 9-9.95z"/></svg></a>
+          <a class="soc-btn" title="YouTube" href="#"><svg viewBox="0 0 24 24"><path d="M23.5 6.2c-.3-1-1.1-1.8-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6c-1 .3-1.8 1.1-2.1 2.1C0 8.1 0 12 0 12s0 3.9.5 5.8c.3 1 1.1 1.8 2.1 2.1 1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6c1-.3 1.8-1.1 2.1-2.1.5-1.9.5-5.8.5-5.8s0-3.9-.5-5.8zM9.6 15.6V8.4l6.3 3.6-6.3 3.6z"/></svg></a>
+          <a class="soc-btn" title="WhatsApp" href="#"><svg viewBox="0 0 24 24"><path d="M17.5 14.4c-.3-.1-1.7-.8-2-.9-.3-.1-.5-.1-.7.1-.2.3-.7.9-.9 1.1-.2.2-.3.2-.6.1-.9-.4-1.7-.9-2.5-1.7-.7-.7-1.2-1.5-1.7-2.4-.1-.3 0-.4.1-.6.1-.1.3-.3.4-.5.1-.2.2-.3.3-.5.1-.2 0-.4 0-.5-.1-.1-.7-1.6-.9-2.2-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-1 1-1.6 2.4-1.6 3.9.1 1.7.9 3.3 1.6 4.4 1.4 2.1 3.1 3.7 5.4 4.6 1 .4 1.8.7 2.4.9.7.2 1.4.2 2 .1.6-.1 1.7-.7 1.9-1.4.2-.7.2-1.3.2-1.4-.1-.1-.3-.2-.6-.4l.3.1zM12 2C6.5 2 2 6.5 2 12c0 1.7.5 3.4 1.3 4.9L2 22l5.3-1.4c1.4.8 3 1.2 4.7 1.2 5.5 0 10-4.5 10-10S17.5 2 12 2z"/></svg></a>
+          <a class="soc-btn" title="Instagram" href="#"><svg viewBox="0 0 24 24"><path d="M12 2.16c3.2 0 3.58 0 4.85.07 3.25.15 4.77 1.69 4.92 4.92.06 1.27.07 1.65.07 4.85s0 3.58-.07 4.85c-.15 3.23-1.66 4.77-4.92 4.92-1.27.06-1.64.07-4.85.07s-3.58 0-4.85-.07c-3.26-.15-4.77-1.7-4.92-4.92-.06-1.27-.07-1.64-.07-4.85s0-3.58.07-4.85C2.5 3.92 4.01 2.38 7.15 2.23 8.42 2.18 8.8 2.16 12 2.16zM12 0C8.74 0 8.33.01 7.05.07 2.7.27.27 2.69.07 7.05.01 8.33 0 8.74 0 12s.01 3.67.07 4.95c.2 4.36 2.62 6.78 6.98 6.98C8.33 23.99 8.74 24 12 24s3.67-.01 4.95-.07c4.35-.2 6.78-2.62 6.98-6.98.06-1.28.07-1.69.07-4.95s-.01-3.67-.07-4.95c-.2-4.35-2.62-6.78-6.98-6.98C15.67.01 15.26 0 12 0zm0 5.84a6.16 6.16 0 100 12.32 6.16 6.16 0 000-12.32zm0 10.16a4 4 0 110-8 4 4 0 010 8zm6.41-11.85a1.44 1.44 0 100 2.88 1.44 1.44 0 000-2.88z"/></svg></a>
+        </div>
+      </div>
+      <div class="footer-col">
+        <h4>Quick Links</h4>
+        <ul>
+          <li><a href="index.html">Home</a></li>
+          <li><a href="About.html">About Us</a></li>
+          <li><a href="Daily Attendance.html">Daily Attendance</a></li>
+          <li><a href="galery.html">Gallery</a></li>
+          <li><a href="Subject.html">Syllabus</a></li>
+          <li><a href="achievements (2).html">Achievements</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Programs</h4>
+        <ul>
+          <li><a href="projects.html">Dhamma Projects</a></li>
+          <li><a href="#">Daily Quotes</a></li>
+          <li><a href="#">Welfare Unit</a></li>
+          <li><a href="#">Media Unit</a></li>
+          <li><a href="Contact.html">Contact Us</a></li>
+        </ul>
+      </div>
+      <div class="footer-col contact-col">
+        <h4>Contact</h4>
+        <div class="contact-item">
+          <div class="contact-icon"><svg viewBox="0 0 24 24"><path d="M12 2C7.58 2 4 5.58 4 10c0 5.25 7 12 8 12s8-6.75 8-12c0-4.42-3.58-8-8-8zm0 11a3 3 0 110-6 3 3 0 010 6z"/></svg></div>
+          <div class="contact-txt"><strong>Location</strong>Kananwila, Horana<br>Sri Lanka 12418</div>
+        </div>
+        <div class="contact-item">
+          <div class="contact-icon"><svg viewBox="0 0 24 24"><path d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56a.977.977 0 00-1.01.24l-1.57 1.97c-2.83-1.35-5.48-3.9-6.89-6.83l1.95-1.66c.27-.27.35-.65.24-1A11.36 11.36 0 018.62 4c0-.55-.45-1-1-1H4.19C3.65 3 3 3.24 3 4c0 9.16 7.83 17 17 17 .72 0 1-.63 1-1.18v-3.43c0-.55-.45-1-1-1z"/></svg></div>
+          <div class="contact-txt"><strong>Phone</strong>077 798 0889</div>
+        </div>
+        <div class="contact-item">
+          <div class="contact-icon"><svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg></div>
+          <div class="contact-txt"><strong>Email</strong>srivipassidhamma<br>school@gmail.com</div>
+        </div>
+      </div>
+    </div>
+    <div class="footer-divider"></div>
+    <div class="footer-bottom">
+      <div class="copy">© 2025 <span>Sri Vipassi Dhamma School</span> · All rights reserved</div>
+      <div class="links">
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Use</a>
+        <a href="#">Sitemap</a>
+      </div>
+    </div>
+    <div class="dhamma-strip">
+      <span>☸</span> Developing Wisdom Through Dhamma <span>☸</span> Sri Lanka <span>☸</span>
+    </div>
+  </div>
+
+  <!-- ===== MOBILE MENU JS ===== -->
+  <script>
+    
+    function toggleMobileMenu(){const s=document.getElementById('mobileSidebar'),o=document.getElementById('mobileOverlay'),h=document.querySelector('.hamburger');s.classList.toggle('open');o.classList.toggle('open');h.classList.toggle('open')}
+    function closeMobileMenu(){const s=document.getElementById('mobileSidebar'),o=document.getElementById('mobileOverlay'),h=document.querySelector('.hamburger');s.classList.remove('open');o.classList.remove('open');h.classList.remove('open')}
+  </script>
+
+  <!-- ===== FIREBASE AUTH ===== -->
+  <script>
+    const firebaseConfig={apiKey:"AIzaSyAWpPP3OevjIRAsoGIjOJTofV6l2jgyhNI",authDomain:"signin-f9656.firebaseapp.com",projectId:"signin-f9656",storageBucket:"signin-f9656.firebasestorage.app",messagingSenderId:"1074665165821",appId:"1:1074665165821:web:91ef329a0472fa138e7f94",measurementId:"G-SG9TZSLP6E"};
+    firebase.initializeApp(firebaseConfig);
+
+    // ============ Secondary Firebase app for the achievements RTDB ============
+    const ACHIEVEMENTS_CONFIG = {
+      apiKey: "AIzaSyDvM76YKHMynYhMEX-B6q1jmrjJn0JyXZE",
+      authDomain: "achievements-74236.firebaseapp.com",
+      databaseURL: "https://achievements-74236-default-rtdb.firebaseio.com",
+      projectId: "achievements-74236",
+      storageBucket: "achievements-74236.firebasestorage.app",
+      messagingSenderId: "188983548531",
+      appId: "1:188983548531:web:d976dc7d3f63cfe33f2806"
+    };
+    const achievementsApp = firebase.initializeApp(ACHIEVEMENTS_CONFIG, "achievements");
+    const achievementsDb  = achievementsApp.database();
+    const auth=firebase.auth();const db=firebase.firestore();
+    const providers={google:new firebase.auth.GoogleAuthProvider()};
+    providers.google.addScope('email');providers.google.addScope('profile');
+
+    async function saveUser(user,extra={}){try{const ref=db.collection("users").doc(user.uid);const snap=await ref.get();if(!snap.exists){await ref.set({uid:user.uid,email:user.email||"",displayName:user.displayName||extra.name||"",photoURL:user.photoURL||"",role:"student",createdAt:firebase.firestore.FieldValue.serverTimestamp(),...extra})}}catch(e){console.warn("Firestore save:",e.message)}}
+
+    auth.onAuthStateChanged(u=>{const btn=document.getElementById("loginBtn");if(!btn)return;if(u){const first=(u.displayName||u.email||"User").split(/[ @]/)[0];btn.textContent=first;btn.classList.add("logged-in");const av=document.getElementById("lgAvatar");if(av){if(u.photoURL){av.innerHTML=`<img src="${u.photoURL}" style="width:100%;height:100%;border-radius:50%;object-fit:cover">`}else{av.textContent=first.charAt(0).toUpperCase()}}const lgName=document.getElementById("lgName");const lgEmail=document.getElementById("lgEmail");if(lgName)lgName.textContent="Welcome, "+(u.displayName||u.email);if(lgEmail)lgEmail.textContent=u.email||""}else{btn.textContent="Login";btn.classList.remove("logged-in")}});
+
+    function openAuth(tab){document.getElementById("authOverlay").classList.add("open");if(auth.currentUser){showPan("panLI");return}switchTab(tab||"si")}
+    function closeAuth(){document.getElementById("authOverlay").classList.remove("open");clearErrs()}
+    function overlayClick(e){if(e.target===document.getElementById("authOverlay"))closeAuth()}
+    function switchTab(t){document.getElementById("tabSI").classList.toggle("on",t==="si");document.getElementById("tabSU").classList.toggle("on",t==="su");showPan(t==="si"?"panSI":"panSU")}
+    function showPan(id){["panSI","panSU","panLI"].forEach(p=>{document.getElementById(p).style.display=p===id?"block":"none"})}
+    function clearErrs(){["siErr","suErr"].forEach(id=>{const el=document.getElementById(id);if(el){el.textContent="";el.className="am-err"}})}
+    function errMsg(id,m){const el=document.getElementById(id);el.textContent=m;el.className="am-err"}
+    function okMsg(id,m){const el=document.getElementById(id);el.textContent=m;el.className="am-err am-ok"}
+    function fErr(c){return({"auth/user-not-found":"No account found with that email.","auth/wrong-password":"Incorrect password.","auth/invalid-credential":"Invalid email or password.","auth/email-already-in-use":"Email already registered — try Sign In.","auth/invalid-email":"Please enter a valid email.","auth/weak-password":"Password must be at least 6 characters.","auth/popup-closed-by-user":"Sign-in popup was closed.","auth/popup-blocked":"Popup was blocked — please allow popups for this site.","auth/network-request-failed":"Network error. Check your connection.","auth/too-many-requests":"Too many attempts — try again later.","auth/account-exists-with-different-credential":"An account already exists with this email using a different sign-in method.","auth/cancelled-popup-request":"Another popup is already open.","auth/operation-not-allowed":"This sign-in method is not enabled. Please contact the administrator.","auth/unauthorized-domain":"This domain is not authorized. Please open via a proper web server."})[c]||"Something went wrong. Please try again. ("+c+")"}
+
+    async function doSignIn(){const email=document.getElementById("siEmail").value.trim();const pass=document.getElementById("siPass").value;if(!email||!pass){errMsg("siErr","Please fill in all fields.");return}const btn=document.getElementById("siBtn");btn.disabled=true;try{await auth.signInWithEmailAndPassword(email,pass);showPan("panLI");setTimeout(closeAuth,1400)}catch(e){errMsg("siErr",fErr(e.code))}finally{btn.disabled=false}}
+    async function doSignUp(){const name=document.getElementById("suName").value.trim();const email=document.getElementById("suEmail").value.trim();const pass=document.getElementById("suPass").value;const conf=document.getElementById("suConf").value;if(!name||!email||!pass){errMsg("suErr","Please fill in all fields.");return}if(pass!==conf){errMsg("suErr","Passwords do not match.");return}if(pass.length<6){errMsg("suErr","Password must be at least 6 characters.");return}const btn=document.getElementById("suBtn");btn.disabled=true;try{const cred=await auth.createUserWithEmailAndPassword(email,pass);await cred.user.updateProfile({displayName:name});await saveUser(cred.user,{name});showPan("panLI");setTimeout(closeAuth,1400)}catch(e){errMsg("suErr",fErr(e.code))}finally{btn.disabled=false}}
+    async function doSocial(providerKey){clearErrs();const provider=providers[providerKey];if(!provider){errMsg("siErr","Provider not configured.");return}try{const result=await auth.signInWithPopup(provider);await saveUser(result.user);showPan("panLI");setTimeout(closeAuth,1400)}catch(e){const activeErr=document.getElementById("panSU").style.display==="block"?"suErr":"siErr";errMsg(activeErr,fErr(e.code));console.error("Social auth error:",e.code,e.message)}}
+    function doGoogle(){doSocial("google")}
+    async function doSignOut(){await auth.signOut();showPan("panSI");closeAuth()}
+    async function forgotPw(){const email=document.getElementById("siEmail").value.trim();if(!email){errMsg("siErr","Enter your email above first.");return}try{await auth.sendPasswordResetEmail(email);okMsg("siErr","Reset email sent — check your inbox.")}catch(e){errMsg("siErr",fErr(e.code))}}
+  </script>
+
+  <script>
+    async function deletePhotoFromDrive(fileId) {
+  if (!fileId) return; // no fileId stored, skip silently
+  try {
+    await fetch(DRIVE_UPLOAD_URL, {
+      method: 'POST',
+      body: JSON.stringify({
+        secret:  DRIVE_SECRET,
+        action:  'delete',
+        fileId:  fileId
+      })
+    });
+  } catch (err) {
+    console.warn('Drive delete failed (photo may remain in Drive):', err);
+  }
+}
+    /* ====== Configuration ====== */
+    const ADMIN_PASSWORD = 'vds';
+
+    // ⚠️ PASTE YOUR APPS SCRIPT WEB-APP URL BELOW
+    // (after deploying the Drive uploader — see Step 1 instructions)
+    const DRIVE_UPLOAD_URL = 'https://script.google.com/macros/s/AKfycbwDTE26NXSlxisSIUXkiSiidxL73PmhWjhDYQCj0wfjy2a9CDW8KEoeEqmlbYJ9nlp_/exec';
+    const DRIVE_SECRET     = 'Achievements'; // must match SHARED_SECRET in Apps Script
+
+    /* ====== Default seed years — used only if database is empty ====== */
+    const SEED_YEARS = {
+      "2022": { color: "maroon", isStart: true, custom: false, order: 1 },
+      "2023": { color: "purple", custom: false, order: 2 },
+      "2024": { color: "teal",   custom: false, order: 3 },
+      "2025": { color: "gold",   custom: false, order: 4 },
+      "2026": { color: "maroon", custom: false, order: 5 },
+      "2027": { color: "purple", custom: false, order: 6 }
+    };
+
+    /* ====== State (mirrors RTDB contents in memory) ====== */
+    let yearsMap   = {};   // { "2022": { color, isStart, custom, order }, ... }
+    let perYearMap = {};   // { "2022": { categories: {...}, place: {...} } }
+    let currentYear = null;
+    let currentCategory = 'default';
+    let isUnlocked = false;
+    let pendingAction = null;
+    let _initialLoad = true;
+
+    /* ====== RTDB references ====== */
+    const dbRoot     = achievementsDb.ref('achievements');
+    const yearsRef   = dbRoot.child('years');
+    const perYearRef = dbRoot.child('perYear');
+
+    /* ====== Data subscription (real-time) ====== */
+    function startDataSync() {
+      dbRoot.on('value', snap => {
+        const v = snap.val() || {};
+        yearsMap   = v.years   || {};
+        perYearMap = v.perYear || {};
+
+        // If database is empty, seed defaults (only once)
+        if (Object.keys(yearsMap).length === 0 && _initialLoad) {
+          _initialLoad = false;
+          seedDefaults();
+          return;
+        }
+        _initialLoad = false;
+
+        hideDataLoading();
+        renderPath();
+        if (currentYear && achModal.classList.contains('show')) {
+          renderYear(currentYear);
+        }
+      }, err => {
+        console.error('RTDB read failed:', err);
+        hideDataLoading();
+        alert('Could not load achievements from the database. Please check your internet connection and reload.');
+      });
+    }
+
+    function seedDefaults() {
+      // Use a transaction so concurrent loads don't double-seed
+      yearsRef.transaction(current => current || SEED_YEARS).catch(err => {
+        console.warn('Seed failed:', err);
+        hideDataLoading();
+      });
+    }
+
+    function hideDataLoading() {
+      const overlay = document.getElementById('dataLoading');
+      if (!overlay) return;
+      overlay.classList.add('hidden');
+      setTimeout(() => overlay.classList.add('gone'), 500);
+    }
+
+    /* ====== Year helpers ====== */
+    function getOrderedYears() {
+      return Object.keys(yearsMap)
+        .map(y => Object.assign({ year: y }, yearsMap[y]))
+        .sort((a, b) => {
+          const ao = a.order != null ? a.order : parseInt(a.year, 10);
+          const bo = b.order != null ? b.order : parseInt(b.year, 10);
+          return ao - bo;
+        });
+    }
+    function isCustomYear(year) {
+      return yearsMap[year] ? !!yearsMap[year].custom : false;
+    }
+
+    /* ====== Per-year data helpers ====== */
+    function getYearData(year) {
+      const rec = perYearMap[year] || {};
+      const categories = rec.categories || {};
+      // Default category exists implicitly (even if no items yet)
+      if (!categories.default) categories.default = {};
+      return {
+        categories: categories,
+        place: rec.place || null
+      };
+    }
+    // Convert RTDB-style {pushId: item} into ordered array
+    function categoryToArray(catObj) {
+      if (!catObj) return [];
+      return Object.keys(catObj)
+        .filter(k => k !== '_init') // skip placeholder used to keep empty categories alive
+        .map(k => Object.assign({ _key: k }, catObj[k]))
+        .filter(item => item && item.name) // skip non-item entries
+        .sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+    }
+
+    /* ====== Drive upload helper ====== */
+    async function uploadPhotoToDrive(file) {
+      if (!DRIVE_UPLOAD_URL || DRIVE_UPLOAD_URL.startsWith('PASTE')) {
+        throw new Error('Drive upload not configured. Paste your Apps Script URL into DRIVE_UPLOAD_URL.');
+      }
+      // Read file as base64
+      const base64 = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const dataUrl = reader.result;
+          const b64 = dataUrl.substring(dataUrl.indexOf(',') + 1);
+          resolve(b64);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+      // POST to Apps Script (text/plain avoids CORS preflight)
+      const res = await fetch(DRIVE_UPLOAD_URL, {
+        method: 'POST',
+        body: JSON.stringify({
+  secret:   DRIVE_SECRET,
+  data:     base64,
+  mimeType: file.type || 'image/jpeg',
+  filename: file.name || ('photo_' + Date.now() + '.jpg'),
+  year:     currentYear,       // ← add this line
+  category: currentCategory    // ← add this line
+})
+      });
+      const json = await res.json();
+      if (json.error) throw new Error(json.error);
+      if (!json.url) throw new Error('Upload succeeded but no URL was returned.');
+      return { url: json.url, fileId: json.fileId };
+    }
+
+    // Start subscription immediately
+    startDataSync();
+    window.addEventListener('resize', () => {
+      if (Object.keys(yearsMap).length > 0) renderPath();
+    });
+
+    /* ====== Element refs ====== */
+    const pathNodes     = document.getElementById('pathNodes');
+    const roadShadow    = document.getElementById('roadShadow');
+    const roadMain      = document.getElementById('roadMain');
+    const roadRed       = document.getElementById('roadRed');
+    const roadDash      = document.getElementById('roadDash');
+
+    const achModal      = document.getElementById('achModal');
+    const modalClose    = document.getElementById('modalClose');
+    const modalYear     = document.getElementById('modalYear');
+    const studentGrid   = document.getElementById('studentGrid');
+    const emptyState    = document.getElementById('emptyState');
+    const modalSummary  = document.getElementById('modalSummary');
+
+    const pwdModal  = document.getElementById('pwdModal');
+    const pwdClose  = document.getElementById('pwdClose');
+    const pwdCancel = document.getElementById('pwdCancel');
+    const pwdForm   = document.getElementById('pwdForm');
+    const pwdInput  = document.getElementById('pwdInput');
+    const pwdError  = document.getElementById('pwdError');
+
+    const uploadModal       = document.getElementById('uploadModal');
+    const uploadClose       = document.getElementById('uploadClose');
+    const uploadCancel      = document.getElementById('uploadCancel');
+    const uploadForm        = document.getElementById('uploadForm');
+    const photoInput        = document.getElementById('photoInput');
+    const uploadPreview     = document.getElementById('uploadPreview');
+    const uploadPlaceholder = document.getElementById('uploadPlaceholder');
+    const nameInput         = document.getElementById('nameInput');
+    const placeInput        = document.getElementById('placeInput');
+    const gradeInput        = document.getElementById('gradeInput');
+
+    const placeValue     = document.getElementById('placeValue');
+    const placeAddBtn    = document.getElementById('placeAddBtn');
+    const placeBlock     = document.getElementById('placeBlock');
+    const placeModal     = document.getElementById('placeModal');
+    const placeClose     = document.getElementById('placeClose');
+    const placeCancel    = document.getElementById('placeCancel');
+    const placeForm      = document.getElementById('placeForm');
+    const placeYearLabel = document.getElementById('placeYearLabel');
+    const placeNumInput  = document.getElementById('placeNumInput');
+    const placeNoteInput = document.getElementById('placeNoteInput');
+
+    const yearModal  = document.getElementById('yearModal');
+    const yearClose  = document.getElementById('yearClose');
+    const yearCancel = document.getElementById('yearCancel');
+    const yearForm   = document.getElementById('yearForm');
+    const yearInput  = document.getElementById('yearInput');
+    const yearError  = document.getElementById('yearError');
+
+    const customCategoriesEl = document.getElementById('categoriesPager');
+    const addCategoryBtn     = document.getElementById('addCategoryBtn');
+    const categoryModal      = document.getElementById('categoryModal');
+    const categoryClose      = document.getElementById('categoryClose');
+    const categoryCancel     = document.getElementById('categoryCancel');
+    const categoryForm       = document.getElementById('categoryForm');
+    const categoryNameInput  = document.getElementById('categoryNameInput');
+    const categoryError      = document.getElementById('categoryError');
+    const categoryYearLabel  = document.getElementById('categoryYearLabel');
+
+    // Pagination refs
+    const categoryNav   = document.getElementById('categoryNav');
+    const categoryTabs  = document.getElementById('categoryTabs');
+    const catPrev       = document.getElementById('catPrev');
+    const catNext       = document.getElementById('catNext');
+    const catDots       = document.getElementById('catDots');
+    const catPageLabel  = document.getElementById('catPageLabel');
+    const defaultPageEl = document.querySelector('[data-cat-key="default"]');
+    let currentCategoryPage = 0;
+
+    /* ====== Snake-path geometry ====== */
+    const PATH_SVG_WIDTH = 1600;
+    const NODE_MARGIN_X  = 140;
+    const NODE_SPAN_X    = PATH_SVG_WIDTH - 2 * NODE_MARGIN_X;
+
+    function getStageWidth() {
+      const stage = document.getElementById('pathStage');
+      if (!stage) return window.innerWidth;
+      return stage.clientWidth || stage.offsetWidth || window.innerWidth;
+    }
+
+    function getGeometry() {
+  const w = getStageWidth();
+  if (w <= 310)  return { firstY: 80,  rowH: 160, botPad: 100 };
+  if (w <= 420)  return { firstY: 90,  rowH: 180, botPad: 110 };
+  if (w <= 700)  return { firstY: 100, rowH: 200, botPad: 120 };
+  if (w <= 1000) return { firstY: 110, rowH: 220, botPad: 130 };
+  if (w <= 1400) return { firstY: 130, rowH: 260, botPad: 150 };
+  if (w <= 2000) return { firstY: 160, rowH: 320, botPad: 180 };
+  if (w <= 2600) return { firstY: 200, rowH: 400, botPad: 220 };
+  if (w <= 3200) return { firstY: 240, rowH: 480, botPad: 260 };
+  if (w <= 3480) return { firstY: 200, rowH: 180, botPad: 100 };
+  if (w <= 3840) return { firstY: 100, rowH: 180, botPad: 60 };
+  return { firstY: 340, rowH: 700, botPad: 400 };
+}
+
+    function getNodeMargin() {
+      const w = getStageWidth();
+      if (w <= 420) return 40;
+      if (w <= 700) return 60;
+      if (w <= 1000) return 90;
+      if (w <= 1400) return 110;
+      if (w <= 1800) return 130;
+      if (w <= 2400) return 150;
+      if (w <= 3200) return 180;
+      if (w <= 3840) return 200;
+      return 220;
+    }
+
+    function getRowNodes(totalSlots = 0) {
+      const w = getStageWidth();
+      if (w <= 310)  return 2;
+      if (w <= 420)  return 3;
+      if (w <= 700)  return 4;
+      if (w <= 1000) return 5;
+      if (w <= 1400) return 6;
+      if (totalSlots > 0) {
+        const ideal = Math.max(4, Math.ceil(totalSlots / 2));
+        if (w >= 2400) return Math.min(6, ideal);
+        if (w >= 1800) return Math.min(5, ideal);
+        return Math.min(6, ideal);
+      }
+      if (w <= 1800) return 6;
+      if (w <= 2400) return 7;
+      if (w <= 3200) return 8;
+      if (w <= 3840) return 9;
+      return 10;
+    }
+
+    function nodePos(i, totalSlots = 0) {
+      const RN = getRowNodes(totalSlots);
+      const NM = getNodeMargin();
+      const nodeSpan = PATH_SVG_WIDTH - 2 * NM;
+      const { firstY, rowH } = getGeometry();
+      const step = RN > 1 ? nodeSpan / (RN - 1) : nodeSpan;
+      const row      = Math.floor(i / RN);
+      const colInRow = i % RN;
+      const reverse  = (row % 2) === 1;
+      const col      = reverse ? (RN - 1 - colInRow) : colInRow;
+      return {
+        x: NM + col * step,
+        y: firstY + row * rowH
+      };
+    }
+
+    function calcSvgHeight(totalSlots) {
+      const RN = getRowNodes(totalSlots);
+      const { firstY, rowH, botPad } = getGeometry();
+      if (totalSlots <= 0) return firstY + botPad;
+      const rows = Math.ceil(totalSlots / RN);
+      return firstY + (rows - 1) * rowH + botPad;
+    }
+    function buildSnakePath(totalSlots) {
+      const RN = getRowNodes(totalSlots);
+      if (totalSlots < 2) return '';
+      const { rowH } = getGeometry();
+      const baseCurl = Math.min(60, Math.max(8, rowH * 0.03));
+      const curlAmt = Math.max(0, baseCurl - 10); // reduce bend height by 10px
+      let d = '';
+      for (let i = 0; i < totalSlots; i++) {
+        const p = nodePos(i, totalSlots);
+        if (i === 0) { d += `M ${p.x},${p.y}`; continue; }
+        const prev    = nodePos(i - 1, totalSlots);
+        const sameRow = Math.floor(i / RN) === Math.floor((i - 1) / RN);
+        if (sameRow) {
+          d += ` L ${p.x.toFixed(1)},${p.y.toFixed(1)}`;
+        } else {
+          const prevRowReverse = Math.floor((i - 1) / RN) % 2 === 1;
+          const curlSign = prevRowReverse ? -1 : 1;
+          const c1x = prev.x + curlSign * curlAmt;
+          const c1y = prev.y + (p.y - prev.y) * 0.35;
+          const c2x = p.x + curlSign * curlAmt;
+          const c2y = prev.y + (p.y - prev.y) * 0.75;
+          d += ` C ${c1x.toFixed(1)},${c1y.toFixed(1)} ${c2x.toFixed(1)},${c2y.toFixed(1)} ${p.x.toFixed(1)},${p.y.toFixed(1)}`;
+        }
+      }
+      return d;
+    }
+
+    /* ====== Build road into the SVG ====== */
+    function buildRoad(totalSlots) {
+      const d = buildSnakePath(totalSlots);
+      roadShadow.setAttribute('d', d);
+      roadMain.setAttribute('d', d);
+      roadRed.setAttribute('d', d);
+      roadDash.setAttribute('d', d);
+    }
+
+    /* ====== Build a single year node at a given SVG position ====== */
+    function buildNode(yearObj, svgPos, svgHeight, isCustom, animDelay) {
+      const node = document.createElement('div');
+      node.className = `path-node ${yearObj.color || 'purple'}${isCustom ? ' custom' : ''}`;
+      node.dataset.year = yearObj.year;
+      node.style.left = ((svgPos.x / PATH_SVG_WIDTH) * 100).toFixed(2) + '%';
+      node.style.top  = ((svgPos.y / svgHeight) * 100).toFixed(2) + '%';
+      node.style.setProperty('--delay', (animDelay * 2).toFixed(1) + 's');
+
+      const startBadgeHTML = yearObj.isStart
+        ? `<div class="start-badge">START HERE</div>` : '';
+      const deleteBtnHTML = isCustom
+        ? `<button class="node-delete" type="button" data-del-year="${yearObj.year}" title="Remove this year">×</button>` : '';
+
+      node.innerHTML = `
+        ${deleteBtnHTML}
+        <div class="node-badge">
+          <div class="yr">${yearObj.year}</div>
+          <div class="lbl">YEAR</div>
+        </div>
+        <div class="node-platform">
+          <div class="platform-top"></div>
+          <div class="platform-gem" style="--delay:${(animDelay*2).toFixed(1)}s"></div>
+          <div class="platform-side"></div>
+          <div class="platform-rim"></div>
+        </div>
+        ${startBadgeHTML}
+      `;
+
+      node.addEventListener('click', (e) => {
+        if (e.target.closest('.node-delete')) return;
+        openAchModal(yearObj.year);
+      });
+
+      return node;
+    }
+
+    /* ====== Build the + Add Year node at given SVG position ====== */
+    function buildAddYearNode(svgPos, svgHeight) {
+      const node = document.createElement('div');
+      node.className = 'add-year-node';
+      node.style.left = ((svgPos.x / PATH_SVG_WIDTH) * 100).toFixed(2) + '%';
+      node.style.top  = ((svgPos.y / svgHeight) * 100).toFixed(2) + '%';
+      node.innerHTML = `
+        <div class="add-year-badge">+</div>
+        <div class="add-year-label">Add Year</div>
+      `;
+      node.addEventListener('click', requestAddYear);
+      return node;
+    }
+
+    /* ====== Render the entire path ====== */
+    function renderPath() {
+      const allYears = getOrderedYears(); // [{ year, color, isStart, custom, order }, ...]
+      const totalSlots = allYears.length + 1;   // years + the trailing + node
+
+      // 1) Resize the stage and SVG to fit all nodes at full size
+      const svgHeight = calcSvgHeight(totalSlots);
+      pathRoad.setAttribute('viewBox', `0 0 ${PATH_SVG_WIDTH} ${svgHeight}`);
+      const pathStage = document.getElementById('pathStage');
+      if (pathStage) pathStage.style.aspectRatio = `${PATH_SVG_WIDTH} / ${svgHeight}`;
+
+      // 2) Draw the snake road
+      buildRoad(totalSlots);
+
+      // 3) Place each year node
+      pathNodes.innerHTML = '';
+      allYears.forEach((yObj, i) => {
+        const pos = nodePos(i, totalSlots);
+        const animDelay = (i / totalSlots);
+        pathNodes.appendChild(buildNode(yObj, pos, svgHeight, !!yObj.custom, animDelay));
+      });
+
+      // 4) Place the + Add Year node at the very end of the path
+      const addPos = nodePos(allYears.length, totalSlots);
+      pathNodes.appendChild(buildAddYearNode(addPos, svgHeight));
+
+      // 5) Wire delete buttons on custom year nodes
+      pathNodes.querySelectorAll('[data-del-year]').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          requestDeleteYear(btn.dataset.delYear);
+        });
+      });
+    }
+
+    function pickColorForYear(year) {
+      const palette = ['purple', 'teal', 'gold', 'maroon'];
+      const n = parseInt(year, 10) || 0;
+      return palette[n % palette.length];
+    }
+
+    /* ====== Achievement modal ====== */
+    function buildStudentCard(student, categoryKey, itemKey) {
+      const card = document.createElement('div');
+      card.className = 'student-card';
+      const photoSrc = student.photoUrl || student.photo; // photoUrl is new, photo kept for safety
+      const photoHTML = photoSrc
+        ? `<img src="${photoSrc}" alt="${student.name}" style="width:100%;aspect-ratio:1;object-fit:cover;border-bottom:1px solid rgba(245,200,74,0.3);" referrerpolicy="no-referrer">`
+        : `<div class="student-photo">${(student.name || '?').trim().charAt(0)}</div>`;
+      const gradeHTML = student.grade ? `<div class="student-grade">${student.grade}</div>` : '';
+      card.innerHTML = `
+        <button class="card-delete" type="button" title="Remove this achievement">×</button>
+        ${photoHTML}
+        <div class="student-info">
+          <div class="student-name">${student.name}</div>
+          <div class="student-rank">${student.rank}</div>
+          ${gradeHTML}
+        </div>
+      `;
+      const delBtn = card.querySelector('.card-delete');
+      delBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        requestDeleteStudent(categoryKey, itemKey, student.name);
+      });
+      return card;
+    }
+    function buildAddCard(categoryName) {
+      const add = document.createElement('button');
+      add.className = 'add-card';
+      add.type = 'button';
+      add.innerHTML = `<div class="plus-icon">+</div><div class="add-lbl">Add Photo</div>`;
+      add.addEventListener('click', () => requestAdd(categoryName));
+      return add;
+    }
+
+    function buildCategorySection(categoryName, studentsList) {
+      const section = document.createElement('div');
+      section.className = 'category-section';
+      section.dataset.category = categoryName;
+
+      const header = document.createElement('div');
+      header.className = 'category-header';
+
+      const title = document.createElement('div');
+      title.className = 'category-title';
+      title.textContent = categoryName;
+
+      const delBtn = document.createElement('button');
+      delBtn.className = 'category-delete';
+      delBtn.type = 'button';
+      delBtn.title = 'Remove this category';
+      delBtn.innerHTML = `<span class="del-x">×</span><span>Remove</span>`;
+      delBtn.addEventListener('click', () => requestDeleteCategory(categoryName));
+
+      header.appendChild(title);
+      header.appendChild(delBtn);
+      section.appendChild(header);
+
+      const grid = document.createElement('div');
+      grid.className = 'student-grid';
+      studentsList.forEach((s) => grid.appendChild(buildStudentCard(s, categoryName, s._key)));
+      grid.appendChild(buildAddCard(categoryName));
+      section.appendChild(grid);
+
+      return section;
+    }
+
+    function renderYear(year) {
+      const rec = getYearData(year);
+      const cats = rec.categories;
+
+      // ----- Default page (සිසු නිපුණතා) -----
+      const defaultList = categoryToArray(cats.default);
+      studentGrid.innerHTML = '';
+      defaultList.forEach((s) => studentGrid.appendChild(buildStudentCard(s, 'default', s._key)));
+      studentGrid.appendChild(buildAddCard('default'));
+      emptyState.classList.toggle('show', defaultList.length === 0);
+
+      // ----- Remove old custom pages, then rebuild -----
+      customCategoriesEl.querySelectorAll('.category-page:not([data-cat-key="default"])').forEach(el => el.remove());
+
+      let totalAchievements = defaultList.length;
+      const customCatNames = Object.keys(cats).filter(k => k !== 'default');
+      customCatNames.forEach(catName => {
+        const list = categoryToArray(cats[catName]);
+        totalAchievements += list.length;
+        const page = document.createElement('div');
+        page.className = 'category-page';
+        page.dataset.catKey = catName;
+        page.appendChild(buildCategorySection(catName, list));
+        customCategoriesEl.appendChild(page);
+      });
+
+      // ----- Pagination -----
+      const pageCount = 1 + customCatNames.length;
+      if (currentCategoryPage >= pageCount) currentCategoryPage = 0;
+      renderPagination(pageCount);
+
+      // ----- Summary -----
+      const customCount = customCatNames.length;
+      const catSummary = customCount ? `, ${customCount} extra categor${customCount === 1 ? 'y' : 'ies'}` : '';
+      modalSummary.textContent = `Year ${year} — ${totalAchievements} achievement${totalAchievements === 1 ? '' : 's'} recorded${catSummary}`;
+
+      // ----- Place block -----
+      if (rec.place && rec.place.num) {
+        const noteHTML = rec.place.note ? `<span class="place-note">${rec.place.note}</span>` : '';
+        placeValue.innerHTML = `<span class="place-num">${rec.place.num}</span> Place${noteHTML}`;
+      } else {
+        placeValue.innerHTML = `<span class="place-empty">Not yet recorded for this year</span>`;
+      }
+    }
+
+    function renderPagination(pageCount) {
+      const pages = customCategoriesEl.querySelectorAll('.category-page');
+      pages.forEach((p, i) => p.classList.toggle('active', i === currentCategoryPage));
+
+      // --- Build top tab bar ---
+      categoryTabs.innerHTML = '';
+      pages.forEach((p, i) => {
+        const key = p.dataset.catKey;
+        const tab = document.createElement('button');
+        tab.type = 'button';
+        tab.className = 'category-tab' + (i === currentCategoryPage ? ' active' : '');
+        const isDefault = key === 'default';
+        const icon = isDefault ? '☸' : '★';
+        const name = isDefault ? 'සිසු නිපුණතා' : key;
+        tab.innerHTML = `<span class="tab-icon">${icon}</span>${name}`;
+        tab.addEventListener('click', () => goToPage(i));
+        categoryTabs.appendChild(tab);
+      });
+      // Hide tab bar if only one category
+      categoryTabs.classList.toggle('hidden', pageCount <= 1);
+
+      // --- Build bottom dots ---
+      catDots.innerHTML = '';
+      for (let i = 0; i < pageCount; i++) {
+        const dot = document.createElement('button');
+        dot.type = 'button';
+        dot.className = 'cat-dot' + (i === currentCategoryPage ? ' active' : '');
+        dot.setAttribute('aria-label', `Go to page ${i + 1}`);
+        dot.addEventListener('click', () => goToPage(i));
+        catDots.appendChild(dot);
+      }
+
+      // --- Label & arrows ---
+      const activePage = pages[currentCategoryPage];
+      const catName = activePage ? activePage.dataset.catKey : '';
+      const displayName = catName === 'default' ? 'සිසු නිපුණතා' : catName;
+      catPageLabel.textContent = pageCount > 1
+        ? `${displayName}  ·  ${currentCategoryPage + 1} / ${pageCount}`
+        : displayName;
+
+      catPrev.disabled = currentCategoryPage === 0;
+      catNext.disabled = currentCategoryPage >= pageCount - 1;
+      categoryNav.classList.toggle('hidden', pageCount <= 1);
+
+      // Horana Division place block belongs to the default සිසු නිපුණතා page only
+      placeBlock.style.display = (currentCategoryPage === 0) ? '' : 'none';
+
+      // Scroll active tab into view
+      const activeTab = categoryTabs.querySelector('.category-tab.active');
+      if (activeTab && activeTab.scrollIntoView) {
+        activeTab.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+      }
+    }
+
+    function goToPage(i) {
+      const pages = customCategoriesEl.querySelectorAll('.category-page');
+      if (i < 0 || i >= pages.length) return;
+      currentCategoryPage = i;
+      renderPagination(pages.length);
+    }
+    function openAchModal(year) {
+      currentYear = year;
+      currentCategoryPage = 0;
+      modalYear.textContent = year;
+      renderYear(year);
+      achModal.classList.add('show');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeAchModal() { achModal.classList.remove('show'); document.body.style.overflow = ''; }
+
+    /* ====== Password gate ====== */
+    function requestAdd(categoryName)  { pendingAction = { type: 'addStudent', category: categoryName || 'default' }; gateAction(); }
+    function requestAddPlace()         { pendingAction = 'addPlace';   gateAction(); }
+    function requestAddYear()          { pendingAction = 'addYear';    gateAction(); }
+    function requestDeleteYear(year)   { pendingAction = { type: 'deleteYear', year }; gateAction(true); }
+    function requestAddCategory()      { pendingAction = 'addCategory'; gateAction(); }
+    function requestDeleteCategory(name) { pendingAction = { type: 'deleteCategory', name }; gateAction(true); }
+    function requestDeleteStudent(categoryKey, itemKey, studentName) {
+      pendingAction = { type: 'deleteStudent', categoryKey, itemKey, studentName };
+      gateAction(true);
+    }
+
+    function gateAction(forceFresh) {
+      // forceFresh: destructive deletes always re-prompt the password
+      if (isUnlocked && !forceFresh) { runPendingAction(); }
+      else {
+        pwdError.classList.remove('show');
+        pwdInput.value = '';
+        // Update modal subtitle so user knows why password is being asked again
+        const sub = pwdModal.querySelector('.pwd-sub');
+        if (sub) {
+          sub.textContent = forceFresh
+            ? 'This action permanently deletes data. Please confirm your password.'
+            : 'Enter the password to make changes.';
+        }
+        pwdModal.classList.add('show');
+        setTimeout(() => pwdInput.focus(), 100);
+      }
+    }
+    function runPendingAction() {
+      if (pendingAction && pendingAction.type === 'addStudent') {
+        currentCategory = pendingAction.category || 'default';
+        openUploadModal();
+      }
+      else if (pendingAction === 'addPlace') openPlaceModal();
+      else if (pendingAction === 'addYear') openYearModal();
+      else if (pendingAction === 'addCategory') openCategoryModal();
+      else if (pendingAction && pendingAction.type === 'deleteYear') doDeleteYear(pendingAction.year);
+      else if (pendingAction && pendingAction.type === 'deleteCategory') doDeleteCategory(pendingAction.name);
+      else if (pendingAction && pendingAction.type === 'deleteStudent') {
+        doDeleteStudent(pendingAction.categoryKey, pendingAction.itemKey, pendingAction.studentName);
+      }
+    }
+
+    function closePwdModal() { pwdModal.classList.remove('show'); }
+    pwdForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      if (pwdInput.value === ADMIN_PASSWORD) {
+        isUnlocked = true; closePwdModal(); runPendingAction();
+      } else {
+        pwdError.classList.add('show'); pwdInput.value = ''; pwdInput.focus();
+      }
+    });
+    pwdClose.addEventListener('click', closePwdModal);
+    pwdCancel.addEventListener('click', closePwdModal);
+    pwdModal.addEventListener('click', (e) => { if (e.target === pwdModal) closePwdModal(); });
+
+    /* ====== Upload flow ====== */
+    function openUploadModal() {
+      uploadForm.reset();
+      uploadPreview.style.display = 'none'; uploadPreview.src = '';
+      uploadPlaceholder.style.display = '';
+      uploadModal.classList.add('show');
+    }
+    function closeUploadModal() { uploadModal.classList.remove('show'); }
+    photoInput.addEventListener('change', (e) => {
+      const file = e.target.files[0]; if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        uploadPreview.src = ev.target.result;
+        uploadPreview.style.display = 'block';
+        uploadPlaceholder.style.display = 'none';
+      };
+      reader.readAsDataURL(file);
+    });
+    uploadForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name  = nameInput.value.trim();
+      const place = placeInput.value.trim();
+      const grade = gradeInput.value.trim();
+      const file  = photoInput.files[0];
+      const statusEl = document.getElementById('uploadStatus');
+      const submitBtn = document.getElementById('uploadSubmit');
+
+      if (!name || !place || !grade) { alert('Please fill in name, place, and grade.'); return; }
+      if (!file) { alert('Please select a photo for the student.'); return; }
+
+      const catKey = currentCategory || 'default';
+      submitBtn.disabled = true;
+      statusEl.classList.remove('error');
+      statusEl.textContent = 'Uploading photo to Google Drive…';
+
+      try {
+        const { url: photoUrl, fileId } = await uploadPhotoToDrive(file);
+
+        statusEl.textContent = 'Saving to database…';
+        // Find this section and update the entry object:
+const entry = {
+  name: name,
+  rank: place,
+  grade: grade,
+  photoUrl: photoUrl,
+  fileId: fileId,        // ← ADD THIS LINE
+  createdAt: firebase.database.ServerValue.TIMESTAMP
+};
+        await perYearRef.child(currentYear).child('categories').child(catKey).push(entry);
+
+        statusEl.textContent = '';
+        closeUploadModal();
+        // Re-render happens automatically via the real-time listener
+      } catch (err) {
+        console.error(err);
+        statusEl.classList.add('error');
+        statusEl.textContent = 'Failed: ' + err.message;
+      } finally {
+        submitBtn.disabled = false;
+      }
+    });
+    uploadClose.addEventListener('click', closeUploadModal);
+    uploadCancel.addEventListener('click', closeUploadModal);
+    uploadModal.addEventListener('click', (e) => { if (e.target === uploadModal) closeUploadModal(); });
+
+    /* ====== Place flow ====== */
+    function openPlaceModal() {
+      const rec = getYearData(currentYear);
+      placeYearLabel.textContent = currentYear;
+      placeNumInput.value  = rec.place ? (rec.place.num || '') : '';
+      placeNoteInput.value = rec.place ? (rec.place.note || '') : '';
+      placeModal.classList.add('show');
+      setTimeout(() => placeNumInput.focus(), 100);
+    }
+    function closePlaceModal() { placeModal.classList.remove('show'); }
+    placeForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const num  = placeNumInput.value.trim();
+      const note = placeNoteInput.value.trim();
+      if (!num) { alert('Please enter the place number.'); return; }
+      try {
+        await perYearRef.child(currentYear).child('place').set({ num, note });
+        closePlaceModal();
+      } catch (err) {
+        alert('Could not save place: ' + err.message);
+      }
+    });
+    placeAddBtn.addEventListener('click', requestAddPlace);
+    placeClose.addEventListener('click', closePlaceModal);
+    placeCancel.addEventListener('click', closePlaceModal);
+    placeModal.addEventListener('click', (e) => { if (e.target === placeModal) closePlaceModal(); });
+
+    /* ====== Add year flow ====== */
+    function openYearModal() {
+      yearForm.reset();
+      yearError.classList.remove('show');
+      yearModal.classList.add('show');
+      setTimeout(() => yearInput.focus(), 100);
+    }
+    function closeYearModal() { yearModal.classList.remove('show'); }
+    yearForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const yr = yearInput.value.trim();
+      const yrNum = parseInt(yr, 10);
+      if (!yr || isNaN(yrNum) || yrNum < 2000 || yrNum > 2100) {
+        yearError.textContent = 'Please enter a valid year (2000–2100).';
+        yearError.classList.add('show');
+        return;
+      }
+      if (yearsMap[yr]) {
+        yearError.textContent = `Year ${yr} is already on the path.`;
+        yearError.classList.add('show');
+        return;
+      }
+      // Calculate next order (largest existing + 1)
+      const maxOrder = Object.values(yearsMap).reduce((m, y) => Math.max(m, y.order || 0), 0);
+      try {
+        await yearsRef.child(yr).set({
+          color: pickColorForYear(yr),
+          custom: true,
+          order: maxOrder + 1
+        });
+        closeYearModal();
+      } catch (err) {
+        yearError.textContent = 'Could not add year: ' + err.message;
+        yearError.classList.add('show');
+      }
+    });
+    yearClose.addEventListener('click', closeYearModal);
+    yearCancel.addEventListener('click', closeYearModal);
+    yearModal.addEventListener('click', (e) => { if (e.target === yearModal) closeYearModal(); });
+
+    /* ====== Delete year flow ====== */
+    function doDeleteYear(year) {
+      if (!confirm(`Remove ${year} from the path?\n(Any achievements saved for this year will also be deleted.)`)) return;
+      Promise.all([
+        yearsRef.child(year).remove(),
+        perYearRef.child(year).remove()
+      ]).catch(err => alert('Could not delete year: ' + err.message));
+    }
+
+    /* ====== Add category flow ====== */
+    function openCategoryModal() {
+      categoryForm.reset();
+      categoryError.classList.remove('show');
+      categoryYearLabel.textContent = currentYear || 'this year';
+      categoryModal.classList.add('show');
+      setTimeout(() => categoryNameInput.focus(), 100);
+    }
+    function closeCategoryModal() { categoryModal.classList.remove('show'); }
+    categoryForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = categoryNameInput.value.trim();
+      if (!name) {
+        categoryError.textContent = 'Please enter a category name.';
+        categoryError.classList.add('show');
+        return;
+      }
+      if (name.toLowerCase() === 'default' || name === 'සිසු නිපුණතා') {
+        categoryError.textContent = 'That name is reserved.';
+        categoryError.classList.add('show');
+        return;
+      }
+      // RTDB keys can't contain . $ # [ ] /
+      if (/[.\$#\[\]\/]/.test(name)) {
+        categoryError.textContent = 'Category name cannot contain . $ # [ ] /';
+        categoryError.classList.add('show');
+        return;
+      }
+      const rec = getYearData(currentYear);
+      if (rec.categories[name]) {
+        categoryError.textContent = `A category called "${name}" already exists for this year.`;
+        categoryError.classList.add('show');
+        return;
+      }
+      try {
+        // Write a tiny placeholder so RTDB persists the empty category node
+        await perYearRef.child(currentYear).child('categories').child(name).child('_init').set(true);
+        const customCount = Object.keys(rec.categories).filter(k => k !== 'default').length;
+        currentCategoryPage = customCount + 1; // jump to the new page once listener re-renders
+        closeCategoryModal();
+      } catch (err) {
+        categoryError.textContent = 'Could not add category: ' + err.message;
+        categoryError.classList.add('show');
+      }
+    });
+    addCategoryBtn.addEventListener('click', requestAddCategory);
+    categoryClose.addEventListener('click', closeCategoryModal);
+    categoryCancel.addEventListener('click', closeCategoryModal);
+    categoryModal.addEventListener('click', (e) => { if (e.target === categoryModal) closeCategoryModal(); });
+
+    /* ====== Delete category flow ====== */
+    function doDeleteCategory(name) {
+      if (!confirm(`Remove the "${name}" category from ${currentYear}?\n(All achievements in this category will be deleted.)`)) return;
+      perYearRef.child(currentYear).child('categories').child(name).remove()
+        .then(() => { currentCategoryPage = Math.max(0, currentCategoryPage - 1); })
+        .catch(err => alert('Could not delete category: ' + err.message));
+    }
+
+    /* ====== Delete single student card ====== */
+    function doDeleteStudent(categoryKey, itemKey, studentName) {
+  const label = studentName || 'this achievement';
+  if (!confirm(`Remove ${label} from ${currentYear}?`)) return;
+
+  // Get the fileId before deleting from Firebase
+  const catData = perYearMap[currentYear]?.categories?.[categoryKey];
+  const fileId  = catData?.[itemKey]?.fileId || null;
+
+  perYearRef.child(currentYear).child('categories').child(categoryKey).child(itemKey).remove()
+    .then(() => {
+      // Also delete from Google Drive
+      if (fileId) deletePhotoFromDrive(fileId);
+    })
+    .catch(err => alert('Could not delete: ' + err.message));
+}
+
+    /* ====== Bindings ====== */
+    modalClose.addEventListener('click', closeAchModal);
+    achModal.addEventListener('click', (e) => { if (e.target === achModal) closeAchModal(); });
+
+    // Pagination arrows
+    catPrev.addEventListener('click', () => goToPage(currentCategoryPage - 1));
+    catNext.addEventListener('click', () => goToPage(currentCategoryPage + 1));
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key !== 'Escape') return;
+      if (categoryModal.classList.contains('show')) closeCategoryModal();
+      else if (yearModal.classList.contains('show')) closeYearModal();
+      else if (placeModal.classList.contains('show')) closePlaceModal();
+      else if (uploadModal.classList.contains('show')) closeUploadModal();
+      else if (pwdModal.classList.contains('show')) closePwdModal();
+      else if (achModal.classList.contains('show')) closeAchModal();
+    });
+
+    /* ====== Initial render is triggered by the RTDB listener (startDataSync) ====== */
+  </script>
+</body>
+</html>
