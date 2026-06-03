@@ -15,7 +15,6 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Noto+Sans+Sinhala:wght@400;600;700&family=Cormorant+Garamond:wght@400;500;600&family=Lora:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
 <style>
-  
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   html { scroll-behavior: smooth; }
   body {
@@ -169,7 +168,7 @@
   /* ---------- HERO TITLE ---------- */
   .hero-title {
     text-align: center;
-    padding: 140px 20px 18px;
+    padding: 30px 20px 10px;
     background: linear-gradient(180deg, rgba(74,24,24,0.4) 0%, transparent 100%);
   }
   .hero-title h1 {
@@ -187,7 +186,7 @@
   /* ========== 3D GAME PATH SECTION ========== */
 .path-section {
   position: relative;
-  padding: 20px 16px 60px;
+  padding: 40px 16px 60px;
   overflow: hidden;
 }
 .path-section::before {
@@ -202,15 +201,10 @@
 }
 .path-stage {
   position: relative;
-  width: 100%;
+  width: min(100%, 1100px);
   max-width: 1100px;
   min-width: 320px;
   margin: 0 auto;
-}
-.path-section {
-  position: relative;
-  padding: 20px 16px 60px;
-  overflow: hidden;
 }
 .path-road-wrap {
   position: absolute;
@@ -254,16 +248,15 @@
   }
 }
 :root {
-  --path-node-scale: 1;
-  --node-size: clamp(80px, 6vw, 120px);
-  --node-yr:   clamp(18px, 1.2vw, 28px);
-  --node-lbl:  clamp(8px, 0.75vw, 12px);
+  --node-size: clamp(44px, 4.5vw, 72px);
+  --node-yr:   clamp(10px, 1.1vw, 16px);
+  --node-lbl:  clamp(5.5px, 0.65vw, 8px);
   --plat-w:    calc(var(--node-size) * 1.32);
   --plat-h:    calc(var(--node-size) * 0.56);
-  --gem-size:  clamp(12px, 1vw, 16px);
-  --add-size:  clamp(60px, 5vw, 100px);
-  --add-font:  clamp(1.6rem, 1.8vw, 3rem);
-  --add-lbl:   clamp(8px,  0.8vw, 12px);
+  --gem-size:  clamp(7px,  0.8vw,  11px);
+  --add-size:  clamp(40px, 4.2vw, 68px);
+  --add-font:  clamp(1.2rem, 1.4vw, 2.4rem);
+  --add-lbl:   clamp(6px,  0.7vw,  10px);
 }
 @media (max-width: 360px) {
   :root {
@@ -287,92 +280,85 @@
 
 @media (min-width: 768px) {
   :root {
-    --node-size: clamp(100px, 5.2vw, 160px);
-    --node-yr:   clamp(20px, 1.2vw, 30px);
-    --node-lbl:  clamp(9px, 0.7vw, 12px);
-    --add-size:  clamp(72px, 5vw, 100px);
-    --add-font:  clamp(1.6rem, 1.5vw, 3rem);
+    --node-size: clamp(56px, 4.8vw, 80px);
+    --node-yr:   clamp(12px, 1.1vw, 18px);
+    --node-lbl:  clamp(6.5px, 0.6vw, 9px);
+    --add-size:  clamp(52px, 4.5vw, 76px);
+    --add-font:  clamp(1.4rem, 1.3vw, 2.6rem);
   }
 }
 @media (min-width: 1440px) {
   :root {
-    --path-node-scale: 1.2;
-    --node-size: clamp(140px, 5vw, 220px);
-    --node-yr:   clamp(25px, 1.2vw, 34px);
-    --node-lbl:  clamp(12px, 0.7vw, 14px);
-    --gem-size:  clamp(14px,  0.75vw, 18px);
-    --add-size:  clamp(92px, 5vw, 120px);
-    --add-font:  clamp(2.2rem, 1.8vw, 3.8rem);
-    --add-lbl:   clamp(10px,  0.8vw, 14px);
+    --node-size: clamp(72px, 4.8vw, 96px);
+    --node-yr:   clamp(15px, 1.1vw, 20px);
+    --node-lbl:  clamp(7.5px, 0.6vw, 10px);
+    --gem-size:  clamp(9px,  0.75vw, 13px);
+    --add-size:  clamp(68px, 4.5vw, 92px);
+    --add-font:  clamp(1.8rem, 1.6vw, 2.8rem);
+    --add-lbl:   clamp(8px,  0.65vw, 11px);
   }
-  .path-section { padding: 60px 24px 90px; }
+  .path-section { padding: 70px 24px 90px; }
   .path-stage   { max-width: 1400px; }
   .hero-title h1 { font-size: clamp(3.5rem, 5vw, 5.5rem) !important; }
 }
 
 @media (min-width: 1920px) {
   :root {
-    --path-node-scale: 1.4;
-    --node-size: clamp(180px, 5vw, 300px);
-    --node-yr:   clamp(30px, 1.1vw, 40px);
-    --node-lbl:  clamp(12.5px, 0.65vw, 16px);
-    --gem-size:  clamp(16px, 0.72vw, 22px);
-    --add-size:  clamp(110px, 4.5vw, 150px);
-    --add-font:  clamp(2.8rem, 1.8vw, 4rem);
-    --add-lbl:   clamp(12px, 0.7vw, 16px);
+    --node-size: clamp(88px, 4.8vw, 116px);
+    --node-yr:   clamp(18px, 1.05vw, 24px);
+    --node-lbl:  clamp(8.5px, 0.6vw, 12px);
+    --gem-size:  clamp(11px, 0.72vw, 16px);
+    --add-size:  clamp(82px, 4.5vw, 110px);
+    --add-font:  clamp(2.2rem, 1.8vw, 3.2rem);
+    --add-lbl:   clamp(9.5px, 0.68vw, 13px);
   }
-  .path-section { padding: 70px 32px 120px; }
+  .path-section { padding: 90px 32px 120px; }
   .path-stage   { max-width: 1800px; }
   .hero-title h1 { font-size: clamp(4.5rem, 5.5vw, 7rem) !important; }
 }
 
 @media (min-width: 2560px) {
   :root {
-    --path-node-scale: 1.6;
-    --node-size: clamp(260px, 6vw, 380px);
-    --node-yr:   clamp(40px,  1.4vw,  60px);
-    --node-lbl:  clamp(18px,  0.8vw,  26px);
-    --gem-size:  clamp(22px,  1vw,    32px);
-    --add-size:  clamp(180px, 6vw,   260px);
-    --add-font:  clamp(3.5rem,  2.4vw,  6rem);
-    --add-lbl:   clamp(18px,  0.9vw,  28px);
+    --node-size: clamp(150px, 6.5vw, 220px);
+    --node-yr:   clamp(30px,  1.5vw,  44px);
+    --node-lbl:  clamp(14px,  0.8vw,  20px);
+    --gem-size:  clamp(18px,  1vw,    26px);
+    --add-size:  clamp(140px, 6vw,   208px);
+    --add-font:  clamp(3rem,  2.5vw,  5.5rem);
+    --add-lbl:   clamp(15px,  0.9vw,  22px);
   }
-  .path-section { padding: 90px 48px 140px; }
+  .path-section { padding: 150px 48px 200px; }
   .path-stage   { max-width: 2400px; }
   .hero-title h1 { font-size: clamp(6rem, 6vw, 10rem) !important; }
 }
 
 @media (min-width: 3440px) {
   :root {
-    --path-node-scale: 1.8;
-    --node-size: clamp(340px, 6vw, 520px);
-    --node-yr:   clamp(55px,  1.4vw,  80px);
-    --node-lbl:  clamp(24px,  0.75vw, 30px);
-    --gem-size:  clamp(30px,  0.9vw,  42px);
-    --add-size:  clamp(260px, 5.6vw, 360px);
-    --add-font:  clamp(5rem,  2.3vw,  8rem);
-    --add-lbl:   clamp(24px,  0.85vw, 36px);
+    --node-size: clamp(200px, 6vw,   280px);
+    --node-yr:   clamp(40px,  1.4vw,  56px);
+    --node-lbl:  clamp(18px,  0.75vw, 26px);
+    --gem-size:  clamp(24px,  0.9vw,  34px);
+    --add-size:  clamp(188px, 5.6vw, 264px);
+    --add-font:  clamp(4rem,  2.3vw,  7rem);
+    --add-lbl:   clamp(20px,  0.85vw, 30px);
   }
-  .path-section { padding: 60px 64px 160px; }
-  .path-stage   { max-width: 4200px; }
-  .hero-title { padding: 120px 20px 18px; }
+  .path-section { padding: 200px 64px 250px; }
+  .path-stage   { max-width: 3200px; }
   .hero-title h1 { font-size: clamp(8rem, 6.5vw, 13rem) !important; }
 }
 
 @media (min-width: 3840px) {
   :root {
-    --path-node-scale: 2.0;
-    --node-size: clamp(420px, 5.8vw, 720px);
-    --node-yr:   clamp(70px,  1.3vw, 100px);
-    --node-lbl:  clamp(28px,  0.7vw,  40px);
-    --gem-size:  clamp(36px,  0.85vw, 52px);
-    --add-size:  clamp(320px, 5.4vw, 420px);
-    --add-font:  clamp(6rem,  2.2vw, 10rem);
-    --add-lbl:   clamp(30px,  0.8vw,  46px);
+    --node-size: clamp(240px, 5.8vw, 340px);
+    --node-yr:   clamp(48px,  1.3vw,  68px);
+    --node-lbl:  clamp(22px,  0.7vw,  32px);
+    --gem-size:  clamp(28px,  0.85vw, 42px);
+    --add-size:  clamp(225px, 5.4vw, 320px);
+    --add-font:  clamp(5rem,  2.2vw,  9rem);
+    --add-lbl:   clamp(24px,  0.8vw,  36px);
   }
-  .path-section { padding: 80px 80px 180px; }
-  .path-stage   { max-width: 4800px; }
-  .hero-title { padding: 120px 20px 50px; }
+  .path-section { padding: 240px 80px 300px; }
+  .path-stage   { max-width: 4000px; }
   .hero-title h1 { font-size: clamp(10rem, 7vw, 16rem) !important; }
 }
 
@@ -383,12 +369,11 @@
   align-items: center;
   gap: 0;
   cursor: pointer;
-  transform-origin: center center;
-  transform: translate(-50%, -50%) scale(var(--path-node-scale, 1));
+  transform: translate(-50%, -50%);
   transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
   z-index: 3;
 }
-.path-node:hover { transform: translate(-50%, -58%) scale(var(--path-node-scale, 1)); z-index: 10; }
+.path-node:hover { transform: translate(-50%, -58%); z-index: 10; }
 
 .node-badge {
   width:  var(--node-size);
@@ -669,8 +654,8 @@
     border: 2px solid var(--gold-bright);
     pointer-events: none;
   }
-  .modal-card::before { top: 0; left: 0; border-right: none; border-bottom: none; border-radius: 8px 0 0 0; }
-  .modal-card::after { bottom: 0; right: 0; border-left: none; border-top: none; border-radius: 0 0 8px 0; }
+  .modal-card::before { top: 10px; left: 10px; border-right: none; border-bottom: none; border-radius: 8px 0 0 0; }
+  .modal-card::after { bottom: 10px; right: 10px; border-left: none; border-top: none; border-radius: 0 0 8px 0; }
 
   .modal-close {
     position: absolute;
@@ -1038,19 +1023,19 @@
     gap: 8px;
     color: var(--gold);
     font-family: 'Cinzel', serif;
-    font-size: 1rem;
+    font-size: 0.85rem;
     letter-spacing: 1px;
     cursor: pointer;
     transition: all 0.3s ease;
     min-height: 180px;
   }
   .add-card:hover { border-color: var(--gold-bright); background: linear-gradient(180deg, rgba(212,164,55,0.15) 0%, rgba(212,164,55,0.08) 100%); color: var(--gold-bright); transform: translateY(-3px); box-shadow: 0 8px 20px rgba(245,200,74,0.15); }
-  .add-card .plus-icon { font-size: 3rem; font-weight: 300; line-height: 1; }
-  .add-card .add-lbl { font-size: 1rem; text-transform: uppercase; }
+  .add-card .plus-icon { font-size: 2.4rem; font-weight: 300; line-height: 1; }
+  .add-card .add-lbl { font-size: 0.75rem; text-transform: uppercase; }
 
-  .empty-state { text-align: center; padding: 30px 20px; color: #a89770; font-family: 'Noto Sans Sinhala', sans-serif; display: none; font-size: 1rem; }
+  .empty-state { text-align: center; padding: 30px 20px; color: #a89770; font-family: 'Noto Sans Sinhala', sans-serif; display: none; }
   .empty-state.show { display: block; }
-  .empty-state .empty-hint { font-size: 1rem; margin-top: 6px; color: var(--gold-soft); }
+  .empty-state .empty-hint { font-size: 0.85rem; margin-top: 6px; color: var(--gold-soft); }
   .empty-state strong { color: var(--gold-bright); }
 
   .pwd-card { max-width: 460px !important; text-align: center; padding: 40px 35px 30px !important; }
@@ -1898,7 +1883,7 @@
       padding: 40px 24px 12px;
     }
     .hero-title h1 {
-      font-size: 5.2rem;
+      font-size: 4.6rem;
       letter-spacing: 3px;
     }
     
@@ -1907,7 +1892,7 @@
     }
     
     .path-stage {
-      max-width: 1400px;
+      max-width: 1200px;
     }
     
     .node-badge {
@@ -1915,10 +1900,10 @@
       height: 72px;
     }
     .node-badge .yr {
-      font-size: 18px;
+      font-size: 17px;
     }
     .node-badge .lbl {
-      font-size: 9px;
+      font-size: 8px;
     }
     
     .node-platform {
@@ -1929,10 +1914,10 @@
     .add-year-badge {
       width: 72px;
       height: 72px;
-      font-size: 2.6rem;
+      font-size: 2.4rem;
     }
     .add-year-label {
-      font-size: 11px;
+      font-size: 10px;
       padding: 4px 12px;
     }
     
@@ -1941,38 +1926,7 @@
     }
     
     .modal-year {
-      font-size: 3.6rem;
-    }
-    
-    .add-category-btn {
-      font-size: 0.95rem;
-      padding: 10px 16px;
-    }
-    .add-category-btn .plus-icon-sm {
-      font-size: 1.2rem;
-    }
-    .category-title {
-      font-size: 1.1rem;
-      padding-left: 10px;
-    }
-    .empty-state {
-      padding: 36px 24px;
-    }
-    .empty-state p {
-      font-size: 1rem;
-    }
-    .empty-state .empty-hint {
-      font-size: 1rem;
-    }
-    .add-card {
-      font-size: 1.15rem !important;
-      min-height: 220px;
-    }
-    .add-card .plus-icon {
-      font-size: 3.2rem !important;
-    }
-    .add-card .add-lbl {
-      font-size: 1.1rem !important;
+      font-size: 3.2rem;
     }
     
     .student-grid {
@@ -1983,136 +1937,15 @@
     .place-block {
       padding: 22px 24px;
     }
-    .place-label {
-      font-size: 1rem;
-    }
     .place-value {
-      font-size: 2.2rem;
+      font-size: 1.6rem;
     }
     .place-value .place-num {
-      font-size: 3rem;
-    }
-    .place-value .place-note {
-      font-size: 1.1rem;
-    }
-    .place-add-btn {
-      font-size: 0.95rem;
+      font-size: 2.2rem;
     }
     
     .pwd-card {
       max-width: 500px !important;
-    }
-  }
-
-  /* Large screens (1840px and above) */
-  @media (min-width: 1840px) {
-    .hero-title {
-      padding: 80px 24px 100px;
-    }
-    .hero-title h1 {
-      font-size: 5.8rem;
-      letter-spacing: 3px;
-    }
-    
-    .path-section {
-      padding: 80px 24px 100px;
-    }
-    
-    .path-stage {
-      max-width: 1400px;
-    }
-    
-    .node-badge {
-      width: 76px;
-      height: 76px;
-    }
-    .node-badge .yr {
-      font-size: 19px;
-    }
-    .node-badge .lbl {
-      font-size: 10px;
-    }
-    
-    .node-platform {
-      width: 102px;
-      height: 44px;
-    }
-    
-    .add-year-badge {
-      width: 76px;
-      height: 76px;
-      font-size: 2.8rem;
-    }
-    .add-year-label {
-      font-size: 12px;
-      padding: 4px 12px;
-    }
-    
-    .modal-card {
-      padding: 50px 40px 40px;
-    }
-    
-    .modal-year {
-      font-size: 4rem;
-    }
-    
-    .add-category-btn {
-      font-size: 1rem;
-      padding: 12px 18px;
-    }
-    .add-category-btn .plus-icon-sm {
-      font-size: 1.4rem;
-    }
-    .category-title {
-      font-size: 1.2rem;
-      padding-left: 12px;
-    }
-    .empty-state {
-      padding: 40px 28px;
-    }
-    .empty-state p {
-      font-size: 1.1rem;
-    }
-    .empty-state .empty-hint {
-      font-size: 1.1rem;
-    }
-    .add-card {
-      font-size: 1.25rem !important;
-      min-height: 240px;
-    }
-    .add-card .plus-icon {
-      font-size: 3.5rem !important;
-    }
-    .add-card .add-lbl {
-      font-size: 1.2rem !important;
-    }
-    
-    .student-grid {
-      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-      gap: 22px;
-    }
-    
-    .place-block {
-      padding: 24px 26px;
-    }
-    .place-label {
-      font-size: 1.1rem;
-    }
-    .place-value {
-      font-size: 2.6rem;
-    }
-    .place-value .place-num {
-      font-size: 3.4rem;
-    }
-    .place-value .place-note {
-      font-size: 1.2rem;
-    }
-    .place-add-btn {
-      font-size: 1rem;
-    }
-    
-    .pwd-card {
-      max-width: 520px !important;
     }
   }
   
@@ -2126,10 +1959,6 @@
       padding: 100px 32px 120px;
     }
     
-    .path-stage {
-      max-width: 1800px;
-    }
-    
     .node-badge {
       width: 80px;
       height: 80px;
@@ -2141,125 +1970,6 @@
     .student-grid {
       grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
       gap: 24px;
-    }
-  }
-  @media (min-width: 2560px) {
-    .path-stage {
-      max-width: 2400px;
-    }
-  }
-  @media (min-width: 3440px) {
-    .path-stage {
-      max-width: 3200px;
-    }
-    .modal-card {
-      max-width: 2200px;
-      padding: 80px 70px 70px;
-    }
-    .modal-header h2 {
-      font-size: 5rem;
-    }
-    .modal-year {
-      font-size: 6rem;
-    }
-    .modal-summary {
-      font-size: 1.8rem;
-      padding: 22px 26px;
-    }
-    .place-label {
-      font-size: 1.8rem;
-    }
-    .place-add-btn {
-      font-size: 1.5rem;
-      padding: 12px 16px;
-    }
-    .place-value {
-      font-size: 2.6rem;
-    }
-    .place-value .place-num {
-      font-size: 4rem;
-    }
-    .place-value .place-note {
-      font-size: 1.5rem;
-    }
-    .btn-primary,
-    .btn-secondary {
-      font-size: 1.6rem;
-      padding: 16px 28px;
-    }
-    .pwd-title {
-      font-size: 3rem;
-    }
-    .pwd-sub {
-      font-size: 1.9rem;
-    }
-    .pwd-input {
-      font-size: 1.6rem;
-      padding: 18px 20px;
-    }
-    .upload-icon {
-      font-size: 3.5rem;
-    }
-    .pwd-card {
-      max-width: 1200px !important;
-      padding: 70px 60px 60px !important;
-    }
-  }
-  @media (min-width: 3840px) {
-    .path-stage {
-      max-width: 4000px;
-    }
-    .modal-card {
-      max-width: 2400px;
-      padding: 90px 80px 80px;
-    }
-    .modal-header h2 {
-      font-size: 6rem;
-    }
-    .modal-year {
-      font-size: 7.5rem;
-    }
-    .modal-summary {
-      font-size: 2.1rem;
-      padding: 26px 32px;
-    }
-    .place-label {
-      font-size: 2rem;
-    }
-    .place-add-btn {
-      font-size: 1.8rem;
-      padding: 16px 20px;
-    }
-    .place-value {
-      font-size: 3.2rem;
-    }
-    .place-value .place-num {
-      font-size: 4.8rem;
-    }
-    .place-value .place-note {
-      font-size: 1.8rem;
-    }
-    .btn-primary,
-    .btn-secondary {
-      font-size: 1.9rem;
-      padding: 18px 32px;
-    }
-    .pwd-title {
-      font-size: 3.6rem;
-    }
-    .pwd-sub {
-      font-size: 2.2rem;
-    }
-    .pwd-input {
-      font-size: 1.9rem;
-      padding: 20px 24px;
-    }
-    .upload-icon {
-      font-size: 4rem;
-    }
-    .pwd-card {
-      max-width: 1400px !important;
-      padding: 80px 70px 70px !important;
     }
   }
   @media(max-width:380px){
@@ -3081,7 +2791,6 @@
     right: -6px !important;
   }
 }
-
 </style>
 </head>
 <body>
@@ -3729,104 +3438,66 @@
     let currentCategoryPage = 0;
 
     /* ====== Snake-path geometry ====== */
-    const PATH_SVG_WIDTH = 1600;
-    const NODE_MARGIN_X  = 140;
+   const PATH_SVG_WIDTH = 1100;
+    const NODE_MARGIN_X  = 110;
     const NODE_SPAN_X    = PATH_SVG_WIDTH - 2 * NODE_MARGIN_X;
 
-    function getStageWidth() {
-      const stage = document.getElementById('pathStage');
-      if (!stage) return window.innerWidth;
-      return stage.clientWidth || stage.offsetWidth || window.innerWidth;
-    }
-
     function getGeometry() {
-  const w = getStageWidth();
-  if (w <= 310)  return { firstY: 80,  rowH: 160, botPad: 100 };
-  if (w <= 420)  return { firstY: 90,  rowH: 180, botPad: 110 };
-  if (w <= 700)  return { firstY: 100, rowH: 200, botPad: 120 };
-  if (w <= 1000) return { firstY: 110, rowH: 220, botPad: 130 };
-  if (w <= 1400) return { firstY: 130, rowH: 260, botPad: 150 };
-  if (w <= 2000) return { firstY: 160, rowH: 320, botPad: 180 };
-  if (w <= 2600) return { firstY: 200, rowH: 400, botPad: 220 };
-  if (w <= 3200) return { firstY: 240, rowH: 480, botPad: 260 };
-  if (w <= 3480) return { firstY: 200, rowH: 180, botPad: 100 };
-  if (w <= 3840) return { firstY: 100, rowH: 180, botPad: 60 };
-  return { firstY: 340, rowH: 700, botPad: 400 };
-}
-
-    function getNodeMargin() {
-      const w = getStageWidth();
-      if (w <= 420) return 40;
-      if (w <= 700) return 60;
-      if (w <= 1000) return 90;
-      if (w <= 1400) return 110;
-      if (w <= 1800) return 130;
-      if (w <= 2400) return 150;
-      if (w <= 3200) return 180;
-      if (w <= 3840) return 200;
-      return 220;
+      const w = window.innerWidth;
+      if (w <= 310)  return { firstY: 200, rowH: 320,  botPad: 180 };
+      if (w >= 3840) return { firstY: 400, rowH: 700,  botPad: 400 };
+      if (w >= 3440) return { firstY: 380, rowH: 600,  botPad: 380 };
+      if (w >= 2560) return { firstY: 300, rowH: 520,  botPad: 300 };
+      return { firstY: 150, rowH: 240, botPad: 150 };
     }
-
-    function getRowNodes(totalSlots = 0) {
-      const w = getStageWidth();
+   function getRowNodes() {
+      const w = window.innerWidth;
       if (w <= 310)  return 2;
       if (w <= 420)  return 3;
       if (w <= 700)  return 4;
-      if (w <= 1000) return 5;
-      if (w <= 1400) return 6;
-      if (totalSlots > 0) {
-        const ideal = Math.max(4, Math.ceil(totalSlots / 2));
-        if (w >= 2400) return Math.min(6, ideal);
-        if (w >= 1800) return Math.min(5, ideal);
-        return Math.min(6, ideal);
-      }
-      if (w <= 1800) return 6;
-      if (w <= 2400) return 7;
-      if (w <= 3200) return 8;
-      if (w <= 3840) return 9;
-      return 10;
+      if (w >= 3840) return 7;
+      if (w >= 3440) return 6;
+      if (w >= 2560) return 6;
+      if (w >= 1920) return 5;
+      if (w >= 1440) return 5;
+      return 5;
     }
-
-    function nodePos(i, totalSlots = 0) {
-      const RN = getRowNodes(totalSlots);
-      const NM = getNodeMargin();
-      const nodeSpan = PATH_SVG_WIDTH - 2 * NM;
+    function nodePos(i) {
+      const RN = getRowNodes();
       const { firstY, rowH } = getGeometry();
-      const step = RN > 1 ? nodeSpan / (RN - 1) : nodeSpan;
+      const step = NODE_SPAN_X / (RN - 1);
       const row      = Math.floor(i / RN);
       const colInRow = i % RN;
       const reverse  = (row % 2) === 1;
       const col      = reverse ? (RN - 1 - colInRow) : colInRow;
       return {
-        x: NM + col * step,
+        x: NODE_MARGIN_X + col * step,
         y: firstY + row * rowH
       };
     }
 
     function calcSvgHeight(totalSlots) {
-      const RN = getRowNodes(totalSlots);
+      const RN = getRowNodes();
       const { firstY, rowH, botPad } = getGeometry();
       if (totalSlots <= 0) return firstY + botPad;
       const rows = Math.ceil(totalSlots / RN);
       return firstY + (rows - 1) * rowH + botPad;
     }
     function buildSnakePath(totalSlots) {
-      const RN = getRowNodes(totalSlots);
+      const RN = getRowNodes();
       if (totalSlots < 2) return '';
-      const { rowH } = getGeometry();
-      const baseCurl = Math.min(60, Math.max(8, rowH * 0.03));
-      const curlAmt = Math.max(0, baseCurl - 10); // reduce bend height by 10px
       let d = '';
       for (let i = 0; i < totalSlots; i++) {
-        const p = nodePos(i, totalSlots);
+        const p = nodePos(i);
         if (i === 0) { d += `M ${p.x},${p.y}`; continue; }
-        const prev    = nodePos(i - 1, totalSlots);
+        const prev    = nodePos(i - 1);
         const sameRow = Math.floor(i / RN) === Math.floor((i - 1) / RN);
         if (sameRow) {
           d += ` L ${p.x.toFixed(1)},${p.y.toFixed(1)}`;
         } else {
           const prevRowReverse = Math.floor((i - 1) / RN) % 2 === 1;
           const curlSign = prevRowReverse ? -1 : 1;
+          const curlAmt  = 80;
           const c1x = prev.x + curlSign * curlAmt;
           const c1y = prev.y + (p.y - prev.y) * 0.35;
           const c2x = p.x + curlSign * curlAmt;
@@ -3914,13 +3585,13 @@
       // 3) Place each year node
       pathNodes.innerHTML = '';
       allYears.forEach((yObj, i) => {
-        const pos = nodePos(i, totalSlots);
+        const pos = nodePos(i);
         const animDelay = (i / totalSlots);
         pathNodes.appendChild(buildNode(yObj, pos, svgHeight, !!yObj.custom, animDelay));
       });
 
       // 4) Place the + Add Year node at the very end of the path
-      const addPos = nodePos(allYears.length, totalSlots);
+      const addPos = nodePos(allYears.length);
       pathNodes.appendChild(buildAddYearNode(addPos, svgHeight));
 
       // 5) Wire delete buttons on custom year nodes
