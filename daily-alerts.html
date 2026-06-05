@@ -56,7 +56,46 @@
   .mobile-nav-links{padding:1rem 0}
   .mobile-nav-links a{display:block;color:#f5deb3;padding:12px 1.5rem;text-decoration:none;border-bottom:1px solid rgba(201,168,76,0.1);transition:all 0.2s}
   .mobile-nav-links a:hover{background:rgba(201,168,76,0.1);color:#ffe066}
-  .mobile-lang-row{padding:1rem;border-top:1px solid rgba(201,168,76,0.1);display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.mobile-lang-row {
+  padding: 0.8rem 1rem;
+  border-top: 1px solid rgba(201,168,76,0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.mobile-lang-row .login-btn {
+  display: block !important;
+  width: 30%;
+  padding: 6px 1px !important;
+  font-size: 10px !important;
+  letter-spacing: 2px;
+  border-radius: 3px;
+  background: linear-gradient(135deg, #c9a84c, #a07810);
+  color: #1a0800 !important;
+  font-weight: 700;
+  text-transform: uppercase;
+  border: 0.1px solid rgba(201,168,76,0.5) !important;
+  box-shadow: 0 2px 12px rgba(201,168,76,0.25);
+  transition: all 0.25s;
+  text-align: center;
+  cursor: pointer;
+  margin-left: 0;
+}
+
+.mobile-lang-row .login-btn:hover {
+  background: linear-gradient(135deg, #e0b95c, #b88a20) !important;
+  box-shadow: 0 4px 18px rgba(201,168,76,0.4);
+  transform: translateY(-1px);
+}
+
+.mobile-lang-row .login-btn.logged-in {
+  background: rgba(201,168,76,0.12) !important;
+  color: #c9a84c !important;
+  border: 0.1px solid rgba(201,168,76,0.35) !important;
+}
   .mobile-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:400}
   .mobile-overlay.open{display:block}
   @media(max-width:1200px){.nav-links{display:none!important}.lang-row{display:none!important}.login-btn{display:none!important}.hamburger{display:flex!important}}
@@ -1186,9 +1225,15 @@
     <a href="projects.html" onclick="closeMobileMenu()">Projects</a>
     <a href="Subject.html" onclick="closeMobileMenu()">Syllabus</a>
   </div>
-  <div class="mobile-lang-row">
-    <button class="lb on">EN</button><button class="lb">සිං</button><button class="lb">தமிழ்</button>
+<div class="mobile-lang-row">
+  <div style="display:flex;gap:5px;align-items:center;">
+    <button class="lb on">EN</button>
+    <button class="lb">සිං</button>
+    <button class="lb">தமிழ்</button>
   </div>
+  <button class="login-btn" id="mobileLoginBtn"
+    onclick="openAuth('si');closeMobileMenu()">Login</button>
+</div>
 </div>
 
 <main class="page-main">

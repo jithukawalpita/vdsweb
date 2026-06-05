@@ -35,7 +35,48 @@ body{font-family:'Lato',sans-serif;color:#f5deb3;min-height:100vh;overflow-x:hid
 .login-btn{background:linear-gradient(135deg,#c9a84c,#a07810);color:#1a0800;border:none;padding:5px 16px;border-radius:3px;font-size:10.5px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;margin-left:8px;transition:all .2s;box-shadow:0 2px 8px rgba(201,168,76,0.25)}
 .login-btn:hover{background:linear-gradient(135deg,#e0b95c,#b88a20);box-shadow:0 4px 14px rgba(201,168,76,0.4)}
 .login-btn.logged-in{background:rgba(201,168,76,0.12);color:#c9a84c;border:1px solid rgba(201,168,76,0.35)}
-.mobile-lang-row{padding:1rem;border-top:1px solid rgba(201,168,76,0.1);display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.mobile-lang-row {
+  padding: 0.8rem 1rem;
+  border-top: 1px solid rgba(201,168,76,0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.mobile-lang-row .login-btn {
+  display: block !important;
+  width: 30%;
+  padding: 6px 1px !important;
+  font-size: 10px !important;
+  letter-spacing: 2px;
+  border-radius: 3px;
+  background: linear-gradient(135deg, #c9a84c, #a07810);
+  color: #1a0800 !important;
+  font-weight: 700;
+  text-transform: uppercase;
+  border: 0.1px solid rgba(201,168,76,0.5) !important;
+  box-shadow: 0 2px 12px rgba(201,168,76,0.25);
+  transition: all 0.25s;
+  text-align: center;
+  cursor: pointer;
+  margin-left: 0;
+}
+
+.mobile-lang-row .login-btn:hover {
+  background: linear-gradient(135deg, #e0b95c, #b88a20) !important;
+  box-shadow: 0 4px 18px rgba(201,168,76,0.4);
+  transform: translateY(-1px);
+}
+
+.mobile-lang-row .login-btn.logged-in {
+  background: rgba(201,168,76,0.12) !important;
+  color: #c9a84c !important;
+  border: 0.1px solid rgba(201,168,76,0.35) !important;
+}
+
+
 .auth-overlay{display:none;position:fixed;inset:0;z-index:1000;background:rgba(4,2,4,0.92);backdrop-filter:blur(8px);align-items:center;justify-content:center}
 .auth-overlay.open{display:flex}
 .auth-modal{background:linear-gradient(160deg,#110808 0%,#1a0a0a 60%,#0d0d0a 100%);border:1px solid rgba(201,168,76,0.28);border-radius:8px;width:100%;max-width:420px;margin:1rem;box-shadow:0 0 80px rgba(0,0,0,0.95);animation:mIn .3s ease both;overflow:hidden;max-height:92vh;overflow-y:auto}
@@ -1506,12 +1547,15 @@ body{font-family:'Lato',sans-serif;color:#f5deb3;min-height:100vh;overflow-x:hid
     <a href="projects.html" onclick="closeMobileMenu()">Projects</a>
     <a href="Subject.html" onclick="closeMobileMenu()">Syllabus</a>
   </div>
-  <div class="mobile-lang-row">
+ <div class="mobile-lang-row">
+  <div style="display:flex;gap:5px;align-items:center;">
     <button class="lb on">EN</button>
     <button class="lb">සිං</button>
     <button class="lb">தமிழ்</button>
-    <button class="login-btn" id="mobileLoginBtn" onclick="openAuth('si');closeMobileMenu()">Login</button>
   </div>
+  <button class="login-btn" id="mobileLoginBtn"
+    onclick="openAuth('si');closeMobileMenu()">Login</button>
+</div>
 </div>
 
 <!-- HERO -->

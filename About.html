@@ -408,7 +408,48 @@ body::after{content:'';position:fixed;inset:0;z-index:-1;background:rgba(15,3,3,
 .mobile-nav-links{padding:1rem 0}
 .mobile-nav-links a{display:block;color:var(--text-primary);padding:12px 1.5rem;text-decoration:none;border-bottom:1px solid var(--mobile-link-border);transition:all .2s}
 .mobile-nav-links a:hover{background:rgba(201,168,76,0.1);color:#ffe066}
-.mobile-lang-row{padding:1rem;border-top:1px solid var(--mobile-link-border);display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.mobile-lang-row {
+  padding: 0.8rem 1rem;
+  border-top: 1px solid rgba(201,168,76,0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.mobile-lang-row .login-btn {
+  display: block !important;
+  width: 30%;
+  padding: 6px 1px !important;
+  font-size: 10px !important;
+  letter-spacing: 2px;
+  border-radius: 3px;
+  background: linear-gradient(135deg, #c9a84c, #a07810);
+  color: #1a0800 !important;
+  font-weight: 700;
+  text-transform: uppercase;
+  border: 0.1px solid rgba(201,168,76,0.5) !important;
+  box-shadow: 0 2px 12px rgba(201,168,76,0.25);
+  transition: all 0.25s;
+  text-align: center;
+  cursor: pointer;
+  margin-left: 0;
+}
+
+.mobile-lang-row .login-btn:hover {
+  background: linear-gradient(135deg, #e0b95c, #b88a20) !important;
+  box-shadow: 0 4px 18px rgba(201,168,76,0.4);
+  transform: translateY(-1px);
+}
+
+.mobile-lang-row .login-btn.logged-in {
+  background: rgba(201,168,76,0.12) !important;
+  color: #c9a84c !important;
+  border: 0.1px solid rgba(201,168,76,0.35) !important;
+}
+
+
 
 /* ========== MOBILE OVERLAY ========== */
 .mobile-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:400}
@@ -1909,12 +1950,14 @@ body::after{content:'';position:fixed;inset:0;z-index:-1;background:rgba(15,3,3,
     <a href="Subject.html" onclick="closeMobileMenu()">Syllabus</a>
   </div>
   <div class="mobile-lang-row">
+  <div style="display:flex;gap:5px;align-items:center;">
     <button class="lb on">EN</button>
     <button class="lb">සිං</button>
     <button class="lb">தமிழ்</button>
-    <button class="login-btn" id="mobileLoginBtn" onclick="openAuth('si'); closeMobileMenu()">Login</button>
-   
   </div>
+  <button class="login-btn" id="mobileLoginBtn"
+    onclick="openAuth('si');closeMobileMenu()">Login</button>
+</div>
 </div>
 
 <!-- ===== HERO ===== -->
