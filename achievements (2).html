@@ -14,6 +14,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Noto+Sans+Sinhala:wght@400;600;700&family=Cormorant+Garamond:wght@400;500;600&family=Lora:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="footer-mobile.css">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   html { scroll-behavior: smooth; }
@@ -1048,6 +1049,8 @@
   .pwd-input::placeholder { color: #6a5a3a; }
   .pwd-error { display: none; color: #e87a7a; font-size: 0.85rem; text-align: left; padding-left: 4px; }
   .pwd-error.show { display: block; }
+  .checkbox-row { display: flex; align-items: flex-start; gap: 10px; font-size: 0.95rem; color: #f6e7b0; }
+  .checkbox-row input[type="checkbox"] { width: 1rem; height: 1rem; accent-color: var(--gold); margin-top: 3px; }
   .pwd-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 8px; }
   .btn-primary, .btn-secondary { padding: 10px 22px; border-radius: 6px; font-family: 'Cinzel', serif; font-size: 0.85rem; letter-spacing: 1px; font-weight: 600; cursor: pointer; transition: all 0.25s ease; }
   .btn-primary { background: linear-gradient(180deg, var(--gold-bright) 0%, var(--gold) 100%); color: var(--maroon-dark); border: 1px solid var(--gold); }
@@ -2811,7 +2814,7 @@
       <a href="About.html">About</a>
       <a href="galery.html">Gallery</a>
       <a href="achievements (2).html" class="active">Achievements</a>
-      <a href="#">Daily Quotes</a>
+      <a href="daily-quotes.html">Daily Quotes</a>
       <a href="Contact.html">Contact us</a>
       <a href="projects.html">Projects</a>
       <a href="Subject.html">Syllabus</a>
@@ -2842,7 +2845,7 @@
       <a href="About.html" onclick="closeMobileMenu()">About</a>
       <a href="galery.html" onclick="closeMobileMenu()">Gallery</a>
       <a href="achievements (2).html" onclick="closeMobileMenu()">Achievements</a>
-      <a href="#" onclick="closeMobileMenu()">Daily Quotes</a>
+      <a href="daily-quotes.html" onclick="closeMobileMenu()">Daily Quotes</a>
       <a href="Contact.html" onclick="closeMobileMenu()">Contact us</a>
       <a href="projects.html" onclick="closeMobileMenu()">Projects</a>
       <a href="Subject.html" onclick="closeMobileMenu()">Syllabus</a>
@@ -2967,6 +2970,7 @@
         <input type="text" id="nameInput" class="pwd-input" placeholder="Student name (e.g. නිමල් පෙරේරා)" />
         <input type="text" id="placeInput" class="pwd-input" placeholder="Place / Achievement (e.g. 1st, Best Speech)" />
         <input type="text" id="gradeInput" class="pwd-input" placeholder="Current school grade (e.g. Grade 8)" />
+        <label class="checkbox-row"><input type="checkbox" id="uploadPermissionCheckbox" /> I confirm I have permission to add this achievement.</label>
         <div class="upload-status" id="uploadStatus"></div>
         <div class="pwd-actions">
           <button type="button" class="btn-secondary" id="uploadCancel">Cancel</button>
@@ -3043,6 +3047,7 @@
       <form id="categoryForm" class="pwd-form">
         <input type="text" id="categoryNameInput" class="pwd-input" placeholder="Category name (e.g. ක්‍රීඩා / Sports)" />
         <div class="pwd-error" id="categoryError">A category with this name already exists.</div>
+        <label class="checkbox-row"><input type="checkbox" id="categoryPermissionCheckbox" /> I confirm I have permission to create this category.</label>
         <div class="pwd-actions">
           <button type="button" class="btn-secondary" id="categoryCancel">Cancel</button>
           <button type="submit" class="btn-primary">Add Category</button>
@@ -3061,6 +3066,7 @@
       <form id="placeForm" class="pwd-form">
         <input type="text" id="placeNumInput" class="pwd-input" placeholder="e.g. 1, 2, 3 or 1st" />
         <input type="text" id="placeNoteInput" class="pwd-input" placeholder="Optional note (e.g. Provincial Champions)" />
+        <label class="checkbox-row"><input type="checkbox" id="placePermissionCheckbox" /> I confirm I have permission to set the school's place.</label>
         <div class="pwd-actions">
           <button type="button" class="btn-secondary" id="placeCancel">Cancel</button>
           <button type="submit" class="btn-primary">Save Place</button>
@@ -3116,7 +3122,7 @@
         <h4>Programs</h4>
         <ul>
           <li><a href="projects.html">Dhamma Projects</a></li>
-          <li><a href="#">Daily Quotes</a></li>
+          <li><a href="daily-quotes.html">Daily Quotes</a></li>
           <li><a href="#">Welfare Unit</a></li>
           <li><a href="#">Media Unit</a></li>
           <li><a href="Contact.html">Contact Us</a></li>
@@ -3161,11 +3167,7 @@
 
   <!-- ===== FIREBASE AUTH ===== -->
   <script>
-    const firebaseConfig={apiKey:"AIzaSyAWpPP3OevjIRAsoGIjOJTofV6l2jgyhNI",authDomain:"signin-f9656.firebaseapp.com",projectId:"signin-f9656",storageBucket:"signin-f9656.firebasestorage.app",messagingSenderId:"1074665165821",appId:"1:1074665165821:web:91ef329a0472fa138e7f94",measurementId:"G-SG9TZSLP6E"};
-    firebase.initializeApp(firebaseConfig);
-
-    // ============ Secondary Firebase app for the achievements RTDB ============
-    const ACHIEVEMENTS_CONFIG = {
+    const firebaseConfig = {
       apiKey: "AIzaSyDvM76YKHMynYhMEX-B6q1jmrjJn0JyXZE",
       authDomain: "achievements-74236.firebaseapp.com",
       databaseURL: "https://achievements-74236-default-rtdb.firebaseio.com",
@@ -3174,9 +3176,11 @@
       messagingSenderId: "188983548531",
       appId: "1:188983548531:web:d976dc7d3f63cfe33f2806"
     };
-    const achievementsApp = firebase.initializeApp(ACHIEVEMENTS_CONFIG, "achievements");
-    const achievementsDb  = achievementsApp.database();
-    const auth=firebase.auth();const db=firebase.firestore();
+    firebase.initializeApp(firebaseConfig);
+
+    const achievementsDb  = firebase.database();
+    const auth = firebase.auth();
+    const db   = firebase.firestore();
     const providers={google:new firebase.auth.GoogleAuthProvider()};
     providers.google.addScope('email');providers.google.addScope('profile');
 
@@ -3398,6 +3402,7 @@
     const nameInput         = document.getElementById('nameInput');
     const placeInput        = document.getElementById('placeInput');
     const gradeInput        = document.getElementById('gradeInput');
+    const uploadPermissionCheckbox = document.getElementById('uploadPermissionCheckbox');
 
     const placeValue     = document.getElementById('placeValue');
     const placeAddBtn    = document.getElementById('placeAddBtn');
@@ -3409,6 +3414,7 @@
     const placeYearLabel = document.getElementById('placeYearLabel');
     const placeNumInput  = document.getElementById('placeNumInput');
     const placeNoteInput = document.getElementById('placeNoteInput');
+    const placePermissionCheckbox = document.getElementById('placePermissionCheckbox');
 
     const yearModal  = document.getElementById('yearModal');
     const yearClose  = document.getElementById('yearClose');
@@ -3426,6 +3432,7 @@
     const categoryNameInput  = document.getElementById('categoryNameInput');
     const categoryError      = document.getElementById('categoryError');
     const categoryYearLabel  = document.getElementById('categoryYearLabel');
+    const categoryPermissionCheckbox = document.getElementById('categoryPermissionCheckbox');
 
     // Pagination refs
     const categoryNav   = document.getElementById('categoryNav');
@@ -3850,6 +3857,7 @@
     /* ====== Upload flow ====== */
     function openUploadModal() {
       uploadForm.reset();
+      if (uploadPermissionCheckbox) uploadPermissionCheckbox.checked = false;
       uploadPreview.style.display = 'none'; uploadPreview.src = '';
       uploadPlaceholder.style.display = '';
       uploadModal.classList.add('show');
@@ -3874,6 +3882,7 @@
       const statusEl = document.getElementById('uploadStatus');
       const submitBtn = document.getElementById('uploadSubmit');
 
+      if (!uploadPermissionCheckbox?.checked) { alert('Please confirm permission to add this achievement.'); return; }
       if (!name || !place || !grade) { alert('Please fill in name, place, and grade.'); return; }
       if (!file) { alert('Please select a photo for the student.'); return; }
 
@@ -3918,6 +3927,7 @@ const entry = {
       placeYearLabel.textContent = currentYear;
       placeNumInput.value  = rec.place ? (rec.place.num || '') : '';
       placeNoteInput.value = rec.place ? (rec.place.note || '') : '';
+      if (placePermissionCheckbox) placePermissionCheckbox.checked = false;
       placeModal.classList.add('show');
       setTimeout(() => placeNumInput.focus(), 100);
     }
@@ -3926,6 +3936,7 @@ const entry = {
       e.preventDefault();
       const num  = placeNumInput.value.trim();
       const note = placeNoteInput.value.trim();
+      if (!placePermissionCheckbox?.checked) { alert('Please confirm permission to save this place.'); return; }
       if (!num) { alert('Please enter the place number.'); return; }
       try {
         await perYearRef.child(currentYear).child('place').set({ num, note });
@@ -3992,6 +4003,7 @@ const entry = {
     function openCategoryModal() {
       categoryForm.reset();
       categoryError.classList.remove('show');
+      if (categoryPermissionCheckbox) categoryPermissionCheckbox.checked = false;
       categoryYearLabel.textContent = currentYear || 'this year';
       categoryModal.classList.add('show');
       setTimeout(() => categoryNameInput.focus(), 100);
@@ -4000,6 +4012,11 @@ const entry = {
     categoryForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const name = categoryNameInput.value.trim();
+      if (!categoryPermissionCheckbox?.checked) {
+        categoryError.textContent = 'Please confirm permission to add this category.';
+        categoryError.classList.add('show');
+        return;
+      }
       if (!name) {
         categoryError.textContent = 'Please enter a category name.';
         categoryError.classList.add('show');
