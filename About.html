@@ -2363,35 +2363,737 @@ ctx.save();
   </div>
 </div>
 
+<!-- =====================================================================
+  Sri Vipassi Dhamma School — Pillar Carousels
+  • Infinite loop (clone technique — no jump-back)
+  • Click image → fullscreen lightbox with prev/next/close + keyboard + swipe
+  ===================================================================== -->
+
 <!-- ===== PILLARS ===== -->
 <div class="pillars-section reveal">
   <div class="pillars-inner">
     <span class="sec-eyebrow">What We Teach</span>
     <h2 class="sec-title">The Four <em>Pillars</em> of Our Curriculum</h2>
+
     <div class="pillars-grid">
+
       <div class="pillar-card">
         <span class="pillar-icon">📖</span>
         <div class="pillar-title">Dhamma Studies</div>
-        <p class="pillar-body">Deep engagement with the Tipitaka, Jataka stories, and the life of the Gautama Buddha. Students develop a comprehensive understanding of Buddhist philosophy and ethics.</p>
+        <div class="pillar-carousel" id="pc-dhamma">
+          <div class="pc-track"></div>
+          <div class="pc-loader"><span class="pc-spinner"></span></div>
+          <div class="pc-dots"></div>
+          <div class="pc-overlay"></div>
+          <div class="pc-zoom-hint">🔍 click to enlarge</div>
+        </div>
       </div>
+
       <div class="pillar-card">
         <span class="pillar-icon">🧘</span>
-        <div class="pillar-title">Meditation & Mindfulness</div>
-        <p class="pillar-body">Age-appropriate meditation practices introduce students to Samatha and Vipassana, cultivating inner stillness, focus, and awareness from a young age.</p>
+        <div class="pillar-title">Meditation &amp; Mindfulness</div>
+        <div class="pillar-carousel" id="pc-meditation">
+          <div class="pc-track"></div>
+          <div class="pc-loader"><span class="pc-spinner"></span></div>
+          <div class="pc-dots"></div>
+          <div class="pc-overlay"></div>
+          <div class="pc-zoom-hint">🔍 click to enlarge</div>
+        </div>
       </div>
+
       <div class="pillar-card">
         <span class="pillar-icon">🎨</span>
-        <div class="pillar-title">Arts & Culture</div>
-        <p class="pillar-body">Traditional Buddhist arts, Pirith chanting, Bodhi Puja rituals, and Sinhala cultural expression are woven throughout the curriculum to preserve our heritage.</p>
+        <div class="pillar-title">Arts &amp; Culture</div>
+        <div class="pillar-carousel" id="pc-arts">
+          <div class="pc-track"></div>
+          <div class="pc-loader"><span class="pc-spinner"></span></div>
+          <div class="pc-dots"></div>
+          <div class="pc-overlay"></div>
+          <div class="pc-zoom-hint">🔍 click to enlarge</div>
+        </div>
       </div>
+
       <div class="pillar-card">
         <span class="pillar-icon">🤝</span>
         <div class="pillar-title">Compassionate Service</div>
-        <p class="pillar-body">Community service projects, dana activities, and welfare initiatives teach students that wisdom without compassion is incomplete — Dana, Sila, Bhavana.</p>
+        <div class="pillar-carousel" id="pc-compassionate">
+          <div class="pc-track"></div>
+          <div class="pc-loader"><span class="pc-spinner"></span></div>
+          <div class="pc-dots"></div>
+          <div class="pc-overlay"></div>
+          <div class="pc-zoom-hint">🔍 click to enlarge</div>
+        </div>
       </div>
+
     </div>
   </div>
 </div>
+
+<!-- ===== FULLSCREEN LIGHTBOX (shared, one instance) ===== -->
+<div id="pc-lightbox" aria-modal="true" role="dialog">
+  <!-- backdrop -->
+  <div id="pc-lb-backdrop"></div>
+
+  <!-- image wrapper -->
+  <div id="pc-lb-wrap">
+    <img id="pc-lb-img" src="" alt="">
+    <div id="pc-lb-loader"><span class="pc-spinner"></span></div>
+  </div>
+
+  <!-- counter  e.g. 2 / 7 -->
+  <div id="pc-lb-counter"></div>
+
+  <!-- controls -->
+  <button id="pc-lb-prev" aria-label="Previous">&#8249;</button>
+  <button id="pc-lb-next" aria-label="Next">&#8250;</button>
+  <button id="pc-lb-close" aria-label="Close">&#10005;</button>
+
+  <!-- dot strip -->
+  <div id="pc-lb-dots"></div>
+</div>
+
+
+<!-- ===== STYLES ===== -->
+<style>
+/* ── Carousel container ── */
+.pillar-carousel {
+  position: relative;
+  width: 100%;
+  margin-top: 1.1rem;
+  border-radius: 8px;
+  overflow: hidden;
+  aspect-ratio: 4 / 3;
+  background: rgba(0,0,0,0.4);
+  cursor: zoom-in;
+}
+
+/* sliding strip */
+.pc-track {
+  display: flex;
+  height: 100%;
+  transition: transform 0.72s cubic-bezier(0.77,0,0.18,1);
+  will-change: transform;
+}
+.pc-track img {
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  flex-shrink: 0;
+  pointer-events: none;
+  user-select: none;
+  display: block;
+}
+
+/* bottom gradient */
+.pc-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top,
+    rgba(8,2,2,0.55) 0%,
+    rgba(8,2,2,0.10) 40%,
+    transparent 70%);
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* zoom hint */
+.pc-zoom-hint {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  font-size: 0.6rem;
+  letter-spacing: 0.5px;
+  color: rgba(255,255,255,0.55);
+  background: rgba(0,0,0,0.35);
+  padding: 3px 7px;
+  border-radius: 20px;
+  pointer-events: none;
+  z-index: 6;
+  opacity: 0;
+  transition: opacity 0.25s;
+}
+.pillar-carousel:hover .pc-zoom-hint { opacity: 1; }
+
+/* dots */
+.pc-dots {
+  position: absolute;
+  bottom: 9px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 5px;
+  z-index: 5;
+}
+.pc-dots span {
+  display: block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.30);
+  cursor: pointer;
+  transition: background 0.3s, transform 0.3s;
+}
+.pc-dots span.active {
+  background: #c9a84c;
+  transform: scale(1.35);
+}
+
+/* spinner */
+.pc-loader {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(8,3,3,0.65);
+  z-index: 10;
+  transition: opacity 0.45s;
+}
+.pc-loader.done { opacity: 0; pointer-events: none; }
+.pc-spinner {
+  display: block;
+  width: 30px;
+  height: 30px;
+  border: 2.5px solid rgba(201,168,76,0.18);
+  border-top-color: #c9a84c;
+  border-radius: 50%;
+  animation: pc-spin 0.75s linear infinite;
+}
+@keyframes pc-spin { to { transform: rotate(360deg); } }
+
+/* empty / error */
+.pc-empty, .pc-error {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  z-index: 8;
+  font-size: 0.72rem;
+  letter-spacing: 1px;
+  text-align: center;
+  padding: 1.2rem;
+  line-height: 1.6;
+}
+.pc-empty { color: rgba(201,168,76,0.45); }
+.pc-error { color: rgba(220,100,80,0.6); }
+.pc-empty-icon { font-size: 2rem; opacity: 0.45; }
+
+@media (max-width: 768px) {
+  .pillar-carousel { aspect-ratio: 3 / 2; }
+  .pc-dots span    { width: 5px; height: 5px; }
+}
+
+
+/* ══════════════════════════════════════════════════
+   FULLSCREEN LIGHTBOX
+══════════════════════════════════════════════════ */
+#pc-lightbox {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  align-items: center;
+  justify-content: center;
+}
+#pc-lightbox.open { display: flex; }
+
+/* dark backdrop */
+#pc-lb-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.94);
+  animation: lbFadeIn 0.3s ease both;
+}
+@keyframes lbFadeIn { from { opacity:0; } to { opacity:1; } }
+
+/* image wrapper */
+#pc-lb-wrap {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  padding: 56px 70px 52px; /* top: counter, sides: arrows, bottom: dots */
+  box-sizing: border-box;
+  animation: lbZoomIn 0.32s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+@keyframes lbZoomIn {
+  from { opacity:0; transform: scale(0.88); }
+  to   { opacity:1; transform: scale(1); }
+}
+
+/* the image itself — fills available space, never overflows */
+#pc-lb-img {
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  border-radius: 6px;
+  box-shadow: 0 0 80px rgba(0,0,0,0.9), 0 0 0 1px rgba(201,168,76,0.15);
+  transition: opacity 0.2s;
+}
+#pc-lb-img.loading { opacity: 0.15; }
+
+/* spinner inside lightbox */
+#pc-lb-loader {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+#pc-lb-loader.show { opacity: 1; }
+
+/* counter  2 / 7 */
+#pc-lb-counter {
+  position: fixed;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 3;
+  color: rgba(201,168,76,0.7);
+  font-family: 'Cinzel', serif;
+  font-size: 0.72rem;
+  letter-spacing: 2.5px;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+/* shared button base */
+#pc-lightbox button {
+  position: fixed;
+  z-index: 4;
+  background: rgba(20,6,6,0.72);
+  border: 1px solid rgba(201,168,76,0.3);
+  color: #c9a84c;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, transform 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+#pc-lightbox button:hover {
+  background: rgba(201,168,76,0.18);
+  border-color: rgba(201,168,76,0.7);
+}
+
+/* close */
+#pc-lb-close {
+  top: 12px;
+  right: 14px;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  font-size: 15px;
+}
+#pc-lb-close:hover { transform: scale(1.1) rotate(90deg); }
+
+/* prev / next arrows */
+#pc-lb-prev,
+#pc-lb-next {
+  top: 50%;
+  transform: translateY(-50%);
+  width: 48px;
+  height: 72px;
+  border-radius: 8px;
+  font-size: 2rem;
+}
+#pc-lb-prev:hover { transform: translateY(-50%) scale(1.08); }
+#pc-lb-next:hover { transform: translateY(-50%) scale(1.08); }
+#pc-lb-prev { left: 12px; }
+#pc-lb-next { right: 12px; }
+
+/* dot strip inside lightbox */
+#pc-lb-dots {
+  position: fixed;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 3;
+  display: flex;
+  gap: 7px;
+  flex-wrap: wrap;
+  justify-content: center;
+  max-width: 88vw;
+}
+#pc-lb-dots span {
+  display: block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.25);
+  cursor: pointer;
+  transition: background 0.25s, transform 0.25s;
+}
+#pc-lb-dots span.active {
+  background: #c9a84c;
+  transform: scale(1.45);
+}
+
+/* ── ≤768px  mobile ── */
+@media (max-width: 768px) {
+  #pc-lb-wrap {
+    padding: 48px 52px 48px;
+  }
+  #pc-lb-prev { left: 6px;  width: 36px; height: 56px; font-size: 1.4rem; }
+  #pc-lb-next { right: 6px; width: 36px; height: 56px; font-size: 1.4rem; }
+  #pc-lb-close { top: 10px; right: 10px; width: 34px; height: 34px; font-size: 13px; }
+  #pc-lb-counter { font-size: 0.65rem; top: 13px; }
+  #pc-lb-dots span { width: 6px; height: 6px; }
+  #pc-lb-dots { bottom: 12px; gap: 5px; }
+}
+
+/* ── 769px – 1439px  tablet / small desktop ── */
+@media (min-width: 769px) and (max-width: 1439px) {
+  #pc-lb-wrap {
+    padding: 58px 72px 54px;
+  }
+  #pc-lb-prev { left: 14px; width: 44px; height: 66px; font-size: 1.8rem; }
+  #pc-lb-next { right: 14px; width: 44px; height: 66px; font-size: 1.8rem; }
+  #pc-lb-close { width: 36px; height: 36px; font-size: 14px; }
+  #pc-lb-counter { font-size: 0.7rem; }
+}
+
+/* ── ≥1440px  large desktop ── */
+@media (min-width: 1440px) {
+  #pc-lb-wrap {
+    padding: 64px 88px 60px;
+  }
+  #pc-lb-prev { left: 20px; width: 54px; height: 80px; font-size: 2.4rem; }
+  #pc-lb-next { right: 20px; width: 54px; height: 80px; font-size: 2.4rem; }
+  #pc-lb-close { top: 16px; right: 20px; width: 42px; height: 42px; font-size: 17px; }
+  #pc-lb-counter { font-size: 0.8rem; letter-spacing: 3px; top: 20px; }
+  #pc-lb-dots span { width: 8px; height: 8px; }
+  #pc-lb-dots { bottom: 20px; gap: 8px; }
+}
+</style>
+
+
+<!-- ===== SCRIPT ===== -->
+<script>
+(function () {
+
+  /* ── Apps Script URL ── */
+  var API_URL = 'https://script.google.com/macros/s/AKfycbxHsy2QTuwKWr4DUDTP3r9uY6BA9Ejy06bj3cKk_8Ow9fnz17Wl83bjaZj_-x7OSRRO/exec';
+
+  var CAROUSELS = {
+    dhamma:        'pc-dhamma',
+    meditation:    'pc-meditation',
+    arts:          'pc-arts',
+    compassionate: 'pc-compassionate'
+  };
+
+  var timers = {};
+
+  /* ════════════════════════════════════════════════════
+     LIGHTBOX STATE
+  ════════════════════════════════════════════════════ */
+  var lb = {
+    images:  [],   /* current image set (real images only) */
+    idx:     0,    /* current real index */
+    open:    false
+  };
+
+  var lbEl       = document.getElementById('pc-lightbox');
+  var lbBackdrop = document.getElementById('pc-lb-backdrop');
+  var lbImg      = document.getElementById('pc-lb-img');
+  var lbLoader   = document.getElementById('pc-lb-loader');
+  var lbCounter  = document.getElementById('pc-lb-counter');
+  var lbDotsEl   = document.getElementById('pc-lb-dots');
+  var lbPrev     = document.getElementById('pc-lb-prev');
+  var lbNext     = document.getElementById('pc-lb-next');
+  var lbClose    = document.getElementById('pc-lb-close');
+
+  function lbShow(images, startIdx) {
+    lb.images = images;
+    lb.idx    = startIdx || 0;
+    lb.open   = true;
+    lbEl.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    lbBuildDots();
+    lbGoto(lb.idx, false);
+  }
+
+  function lbHide() {
+    lb.open = false;
+    lbEl.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  function lbGoto(idx, animate) {
+    if (!lb.images.length) return;
+    lb.idx = ((idx % lb.images.length) + lb.images.length) % lb.images.length;
+    var imgData = lb.images[lb.idx];
+
+    /* show loader */
+    lbImg.classList.add('loading');
+    lbLoader.classList.add('show');
+
+    var newImg = new Image();
+    newImg.onload = function () {
+      lbImg.src = imgData.url;
+      lbImg.alt = imgData.name || '';
+      lbImg.classList.remove('loading');
+      lbLoader.classList.remove('show');
+    };
+    newImg.onerror = function () {
+      /* fallback to thumbnail */
+      lbImg.src = 'https://drive.google.com/thumbnail?id=' + imgData.id + '&sz=w1600';
+      lbImg.classList.remove('loading');
+      lbLoader.classList.remove('show');
+    };
+    newImg.src = imgData.url;
+
+    /* counter */
+    lbCounter.textContent = (lb.idx + 1) + ' / ' + lb.images.length;
+
+    /* dots */
+    var dots = lbDotsEl.querySelectorAll('span');
+    dots.forEach(function (d, i) {
+      d.classList.toggle('active', i === lb.idx);
+    });
+  }
+
+  function lbBuildDots() {
+    lbDotsEl.innerHTML = '';
+    lb.images.forEach(function (_, i) {
+      var d = document.createElement('span');
+      d.addEventListener('click', function () { lbGoto(i); });
+      lbDotsEl.appendChild(d);
+    });
+  }
+
+  /* button events */
+  lbPrev.addEventListener('click',    function () { lbGoto(lb.idx - 1); });
+  lbNext.addEventListener('click',    function () { lbGoto(lb.idx + 1); });
+  lbClose.addEventListener('click',   lbHide);
+  lbBackdrop.addEventListener('click', lbHide);
+
+  /* keyboard */
+  document.addEventListener('keydown', function (e) {
+    if (!lb.open) return;
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown')  lbGoto(lb.idx + 1);
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')    lbGoto(lb.idx - 1);
+    if (e.key === 'Escape')                                lbHide();
+  });
+
+  /* touch swipe inside lightbox */
+  var lbTouchX = null;
+  lbEl.addEventListener('touchstart', function (e) {
+    lbTouchX = e.touches[0].clientX;
+  }, { passive: true });
+  lbEl.addEventListener('touchend', function (e) {
+    if (lbTouchX === null) return;
+    var dx = e.changedTouches[0].clientX - lbTouchX;
+    lbTouchX = null;
+    if (Math.abs(dx) < 40) return;
+    if (dx < 0) lbGoto(lb.idx + 1);
+    else        lbGoto(lb.idx - 1);
+  }, { passive: true });
+
+
+  /* ════════════════════════════════════════════════════
+     BUILD ONE CAROUSEL  (infinite loop — clone technique)
+     Track layout:
+       slot 0            → clone of last image
+       slots 1 … total   → real images
+       slot total+1      → clone of first image
+  ════════════════════════════════════════════════════ */
+  function buildCarousel(el, images) {
+    var track  = el.querySelector('.pc-track');
+    var dotsEl = el.querySelector('.pc-dots');
+    var loader = el.querySelector('.pc-loader');
+
+    loader.classList.add('done');
+
+    if (!images || images.length === 0) {
+      var empty = document.createElement('div');
+      empty.className = 'pc-empty';
+      empty.innerHTML = '<span class="pc-empty-icon">🪷</span>Upload images to the<br>Drive folder to display here';
+      el.appendChild(empty);
+      return;
+    }
+
+    var total     = images.length;
+    var pos       = 1;      /* current slot index */
+    var busy      = false;
+    var slotCount = total + 2;
+
+    /* ── make one img element ── */
+    function makeImg(imgData) {
+      var img     = document.createElement('img');
+      img.src     = imgData.url;
+      img.alt     = imgData.name || '';
+      img.loading = 'lazy';
+      img.onerror = function () {
+        this.onerror = null;
+        this.src = 'https://drive.google.com/thumbnail?id=' + imgData.id + '&sz=w800';
+      };
+      return img;
+    }
+
+    /* ── build track ── */
+    track.appendChild(makeImg(images[total - 1]));          /* slot 0   */
+    images.forEach(function (d) { track.appendChild(makeImg(d)); }); /* 1…N */
+    track.appendChild(makeImg(images[0]));                  /* slot N+1 */
+
+    track.style.width = (slotCount * 100) + '%';
+    track.querySelectorAll('img').forEach(function (img) {
+      img.style.width = (100 / slotCount) + '%';
+    });
+
+    /* ── positioning helpers ── */
+    function snapTo(p) {
+      track.style.transition = 'none';
+      track.style.transform  = 'translateX(-' + (p / slotCount * 100) + '%)';
+      void track.offsetWidth;
+      pos = p;
+    }
+    function slideTo(p) {
+      track.style.transition = 'transform 0.72s cubic-bezier(0.77,0,0.18,1)';
+      track.style.transform  = 'translateX(-' + (p / slotCount * 100) + '%)';
+      pos = p;
+    }
+
+    /* ── dots helper ── */
+    function updateDots(realIdx) {
+      dotsEl.querySelectorAll('span').forEach(function (d, i) {
+        d.classList.toggle('active', i === realIdx);
+      });
+    }
+
+    /* ── advance ── */
+    function advance() {
+      if (busy) return;
+      var next   = pos + 1;
+      var dotIdx = (next - 1 + total) % total;
+      slideTo(next);
+      updateDots(dotIdx);
+      if (next === total + 1) {
+        busy = true;
+        track.addEventListener('transitionend', function onEnd() {
+          track.removeEventListener('transitionend', onEnd);
+          snapTo(1);
+          busy = false;
+        });
+      }
+    }
+
+    /* ── go to real index (dot click) ── */
+    function goToReal(realIdx) {
+      snapTo(realIdx + 1);
+      updateDots(realIdx);
+    }
+
+    /* ── build small-carousel dots ── */
+    images.forEach(function (_, i) {
+      var dot = document.createElement('span');
+      if (i === 0) dot.classList.add('active');
+      dot.addEventListener('click', function (e) {
+        e.stopPropagation();   /* don't trigger lightbox */
+        goToReal(i);
+        resetTimer();
+      });
+      dotsEl.appendChild(dot);
+    });
+
+    snapTo(1);
+
+    /* ── timer ── */
+    function startTimer() { timers[el.id] = setInterval(advance, 3000); }
+    function stopTimer()  { clearInterval(timers[el.id]); }
+    function resetTimer() { stopTimer(); startTimer(); }
+
+    startTimer();
+    el.addEventListener('mouseenter', stopTimer);
+    el.addEventListener('mouseleave', startTimer);
+    el.addEventListener('touchstart', stopTimer,  { passive: true });
+    el.addEventListener('touchend',   resetTimer, { passive: true });
+
+    /* ── CLICK → OPEN LIGHTBOX at current real slide ── */
+    el.addEventListener('click', function () {
+      /* pos 1…total → real index 0…total-1 */
+      var realIdx = pos - 1;
+      /* clamp: if on a clone, map back */
+      if (realIdx < 0)      realIdx = total - 1;
+      if (realIdx >= total) realIdx = 0;
+      stopTimer();
+      lbShow(images, realIdx);
+    });
+  }
+
+
+  /* ════════════════════════════════════════════════════
+     HELPERS
+  ════════════════════════════════════════════════════ */
+  function showEmpty(el, html) {
+    el.querySelector('.pc-loader').classList.add('done');
+    var d = document.createElement('div');
+    d.className = 'pc-empty';
+    d.innerHTML = html;
+    el.appendChild(d);
+  }
+  function showError(el, msg) {
+    el.querySelector('.pc-loader').classList.add('done');
+    var d = document.createElement('div');
+    d.className = 'pc-error';
+    d.innerHTML = '⚠ ' + (msg || 'Could not load images');
+    el.appendChild(d);
+  }
+
+
+  /* ════════════════════════════════════════════════════
+     FETCH & INIT
+  ════════════════════════════════════════════════════ */
+  function init() {
+    if (!API_URL || API_URL.indexOf('YOUR_APPS_SCRIPT') !== -1) {
+      Object.values(CAROUSELS).forEach(function (id) {
+        var el = document.getElementById(id);
+        if (el) showEmpty(el, '<span class="pc-empty-icon">⚙️</span>Set the Apps Script URL<br>in the carousel script');
+      });
+      return;
+    }
+
+    fetch(API_URL)
+      .then(function (res) {
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        return res.json();
+      })
+      .then(function (data) {
+        Object.keys(CAROUSELS).forEach(function (key) {
+          var el = document.getElementById(CAROUSELS[key]);
+          if (!el) return;
+          buildCarousel(el, data[key] || []);
+        });
+      })
+      .catch(function (err) {
+        console.error('Pillar carousel error:', err);
+        Object.values(CAROUSELS).forEach(function (id) {
+          var el = document.getElementById(id);
+          if (el) showError(el, 'Images unavailable');
+        });
+      });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+
+})();
+</script>
 
 <!-- ===== TIMELINE ===== -->
 <section class="timeline-section reveal">
