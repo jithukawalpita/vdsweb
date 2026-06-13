@@ -1,0 +1,193 @@
+/* ═══════════════════════════════════════════════════════════════════
+   Sri Vipassi Dhamma School — Auth Modal Styles
+   Drop-in CSS for the sign-in/sign-up/face-login modal.
+   Link this from any page that uses the auth modal.
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── Login button (nav) ── */
+.login-btn{background:linear-gradient(135deg,#c9a84c,#a07810);color:#1a0800;border:none;padding:5px 16px;border-radius:3px;font-size:10.5px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;margin-left:8px;transition:all .2s;box-shadow:0 2px 8px rgba(201,168,76,0.25)}
+.login-btn:hover{background:linear-gradient(135deg,#e0b95c,#b88a20);box-shadow:0 4px 14px rgba(201,168,76,0.4)}
+.login-btn.logged-in{background:rgba(201,168,76,0.12);color:#c9a84c;border:1px solid rgba(201,168,76,0.35)}
+
+/* ── Modal overlay & shell ── */
+.auth-overlay{display:none;position:fixed;inset:0;z-index:1000;background:rgba(4,2,4,0.92);backdrop-filter:blur(8px);align-items:center;justify-content:center}
+.auth-overlay.open{display:flex}
+.auth-modal{background:linear-gradient(160deg,#110808 0%,#1a0a0a 60%,#0d0d0a 100%);border:1px solid rgba(201,168,76,0.28);border-radius:8px;width:100%;max-width:420px;margin:1rem;box-shadow:0 0 80px rgba(0,0,0,0.95);animation:mIn .3s ease both;overflow:hidden;max-height:92vh;overflow-y:auto}
+@keyframes mIn{from{opacity:0;transform:translateY(-20px) scale(0.96)}to{opacity:1;transform:none}}
+
+/* ── Modal head ── */
+.am-head{background:linear-gradient(90deg,#5a0808,#7a0e0e,#5a0808);border-bottom:1px solid rgba(201,168,76,0.3);padding:1rem 1.4rem;display:flex;align-items:center;gap:10px;position:relative}
+.am-wheel{font-size:1.3rem;filter:drop-shadow(0 0 7px rgba(201,168,76,0.6))}
+.am-brand{font-size:10px;letter-spacing:2px;color:#c9a84c;text-transform:uppercase;flex:1}
+.am-close{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:rgba(245,222,179,0.45);font-size:14px;cursor:pointer;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.am-close:hover{background:rgba(255,255,255,0.1);color:#f5deb3}
+
+/* ── Tabs ── */
+.am-tabs{display:flex;border-bottom:1px solid rgba(201,168,76,0.1)}
+.am-tab{flex:1;padding:11px;background:none;border:none;color:rgba(245,222,179,0.4);font-size:9.5px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;border-bottom:2px solid transparent;transition:all .2s}
+.am-tab.on{color:#c9a84c;border-bottom-color:#c9a84c;background:rgba(201,168,76,0.04)}
+.am-tab:hover:not(.on){color:rgba(245,222,179,0.65)}
+
+/* ── Body & fields ── */
+.am-body{padding:1.4rem}
+.am-field{margin-bottom:.9rem}
+.am-label{display:block;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:#c9a84c;margin-bottom:5px}
+.am-input{width:100%;background:rgba(255,255,255,0.04);border:1px solid rgba(201,168,76,0.18);border-radius:3px;padding:9px 13px;color:#f5deb3;font-size:0.87rem;outline:none;transition:border-color .2s}
+.am-input:focus{border-color:rgba(201,168,76,0.5);background:rgba(201,168,76,0.03)}
+.am-input::placeholder{color:rgba(245,222,179,0.18)}
+
+/* ── Forgot link, button, errors ── */
+.am-forgot{text-align:right;margin-top:-3px;margin-bottom:.8rem}
+.am-forgot a{font-size:0.75rem;color:rgba(201,168,76,0.55);text-decoration:none}
+.am-forgot a:hover{color:#c9a84c}
+.am-btn{width:100%;padding:11px;background:linear-gradient(135deg,#c9a84c,#a07810);border:none;border-radius:3px;color:#1a0800;font-weight:700;font-size:10.5px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all .2s}
+.am-btn:hover{background:linear-gradient(135deg,#e0b95c,#b88a20);box-shadow:0 4px 18px rgba(201,168,76,0.28)}
+.am-btn:disabled{opacity:.5;cursor:not-allowed}
+.am-err{margin-top:.65rem;font-size:.77rem;color:#e05555;min-height:1rem;text-align:center}
+.am-ok{color:#6dbf6d!important}
+
+/* ── Divider & socials ── */
+.am-div{display:flex;align-items:center;gap:10px;margin:1rem 0;color:rgba(245,222,179,0.22);font-size:.72rem}
+.am-div::before,.am-div::after{content:'';flex:1;height:1px;background:rgba(201,168,76,0.1)}
+.am-socials{display:grid;grid-template-columns:1fr;gap:8px;margin-bottom:.4rem}
+.am-soc{padding:9px 6px;background:rgba(255,255,255,0.04);border:1px solid rgba(201,168,76,0.14);border-radius:3px;color:rgba(245,222,179,0.7);font-size:.78rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:all .2s;white-space:nowrap}
+.am-soc:hover{background:rgba(255,255,255,0.09);border-color:rgba(201,168,76,0.3);color:#f5deb3}
+.am-soc.google:hover{border-color:rgba(234,67,53,0.5)}
+
+/* ── Logged-in panel ── */
+.am-loggedin{text-align:center;padding:2rem 1.4rem}
+.am-avatar{width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,rgba(201,168,76,0.2),rgba(90,8,8,0.5));border:2px solid rgba(201,168,76,0.4);display:flex;align-items:center;justify-content:center;font-size:1.8rem;margin:0 auto .8rem}
+.am-lg-name{font-size:1.3rem;color:#fff;margin-bottom:.25rem}
+.am-lg-email{font-size:.76rem;color:rgba(201,168,76,0.55);letter-spacing:.8px;margin-bottom:1.4rem}
+.am-lg-role{display:inline-block;font-family:'Cinzel',serif;font-size:9px;letter-spacing:2px;color:#c9a84c;background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.3);border-radius:30px;padding:4px 14px;margin-bottom:1rem;text-transform:uppercase}
+.am-btn-ghost{background:rgba(201,168,76,0.08)!important;color:#c9a84c!important;border:1px solid rgba(201,168,76,0.3)!important}
+.am-btn-ghost:hover{background:rgba(201,168,76,0.18)!important}
+
+/* ── Role picker (Sign Up) ── */
+.am-role-prompt{font-family:'Cormorant Garamond',serif;font-size:1.3rem;color:#f5deb3;text-align:center;margin-bottom:1.2rem}
+.am-role-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:1rem}
+.am-role-card{background:rgba(201,168,76,0.06);border:1px solid rgba(201,168,76,0.25);border-radius:8px;padding:1.2rem 0.6rem;cursor:pointer;transition:all .25s;text-align:center;color:#f5deb3}
+.am-role-card:hover{background:rgba(201,168,76,0.14);border-color:#c9a84c;transform:translateY(-2px)}
+.am-role-ico{font-size:2.4rem;margin-bottom:0.4rem}
+.am-role-title{font-family:'Cinzel',serif;font-size:13px;letter-spacing:2px;color:#c9a84c;margin-bottom:0.3rem}
+.am-role-sub{font-size:10.5px;color:rgba(245,222,179,0.55);line-height:1.4}
+.am-role-grid-3{grid-template-columns:1fr;gap:0.7rem}
+@media (min-width:520px){.am-role-grid-3{grid-template-columns:repeat(3,1fr)}}
+
+/* ── Back arrow & section label ── */
+.am-back{background:none;border:none;color:rgba(201,168,76,0.7);font-size:11px;letter-spacing:1px;cursor:pointer;margin-bottom:0.8rem;padding:0}
+.am-back:hover{color:#c9a84c}
+.am-section-label{font-family:'Cinzel',serif;font-size:11px;letter-spacing:2.5px;color:#c9a84c;text-transform:uppercase;margin-bottom:1rem;text-align:center;padding-bottom:0.6rem;border-bottom:1px solid rgba(201,168,76,0.15)}
+.am-opt{color:rgba(201,168,76,0.45);font-size:9px;letter-spacing:1px;font-weight:normal;text-transform:none}
+
+/* ── Textarea & select ── */
+.am-textarea{resize:vertical;min-height:50px;font-family:'Lato',sans-serif;line-height:1.45}
+select.am-input{appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23c9a84c'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e");background-repeat:no-repeat;background-position:right 10px center;padding-right:32px;cursor:pointer}
+
+/* ── Face capture block ── */
+.am-face-block{background:rgba(255,255,255,0.02);border:1px dashed rgba(201,168,76,0.25);border-radius:6px;padding:0.9rem;margin-bottom:1rem}
+.am-face-label{font-family:'Cinzel',serif;font-size:10px;letter-spacing:1.8px;color:#c9a84c;text-transform:uppercase;margin-bottom:0.7rem;text-align:center}
+.am-face-stage{position:relative;width:100%;aspect-ratio:4/3;background:#0a0606;border-radius:4px;overflow:hidden;display:flex;align-items:center;justify-content:center;margin-bottom:0.7rem}
+.am-face-stage video,.am-face-stage img{width:100%;height:100%;object-fit:cover;display:none}
+.am-face-stage video.live,.am-face-stage img.preview{display:block}
+.am-face-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:rgba(245,222,179,0.4);font-size:0.8rem;text-align:center;padding:1rem;pointer-events:none}
+.am-face-stage.has-content .am-face-overlay{display:none}
+.am-fc-stage{aspect-ratio:4/3;margin-bottom:1rem}
+.am-face-btns{display:flex;gap:6px;flex-wrap:wrap}
+.am-face-btn{flex:1;min-width:80px;padding:8px 10px;background:linear-gradient(135deg,#c9a84c,#a07810);border:none;border-radius:3px;color:#1a0800;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;font-weight:700;cursor:pointer;transition:all .2s}
+.am-face-btn:hover:not(:disabled){background:linear-gradient(135deg,#e0b95c,#b88a20)}
+.am-face-btn:disabled{opacity:.4;cursor:not-allowed}
+.am-face-btn.alt{background:rgba(201,168,76,0.1);color:#c9a84c;border:1px solid rgba(201,168,76,0.3)}
+.am-face-btn.alt:hover:not(:disabled){background:rgba(201,168,76,0.2)}
+.am-face-hint{font-size:0.7rem;color:rgba(245,222,179,0.45);margin-top:0.5rem;text-align:center;font-style:italic;line-height:1.5}
+
+/* ── Loading state ── */
+.am-btn.loading{position:relative;color:transparent!important}
+.am-btn.loading::after{content:'';position:absolute;top:50%;left:50%;width:16px;height:16px;margin:-8px 0 0 -8px;border:2px solid rgba(26,8,0,0.3);border-top-color:#1a0800;border-radius:50%;animation:amSpin .7s linear infinite}
+@keyframes amSpin{to{transform:rotate(360deg)}}
+
+/* ── Re-upload panel ── */
+.ru-greeting{font-family:'Cormorant Garamond',serif;font-size:1.3rem;color:#f5deb3;text-align:center;margin-bottom:0.5rem}
+.ru-message{font-size:0.86rem;color:rgba(245,222,179,0.7);text-align:center;margin-bottom:1.2rem;line-height:1.6}
+.ru-new-grade{display:inline-block;background:rgba(201,168,76,0.18);color:#c9a84c;padding:2px 12px;border-radius:30px;font-family:'Cinzel',serif;font-size:11px;letter-spacing:2px;margin:0 4px}
+
+/* ── Alumni panel ── */
+.al-batch{font-family:'Cinzel',serif;font-size:11px;letter-spacing:3px;color:#c9a84c;text-transform:uppercase;margin-bottom:1.2rem;text-align:center}
+.al-batch span{font-family:'Cormorant Garamond',serif;font-size:1.5rem;letter-spacing:1px;display:block;color:#f5deb3;margin-top:6px;font-style:italic}
+.al-text{font-size:0.86rem;color:rgba(245,222,179,0.68);text-align:center;line-height:1.7;margin-bottom:1.5rem;font-style:italic;padding:0 0.5rem}
+
+/* ── Edit profile note ── */
+.am-grade-note{font-size:0.7rem;color:rgba(245,222,179,0.4);margin-top:4px;font-style:italic;line-height:1.5}
+
+/* ── Registration code field (visually gated) ── */
+.am-reg-code{background:linear-gradient(135deg,rgba(201,168,76,0.04),rgba(80,8,8,0.03));border:1px dashed rgba(201,168,76,0.25);border-radius:6px;padding:0.9rem 0.8rem 0.7rem;margin-bottom:1.1rem!important}
+.am-reg-code .am-label{color:#e0b95c}
+
+/* ── Sign-in section split ── */
+.am-signin-section{margin-bottom:0.5rem}
+.am-signin-section .am-section-label{font-size:11px;color:#c9a84c;margin-top:0;margin-bottom:0.9rem;text-align:left;border-bottom:1px solid rgba(201,168,76,0.15);padding-bottom:0.55rem}
+
+/* ── Divider between sections ── */
+.am-divider{display:flex;align-items:center;gap:0.8rem;margin:1.4rem 0;color:rgba(245,222,179,0.4);font-size:11px;letter-spacing:3px}
+.am-divider::before,.am-divider::after{content:"";flex:1;height:1px;background:rgba(201,168,76,0.15)}
+.am-divider span{font-family:'Cinzel',serif}
+.am-divider-small{margin:0.9rem 0;font-size:10px}
+
+/* ── Visitor intro ── */
+.am-visitor-intro{font-size:0.82rem;color:rgba(245,222,179,0.65);line-height:1.6;margin:0 0 1.2rem;padding:0.7rem 0.9rem;background:rgba(201,168,76,0.04);border-left:2px solid rgba(201,168,76,0.3);border-radius:3px;font-style:italic}
+
+/* ── Guest-only Google sign-in ── */
+.am-guest-section{background:rgba(80,180,80,0.025);border:1px dashed rgba(140,200,140,0.18);border-radius:6px;padding:0.9rem 0.8rem 0.5rem}
+.am-guest-section .am-section-label{color:#a8c97a;border-bottom-color:rgba(168,201,122,0.18)}
+.am-guest-note{font-size:0.75rem;color:rgba(245,222,179,0.55);text-align:center;margin:0 0 0.8rem;line-height:1.5;font-style:italic}
+
+/* ── Migration link & intro ── */
+.am-migration-link{font-size:0.74rem;color:rgba(245,222,179,0.5);text-align:center;margin-top:0.9rem;line-height:1.6}
+.am-migration-link a{color:#c9a84c;text-decoration:none;font-weight:500;margin-left:4px}
+.am-migration-link a:hover{color:#e0b95c;text-decoration:underline}
+.am-migration-intro{font-size:0.82rem;color:rgba(245,222,179,0.7);line-height:1.65;margin:0 0 1.4rem;padding:0.85rem 0.95rem;background:rgba(201,168,76,0.05);border-left:2px solid rgba(201,168,76,0.4);border-radius:3px}
+.am-migration-intro strong{color:#e0b95c}
+
+/* ═══════════════════════════════════════════════════════════════════
+   RESPONSIVE — Large screens
+   ═══════════════════════════════════════════════════════════════════ */
+@media(min-width:1440px){
+  .auth-modal{max-width:480px}
+  .am-brand{font-size:15px}
+  .am-wheel{font-size:1.7rem}
+  .am-close{font-size:24px;width:38px;height:38px}
+  .am-tab{font-size:13.5px;padding:13px}
+  .am-label{font-size:11.5px}
+  .am-input{font-size:0.97rem;padding:11px 15px}
+  .am-btn{font-size:12.5px;padding:13px}
+  .am-soc{font-size:0.92rem}
+  .am-avatar{width:76px;height:76px}
+}
+@media(min-width:1920px){
+  .auth-modal{max-width:560px}
+  .am-brand{font-size:18px}
+  .am-wheel{font-size:2rem}
+  .am-close{font-size:28px;width:44px;height:44px}
+  .am-tab{font-size:15px;padding:15px}
+  .am-label{font-size:13px}
+  .am-input{font-size:1.1rem;padding:13px 18px}
+  .am-btn{font-size:14px;padding:15px}
+  .am-soc{font-size:1.05rem;padding:13px 10px}
+  .am-forgot a{font-size:1rem}
+  .am-err{font-size:0.95rem}
+  .am-avatar{width:88px;height:88px}
+}
+@media(min-width:2560px){
+  .auth-modal{max-width:720px}
+  .am-brand{font-size:22px}
+  .am-wheel{font-size:2.4rem}
+  .am-close{font-size:36px;width:56px;height:56px}
+  .am-tab{font-size:18px;padding:20px}
+  .am-label{font-size:16px}
+  .am-input{font-size:1.4rem;padding:16px 22px}
+  .am-btn{font-size:18px;padding:18px}
+  .am-soc{font-size:1.3rem;padding:16px 12px}
+  .am-forgot a{font-size:1.2rem}
+  .am-err{font-size:1.1rem}
+  .am-avatar{width:110px;height:110px}
+}

@@ -1850,58 +1850,565 @@ body::after{content:'';position:fixed;inset:0;z-index:-1;background:rgba(15,3,3,
 </head>
 <body>
 <div class="bg-orbs"></div>
+<!--
+═════════════════════════════════════════════════════════════════════
+  AUTH MODAL — DROP-IN REPLACEMENT
+─────────────────────────────────────────────────────────────────────
+  Replace the existing <div class="auth-overlay" id="authOverlay">…</div>
+  block in About.html (and every other page that has the modal)
+  with this whole snippet.
+
+  Loads face-utils.js + auth-system.js at the bottom.
+═════════════════════════════════════════════════════════════════════
+-->
+
 <!-- AUTH MODAL -->
 <div class="auth-overlay" id="authOverlay" onclick="overlayClick(event)">
   <div class="auth-modal">
+
     <div class="am-head">
       <span class="am-wheel">☸</span>
       <span class="am-brand">Sri Vipassi Dhamma School</span>
       <button class="am-close" onclick="closeAuth()">✕</button>
     </div>
+
     <div class="am-tabs">
       <button class="am-tab on" id="tabSI" onclick="switchTab('si')">Sign In</button>
-      <button class="am-tab" id="tabSU" onclick="switchTab('su')">Sign Up</button>
+      <button class="am-tab"    id="tabSU" onclick="switchTab('su')">Sign Up</button>
+      <button class="am-tab"    id="tabFC" onclick="switchTab('fc')">Face Sign-In</button>
     </div>
-    <!-- Sign In Panel -->
+
+    <!-- ════════════════ SIGN IN ════════════════ -->
     <div class="am-body" id="panSI">
-      <div class="am-field"><label class="am-label">Email</label><input class="am-input" id="siEmail" type="email" placeholder="you@email.com" autocomplete="email"></div>
-      <div class="am-field"><label class="am-label">Password</label><input class="am-input" id="siPass" type="password" placeholder="Password" autocomplete="current-password"></div>
-      <div class="am-forgot"><a href="#" onclick="forgotPw();return false">Forgot password?</a></div>
-      <button class="am-btn" id="siBtn" onclick="doSignIn()">Sign In</button>
-      <div class="am-err" id="siErr"></div>
-      <div class="am-div"><span>or continue with</span></div>
-      <div class="am-socials">
-        <button class="am-soc google" onclick="doGoogle()">
-          <svg width="15" height="15" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
-          Continue with Google
-        </button>
+
+      <!-- ─ Section 1: STUDENT / TEACHER sign-in (name + password) ─ -->
+      <div class="am-signin-section">
+        <div class="am-section-label">🎒 Student / Teacher Sign-In</div>
+
+        <div class="am-field"><label class="am-label">Your Name</label>
+          <input class="am-input" id="siNm" type="text" placeholder="Any part of your full name" autocomplete="username"></div>
+
+        <div class="am-field"><label class="am-label">Password</label>
+          <input class="am-input" id="siNmPass" type="password" placeholder="Password" autocomplete="current-password"></div>
+
+        <button class="am-btn" id="siNmBtn" onclick="doSchoolSignIn()">Sign In</button>
+        <div class="am-err" id="siNmErr"></div>
+
+        <div class="am-forgot"><a href="#" onclick="forgotPwForName();return false">Forgot password?</a></div>
+
+        <div class="am-migration-link">
+          Existing account that won't sign in by name?
+          <a href="#" onclick="openMigration();return false;">Click to migrate →</a>
+        </div>
+      </div>
+
+      <div class="am-divider"><span>OR</span></div>
+
+      <!-- ─ Section 2: GUEST sign-in (visitors only) ─ -->
+      <div class="am-signin-section am-guest-section">
+        <div class="am-section-label">👤 Guest Sign-In</div>
+        <p class="am-guest-note">For community visitors only. Students &amp; teachers must use the section above.</p>
+
+        <div class="am-field"><label class="am-label">Email</label>
+          <input class="am-input" id="siEmail" type="email" placeholder="you@email.com" autocomplete="email"></div>
+
+        <div class="am-field"><label class="am-label">Password</label>
+          <input class="am-input" id="siPass" type="password" placeholder="Password" autocomplete="current-password"></div>
+
+        <div class="am-forgot"><a href="#" onclick="forgotPw();return false">Forgot password?</a></div>
+
+        <button class="am-btn" id="siBtn" onclick="doSignIn()">Sign In as Guest</button>
+        <div class="am-err" id="siErr"></div>
+
+        <div class="am-divider am-divider-small"><span>OR</span></div>
+
+        <div class="am-socials">
+          <button class="am-soc google" onclick="doGoogle()">
+            <svg width="15" height="15" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+            Continue with Google
+          </button>
+        </div>
       </div>
     </div>
-    <!-- Sign Up Panel -->
+
+    <!-- ════════════════ SIGN UP — ROLE PICKER ════════════════ -->
     <div class="am-body" id="panSU" style="display:none">
-      <div class="am-field"><label class="am-label">Full Name</label><input class="am-input" id="suName" type="text" placeholder="Your name" autocomplete="name"></div>
-      <div class="am-field"><label class="am-label">Email</label><input class="am-input" id="suEmail" type="email" placeholder="you@email.com" autocomplete="email"></div>
-      <div class="am-field"><label class="am-label">Password</label><input class="am-input" id="suPass" type="password" placeholder="Min. 6 characters" autocomplete="new-password"></div>
-      <div class="am-field"><label class="am-label">Confirm Password</label><input class="am-input" id="suConf" type="password" placeholder="Repeat password" autocomplete="new-password"></div>
-      <button class="am-btn" id="suBtn" onclick="doSignUp()">Create Account</button>
-      <div class="am-err" id="suErr"></div>
-      <div class="am-div"><span>or sign up with</span></div>
-      <div class="am-socials">
-        <button class="am-soc google" onclick="doGoogle()">
-          <svg width="15" height="15" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
-          Continue with Google
-        </button>
+
+      <!-- STEP 1 — Choose role -->
+      <div id="suStep1">
+        <div class="am-role-prompt">I am a…</div>
+        <div class="am-role-grid am-role-grid-3">
+          <button class="am-role-card" onclick="pickRole('student')">
+            <div class="am-role-ico">🎒</div>
+            <div class="am-role-title">Student</div>
+            <div class="am-role-sub">Sign up as a Dhamma school student</div>
+          </button>
+          <button class="am-role-card" onclick="pickRole('teacher')">
+            <div class="am-role-ico">👨‍🏫</div>
+            <div class="am-role-title">Teacher</div>
+            <div class="am-role-sub">Sign up as a Dhamma school teacher</div>
+          </button>
+          <button class="am-role-card" onclick="pickRole('normal')">
+            <div class="am-role-ico">👤</div>
+            <div class="am-role-title">Visitor</div>
+            <div class="am-role-sub">Community member — no school code needed</div>
+          </button>
+        </div>
       </div>
+
+      <!-- STEP 2 — Student form -->
+      <div id="suStudent" style="display:none">
+        <button class="am-back" onclick="backToRolePick()">← Choose different role</button>
+        <div class="am-section-label">Student Registration</div>
+
+        <div class="am-field am-reg-code"><label class="am-label">🔒 School Registration Code *</label>
+          <input class="am-input" id="stRegCode" type="password" placeholder="Required to register as a student" autocomplete="off">
+          <div class="am-grade-note">Get the code from your teacher or the school office.</div></div>
+
+        <div class="am-field"><label class="am-label">Full Name *</label>
+          <input class="am-input" id="stName" type="text" placeholder="Your full name"></div>
+
+        <div class="am-field"><label class="am-label">Email *</label>
+          <input class="am-input" id="stEmail" type="email" placeholder="you@email.com"></div>
+
+        <div class="am-field"><label class="am-label">Password *</label>
+          <input class="am-input" id="stPass" type="password" placeholder="Min. 6 characters"></div>
+
+        <div class="am-field"><label class="am-label">Admission Number *</label>
+          <input class="am-input" id="stAdmission" type="text" placeholder="e.g. SVDS-2025-042"></div>
+
+        <div class="am-field"><label class="am-label">Contact Number *</label>
+          <input class="am-input" id="stContact" type="tel" placeholder="07X XXX XXXX"></div>
+
+        <div class="am-field"><label class="am-label">Current Grade *</label>
+          <select class="am-input" id="stGrade">
+            <option value="">— Select grade —</option>
+            <option value="1">Grade 1</option><option value="2">Grade 2</option>
+            <option value="3">Grade 3</option><option value="4">Grade 4</option>
+            <option value="5">Grade 5</option><option value="6">Grade 6</option>
+            <option value="7">Grade 7</option><option value="8">Grade 8</option>
+            <option value="9">Grade 9</option><option value="10">Grade 10</option>
+            <option value="11">Grade 11</option>
+          </select></div>
+
+        <div class="am-field"><label class="am-label">Date of Birth *</label>
+          <input class="am-input" id="stDOB" type="date"></div>
+
+        <div class="am-field"><label class="am-label">Parent / Guardian's Name *</label>
+          <input class="am-input" id="stGuardName" type="text" placeholder="Mother / Father / Guardian"></div>
+
+        <div class="am-field"><label class="am-label">Parent / Guardian's Phone *</label>
+          <input class="am-input" id="stGuardPhone" type="tel" placeholder="07X XXX XXXX"></div>
+
+        <div class="am-field"><label class="am-label">Parent / Guardian's Email <span class="am-opt">(optional)</span></label>
+          <input class="am-input" id="stGuardEmail" type="email" placeholder="guardian@email.com"></div>
+
+        <div class="am-field"><label class="am-label">Home Address *</label>
+          <textarea class="am-input am-textarea" id="stAddress" rows="2" placeholder="Street, City, Postal code"></textarea></div>
+
+        <!-- Face capture -->
+        <div class="am-face-block">
+          <div class="am-face-label">📸 Face Photo <span class="am-opt">(for face sign-in)</span></div>
+          <div class="am-face-stage" id="stFaceStage">
+            <video id="stVideo" autoplay playsinline muted></video>
+            <img id="stPreview" alt="">
+            <div class="am-face-overlay" id="stFaceOverlay">Camera will appear here</div>
+          </div>
+          <div class="am-face-btns">
+            <button type="button" class="am-face-btn" id="stCamBtn" onclick="startFaceCapture('student')">Open Camera</button>
+            <button type="button" class="am-face-btn alt" id="stSnapBtn" onclick="snapFace('student')" disabled>Capture</button>
+            <button type="button" class="am-face-btn alt" id="stRetakeBtn" onclick="retakeFace('student')" style="display:none">Retake</button>
+          </div>
+          <div class="am-face-hint" id="stFaceHint">Look straight at the camera in good light.</div>
+        </div>
+
+        <button class="am-btn" id="stBtn" onclick="doSignUpStudent()">Create Student Account</button>
+        <div class="am-err" id="stErr"></div>
+      </div>
+
+      <!-- STEP 3 — Teacher form -->
+      <div id="suTeacher" style="display:none">
+        <button class="am-back" onclick="backToRolePick()">← Choose different role</button>
+        <div class="am-section-label">Teacher Registration</div>
+
+        <div class="am-field am-reg-code"><label class="am-label">🔒 School Registration Code *</label>
+          <input class="am-input" id="tcRegCode" type="password" placeholder="Required to register as a teacher" autocomplete="off">
+          <div class="am-grade-note">Provided by school administration.</div></div>
+
+        <div class="am-field"><label class="am-label">Full Name *</label>
+          <input class="am-input" id="tcName" type="text" placeholder="Your full name"></div>
+
+        <div class="am-field"><label class="am-label">Email *</label>
+          <input class="am-input" id="tcEmail" type="email" placeholder="you@email.com"></div>
+
+        <div class="am-field"><label class="am-label">Password *</label>
+          <input class="am-input" id="tcPass" type="password" placeholder="Min. 6 characters"></div>
+
+        <div class="am-field"><label class="am-label">Phone Number *</label>
+          <input class="am-input" id="tcPhone" type="tel" placeholder="07X XXX XXXX"></div>
+
+        <div class="am-field"><label class="am-label">Contact Number (alternate) *</label>
+          <input class="am-input" id="tcContact" type="tel" placeholder="07X XXX XXXX"></div>
+
+        <div class="am-field"><label class="am-label">Home Address *</label>
+          <textarea class="am-input am-textarea" id="tcAddress" rows="2" placeholder="Street, City, Postal code"></textarea></div>
+
+        <div class="am-field"><label class="am-label">Teaching Grade *</label>
+          <select class="am-input" id="tcGrade">
+            <option value="">— Select grade —</option>
+            <option value="1">Grade 1</option><option value="2">Grade 2</option>
+            <option value="3">Grade 3</option><option value="4">Grade 4</option>
+            <option value="5">Grade 5</option><option value="6">Grade 6</option>
+            <option value="7">Grade 7</option><option value="8">Grade 8</option>
+            <option value="9">Grade 9</option><option value="10">Grade 10</option>
+            <option value="11">Grade 11</option>
+            <option value="multi">Multiple grades</option>
+          </select></div>
+
+        <div class="am-field"><label class="am-label">Subject *</label>
+          <input class="am-input" id="tcSubject" type="text" placeholder="e.g. Dhamma, Pali, History"></div>
+
+        <div class="am-field"><label class="am-label">Medium *</label>
+          <select class="am-input" id="tcMedium">
+            <option value="">— Select medium —</option>
+            <option value="Sinhala">Sinhala</option>
+            <option value="Tamil">Tamil</option>
+            <option value="English">English</option>
+          </select></div>
+
+        <div class="am-field"><label class="am-label">Date of Birth *</label>
+          <input class="am-input" id="tcDOB" type="date"></div>
+
+        <div class="am-field"><label class="am-label">Joining Date *</label>
+          <input class="am-input" id="tcJoinDate" type="date"></div>
+
+        <!-- Face capture -->
+        <div class="am-face-block">
+          <div class="am-face-label">📸 Face Photo <span class="am-opt">(for face sign-in)</span></div>
+          <div class="am-face-stage" id="tcFaceStage">
+            <video id="tcVideo" autoplay playsinline muted></video>
+            <img id="tcPreview" alt="">
+            <div class="am-face-overlay" id="tcFaceOverlay">Camera will appear here</div>
+          </div>
+          <div class="am-face-btns">
+            <button type="button" class="am-face-btn" id="tcCamBtn"   onclick="startFaceCapture('teacher')">Open Camera</button>
+            <button type="button" class="am-face-btn alt" id="tcSnapBtn"  onclick="snapFace('teacher')" disabled>Capture</button>
+            <button type="button" class="am-face-btn alt" id="tcRetakeBtn" onclick="retakeFace('teacher')" style="display:none">Retake</button>
+          </div>
+          <div class="am-face-hint" id="tcFaceHint">Look straight at the camera in good light.</div>
+        </div>
+
+        <button class="am-btn" id="tcBtn" onclick="doSignUpTeacher()">Create Teacher Account</button>
+        <div class="am-err" id="tcErr"></div>
+      </div>
+
+      <!-- STEP 4 — Visitor / Community Member form -->
+      <div id="suNormal" style="display:none">
+        <button class="am-back" onclick="backToRolePick()">← Choose different role</button>
+        <div class="am-section-label">Visitor Registration</div>
+        <p class="am-visitor-intro">A free community account — no school code or face photo needed. You can view content and use Google sign-in too.</p>
+
+        <div class="am-field"><label class="am-label">Full Name *</label>
+          <input class="am-input" id="nmName" type="text" placeholder="Your full name"></div>
+
+        <div class="am-field"><label class="am-label">Email *</label>
+          <input class="am-input" id="nmEmail" type="email" placeholder="you@email.com"></div>
+
+        <div class="am-field"><label class="am-label">Password *</label>
+          <input class="am-input" id="nmPass" type="password" placeholder="Min. 6 characters"></div>
+
+        <button class="am-btn" id="nmBtn" onclick="doSignUpNormal()">Create Visitor Account</button>
+        <div class="am-err" id="nmErr"></div>
+      </div>
+
+    </div><!-- /panSU -->
+
+    <!-- ════════════════ FACE SIGN-IN ════════════════ -->
+    <div class="am-body" id="panFC" style="display:none">
+      <div class="am-section-label">Sign in with your face</div>
+
+      <div class="am-face-stage am-fc-stage" id="fcStage">
+        <video id="fcVideo" autoplay playsinline muted></video>
+        <div class="am-face-overlay" id="fcOverlay">Click "Open Camera" to begin</div>
+      </div>
+
+      <div class="am-face-btns">
+        <button type="button" class="am-face-btn"     id="fcCamBtn"  onclick="startFaceLogin()">Open Camera</button>
+        <button type="button" class="am-face-btn alt" id="fcScanBtn" onclick="scanFaceLogin()" disabled>Scan & Sign In</button>
+      </div>
+
+      <div class="am-face-hint" id="fcHint">Face sign-in works after you've registered with a photo.</div>
+      <div class="am-err" id="fcErr"></div>
     </div>
-    <!-- Logged In Panel -->
+
+    <!-- ════════════════ ANNUAL PROMOTION — RE-UPLOAD PHOTO ════════════════ -->
+    <div class="am-body" id="panRU" style="display:none">
+      <div class="am-section-label">Annual Re-registration</div>
+      <div class="ru-greeting" id="ruGreeting">Welcome back!</div>
+      <div class="ru-message">
+        A new academic year has begun and you've been promoted to
+        <span class="ru-new-grade" id="ruNewGrade">Grade ?</span>.<br>
+        Please re-upload your face photo to continue using face sign-in.
+      </div>
+
+      <div class="am-face-block">
+        <div class="am-face-label">📸 New Face Photo</div>
+        <div class="am-face-stage" id="ruFaceStage">
+          <video id="ruVideo" autoplay playsinline muted></video>
+          <img id="ruPreview" alt="">
+          <div class="am-face-overlay" id="ruFaceOverlay">Click "Open Camera" to begin</div>
+        </div>
+        <div class="am-face-btns">
+          <button type="button" class="am-face-btn"     id="ruCamBtn"    onclick="startReuploadCapture()">Open Camera</button>
+          <button type="button" class="am-face-btn alt" id="ruSnapBtn"   onclick="snapReupload()" disabled>Capture</button>
+          <button type="button" class="am-face-btn alt" id="ruRetakeBtn" onclick="retakeReupload()" style="display:none">Retake</button>
+        </div>
+        <div class="am-face-hint" id="ruFaceHint">Look straight at the camera in good light.</div>
+      </div>
+
+      <button class="am-btn"           id="ruBtn" onclick="submitReupload()" disabled>Save New Photo</button>
+      <div class="am-err" id="ruErr"></div>
+      <button class="am-btn am-btn-ghost" onclick="skipReupload()" style="margin-top:10px">Skip for now</button>
+    </div>
+
+    <!-- ════════════════ ALUMNI WELCOME (Graduates) ════════════════ -->
+    <div class="am-body am-loggedin" id="panAL" style="display:none">
+      <div class="am-avatar" style="font-size:2.2rem">🎓</div>
+      <div class="am-lg-name"  id="alName">Congratulations!</div>
+      <div class="al-batch">Class of <span id="alBatchYear">—</span></div>
+      <p class="al-text">
+        You've completed Grade 11 at Sri Vipassi Dhamma School.<br>
+        Your records are preserved in the school archives.<br>
+        ☸ May the Dhamma continue to guide you on your journey.
+      </p>
+      <button class="am-btn" onclick="doSignOut()">Sign Out</button>
+      <button class="am-btn am-btn-ghost" onclick="closeAuth()" style="margin-top:10px">Continue Browsing</button>
+    </div>
+
+    <!-- ════════════════ LOGGED IN ════════════════ -->
     <div class="am-body am-loggedin" id="panLI" style="display:none">
       <div class="am-avatar" id="lgAvatar">☸</div>
-      <div class="am-lg-name" id="lgName">Welcome!</div>
+      <div class="am-lg-name"  id="lgName">Welcome!</div>
       <div class="am-lg-email" id="lgEmail"></div>
-      <button class="am-btn" onclick="doSignOut()">Sign Out</button>
+      <div class="am-lg-role"  id="lgRole"></div>
+
+      <button class="am-btn"              id="lgEditBtn"    onclick="openEditProfile()">Edit Profile</button>
+      <button class="am-btn am-btn-ghost" id="lgScannerBtn" style="display:none;margin-top:10px" onclick="window.location.href='Scaner.html'">Open Attendance Scanner</button>
+      <button class="am-btn am-btn-ghost"                   style="margin-top:10px" onclick="doSignOut()">Sign Out</button>
     </div>
+
+    <!-- ════════════════ EDIT PROFILE ════════════════ -->
+    <div class="am-body" id="panED" style="display:none">
+      <button class="am-back" onclick="cancelEdit()">← Back to profile</button>
+      <div class="am-section-label">Edit Your Details</div>
+
+      <div class="am-field"><label class="am-label">Full Name *</label>
+        <input class="am-input" id="edName" type="text" placeholder="Your full name"></div>
+
+      <!-- ── STUDENT-only fields ── -->
+      <div id="edStudentFields" style="display:none">
+        <div class="am-field"><label class="am-label">Admission Number</label>
+          <input class="am-input" id="edAdmission" type="text"></div>
+
+        <div class="am-field"><label class="am-label">Contact Number *</label>
+          <input class="am-input" id="edStContact" type="tel"></div>
+
+        <div class="am-field"><label class="am-label">Date of Birth *</label>
+          <input class="am-input" id="edStDOB" type="date"></div>
+
+        <div class="am-field"><label class="am-label">Parent / Guardian's Name *</label>
+          <input class="am-input" id="edGuardName" type="text"></div>
+
+        <div class="am-field"><label class="am-label">Parent / Guardian's Phone *</label>
+          <input class="am-input" id="edGuardPhone" type="tel"></div>
+
+        <div class="am-field"><label class="am-label">Parent / Guardian's Email <span class="am-opt">(optional)</span></label>
+          <input class="am-input" id="edGuardEmail" type="email"></div>
+
+        <div class="am-field"><label class="am-label">Home Address *</label>
+          <textarea class="am-input am-textarea" id="edStAddress" rows="2"></textarea></div>
+
+        <div class="am-field">
+          <label class="am-label">Current Grade</label>
+          <input class="am-input" id="edStGradeDisplay" type="text" disabled
+                 style="opacity:0.65;cursor:not-allowed">
+          <div class="am-grade-note">Grade is managed automatically by the annual promotion system.</div>
+        </div>
+      </div>
+
+      <!-- ── TEACHER-only fields ── -->
+      <div id="edTeacherFields" style="display:none">
+        <div class="am-field"><label class="am-label">Phone Number *</label>
+          <input class="am-input" id="edTcPhone" type="tel"></div>
+
+        <div class="am-field"><label class="am-label">Contact Number (alternate) *</label>
+          <input class="am-input" id="edTcContact" type="tel"></div>
+
+        <div class="am-field"><label class="am-label">Home Address *</label>
+          <textarea class="am-input am-textarea" id="edTcAddress" rows="2"></textarea></div>
+
+        <div class="am-field"><label class="am-label">Teaching Grade *</label>
+          <select class="am-input" id="edTcGrade">
+            <option value="">— Select grade —</option>
+            <option value="1">Grade 1</option><option value="2">Grade 2</option>
+            <option value="3">Grade 3</option><option value="4">Grade 4</option>
+            <option value="5">Grade 5</option><option value="6">Grade 6</option>
+            <option value="7">Grade 7</option><option value="8">Grade 8</option>
+            <option value="9">Grade 9</option><option value="10">Grade 10</option>
+            <option value="11">Grade 11</option>
+            <option value="multi">Multiple grades</option>
+          </select></div>
+
+        <div class="am-field"><label class="am-label">Subject *</label>
+          <input class="am-input" id="edTcSubject" type="text"></div>
+
+        <div class="am-field"><label class="am-label">Medium *</label>
+          <select class="am-input" id="edTcMedium">
+            <option value="">— Select medium —</option>
+            <option value="Sinhala">Sinhala</option>
+            <option value="Tamil">Tamil</option>
+            <option value="English">English</option>
+          </select></div>
+
+        <div class="am-field"><label class="am-label">Date of Birth *</label>
+          <input class="am-input" id="edTcDOB" type="date"></div>
+      </div>
+
+      <button class="am-btn" id="edBtn" onclick="saveProfileEdits()">Save Changes</button>
+      <div class="am-err" id="edErr"></div>
+      <button class="am-btn am-btn-ghost" onclick="openManualReupload()" style="margin-top:10px">📷 Re-register Face Photo</button>
+    </div>
+
+    <!-- ════════════════ MIGRATE EXISTING ACCOUNT ════════════════ -->
+    <div class="am-body" id="panMG" style="display:none">
+      <button class="am-back" onclick="cancelMigration()">← Back to sign-in</button>
+      <div class="am-section-label">Migrate Existing Account</div>
+
+      <p class="am-migration-intro">
+        For students &amp; teachers who signed up <strong>before</strong> the name-based sign-in feature.
+        Enter your email and password <strong>once</strong> here. Your account data gets upgraded automatically,
+        and from then on you can sign in with your name.
+      </p>
+
+      <div class="am-field"><label class="am-label">Your School Email</label>
+        <input class="am-input" id="mgEmail" type="email" placeholder="you@email.com" autocomplete="email"></div>
+
+      <div class="am-field"><label class="am-label">Your Password</label>
+        <input class="am-input" id="mgPass" type="password" placeholder="Password" autocomplete="current-password"></div>
+
+      <button class="am-btn" id="mgBtn" onclick="doMigrate()">Migrate My Account</button>
+      <div class="am-err" id="mgErr"></div>
+    </div>
+
   </div>
 </div>
+
+
+<!-- ════════════════════════════════════════════════════════════════
+     EXTRA STYLES — paste these into the same <style> block as the
+     existing modal styles, or keep them inline here.
+     ════════════════════════════════════════════════════════════════ -->
+<style>
+/* Role picker */
+.am-role-prompt{font-family:'Cormorant Garamond',serif;font-size:1.3rem;color:#f5deb3;text-align:center;margin-bottom:1.2rem}
+.am-role-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:1rem}
+.am-role-card{background:rgba(201,168,76,0.06);border:1px solid rgba(201,168,76,0.25);border-radius:8px;padding:1.2rem 0.6rem;cursor:pointer;transition:all .25s;text-align:center;color:#f5deb3}
+.am-role-card:hover{background:rgba(201,168,76,0.14);border-color:#c9a84c;transform:translateY(-2px)}
+.am-role-ico{font-size:2.4rem;margin-bottom:0.4rem}
+.am-role-title{font-family:'Cinzel',serif;font-size:13px;letter-spacing:2px;color:#c9a84c;margin-bottom:0.3rem}
+.am-role-sub{font-size:10.5px;color:rgba(245,222,179,0.55);line-height:1.4}
+
+/* Back arrow */
+.am-back{background:none;border:none;color:rgba(201,168,76,0.7);font-size:11px;letter-spacing:1px;cursor:pointer;margin-bottom:0.8rem;padding:0}
+.am-back:hover{color:#c9a84c}
+.am-section-label{font-family:'Cinzel',serif;font-size:11px;letter-spacing:2.5px;color:#c9a84c;text-transform:uppercase;margin-bottom:1rem;text-align:center;padding-bottom:0.6rem;border-bottom:1px solid rgba(201,168,76,0.15)}
+.am-opt{color:rgba(201,168,76,0.45);font-size:9px;letter-spacing:1px;font-weight:normal;text-transform:none}
+
+/* Textarea reuses .am-input style */
+.am-textarea{resize:vertical;min-height:50px;font-family:'Lato',sans-serif;line-height:1.45}
+select.am-input{appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23c9a84c'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e");background-repeat:no-repeat;background-position:right 10px center;padding-right:32px;cursor:pointer}
+
+/* Face capture block */
+.am-face-block{background:rgba(255,255,255,0.02);border:1px dashed rgba(201,168,76,0.25);border-radius:6px;padding:0.9rem;margin-bottom:1rem}
+.am-face-label{font-family:'Cinzel',serif;font-size:10px;letter-spacing:1.8px;color:#c9a84c;text-transform:uppercase;margin-bottom:0.7rem;text-align:center}
+.am-face-stage{position:relative;width:100%;aspect-ratio:4/3;background:#0a0606;border-radius:4px;overflow:hidden;display:flex;align-items:center;justify-content:center;margin-bottom:0.7rem}
+.am-face-stage video,.am-face-stage img{width:100%;height:100%;object-fit:cover;display:none}
+.am-face-stage video.live,.am-face-stage img.preview{display:block}
+.am-face-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:rgba(245,222,179,0.4);font-size:0.8rem;text-align:center;padding:1rem;pointer-events:none}
+.am-face-stage.has-content .am-face-overlay{display:none}
+.am-fc-stage{aspect-ratio:4/3;margin-bottom:1rem}
+.am-face-btns{display:flex;gap:6px;flex-wrap:wrap}
+.am-face-btn{flex:1;min-width:80px;padding:8px 10px;background:linear-gradient(135deg,#c9a84c,#a07810);border:none;border-radius:3px;color:#1a0800;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;font-weight:700;cursor:pointer;transition:all .2s}
+.am-face-btn:hover:not(:disabled){background:linear-gradient(135deg,#e0b95c,#b88a20)}
+.am-face-btn:disabled{opacity:.4;cursor:not-allowed}
+.am-face-btn.alt{background:rgba(201,168,76,0.1);color:#c9a84c;border:1px solid rgba(201,168,76,0.3)}
+.am-face-btn.alt:hover:not(:disabled){background:rgba(201,168,76,0.2)}
+.am-face-hint{font-size:0.7rem;color:rgba(245,222,179,0.45);margin-top:0.5rem;text-align:center;font-style:italic;line-height:1.5}
+
+/* Logged-in role badge & ghost btn */
+.am-lg-role{display:inline-block;font-family:'Cinzel',serif;font-size:9px;letter-spacing:2px;color:#c9a84c;background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.3);border-radius:30px;padding:4px 14px;margin-bottom:1rem;text-transform:uppercase}
+.am-btn-ghost{background:rgba(201,168,76,0.08)!important;color:#c9a84c!important;border:1px solid rgba(201,168,76,0.3)!important}
+.am-btn-ghost:hover{background:rgba(201,168,76,0.18)!important}
+
+/* Loading state on submit buttons */
+.am-btn.loading{position:relative;color:transparent!important}
+.am-btn.loading::after{content:'';position:absolute;top:50%;left:50%;width:16px;height:16px;margin:-8px 0 0 -8px;border:2px solid rgba(26,8,0,0.3);border-top-color:#1a0800;border-radius:50%;animation:amSpin .7s linear infinite}
+@keyframes amSpin{to{transform:rotate(360deg)}}
+
+/* Re-upload panel */
+.ru-greeting{font-family:'Cormorant Garamond',serif;font-size:1.3rem;color:#f5deb3;text-align:center;margin-bottom:0.5rem}
+.ru-message{font-size:0.86rem;color:rgba(245,222,179,0.7);text-align:center;margin-bottom:1.2rem;line-height:1.6}
+.ru-new-grade{display:inline-block;background:rgba(201,168,76,0.18);color:#c9a84c;padding:2px 12px;border-radius:30px;font-family:'Cinzel',serif;font-size:11px;letter-spacing:2px;margin:0 4px}
+
+/* Alumni panel */
+.al-batch{font-family:'Cinzel',serif;font-size:11px;letter-spacing:3px;color:#c9a84c;text-transform:uppercase;margin-bottom:1.2rem;text-align:center}
+.al-batch span{font-family:'Cormorant Garamond',serif;font-size:1.5rem;letter-spacing:1px;display:block;color:#f5deb3;margin-top:6px;font-style:italic}
+.al-text{font-size:0.86rem;color:rgba(245,222,179,0.68);text-align:center;line-height:1.7;margin-bottom:1.5rem;font-style:italic;padding:0 0.5rem}
+
+/* Edit Profile panel */
+.am-grade-note{font-size:0.7rem;color:rgba(245,222,179,0.4);margin-top:4px;font-style:italic;line-height:1.5}
+
+/* Registration code field — visually distinct to signal it's gated */
+.am-reg-code{
+  background:linear-gradient(135deg,rgba(201,168,76,0.04),rgba(80,8,8,0.03));
+  border:1px dashed rgba(201,168,76,0.25);
+  border-radius:6px;
+  padding:0.9rem 0.8rem 0.7rem;
+  margin-bottom:1.1rem!important;
+}
+.am-reg-code .am-label{color:#e0b95c}
+
+/* Sign-in section (split into student + email/others) */
+.am-signin-section{margin-bottom:0.5rem}
+.am-signin-section .am-section-label{font-size:11px;color:#c9a84c;margin-top:0;margin-bottom:0.9rem;text-align:left;border-bottom:1px solid rgba(201,168,76,0.15);padding-bottom:0.55rem}
+
+/* OR divider between sign-in sections */
+.am-divider{display:flex;align-items:center;gap:0.8rem;margin:1.4rem 0;color:rgba(245,222,179,0.4);font-size:11px;letter-spacing:3px}
+.am-divider::before,.am-divider::after{content:"";flex:1;height:1px;background:rgba(201,168,76,0.15)}
+.am-divider span{font-family:'Cinzel',serif}
+.am-divider-small{margin:0.9rem 0;font-size:10px}
+
+/* 3-card role grid (Student / Teacher / Visitor) */
+.am-role-grid-3{grid-template-columns:1fr;gap:0.7rem}
+@media (min-width:520px){.am-role-grid-3{grid-template-columns:repeat(3,1fr)}}
+
+/* Visitor intro paragraph */
+.am-visitor-intro{font-size:0.82rem;color:rgba(245,222,179,0.65);line-height:1.6;margin:0 0 1.2rem;padding:0.7rem 0.9rem;background:rgba(201,168,76,0.04);border-left:2px solid rgba(201,168,76,0.3);border-radius:3px;font-style:italic}
+
+/* Guest-only Google sign-in subsection */
+.am-guest-section{background:rgba(80,180,80,0.025);border:1px dashed rgba(140,200,140,0.18);border-radius:6px;padding:0.9rem 0.8rem 0.5rem}
+.am-guest-section .am-section-label{color:#a8c97a;border-bottom-color:rgba(168,201,122,0.18)}
+.am-guest-note{font-size:0.75rem;color:rgba(245,222,179,0.55);text-align:center;margin:0 0 0.8rem;line-height:1.5;font-style:italic}
+
+/* Migration link under Student/Teacher sign-in */
+.am-migration-link{font-size:0.74rem;color:rgba(245,222,179,0.5);text-align:center;margin-top:0.9rem;line-height:1.6}
+.am-migration-link a{color:#c9a84c;text-decoration:none;font-weight:500;margin-left:4px}
+.am-migration-link a:hover{color:#e0b95c;text-decoration:underline}
+
+/* Migration panel intro */
+.am-migration-intro{font-size:0.82rem;color:rgba(245,222,179,0.7);line-height:1.65;margin:0 0 1.4rem;padding:0.85rem 0.95rem;background:rgba(201,168,76,0.05);border-left:2px solid rgba(201,168,76,0.4);border-radius:3px}
+.am-migration-intro strong{color:#e0b95c}
+</style>
 
 <!-- ===== NAV ===== -->
 <nav class="nav">
@@ -3320,10 +3827,12 @@ function syncThemeIcons(){
 })();
 </script>
 
-<!-- Firebase -->
+<!-- Firebase + Face Attendance System -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="face-utils.js"></script>
+<script src="auth-system.js"></script>
 
 <script>
 if(!firebase.apps.length){
