@@ -15,6 +15,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Noto+Sans+Sinhala:wght@400;600;700&family=Cormorant+Garamond:wght@400;500;600&family=Lora:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="footer-mobile.css">
+<link rel="stylesheet" href="auth-modal.css">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   html { scroll-behavior: smooth; }
@@ -2864,7 +2865,7 @@
       <button class="lb on">EN</button>
       <button class="lb">සිං</button>
       <button class="lb">தமிழ்</button>
-      <button class="login-btn" id="loginBtn" onclick="openAuth('signin')">Login</button>
+      <button class="login-btn" id="loginBtn" onclick="openAuth('si')">Login</button>
     </div>
     <button class="hamburger" onclick="toggleMobileMenu()" aria-label="Open menu">
       <span class="dot red"></span>
@@ -2901,25 +2902,66 @@
     onclick="openAuth('si');closeMobileMenu()">Login</button>
 </div>
   </div>
+<!-- AUTH MODAL -->
+<div class="auth-overlay" id="authOverlay" onclick="overlayClick(event)">
+  <div class="auth-modal">
 
-  <!-- AUTH MODAL -->
-  <div class="auth-overlay" id="authOverlay" onclick="overlayClick(event)">
-    <div class="auth-modal">
-      <div class="am-head">
-        <span class="am-brand">Sri Vipassi Dhamma School</span>
-        <button class="am-close" onclick="closeAuth()">✕</button>
+    <div class="am-head">
+      <span class="am-wheel">☸</span>
+      <span class="am-brand">Sri Vipassi Dhamma School</span>
+      <button class="am-close" onclick="closeAuth()">✕</button>
+    </div>
+
+    <div class="am-tabs">
+      <button class="am-tab on" id="tabSI" onclick="switchTab('si')">Sign In</button>
+      <button class="am-tab"    id="tabSU" onclick="switchTab('su')">Sign Up</button>
+      <button class="am-tab"    id="tabFC" onclick="switchTab('fc')">Face Sign-In</button>
+    </div>
+
+    <!-- ════════════════ SIGN IN ════════════════ -->
+    <div class="am-body" id="panSI">
+
+      <!-- Student / Teacher sign-in -->
+      <div class="am-signin-section">
+        <div class="am-section-label">🎒 Student / Teacher Sign-In</div>
+
+        <div class="am-field"><label class="am-label">Your Name</label>
+          <input class="am-input" id="siNm" type="text" placeholder="Any part of your full name" autocomplete="username"></div>
+
+        <div class="am-field"><label class="am-label">Password</label>
+          <input class="am-input" id="siNmPass" type="password" placeholder="Password" autocomplete="current-password"></div>
+
+        <button class="am-btn" id="siNmBtn" onclick="doSchoolSignIn()">Sign In</button>
+        <div class="am-err" id="siNmErr"></div>
+
+        <div class="am-forgot"><a href="#" onclick="forgotPwForName();return false">Forgot password?</a></div>
+
+        <div class="am-migration-link">
+          Existing account that won't sign in by name?
+          <a href="#" onclick="openMigration();return false;">Click to migrate →</a>
+        </div>
       </div>
-      <div class="am-tabs">
-        <button class="am-tab on" id="tabSI" onclick="switchTab('si')">Sign In</button>
-        <button class="am-tab" id="tabSU" onclick="switchTab('su')">Sign Up</button>
-      </div>
-      <div class="am-body" id="panSI">
-        <div class="am-field"><label class="am-label">Email</label><input class="am-input" id="siEmail" type="email" placeholder="you@email.com" autocomplete="email"></div>
-        <div class="am-field"><label class="am-label">Password</label><input class="am-input" id="siPass" type="password" placeholder="Password" autocomplete="current-password"></div>
+
+      <div class="am-divider"><span>OR</span></div>
+
+      <!-- Guest sign-in -->
+      <div class="am-signin-section am-guest-section">
+        <div class="am-section-label">👤 Guest Sign-In</div>
+        <p class="am-guest-note">For community visitors only. Students &amp; teachers must use the section above.</p>
+
+        <div class="am-field"><label class="am-label">Email</label>
+          <input class="am-input" id="siEmail" type="email" placeholder="you@email.com" autocomplete="email"></div>
+
+        <div class="am-field"><label class="am-label">Password</label>
+          <input class="am-input" id="siPass" type="password" placeholder="Password" autocomplete="current-password"></div>
+
         <div class="am-forgot"><a href="#" onclick="forgotPw();return false">Forgot password?</a></div>
-        <button class="am-btn" id="siBtn" onclick="doSignIn()">Sign In</button>
+
+        <button class="am-btn" id="siBtn" onclick="doSignIn()">Sign In as Guest</button>
         <div class="am-err" id="siErr"></div>
-        <div class="am-div"><span>or continue with</span></div>
+
+        <div class="am-divider am-divider-small"><span>OR</span></div>
+
         <div class="am-socials">
           <button class="am-soc google" onclick="doGoogle()">
             <svg width="15" height="15" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
@@ -2927,26 +2969,376 @@
           </button>
         </div>
       </div>
-      <div class="am-body" id="panSU" style="display:none">
-        <div class="am-field"><label class="am-label">Full Name</label><input class="am-input" id="suName" type="text" placeholder="Your name" autocomplete="name"></div>
-        <div class="am-field"><label class="am-label">Email</label><input class="am-input" id="suEmail" type="email" placeholder="you@email.com" autocomplete="email"></div>
-        <div class="am-field"><label class="am-label">Password</label><input class="am-input" id="suPass" type="password" placeholder="Min. 6 characters" autocomplete="new-password"></div>
-        <div class="am-field"><label class="am-label">Confirm Password</label><input class="am-input" id="suConf" type="password" placeholder="Repeat password" autocomplete="new-password"></div>
-        <button class="am-btn" id="suBtn" onclick="doSignUp()">Create Account</button>
-        <div class="am-err" id="suErr"></div>
-        <div class="am-div"><span>or sign up with</span></div>
-        <div class="am-socials">
-          <button class="am-soc google" onclick="doGoogle()"><svg width="15" height="15" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>Continue with Google</button>
+    </div>
+
+    <!-- ════════════════ SIGN UP ════════════════ -->
+    <div class="am-body" id="panSU" style="display:none">
+
+      <!-- Role picker -->
+      <div id="suStep1">
+        <div class="am-role-prompt">I am a…</div>
+        <div class="am-role-grid am-role-grid-3">
+          <button class="am-role-card" onclick="pickRole('student')">
+            <div class="am-role-ico">🎒</div>
+            <div class="am-role-title">Student</div>
+            <div class="am-role-sub">Sign up as a Dhamma school student</div>
+          </button>
+          <button class="am-role-card" onclick="pickRole('teacher')">
+            <div class="am-role-ico">👨‍🏫</div>
+            <div class="am-role-title">Teacher</div>
+            <div class="am-role-sub">Sign up as a Dhamma school teacher</div>
+          </button>
+          <button class="am-role-card" onclick="pickRole('normal')">
+            <div class="am-role-ico">👤</div>
+            <div class="am-role-title">Visitor</div>
+            <div class="am-role-sub">Community member — no school code needed</div>
+          </button>
         </div>
       </div>
-      <div class="am-body am-loggedin" id="panLI" style="display:none">
-        <div class="am-avatar" id="lgAvatar">☸</div>
-        <div class="am-lg-name" id="lgName">Welcome!</div>
-        <div class="am-lg-email" id="lgEmail"></div>
-        <button class="am-btn" onclick="doSignOut()">Sign Out</button>
+
+      <!-- Student form -->
+      <div id="suStudent" style="display:none">
+        <button class="am-back" onclick="backToRolePick()">← Choose different role</button>
+        <div class="am-section-label">Student Registration</div>
+
+        <div class="am-field am-reg-code"><label class="am-label">🔒 School Registration Code *</label>
+          <input class="am-input" id="stRegCode" type="password" placeholder="Required to register as a student" autocomplete="off">
+          <div class="am-grade-note">Get the code from your teacher or the school office.</div></div>
+
+        <div class="am-field"><label class="am-label">Full Name *</label>
+          <input class="am-input" id="stName" type="text" placeholder="Your full name"></div>
+
+        <div class="am-field"><label class="am-label">Email *</label>
+          <input class="am-input" id="stEmail" type="email" placeholder="you@email.com"></div>
+
+        <div class="am-field"><label class="am-label">Password *</label>
+          <input class="am-input" id="stPass" type="password" placeholder="Min. 6 characters"></div>
+
+        <div class="am-field"><label class="am-label">Admission Number *</label>
+          <input class="am-input" id="stAdmission" type="text" placeholder="e.g. SVDS-2025-042"></div>
+
+        <div class="am-field"><label class="am-label">Contact Number *</label>
+          <input class="am-input" id="stContact" type="tel" placeholder="07X XXX XXXX"></div>
+
+        <div class="am-field"><label class="am-label">Current Grade *</label>
+          <select class="am-input" id="stGrade">
+            <option value="">— Select grade —</option>
+            <option value="1">Grade 1</option><option value="2">Grade 2</option>
+            <option value="3">Grade 3</option><option value="4">Grade 4</option>
+            <option value="5">Grade 5</option><option value="6">Grade 6</option>
+            <option value="7">Grade 7</option><option value="8">Grade 8</option>
+            <option value="9">Grade 9</option><option value="10">Grade 10</option>
+            <option value="11">Grade 11</option>
+          </select></div>
+
+        <div class="am-field"><label class="am-label">Date of Birth *</label>
+          <input class="am-input" id="stDOB" type="date"></div>
+
+        <div class="am-field"><label class="am-label">Parent / Guardian's Name *</label>
+          <input class="am-input" id="stGuardName" type="text" placeholder="Mother / Father / Guardian"></div>
+
+        <div class="am-field"><label class="am-label">Parent / Guardian's Phone *</label>
+          <input class="am-input" id="stGuardPhone" type="tel" placeholder="07X XXX XXXX"></div>
+
+        <div class="am-field"><label class="am-label">Parent / Guardian's Email <span class="am-opt">(optional)</span></label>
+          <input class="am-input" id="stGuardEmail" type="email" placeholder="guardian@email.com"></div>
+
+        <div class="am-field"><label class="am-label">Home Address *</label>
+          <textarea class="am-input am-textarea" id="stAddress" rows="2" placeholder="Street, City, Postal code"></textarea></div>
+
+        <div class="am-face-block">
+          <div class="am-face-label">📸 Face Photo <span class="am-opt">(for face sign-in)</span></div>
+          <div class="am-face-stage" id="stFaceStage">
+            <video id="stVideo" autoplay playsinline muted></video>
+            <img id="stPreview" alt="">
+            <div class="am-face-overlay" id="stFaceOverlay">Camera will appear here</div>
+          </div>
+          <div class="am-face-btns">
+            <button type="button" class="am-face-btn" id="stCamBtn" onclick="startFaceCapture('student')">Open Camera</button>
+            <button type="button" class="am-face-btn alt" id="stSnapBtn" onclick="snapFace('student')" disabled>Capture</button>
+            <button type="button" class="am-face-btn alt" id="stRetakeBtn" onclick="retakeFace('student')" style="display:none">Retake</button>
+          </div>
+          <div class="am-face-hint" id="stFaceHint">Look straight at the camera in good light.</div>
+        </div>
+
+        <button class="am-btn" id="stBtn" onclick="doSignUpStudent()">Create Student Account</button>
+        <div class="am-err" id="stErr"></div>
       </div>
+
+      <!-- Teacher form -->
+      <div id="suTeacher" style="display:none">
+        <button class="am-back" onclick="backToRolePick()">← Choose different role</button>
+        <div class="am-section-label">Teacher Registration</div>
+
+        <div class="am-field am-reg-code"><label class="am-label">🔒 School Registration Code *</label>
+          <input class="am-input" id="tcRegCode" type="password" placeholder="Required to register as a teacher" autocomplete="off">
+          <div class="am-grade-note">Provided by school administration.</div></div>
+
+        <div class="am-field"><label class="am-label">Full Name *</label>
+          <input class="am-input" id="tcName" type="text" placeholder="Your full name"></div>
+
+        <div class="am-field"><label class="am-label">Email *</label>
+          <input class="am-input" id="tcEmail" type="email" placeholder="you@email.com"></div>
+
+        <div class="am-field"><label class="am-label">Password *</label>
+          <input class="am-input" id="tcPass" type="password" placeholder="Min. 6 characters"></div>
+
+        <div class="am-field"><label class="am-label">Phone Number *</label>
+          <input class="am-input" id="tcPhone" type="tel" placeholder="07X XXX XXXX"></div>
+
+        <div class="am-field"><label class="am-label">Contact Number (alternate) *</label>
+          <input class="am-input" id="tcContact" type="tel" placeholder="07X XXX XXXX"></div>
+
+        <div class="am-field"><label class="am-label">Home Address *</label>
+          <textarea class="am-input am-textarea" id="tcAddress" rows="2" placeholder="Street, City, Postal code"></textarea></div>
+
+        <div class="am-field"><label class="am-label">Teaching Grade *</label>
+          <select class="am-input" id="tcGrade">
+            <option value="">— Select grade —</option>
+            <option value="1">Grade 1</option><option value="2">Grade 2</option>
+            <option value="3">Grade 3</option><option value="4">Grade 4</option>
+            <option value="5">Grade 5</option><option value="6">Grade 6</option>
+            <option value="7">Grade 7</option><option value="8">Grade 8</option>
+            <option value="9">Grade 9</option><option value="10">Grade 10</option>
+            <option value="11">Grade 11</option>
+            <option value="multi">Multiple grades</option>
+          </select></div>
+
+        <div class="am-field"><label class="am-label">Subject *</label>
+          <input class="am-input" id="tcSubject" type="text" placeholder="e.g. Dhamma, Pali, History"></div>
+
+        <div class="am-field"><label class="am-label">Medium *</label>
+          <select class="am-input" id="tcMedium">
+            <option value="">— Select medium —</option>
+            <option value="Sinhala">Sinhala</option>
+            <option value="Tamil">Tamil</option>
+            <option value="English">English</option>
+          </select></div>
+
+        <div class="am-field"><label class="am-label">Date of Birth *</label>
+          <input class="am-input" id="tcDOB" type="date"></div>
+
+        <div class="am-field"><label class="am-label">Joining Date *</label>
+          <input class="am-input" id="tcJoinDate" type="date"></div>
+
+        <div class="am-face-block">
+          <div class="am-face-label">📸 Face Photo <span class="am-opt">(for face sign-in)</span></div>
+          <div class="am-face-stage" id="tcFaceStage">
+            <video id="tcVideo" autoplay playsinline muted></video>
+            <img id="tcPreview" alt="">
+            <div class="am-face-overlay" id="tcFaceOverlay">Camera will appear here</div>
+          </div>
+          <div class="am-face-btns">
+            <button type="button" class="am-face-btn" id="tcCamBtn"   onclick="startFaceCapture('teacher')">Open Camera</button>
+            <button type="button" class="am-face-btn alt" id="tcSnapBtn"  onclick="snapFace('teacher')" disabled>Capture</button>
+            <button type="button" class="am-face-btn alt" id="tcRetakeBtn" onclick="retakeFace('teacher')" style="display:none">Retake</button>
+          </div>
+          <div class="am-face-hint" id="tcFaceHint">Look straight at the camera in good light.</div>
+        </div>
+
+        <button class="am-btn" id="tcBtn" onclick="doSignUpTeacher()">Create Teacher Account</button>
+        <div class="am-err" id="tcErr"></div>
+      </div>
+
+      <!-- Visitor form -->
+      <div id="suNormal" style="display:none">
+        <button class="am-back" onclick="backToRolePick()">← Choose different role</button>
+        <div class="am-section-label">Visitor Registration</div>
+        <p class="am-visitor-intro">A free community account — no school code or face photo needed. You can view content and use Google sign-in too.</p>
+
+        <div class="am-field"><label class="am-label">Full Name *</label>
+          <input class="am-input" id="nmName" type="text" placeholder="Your full name"></div>
+
+        <div class="am-field"><label class="am-label">Email *</label>
+          <input class="am-input" id="nmEmail" type="email" placeholder="you@email.com"></div>
+
+        <div class="am-field"><label class="am-label">Password *</label>
+          <input class="am-input" id="nmPass" type="password" placeholder="Min. 6 characters"></div>
+
+        <button class="am-btn" id="nmBtn" onclick="doSignUpNormal()">Create Visitor Account</button>
+        <div class="am-err" id="nmErr"></div>
+      </div>
+
     </div>
+
+    <!-- ════════════════ FACE SIGN-IN ════════════════ -->
+    <div class="am-body" id="panFC" style="display:none">
+      <div class="am-section-label">Sign in with your face</div>
+
+      <div class="am-face-stage am-fc-stage" id="fcStage">
+        <video id="fcVideo" autoplay playsinline muted></video>
+        <div class="am-face-overlay" id="fcOverlay">Click "Open Camera" to begin</div>
+      </div>
+
+      <div class="am-face-btns">
+        <button type="button" class="am-face-btn"     id="fcCamBtn"  onclick="startFaceLogin()">Open Camera</button>
+        <button type="button" class="am-face-btn alt" id="fcScanBtn" onclick="scanFaceLogin()" disabled>Scan & Sign In</button>
+      </div>
+
+      <div class="am-face-hint" id="fcHint">Face sign-in works after you've registered with a photo.</div>
+      <div class="am-err" id="fcErr"></div>
+    </div>
+
+    <!-- ════════════════ ANNUAL PROMOTION — RE-UPLOAD ════════════════ -->
+    <div class="am-body" id="panRU" style="display:none">
+      <div class="am-section-label">Annual Re-registration</div>
+      <div class="ru-greeting" id="ruGreeting">Welcome back!</div>
+      <div class="ru-message">
+        A new academic year has begun and you've been promoted to
+        <span class="ru-new-grade" id="ruNewGrade">Grade ?</span>.<br>
+        Please re-upload your face photo to continue using face sign-in.
+      </div>
+
+      <div class="am-face-block">
+        <div class="am-face-label">📸 New Face Photo</div>
+        <div class="am-face-stage" id="ruFaceStage">
+          <video id="ruVideo" autoplay playsinline muted></video>
+          <img id="ruPreview" alt="">
+          <div class="am-face-overlay" id="ruFaceOverlay">Click "Open Camera" to begin</div>
+        </div>
+        <div class="am-face-btns">
+          <button type="button" class="am-face-btn"     id="ruCamBtn"    onclick="startReuploadCapture()">Open Camera</button>
+          <button type="button" class="am-face-btn alt" id="ruSnapBtn"   onclick="snapReupload()" disabled>Capture</button>
+          <button type="button" class="am-face-btn alt" id="ruRetakeBtn" onclick="retakeReupload()" style="display:none">Retake</button>
+        </div>
+        <div class="am-face-hint" id="ruFaceHint">Look straight at the camera in good light.</div>
+      </div>
+
+      <button class="am-btn"           id="ruBtn" onclick="submitReupload()" disabled>Save New Photo</button>
+      <div class="am-err" id="ruErr"></div>
+      <button class="am-btn am-btn-ghost" onclick="skipReupload()" style="margin-top:10px">Skip for now</button>
+    </div>
+
+    <!-- ════════════════ ALUMNI ════════════════ -->
+    <div class="am-body am-loggedin" id="panAL" style="display:none">
+      <div class="am-avatar" style="font-size:2.2rem">🎓</div>
+      <div class="am-lg-name"  id="alName">Congratulations!</div>
+      <div class="al-batch">Class of <span id="alBatchYear">—</span></div>
+      <p class="al-text">
+        You've completed Grade 11 at Sri Vipassi Dhamma School.<br>
+        Your records are preserved in the school archives.<br>
+        ☸ May the Dhamma continue to guide you on your journey.
+      </p>
+      <button class="am-btn" onclick="doSignOut()">Sign Out</button>
+      <button class="am-btn am-btn-ghost" onclick="closeAuth()" style="margin-top:10px">Continue Browsing</button>
+    </div>
+
+    <!-- ════════════════ LOGGED IN ════════════════ -->
+    <div class="am-body am-loggedin" id="panLI" style="display:none">
+      <div class="am-avatar" id="lgAvatar">☸</div>
+      <div class="am-lg-name"  id="lgName">Welcome!</div>
+      <div class="am-lg-email" id="lgEmail"></div>
+      <div class="am-lg-role"  id="lgRole"></div>
+
+      <button class="am-btn"              id="lgEditBtn"    onclick="openEditProfile()">Edit Profile</button>
+      <button class="am-btn am-btn-ghost" id="lgScannerBtn" style="display:none;margin-top:10px" onclick="window.location.href='Scaner.html'">Open Attendance Scanner</button>
+      <button class="am-btn am-btn-ghost"                   style="margin-top:10px" onclick="doSignOut()">Sign Out</button>
+    </div>
+
+    <!-- ════════════════ EDIT PROFILE ════════════════ -->
+    <div class="am-body" id="panED" style="display:none">
+      <button class="am-back" onclick="cancelEdit()">← Back to profile</button>
+      <div class="am-section-label">Edit Your Details</div>
+
+      <div class="am-field"><label class="am-label">Full Name *</label>
+        <input class="am-input" id="edName" type="text" placeholder="Your full name"></div>
+
+      <div id="edStudentFields" style="display:none">
+        <div class="am-field"><label class="am-label">Admission Number</label>
+          <input class="am-input" id="edAdmission" type="text"></div>
+
+        <div class="am-field"><label class="am-label">Contact Number *</label>
+          <input class="am-input" id="edStContact" type="tel"></div>
+
+        <div class="am-field"><label class="am-label">Date of Birth *</label>
+          <input class="am-input" id="edStDOB" type="date"></div>
+
+        <div class="am-field"><label class="am-label">Parent / Guardian's Name *</label>
+          <input class="am-input" id="edGuardName" type="text"></div>
+
+        <div class="am-field"><label class="am-label">Parent / Guardian's Phone *</label>
+          <input class="am-input" id="edGuardPhone" type="tel"></div>
+
+        <div class="am-field"><label class="am-label">Parent / Guardian's Email <span class="am-opt">(optional)</span></label>
+          <input class="am-input" id="edGuardEmail" type="email"></div>
+
+        <div class="am-field"><label class="am-label">Home Address *</label>
+          <textarea class="am-input am-textarea" id="edStAddress" rows="2"></textarea></div>
+
+        <div class="am-field">
+          <label class="am-label">Current Grade</label>
+          <input class="am-input" id="edStGradeDisplay" type="text" disabled style="opacity:0.65;cursor:not-allowed">
+          <div class="am-grade-note">Grade is managed automatically by the annual promotion system.</div>
+        </div>
+      </div>
+
+      <div id="edTeacherFields" style="display:none">
+        <div class="am-field"><label class="am-label">Phone Number *</label>
+          <input class="am-input" id="edTcPhone" type="tel"></div>
+
+        <div class="am-field"><label class="am-label">Contact Number (alternate) *</label>
+          <input class="am-input" id="edTcContact" type="tel"></div>
+
+        <div class="am-field"><label class="am-label">Home Address *</label>
+          <textarea class="am-input am-textarea" id="edTcAddress" rows="2"></textarea></div>
+
+        <div class="am-field"><label class="am-label">Teaching Grade *</label>
+          <select class="am-input" id="edTcGrade">
+            <option value="">— Select grade —</option>
+            <option value="1">Grade 1</option><option value="2">Grade 2</option>
+            <option value="3">Grade 3</option><option value="4">Grade 4</option>
+            <option value="5">Grade 5</option><option value="6">Grade 6</option>
+            <option value="7">Grade 7</option><option value="8">Grade 8</option>
+            <option value="9">Grade 9</option><option value="10">Grade 10</option>
+            <option value="11">Grade 11</option>
+            <option value="multi">Multiple grades</option>
+          </select></div>
+
+        <div class="am-field"><label class="am-label">Subject *</label>
+          <input class="am-input" id="edTcSubject" type="text"></div>
+
+        <div class="am-field"><label class="am-label">Medium *</label>
+          <select class="am-input" id="edTcMedium">
+            <option value="">— Select medium —</option>
+            <option value="Sinhala">Sinhala</option>
+            <option value="Tamil">Tamil</option>
+            <option value="English">English</option>
+          </select></div>
+
+        <div class="am-field"><label class="am-label">Date of Birth *</label>
+          <input class="am-input" id="edTcDOB" type="date"></div>
+      </div>
+
+      <button class="am-btn" id="edBtn" onclick="saveProfileEdits()">Save Changes</button>
+      <div class="am-err" id="edErr"></div>
+      <button class="am-btn am-btn-ghost" onclick="openManualReupload()" style="margin-top:10px">📷 Re-register Face Photo</button>
+    </div>
+
+    <!-- ════════════════ MIGRATE EXISTING ════════════════ -->
+    <div class="am-body" id="panMG" style="display:none">
+      <button class="am-back" onclick="cancelMigration()">← Back to sign-in</button>
+      <div class="am-section-label">Migrate Existing Account</div>
+
+      <p class="am-migration-intro">
+        For students &amp; teachers who signed up <strong>before</strong> the name-based sign-in feature.
+        Enter your email and password <strong>once</strong> here. Your account data gets upgraded automatically,
+        and from then on you can sign in with your name.
+      </p>
+
+      <div class="am-field"><label class="am-label">Your School Email</label>
+        <input class="am-input" id="mgEmail" type="email" placeholder="you@email.com" autocomplete="email"></div>
+
+      <div class="am-field"><label class="am-label">Your Password</label>
+        <input class="am-input" id="mgPass" type="password" placeholder="Password" autocomplete="current-password"></div>
+
+      <button class="am-btn" id="mgBtn" onclick="doMigrate()">Migrate My Account</button>
+      <div class="am-err" id="mgErr"></div>
+    </div>
+
   </div>
+</div>
+
+
 
   <!-- ===== HERO TITLE ===== -->
   <section class="hero-title">
@@ -3204,78 +3596,74 @@
 
   <!-- ===== MOBILE MENU JS ===== -->
   <script>
-    
     function toggleMobileMenu(){const s=document.getElementById('mobileSidebar'),o=document.getElementById('mobileOverlay'),h=document.querySelector('.hamburger');s.classList.toggle('open');o.classList.toggle('open');h.classList.toggle('open')}
     function closeMobileMenu(){const s=document.getElementById('mobileSidebar'),o=document.getElementById('mobileOverlay'),h=document.querySelector('.hamburger');s.classList.remove('open');o.classList.remove('open');h.classList.remove('open')}
   </script>
 
-  <!-- ===== FIREBASE AUTH ===== -->
+  <!-- ===== FIREBASE: Auth (default) + Achievements RTDB (named) ===== -->
   <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyDvM76YKHMynYhMEX-B6q1jmrjJn0JyXZE",
-      authDomain: "achievements-74236.firebaseapp.com",
-      databaseURL: "https://achievements-74236-default-rtdb.firebaseio.com",
-      projectId: "achievements-74236",
-      storageBucket: "achievements-74236.firebasestorage.app",
+    // 1. School auth as DEFAULT app (auth-system.js needs this)
+    firebase.initializeApp({
+      apiKey:            "AIzaSyAWpPP3OevjIRAsoGIjOJTofV6l2jgyhNI",
+      authDomain:        "signin-f9656.firebaseapp.com",
+      projectId:         "signin-f9656",
+      storageBucket:     "signin-f9656.firebasestorage.app",
+      messagingSenderId: "1074665165821",
+      appId:             "1:1074665165821:web:91ef329a0472fa138e7f94"
+    });
+
+    // 2. Achievements RTDB as NAMED app
+    var achievementsApp = firebase.initializeApp({
+      apiKey:            "AIzaSyDvM76YKHMynYhMEX-B6q1jmrjJn0JyXZE",
+      authDomain:        "achievements-74236.firebaseapp.com",
+      databaseURL:       "https://achievements-74236-default-rtdb.firebaseio.com",
+      projectId:         "achievements-74236",
+      storageBucket:     "achievements-74236.firebasestorage.app",
       messagingSenderId: "188983548531",
-      appId: "1:188983548531:web:d976dc7d3f63cfe33f2806"
-    };
-    firebase.initializeApp(firebaseConfig);
-
-    const achievementsDb  = firebase.database();
-    const auth = firebase.auth();
-    const db   = firebase.firestore();
-    const providers={google:new firebase.auth.GoogleAuthProvider()};
-    providers.google.addScope('email');providers.google.addScope('profile');
-
-    async function saveUser(user,extra={}){try{const ref=db.collection("users").doc(user.uid);const snap=await ref.get();if(!snap.exists){await ref.set({uid:user.uid,email:user.email||"",displayName:user.displayName||extra.name||"",photoURL:user.photoURL||"",role:"student",createdAt:firebase.firestore.FieldValue.serverTimestamp(),...extra})}}catch(e){console.warn("Firestore save:",e.message)}}
-
-    auth.onAuthStateChanged(u=>{const btn=document.getElementById("loginBtn");if(!btn)return;if(u){const first=(u.displayName||u.email||"User").split(/[ @]/)[0];btn.textContent=first;btn.classList.add("logged-in");const av=document.getElementById("lgAvatar");if(av){if(u.photoURL){av.innerHTML=`<img src="${u.photoURL}" style="width:100%;height:100%;border-radius:50%;object-fit:cover">`}else{av.textContent=first.charAt(0).toUpperCase()}}const lgName=document.getElementById("lgName");const lgEmail=document.getElementById("lgEmail");if(lgName)lgName.textContent="Welcome, "+(u.displayName||u.email);if(lgEmail)lgEmail.textContent=u.email||""}else{btn.textContent="Login";btn.classList.remove("logged-in")}});
-
-    function openAuth(tab){document.getElementById("authOverlay").classList.add("open");if(auth.currentUser){showPan("panLI");return}switchTab(tab||"si")}
-    function closeAuth(){document.getElementById("authOverlay").classList.remove("open");clearErrs()}
-    function overlayClick(e){if(e.target===document.getElementById("authOverlay"))closeAuth()}
-    function switchTab(t){document.getElementById("tabSI").classList.toggle("on",t==="si");document.getElementById("tabSU").classList.toggle("on",t==="su");showPan(t==="si"?"panSI":"panSU")}
-    function showPan(id){["panSI","panSU","panLI"].forEach(p=>{document.getElementById(p).style.display=p===id?"block":"none"})}
-    function clearErrs(){["siErr","suErr"].forEach(id=>{const el=document.getElementById(id);if(el){el.textContent="";el.className="am-err"}})}
-    function errMsg(id,m){const el=document.getElementById(id);el.textContent=m;el.className="am-err"}
-    function okMsg(id,m){const el=document.getElementById(id);el.textContent=m;el.className="am-err am-ok"}
-    function fErr(c){return({"auth/user-not-found":"No account found with that email.","auth/wrong-password":"Incorrect password.","auth/invalid-credential":"Invalid email or password.","auth/email-already-in-use":"Email already registered — try Sign In.","auth/invalid-email":"Please enter a valid email.","auth/weak-password":"Password must be at least 6 characters.","auth/popup-closed-by-user":"Sign-in popup was closed.","auth/popup-blocked":"Popup was blocked — please allow popups for this site.","auth/network-request-failed":"Network error. Check your connection.","auth/too-many-requests":"Too many attempts — try again later.","auth/account-exists-with-different-credential":"An account already exists with this email using a different sign-in method.","auth/cancelled-popup-request":"Another popup is already open.","auth/operation-not-allowed":"This sign-in method is not enabled. Please contact the administrator.","auth/unauthorized-domain":"This domain is not authorized. Please open via a proper web server."})[c]||"Something went wrong. Please try again. ("+c+")"}
-
-    async function doSignIn(){const email=document.getElementById("siEmail").value.trim();const pass=document.getElementById("siPass").value;if(!email||!pass){errMsg("siErr","Please fill in all fields.");return}const btn=document.getElementById("siBtn");btn.disabled=true;try{await auth.signInWithEmailAndPassword(email,pass);showPan("panLI");setTimeout(closeAuth,1400)}catch(e){errMsg("siErr",fErr(e.code))}finally{btn.disabled=false}}
-    async function doSignUp(){const name=document.getElementById("suName").value.trim();const email=document.getElementById("suEmail").value.trim();const pass=document.getElementById("suPass").value;const conf=document.getElementById("suConf").value;if(!name||!email||!pass){errMsg("suErr","Please fill in all fields.");return}if(pass!==conf){errMsg("suErr","Passwords do not match.");return}if(pass.length<6){errMsg("suErr","Password must be at least 6 characters.");return}const btn=document.getElementById("suBtn");btn.disabled=true;try{const cred=await auth.createUserWithEmailAndPassword(email,pass);await cred.user.updateProfile({displayName:name});await saveUser(cred.user,{name});showPan("panLI");setTimeout(closeAuth,1400)}catch(e){errMsg("suErr",fErr(e.code))}finally{btn.disabled=false}}
-    async function doSocial(providerKey){clearErrs();const provider=providers[providerKey];if(!provider){errMsg("siErr","Provider not configured.");return}try{const result=await auth.signInWithPopup(provider);await saveUser(result.user);showPan("panLI");setTimeout(closeAuth,1400)}catch(e){const activeErr=document.getElementById("panSU").style.display==="block"?"suErr":"siErr";errMsg(activeErr,fErr(e.code));console.error("Social auth error:",e.code,e.message)}}
-    function doGoogle(){doSocial("google")}
-    async function doSignOut(){await auth.signOut();showPan("panSI");closeAuth()}
-    async function forgotPw(){const email=document.getElementById("siEmail").value.trim();if(!email){errMsg("siErr","Enter your email above first.");return}try{await auth.sendPasswordResetEmail(email);okMsg("siErr","Reset email sent — check your inbox.")}catch(e){errMsg("siErr",fErr(e.code))}}
+      appId:             "1:188983548531:web:d976dc7d3f63cfe33f2806"
+    }, "achievementsApp");
+    var achievementsDb = firebase.database(achievementsApp);
   </script>
 
+  <!-- ===== Auth system (shared with all pages) ===== -->
+  <script src="face-utils.js"></script>
+  <script src="auth-system.js"></script>
+
+  <!-- ===== Update login button on auth state ===== -->
+  <script>
+    firebase.auth().onAuthStateChanged(function(u) {
+      var btn  = document.getElementById('loginBtn');
+      var mbtn = document.getElementById('mobileLoginBtn');
+      [btn, mbtn].filter(Boolean).forEach(function(b) {
+        if (u) {
+          var first = (u.displayName || u.email || 'User').split(/[ @]/)[0];
+          b.textContent = first;
+          b.classList.add('logged-in');
+        } else {
+          b.textContent = 'Login';
+          b.classList.remove('logged-in');
+        }
+      });
+    });
+  </script>
+
+  <!-- ===== ACHIEVEMENTS LOGIC ===== -->
   <script>
     async function deletePhotoFromDrive(fileId) {
-  if (!fileId) return; // no fileId stored, skip silently
-  try {
-    await fetch(DRIVE_UPLOAD_URL, {
-      method: 'POST',
-      body: JSON.stringify({
-        secret:  DRIVE_SECRET,
-        action:  'delete',
-        fileId:  fileId
-      })
-    });
-  } catch (err) {
-    console.warn('Drive delete failed (photo may remain in Drive):', err);
-  }
-}
-    /* ====== Configuration ====== */
-    const ADMIN_PASSWORD = 'vds';
+      if (!fileId) return;
+      try {
+        await fetch(DRIVE_UPLOAD_URL, {
+          method: 'POST',
+          body: JSON.stringify({ secret: DRIVE_SECRET, action: 'delete', fileId: fileId })
+        });
+      } catch (err) { console.warn('Drive delete failed:', err); }
+    }
 
-    // ⚠️ PASTE YOUR APPS SCRIPT WEB-APP URL BELOW
-    // (after deploying the Drive uploader — see Step 1 instructions)
-    const DRIVE_UPLOAD_URL = 'https://script.google.com/macros/s/AKfycbwDTE26NXSlxisSIUXkiSiidxL73PmhWjhDYQCj0wfjy2a9CDW8KEoeEqmlbYJ9nlp_/exec';
-    const DRIVE_SECRET     = 'Achievements'; // must match SHARED_SECRET in Apps Script
+    var ADMIN_PASSWORD = 'vds';
+    var DRIVE_UPLOAD_URL = 'https://script.google.com/macros/s/AKfycbwDTE26NXSlxisSIUXkiSiidxL73PmhWjhDYQCj0wfjy2a9CDW8KEoeEqmlbYJ9nlp_/exec';
+    var DRIVE_SECRET = 'Achievements';
 
-    /* ====== Default seed years — used only if database is empty ====== */
-    const SEED_YEARS = {
+    var SEED_YEARS = {
       "2022": { color: "maroon", isStart: true, custom: false, order: 1 },
       "2023": { color: "purple", custom: false, order: 2 },
       "2024": { color: "teal",   custom: false, order: 3 },
@@ -3284,865 +3672,229 @@
       "2027": { color: "purple", custom: false, order: 6 }
     };
 
-    /* ====== State (mirrors RTDB contents in memory) ====== */
-    let yearsMap   = {};   // { "2022": { color, isStart, custom, order }, ... }
-    let perYearMap = {};   // { "2022": { categories: {...}, place: {...} } }
-    let currentYear = null;
-    let currentCategory = 'default';
-    let isUnlocked = false;
-    let pendingAction = null;
-    let _initialLoad = true;
+    var yearsMap = {}, perYearMap = {}, currentYear = null, currentCategory = 'default';
+    var isUnlocked = false, pendingAction = null, _initialLoad = true;
 
-    /* ====== RTDB references ====== */
-    const dbRoot     = achievementsDb.ref('achievements');
-    const yearsRef   = dbRoot.child('years');
-    const perYearRef = dbRoot.child('perYear');
+    var dbRoot     = achievementsDb.ref('achievements');
+    var yearsRef   = dbRoot.child('years');
+    var perYearRef = dbRoot.child('perYear');
 
-    /* ====== Data subscription (real-time) ====== */
     function startDataSync() {
-      dbRoot.on('value', snap => {
-        const v = snap.val() || {};
+      dbRoot.on('value', function(snap) {
+        var v = snap.val() || {};
         yearsMap   = v.years   || {};
         perYearMap = v.perYear || {};
-
-        // If database is empty, seed defaults (only once)
         if (Object.keys(yearsMap).length === 0 && _initialLoad) {
-          _initialLoad = false;
-          seedDefaults();
-          return;
+          _initialLoad = false; seedDefaults(); return;
         }
         _initialLoad = false;
-
-        hideDataLoading();
-        renderPath();
-        if (currentYear && achModal.classList.contains('show')) {
-          renderYear(currentYear);
-        }
-      }, err => {
+        hideDataLoading(); renderPath();
+        if (currentYear && achModal.classList.contains('show')) renderYear(currentYear);
+      }, function(err) {
         console.error('RTDB read failed:', err);
         hideDataLoading();
-        alert('Could not load achievements from the database. Please check your internet connection and reload.');
+        alert('Could not load achievements. Check your connection and reload.');
       });
     }
-
     function seedDefaults() {
-      // Use a transaction so concurrent loads don't double-seed
-      yearsRef.transaction(current => current || SEED_YEARS).catch(err => {
-        console.warn('Seed failed:', err);
-        hideDataLoading();
-      });
+      yearsRef.transaction(function(c) { return c || SEED_YEARS; }).catch(function(e) { console.warn('Seed failed:', e); hideDataLoading(); });
     }
-
     function hideDataLoading() {
-      const overlay = document.getElementById('dataLoading');
+      var overlay = document.getElementById('dataLoading');
       if (!overlay) return;
       overlay.classList.add('hidden');
-      setTimeout(() => overlay.classList.add('gone'), 500);
+      setTimeout(function() { overlay.classList.add('gone'); }, 500);
     }
-
-    /* ====== Year helpers ====== */
     function getOrderedYears() {
-      return Object.keys(yearsMap)
-        .map(y => Object.assign({ year: y }, yearsMap[y]))
-        .sort((a, b) => {
-          const ao = a.order != null ? a.order : parseInt(a.year, 10);
-          const bo = b.order != null ? b.order : parseInt(b.year, 10);
-          return ao - bo;
-        });
+      return Object.keys(yearsMap).map(function(y) { return Object.assign({ year: y }, yearsMap[y]); })
+        .sort(function(a, b) { return parseInt(a.year,10) - parseInt(b.year,10); });
     }
-    function isCustomYear(year) {
-      return yearsMap[year] ? !!yearsMap[year].custom : false;
-    }
-
-    /* ====== Per-year data helpers ====== */
+    function isCustomYear(year) { return yearsMap[year] ? !!yearsMap[year].custom : false; }
     function getYearData(year) {
-      const rec = perYearMap[year] || {};
-      const categories = rec.categories || {};
-      // Default category exists implicitly (even if no items yet)
-      if (!categories.default) categories.default = {};
-      return {
-        categories: categories,
-        place: rec.place || null
-      };
+      var rec = perYearMap[year] || {};
+      var categories = rec.categories || {};
+      if (!categories['default']) categories['default'] = {};
+      return { categories: categories, place: rec.place || null };
     }
-    // Convert RTDB-style {pushId: item} into ordered array
     function categoryToArray(catObj) {
       if (!catObj) return [];
-      return Object.keys(catObj)
-        .filter(k => k !== '_init') // skip placeholder used to keep empty categories alive
-        .map(k => Object.assign({ _key: k }, catObj[k]))
-        .filter(item => item && item.name) // skip non-item entries
-        .sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+      return Object.keys(catObj).filter(function(k) { return k !== '_init'; })
+        .map(function(k) { return Object.assign({ _key: k }, catObj[k]); })
+        .filter(function(item) { return item && item.name; })
+        .sort(function(a, b) { return (a.createdAt || 0) - (b.createdAt || 0); });
     }
-
-    /* ====== Drive upload helper ====== */
     async function uploadPhotoToDrive(file) {
-      if (!DRIVE_UPLOAD_URL || DRIVE_UPLOAD_URL.startsWith('PASTE')) {
-        throw new Error('Drive upload not configured. Paste your Apps Script URL into DRIVE_UPLOAD_URL.');
-      }
-      // Read file as base64
-      const base64 = await new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => {
-          const dataUrl = reader.result;
-          const b64 = dataUrl.substring(dataUrl.indexOf(',') + 1);
-          resolve(b64);
-        };
+      if (!DRIVE_UPLOAD_URL || DRIVE_UPLOAD_URL.startsWith('PASTE')) throw new Error('Drive upload not configured.');
+      var base64 = await new Promise(function(resolve, reject) {
+        var reader = new FileReader();
+        reader.onload = function() { resolve(reader.result.substring(reader.result.indexOf(',') + 1)); };
         reader.onerror = reject;
         reader.readAsDataURL(file);
       });
-      // POST to Apps Script (text/plain avoids CORS preflight)
-      const res = await fetch(DRIVE_UPLOAD_URL, {
+      var res = await fetch(DRIVE_UPLOAD_URL, {
         method: 'POST',
-        body: JSON.stringify({
-  secret:   DRIVE_SECRET,
-  data:     base64,
-  mimeType: file.type || 'image/jpeg',
-  filename: file.name || ('photo_' + Date.now() + '.jpg'),
-  year:     currentYear,       // ← add this line
-  category: currentCategory    // ← add this line
-})
+        body: JSON.stringify({ secret: DRIVE_SECRET, data: base64, mimeType: file.type || 'image/jpeg', filename: file.name || ('photo_' + Date.now() + '.jpg'), year: currentYear, category: currentCategory })
       });
-      const json = await res.json();
+      var json = await res.json();
       if (json.error) throw new Error(json.error);
-      if (!json.url) throw new Error('Upload succeeded but no URL was returned.');
+      if (!json.url) throw new Error('Upload succeeded but no URL returned.');
       return { url: json.url, fileId: json.fileId };
     }
 
-    // Start subscription immediately
     startDataSync();
-    window.addEventListener('resize', () => {
-      if (Object.keys(yearsMap).length > 0) renderPath();
-    });
-
-    /* ====== Element refs ====== */
-    const pathNodes     = document.getElementById('pathNodes');
-    const roadShadow    = document.getElementById('roadShadow');
-    const roadMain      = document.getElementById('roadMain');
-    const roadRed       = document.getElementById('roadRed');
-    const roadDash      = document.getElementById('roadDash');
-
-    const achModal      = document.getElementById('achModal');
-    const modalClose    = document.getElementById('modalClose');
-    const modalYear     = document.getElementById('modalYear');
-    const studentGrid   = document.getElementById('studentGrid');
-    const emptyState    = document.getElementById('emptyState');
-    const modalSummary  = document.getElementById('modalSummary');
-
-    const pwdModal  = document.getElementById('pwdModal');
-    const pwdClose  = document.getElementById('pwdClose');
-    const pwdCancel = document.getElementById('pwdCancel');
-    const pwdForm   = document.getElementById('pwdForm');
-    const pwdInput  = document.getElementById('pwdInput');
-    const pwdError  = document.getElementById('pwdError');
-
-    const uploadModal       = document.getElementById('uploadModal');
-    const uploadClose       = document.getElementById('uploadClose');
-    const uploadCancel      = document.getElementById('uploadCancel');
-    const uploadForm        = document.getElementById('uploadForm');
-    const photoInput        = document.getElementById('photoInput');
-    const uploadPreview     = document.getElementById('uploadPreview');
-    const uploadPlaceholder = document.getElementById('uploadPlaceholder');
-    const nameInput         = document.getElementById('nameInput');
-    const placeInput        = document.getElementById('placeInput');
-    const gradeInput        = document.getElementById('gradeInput');
-    const uploadPermissionCheckbox = document.getElementById('uploadPermissionCheckbox');
-
-    const placeValue     = document.getElementById('placeValue');
-    const placeAddBtn    = document.getElementById('placeAddBtn');
-    const placeBlock     = document.getElementById('placeBlock');
-    const placeModal     = document.getElementById('placeModal');
-    const placeClose     = document.getElementById('placeClose');
-    const placeCancel    = document.getElementById('placeCancel');
-    const placeForm      = document.getElementById('placeForm');
-    const placeYearLabel = document.getElementById('placeYearLabel');
-    const placeNumInput  = document.getElementById('placeNumInput');
-    const placeNoteInput = document.getElementById('placeNoteInput');
-    const placePermissionCheckbox = document.getElementById('placePermissionCheckbox');
-
-    const yearModal  = document.getElementById('yearModal');
-    const yearClose  = document.getElementById('yearClose');
-    const yearCancel = document.getElementById('yearCancel');
-    const yearForm   = document.getElementById('yearForm');
-    const yearInput  = document.getElementById('yearInput');
-    const yearError  = document.getElementById('yearError');
-
-    const customCategoriesEl = document.getElementById('categoriesPager');
-    const addCategoryBtn     = document.getElementById('addCategoryBtn');
-    const categoryModal      = document.getElementById('categoryModal');
-    const categoryClose      = document.getElementById('categoryClose');
-    const categoryCancel     = document.getElementById('categoryCancel');
-    const categoryForm       = document.getElementById('categoryForm');
-    const categoryNameInput  = document.getElementById('categoryNameInput');
-    const categoryError      = document.getElementById('categoryError');
-    const categoryYearLabel  = document.getElementById('categoryYearLabel');
-    const categoryPermissionCheckbox = document.getElementById('categoryPermissionCheckbox');
-
-    // Pagination refs
-    const categoryNav   = document.getElementById('categoryNav');
-    const categoryTabs  = document.getElementById('categoryTabs');
-    const catPrev       = document.getElementById('catPrev');
-    const catNext       = document.getElementById('catNext');
-    const catDots       = document.getElementById('catDots');
-    const catPageLabel  = document.getElementById('catPageLabel');
-    const defaultPageEl = document.querySelector('[data-cat-key="default"]');
-    let currentCategoryPage = 0;
-
-    /* ====== Snake-path geometry ====== */
-   const PATH_SVG_WIDTH = 1100;
-    const NODE_MARGIN_X  = 110;
-    const NODE_SPAN_X    = PATH_SVG_WIDTH - 2 * NODE_MARGIN_X;
-
-    function getGeometry() {
-      const w = window.innerWidth;
-      if (w <= 310)  return { firstY: 200, rowH: 320,  botPad: 180 };
-      if (w >= 3840) return { firstY: 400, rowH: 700,  botPad: 400 };
-      if (w >= 3440) return { firstY: 380, rowH: 600,  botPad: 380 };
-      if (w >= 2560) return { firstY: 300, rowH: 520,  botPad: 300 };
-      return { firstY: 150, rowH: 240, botPad: 150 };
-    }
-   function getRowNodes() {
-      const w = window.innerWidth;
-      if (w <= 310)  return 2;
-      if (w <= 420)  return 3;
-      if (w <= 700)  return 4;
-      if (w >= 3840) return 7;
-      if (w >= 3440) return 6;
-      if (w >= 2560) return 6;
-      if (w >= 1920) return 5;
-      if (w >= 1440) return 5;
-      return 5;
-    }
-    function nodePos(i) {
-      const RN = getRowNodes();
-      const { firstY, rowH } = getGeometry();
-      const step = NODE_SPAN_X / (RN - 1);
-      const row      = Math.floor(i / RN);
-      const colInRow = i % RN;
-      const reverse  = (row % 2) === 1;
-      const col      = reverse ? (RN - 1 - colInRow) : colInRow;
-      return {
-        x: NODE_MARGIN_X + col * step,
-        y: firstY + row * rowH
-      };
-    }
-
-    function calcSvgHeight(totalSlots) {
-      const RN = getRowNodes();
-      const { firstY, rowH, botPad } = getGeometry();
-      if (totalSlots <= 0) return firstY + botPad;
-      const rows = Math.ceil(totalSlots / RN);
-      return firstY + (rows - 1) * rowH + botPad;
-    }
-    function buildSnakePath(totalSlots) {
-      const RN = getRowNodes();
-      if (totalSlots < 2) return '';
-      let d = '';
-      for (let i = 0; i < totalSlots; i++) {
-        const p = nodePos(i);
-        if (i === 0) { d += `M ${p.x},${p.y}`; continue; }
-        const prev    = nodePos(i - 1);
-        const sameRow = Math.floor(i / RN) === Math.floor((i - 1) / RN);
-        if (sameRow) {
-          d += ` L ${p.x.toFixed(1)},${p.y.toFixed(1)}`;
-        } else {
-          const prevRowReverse = Math.floor((i - 1) / RN) % 2 === 1;
-          const curlSign = prevRowReverse ? -1 : 1;
-          const curlAmt  = 80;
-          const c1x = prev.x + curlSign * curlAmt;
-          const c1y = prev.y + (p.y - prev.y) * 0.35;
-          const c2x = p.x + curlSign * curlAmt;
-          const c2y = prev.y + (p.y - prev.y) * 0.75;
-          d += ` C ${c1x.toFixed(1)},${c1y.toFixed(1)} ${c2x.toFixed(1)},${c2y.toFixed(1)} ${p.x.toFixed(1)},${p.y.toFixed(1)}`;
-        }
-      }
-      return d;
-    }
-
-    /* ====== Build road into the SVG ====== */
-    function buildRoad(totalSlots) {
-      const d = buildSnakePath(totalSlots);
-      roadShadow.setAttribute('d', d);
-      roadMain.setAttribute('d', d);
-      roadRed.setAttribute('d', d);
-      roadDash.setAttribute('d', d);
-    }
-
-    /* ====== Build a single year node at a given SVG position ====== */
-    function buildNode(yearObj, svgPos, svgHeight, isCustom, animDelay) {
-      const node = document.createElement('div');
-      node.className = `path-node ${yearObj.color || 'purple'}${isCustom ? ' custom' : ''}`;
-      node.dataset.year = yearObj.year;
-      node.style.left = ((svgPos.x / PATH_SVG_WIDTH) * 100).toFixed(2) + '%';
-      node.style.top  = ((svgPos.y / svgHeight) * 100).toFixed(2) + '%';
-      node.style.setProperty('--delay', (animDelay * 2).toFixed(1) + 's');
-
-      const startBadgeHTML = yearObj.isStart
-        ? `<div class="start-badge">START HERE</div>` : '';
-      const deleteBtnHTML = isCustom
-        ? `<button class="node-delete" type="button" data-del-year="${yearObj.year}" title="Remove this year">×</button>` : '';
-
-      node.innerHTML = `
-        ${deleteBtnHTML}
-        <div class="node-badge">
-          <div class="yr">${yearObj.year}</div>
-          <div class="lbl">YEAR</div>
-        </div>
-        <div class="node-platform">
-          <div class="platform-top"></div>
-          <div class="platform-gem" style="--delay:${(animDelay*2).toFixed(1)}s"></div>
-          <div class="platform-side"></div>
-          <div class="platform-rim"></div>
-        </div>
-        ${startBadgeHTML}
-      `;
-
-      node.addEventListener('click', (e) => {
-        if (e.target.closest('.node-delete')) return;
-        openAchModal(yearObj.year);
-      });
-
-      return node;
-    }
-
-    /* ====== Build the + Add Year node at given SVG position ====== */
-    function buildAddYearNode(svgPos, svgHeight) {
-      const node = document.createElement('div');
-      node.className = 'add-year-node';
-      node.style.left = ((svgPos.x / PATH_SVG_WIDTH) * 100).toFixed(2) + '%';
-      node.style.top  = ((svgPos.y / svgHeight) * 100).toFixed(2) + '%';
-      node.innerHTML = `
-        <div class="add-year-badge">+</div>
-        <div class="add-year-label">Add Year</div>
-      `;
-      node.addEventListener('click', requestAddYear);
-      return node;
-    }
-
-    /* ====== Render the entire path ====== */
-    function renderPath() {
-      const allYears = getOrderedYears(); // [{ year, color, isStart, custom, order }, ...]
-      const totalSlots = allYears.length + 1;   // years + the trailing + node
-
-      // 1) Resize the stage and SVG to fit all nodes at full size
-      const svgHeight = calcSvgHeight(totalSlots);
-      pathRoad.setAttribute('viewBox', `0 0 ${PATH_SVG_WIDTH} ${svgHeight}`);
-      const pathStage = document.getElementById('pathStage');
-      if (pathStage) pathStage.style.aspectRatio = `${PATH_SVG_WIDTH} / ${svgHeight}`;
-
-      // 2) Draw the snake road
-      buildRoad(totalSlots);
-
-      // 3) Place each year node
-      pathNodes.innerHTML = '';
-      allYears.forEach((yObj, i) => {
-        const pos = nodePos(i);
-        const animDelay = (i / totalSlots);
-        pathNodes.appendChild(buildNode(yObj, pos, svgHeight, !!yObj.custom, animDelay));
-      });
-
-      // 4) Place the + Add Year node at the very end of the path
-      const addPos = nodePos(allYears.length);
-      pathNodes.appendChild(buildAddYearNode(addPos, svgHeight));
-
-      // 5) Wire delete buttons on custom year nodes
-      pathNodes.querySelectorAll('[data-del-year]').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-          e.stopPropagation();
-          requestDeleteYear(btn.dataset.delYear);
-        });
-      });
-    }
-
-    function pickColorForYear(year) {
-      const palette = ['purple', 'teal', 'gold', 'maroon'];
-      const n = parseInt(year, 10) || 0;
-      return palette[n % palette.length];
-    }
-
-    /* ====== Achievement modal ====== */
-    function buildStudentCard(student, categoryKey, itemKey) {
-      const card = document.createElement('div');
-      card.className = 'student-card';
-      const photoSrc = student.photoUrl || student.photo; // photoUrl is new, photo kept for safety
-      const photoHTML = photoSrc
-        ? `<img src="${photoSrc}" alt="${student.name}" style="width:100%;aspect-ratio:1;object-fit:cover;border-bottom:1px solid rgba(245,200,74,0.3);" referrerpolicy="no-referrer">`
-        : `<div class="student-photo">${(student.name || '?').trim().charAt(0)}</div>`;
-      const gradeHTML = student.grade ? `<div class="student-grade">${student.grade}</div>` : '';
-      card.innerHTML = `
-        <button class="card-delete" type="button" title="Remove this achievement">×</button>
-        ${photoHTML}
-        <div class="student-info">
-          <div class="student-name">${student.name}</div>
-          <div class="student-rank">${student.rank}</div>
-          ${gradeHTML}
-        </div>
-      `;
-      const delBtn = card.querySelector('.card-delete');
-      delBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        requestDeleteStudent(categoryKey, itemKey, student.name);
-      });
-      return card;
-    }
-    function buildAddCard(categoryName) {
-      const add = document.createElement('button');
-      add.className = 'add-card';
-      add.type = 'button';
-      add.innerHTML = `<div class="plus-icon">+</div><div class="add-lbl">Add Photo</div>`;
-      add.addEventListener('click', () => requestAdd(categoryName));
-      return add;
-    }
-
-    function buildCategorySection(categoryName, studentsList) {
-      const section = document.createElement('div');
-      section.className = 'category-section';
-      section.dataset.category = categoryName;
-
-      const header = document.createElement('div');
-      header.className = 'category-header';
-
-      const title = document.createElement('div');
-      title.className = 'category-title';
-      title.textContent = categoryName;
-
-      const delBtn = document.createElement('button');
-      delBtn.className = 'category-delete';
-      delBtn.type = 'button';
-      delBtn.title = 'Remove this category';
-      delBtn.innerHTML = `<span class="del-x">×</span><span>Remove</span>`;
-      delBtn.addEventListener('click', () => requestDeleteCategory(categoryName));
-
-      header.appendChild(title);
-      header.appendChild(delBtn);
-      section.appendChild(header);
-
-      const grid = document.createElement('div');
-      grid.className = 'student-grid';
-      studentsList.forEach((s) => grid.appendChild(buildStudentCard(s, categoryName, s._key)));
-      grid.appendChild(buildAddCard(categoryName));
-      section.appendChild(grid);
-
-      return section;
-    }
-
-    function renderYear(year) {
-      const rec = getYearData(year);
-      const cats = rec.categories;
-
-      // ----- Default page (සිසු නිපුණතා) -----
-      const defaultList = categoryToArray(cats.default);
-      studentGrid.innerHTML = '';
-      defaultList.forEach((s) => studentGrid.appendChild(buildStudentCard(s, 'default', s._key)));
-      studentGrid.appendChild(buildAddCard('default'));
-      emptyState.classList.toggle('show', defaultList.length === 0);
-
-      // ----- Remove old custom pages, then rebuild -----
-      customCategoriesEl.querySelectorAll('.category-page:not([data-cat-key="default"])').forEach(el => el.remove());
-
-      let totalAchievements = defaultList.length;
-      const customCatNames = Object.keys(cats).filter(k => k !== 'default');
-      customCatNames.forEach(catName => {
-        const list = categoryToArray(cats[catName]);
-        totalAchievements += list.length;
-        const page = document.createElement('div');
-        page.className = 'category-page';
-        page.dataset.catKey = catName;
-        page.appendChild(buildCategorySection(catName, list));
-        customCategoriesEl.appendChild(page);
-      });
-
-      // ----- Pagination -----
-      const pageCount = 1 + customCatNames.length;
-      if (currentCategoryPage >= pageCount) currentCategoryPage = 0;
-      renderPagination(pageCount);
-
-      // ----- Summary -----
-      const customCount = customCatNames.length;
-      const catSummary = customCount ? `, ${customCount} extra categor${customCount === 1 ? 'y' : 'ies'}` : '';
-      modalSummary.textContent = `Year ${year} — ${totalAchievements} achievement${totalAchievements === 1 ? '' : 's'} recorded${catSummary}`;
-
-      // ----- Place block -----
-      if (rec.place && rec.place.num) {
-        const noteHTML = rec.place.note ? `<span class="place-note">${rec.place.note}</span>` : '';
-        placeValue.innerHTML = `<span class="place-num">${rec.place.num}</span> Place${noteHTML}`;
-      } else {
-        placeValue.innerHTML = `<span class="place-empty">Not yet recorded for this year</span>`;
-      }
-    }
-
-    function renderPagination(pageCount) {
-      const pages = customCategoriesEl.querySelectorAll('.category-page');
-      pages.forEach((p, i) => p.classList.toggle('active', i === currentCategoryPage));
-
-      // --- Build top tab bar ---
-      categoryTabs.innerHTML = '';
-      pages.forEach((p, i) => {
-        const key = p.dataset.catKey;
-        const tab = document.createElement('button');
-        tab.type = 'button';
-        tab.className = 'category-tab' + (i === currentCategoryPage ? ' active' : '');
-        const isDefault = key === 'default';
-        const icon = isDefault ? '☸' : '★';
-        const name = isDefault ? 'සිසු නිපුණතා' : key;
-        tab.innerHTML = `<span class="tab-icon">${icon}</span>${name}`;
-        tab.addEventListener('click', () => goToPage(i));
-        categoryTabs.appendChild(tab);
-      });
-      // Hide tab bar if only one category
-      categoryTabs.classList.toggle('hidden', pageCount <= 1);
-
-      // --- Build bottom dots ---
-      catDots.innerHTML = '';
-      for (let i = 0; i < pageCount; i++) {
-        const dot = document.createElement('button');
-        dot.type = 'button';
-        dot.className = 'cat-dot' + (i === currentCategoryPage ? ' active' : '');
-        dot.setAttribute('aria-label', `Go to page ${i + 1}`);
-        dot.addEventListener('click', () => goToPage(i));
-        catDots.appendChild(dot);
-      }
-
-      // --- Label & arrows ---
-      const activePage = pages[currentCategoryPage];
-      const catName = activePage ? activePage.dataset.catKey : '';
-      const displayName = catName === 'default' ? 'සිසු නිපුණතා' : catName;
-      catPageLabel.textContent = pageCount > 1
-        ? `${displayName}  ·  ${currentCategoryPage + 1} / ${pageCount}`
-        : displayName;
-
-      catPrev.disabled = currentCategoryPage === 0;
-      catNext.disabled = currentCategoryPage >= pageCount - 1;
-      categoryNav.classList.toggle('hidden', pageCount <= 1);
-
-      // Horana Division place block belongs to the default සිසු නිපුණතා page only
-      placeBlock.style.display = (currentCategoryPage === 0) ? '' : 'none';
-
-      // Scroll active tab into view
-      const activeTab = categoryTabs.querySelector('.category-tab.active');
-      if (activeTab && activeTab.scrollIntoView) {
-        activeTab.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-      }
-    }
-
-    function goToPage(i) {
-      const pages = customCategoriesEl.querySelectorAll('.category-page');
-      if (i < 0 || i >= pages.length) return;
-      currentCategoryPage = i;
-      renderPagination(pages.length);
-    }
-    function openAchModal(year) {
-      currentYear = year;
-      currentCategoryPage = 0;
-      modalYear.textContent = year;
-      renderYear(year);
-      achModal.classList.add('show');
-      document.body.style.overflow = 'hidden';
-    }
-    function closeAchModal() { achModal.classList.remove('show'); document.body.style.overflow = ''; }
-
-    /* ====== Password gate ====== */
-    function requestAdd(categoryName)  { pendingAction = { type: 'addStudent', category: categoryName || 'default' }; gateAction(); }
-    function requestAddPlace()         { pendingAction = 'addPlace';   gateAction(); }
-    function requestAddYear()          { pendingAction = 'addYear';    gateAction(); }
-    function requestDeleteYear(year)   { pendingAction = { type: 'deleteYear', year }; gateAction(true); }
-    function requestAddCategory()      { pendingAction = 'addCategory'; gateAction(); }
-    function requestDeleteCategory(name) { pendingAction = { type: 'deleteCategory', name }; gateAction(true); }
-    function requestDeleteStudent(categoryKey, itemKey, studentName) {
-      pendingAction = { type: 'deleteStudent', categoryKey, itemKey, studentName };
-      gateAction(true);
-    }
-
-    function gateAction(forceFresh) {
-      // forceFresh: destructive deletes always re-prompt the password
-      if (isUnlocked && !forceFresh) { runPendingAction(); }
-      else {
-        pwdError.classList.remove('show');
-        pwdInput.value = '';
-        // Update modal subtitle so user knows why password is being asked again
-        const sub = pwdModal.querySelector('.pwd-sub');
-        if (sub) {
-          sub.textContent = forceFresh
-            ? 'This action permanently deletes data. Please confirm your password.'
-            : 'Enter the password to make changes.';
-        }
-        pwdModal.classList.add('show');
-        setTimeout(() => pwdInput.focus(), 100);
-      }
-    }
-    function runPendingAction() {
-      if (pendingAction && pendingAction.type === 'addStudent') {
-        currentCategory = pendingAction.category || 'default';
-        openUploadModal();
-      }
-      else if (pendingAction === 'addPlace') openPlaceModal();
-      else if (pendingAction === 'addYear') openYearModal();
-      else if (pendingAction === 'addCategory') openCategoryModal();
-      else if (pendingAction && pendingAction.type === 'deleteYear') doDeleteYear(pendingAction.year);
-      else if (pendingAction && pendingAction.type === 'deleteCategory') doDeleteCategory(pendingAction.name);
-      else if (pendingAction && pendingAction.type === 'deleteStudent') {
-        doDeleteStudent(pendingAction.categoryKey, pendingAction.itemKey, pendingAction.studentName);
-      }
-    }
-
-    function closePwdModal() { pwdModal.classList.remove('show'); }
-    pwdForm.addEventListener('submit', (e) => {
-      e.preventDefault();
-      if (pwdInput.value === ADMIN_PASSWORD) {
-        isUnlocked = true; closePwdModal(); runPendingAction();
-      } else {
-        pwdError.classList.add('show'); pwdInput.value = ''; pwdInput.focus();
-      }
-    });
-    pwdClose.addEventListener('click', closePwdModal);
-    pwdCancel.addEventListener('click', closePwdModal);
-    pwdModal.addEventListener('click', (e) => { if (e.target === pwdModal) closePwdModal(); });
-
-    /* ====== Upload flow ====== */
-    function openUploadModal() {
-      uploadForm.reset();
-      if (uploadPermissionCheckbox) uploadPermissionCheckbox.checked = false;
-      uploadPreview.style.display = 'none'; uploadPreview.src = '';
-      uploadPlaceholder.style.display = '';
-      uploadModal.classList.add('show');
-    }
-    function closeUploadModal() { uploadModal.classList.remove('show'); }
-    photoInput.addEventListener('change', (e) => {
-      const file = e.target.files[0]; if (!file) return;
-      const reader = new FileReader();
-      reader.onload = (ev) => {
-        uploadPreview.src = ev.target.result;
-        uploadPreview.style.display = 'block';
-        uploadPlaceholder.style.display = 'none';
-      };
-      reader.readAsDataURL(file);
-    });
-    uploadForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const name  = nameInput.value.trim();
-      const place = placeInput.value.trim();
-      const grade = gradeInput.value.trim();
-      const file  = photoInput.files[0];
-      const statusEl = document.getElementById('uploadStatus');
-      const submitBtn = document.getElementById('uploadSubmit');
-
-      if (!uploadPermissionCheckbox?.checked) { alert('Please confirm permission to add this achievement.'); return; }
-      if (!name || !place || !grade) { alert('Please fill in name, place, and grade.'); return; }
-      if (!file) { alert('Please select a photo for the student.'); return; }
-
-      const catKey = currentCategory || 'default';
-      submitBtn.disabled = true;
-      statusEl.classList.remove('error');
-      statusEl.textContent = 'Uploading photo to Google Drive…';
-
-      try {
-        const { url: photoUrl, fileId } = await uploadPhotoToDrive(file);
-
-        statusEl.textContent = 'Saving to database…';
-        // Find this section and update the entry object:
-const entry = {
-  name: name,
-  rank: place,
-  grade: grade,
-  photoUrl: photoUrl,
-  fileId: fileId,        // ← ADD THIS LINE
-  createdAt: firebase.database.ServerValue.TIMESTAMP
-};
-        await perYearRef.child(currentYear).child('categories').child(catKey).push(entry);
-
-        statusEl.textContent = '';
-        closeUploadModal();
-        // Re-render happens automatically via the real-time listener
-      } catch (err) {
-        console.error(err);
-        statusEl.classList.add('error');
-        statusEl.textContent = 'Failed: ' + err.message;
-      } finally {
-        submitBtn.disabled = false;
-      }
-    });
-    uploadClose.addEventListener('click', closeUploadModal);
-    uploadCancel.addEventListener('click', closeUploadModal);
-    uploadModal.addEventListener('click', (e) => { if (e.target === uploadModal) closeUploadModal(); });
-
-    /* ====== Place flow ====== */
-    function openPlaceModal() {
-      const rec = getYearData(currentYear);
-      placeYearLabel.textContent = currentYear;
-      placeNumInput.value  = rec.place ? (rec.place.num || '') : '';
-      placeNoteInput.value = rec.place ? (rec.place.note || '') : '';
-      if (placePermissionCheckbox) placePermissionCheckbox.checked = false;
-      placeModal.classList.add('show');
-      setTimeout(() => placeNumInput.focus(), 100);
-    }
-    function closePlaceModal() { placeModal.classList.remove('show'); }
-    placeForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const num  = placeNumInput.value.trim();
-      const note = placeNoteInput.value.trim();
-      if (!placePermissionCheckbox?.checked) { alert('Please confirm permission to save this place.'); return; }
-      if (!num) { alert('Please enter the place number.'); return; }
-      try {
-        await perYearRef.child(currentYear).child('place').set({ num, note });
-        closePlaceModal();
-      } catch (err) {
-        alert('Could not save place: ' + err.message);
-      }
-    });
-    placeAddBtn.addEventListener('click', requestAddPlace);
-    placeClose.addEventListener('click', closePlaceModal);
-    placeCancel.addEventListener('click', closePlaceModal);
-    placeModal.addEventListener('click', (e) => { if (e.target === placeModal) closePlaceModal(); });
-
-    /* ====== Add year flow ====== */
-    function openYearModal() {
-      yearForm.reset();
-      yearError.classList.remove('show');
-      yearModal.classList.add('show');
-      setTimeout(() => yearInput.focus(), 100);
-    }
-    function closeYearModal() { yearModal.classList.remove('show'); }
-    yearForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const yr = yearInput.value.trim();
-      const yrNum = parseInt(yr, 10);
-      if (!yr || isNaN(yrNum) || yrNum < 2000 || yrNum > 2100) {
-        yearError.textContent = 'Please enter a valid year (2000–2100).';
-        yearError.classList.add('show');
-        return;
-      }
-      if (yearsMap[yr]) {
-        yearError.textContent = `Year ${yr} is already on the path.`;
-        yearError.classList.add('show');
-        return;
-      }
-      // Calculate next order (largest existing + 1)
-      const maxOrder = Object.values(yearsMap).reduce((m, y) => Math.max(m, y.order || 0), 0);
-      try {
-        await yearsRef.child(yr).set({
-          color: pickColorForYear(yr),
-          custom: true,
-          order: maxOrder + 1
-        });
-        closeYearModal();
-      } catch (err) {
-        yearError.textContent = 'Could not add year: ' + err.message;
-        yearError.classList.add('show');
-      }
-    });
-    yearClose.addEventListener('click', closeYearModal);
-    yearCancel.addEventListener('click', closeYearModal);
-    yearModal.addEventListener('click', (e) => { if (e.target === yearModal) closeYearModal(); });
-
-    /* ====== Delete year flow ====== */
-    function doDeleteYear(year) {
-      if (!confirm(`Remove ${year} from the path?\n(Any achievements saved for this year will also be deleted.)`)) return;
-      Promise.all([
-        yearsRef.child(year).remove(),
-        perYearRef.child(year).remove()
-      ]).catch(err => alert('Could not delete year: ' + err.message));
-    }
-
-    /* ====== Add category flow ====== */
-    function openCategoryModal() {
-      categoryForm.reset();
-      categoryError.classList.remove('show');
-      if (categoryPermissionCheckbox) categoryPermissionCheckbox.checked = false;
-      categoryYearLabel.textContent = currentYear || 'this year';
-      categoryModal.classList.add('show');
-      setTimeout(() => categoryNameInput.focus(), 100);
-    }
-    function closeCategoryModal() { categoryModal.classList.remove('show'); }
-    categoryForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const name = categoryNameInput.value.trim();
-      if (!categoryPermissionCheckbox?.checked) {
-        categoryError.textContent = 'Please confirm permission to add this category.';
-        categoryError.classList.add('show');
-        return;
-      }
-      if (!name) {
-        categoryError.textContent = 'Please enter a category name.';
-        categoryError.classList.add('show');
-        return;
-      }
-      if (name.toLowerCase() === 'default' || name === 'සිසු නිපුණතා') {
-        categoryError.textContent = 'That name is reserved.';
-        categoryError.classList.add('show');
-        return;
-      }
-      // RTDB keys can't contain . $ # [ ] /
-      if (/[.\$#\[\]\/]/.test(name)) {
-        categoryError.textContent = 'Category name cannot contain . $ # [ ] /';
-        categoryError.classList.add('show');
-        return;
-      }
-      const rec = getYearData(currentYear);
-      if (rec.categories[name]) {
-        categoryError.textContent = `A category called "${name}" already exists for this year.`;
-        categoryError.classList.add('show');
-        return;
-      }
-      try {
-        // Write a tiny placeholder so RTDB persists the empty category node
-        await perYearRef.child(currentYear).child('categories').child(name).child('_init').set(true);
-        const customCount = Object.keys(rec.categories).filter(k => k !== 'default').length;
-        currentCategoryPage = customCount + 1; // jump to the new page once listener re-renders
-        closeCategoryModal();
-      } catch (err) {
-        categoryError.textContent = 'Could not add category: ' + err.message;
-        categoryError.classList.add('show');
-      }
-    });
-    addCategoryBtn.addEventListener('click', requestAddCategory);
-    categoryClose.addEventListener('click', closeCategoryModal);
-    categoryCancel.addEventListener('click', closeCategoryModal);
-    categoryModal.addEventListener('click', (e) => { if (e.target === categoryModal) closeCategoryModal(); });
-
-    /* ====== Delete category flow ====== */
-    function doDeleteCategory(name) {
-      if (!confirm(`Remove the "${name}" category from ${currentYear}?\n(All achievements in this category will be deleted.)`)) return;
-      perYearRef.child(currentYear).child('categories').child(name).remove()
-        .then(() => { currentCategoryPage = Math.max(0, currentCategoryPage - 1); })
-        .catch(err => alert('Could not delete category: ' + err.message));
-    }
-
-    /* ====== Delete single student card ====== */
-    function doDeleteStudent(categoryKey, itemKey, studentName) {
-  const label = studentName || 'this achievement';
-  if (!confirm(`Remove ${label} from ${currentYear}?`)) return;
-
-  // Get the fileId before deleting from Firebase
-  const catData = perYearMap[currentYear]?.categories?.[categoryKey];
-  const fileId  = catData?.[itemKey]?.fileId || null;
-
-  perYearRef.child(currentYear).child('categories').child(categoryKey).child(itemKey).remove()
-    .then(() => {
-      // Also delete from Google Drive
-      if (fileId) deletePhotoFromDrive(fileId);
-    })
-    .catch(err => alert('Could not delete: ' + err.message));
-}
-
-    /* ====== Bindings ====== */
-    modalClose.addEventListener('click', closeAchModal);
-    achModal.addEventListener('click', (e) => { if (e.target === achModal) closeAchModal(); });
-
-    // Pagination arrows
-    catPrev.addEventListener('click', () => goToPage(currentCategoryPage - 1));
-    catNext.addEventListener('click', () => goToPage(currentCategoryPage + 1));
-
-    document.addEventListener('keydown', (e) => {
-      if (e.key !== 'Escape') return;
-      if (categoryModal.classList.contains('show')) closeCategoryModal();
-      else if (yearModal.classList.contains('show')) closeYearModal();
-      else if (placeModal.classList.contains('show')) closePlaceModal();
-      else if (uploadModal.classList.contains('show')) closeUploadModal();
-      else if (pwdModal.classList.contains('show')) closePwdModal();
-      else if (achModal.classList.contains('show')) closeAchModal();
-    });
-
-    /* ====== Initial render is triggered by the RTDB listener (startDataSync) ====== */
+    window.addEventListener('resize', function() { if (Object.keys(yearsMap).length > 0) renderPath(); });
+
+    var pathNodes     = document.getElementById('pathNodes');
+    var roadShadow    = document.getElementById('roadShadow');
+    var roadMain      = document.getElementById('roadMain');
+    var roadRed       = document.getElementById('roadRed');
+    var roadDash      = document.getElementById('roadDash');
+    var achModal      = document.getElementById('achModal');
+    var modalClose    = document.getElementById('modalClose');
+    var modalYear     = document.getElementById('modalYear');
+    var studentGrid   = document.getElementById('studentGrid');
+    var emptyState    = document.getElementById('emptyState');
+    var modalSummary  = document.getElementById('modalSummary');
+    var pwdModal  = document.getElementById('pwdModal');
+    var pwdClose  = document.getElementById('pwdClose');
+    var pwdCancel = document.getElementById('pwdCancel');
+    var pwdForm   = document.getElementById('pwdForm');
+    var pwdInput  = document.getElementById('pwdInput');
+    var pwdError  = document.getElementById('pwdError');
+    var uploadModal       = document.getElementById('uploadModal');
+    var uploadClose       = document.getElementById('uploadClose');
+    var uploadCancel      = document.getElementById('uploadCancel');
+    var uploadForm        = document.getElementById('uploadForm');
+    var photoInput        = document.getElementById('photoInput');
+    var uploadPreview     = document.getElementById('uploadPreview');
+    var uploadPlaceholder = document.getElementById('uploadPlaceholder');
+    var nameInput         = document.getElementById('nameInput');
+    var placeInput2       = document.getElementById('placeInput');
+    var gradeInput        = document.getElementById('gradeInput');
+    var uploadPermissionCheckbox = document.getElementById('uploadPermissionCheckbox');
+    var placeValue     = document.getElementById('placeValue');
+    var placeAddBtn    = document.getElementById('placeAddBtn');
+    var placeBlock     = document.getElementById('placeBlock');
+    var placeModal     = document.getElementById('placeModal');
+    var placeClose     = document.getElementById('placeClose');
+    var placeCancel    = document.getElementById('placeCancel');
+    var placeForm      = document.getElementById('placeForm');
+    var placeYearLabel = document.getElementById('placeYearLabel');
+    var placeNumInput  = document.getElementById('placeNumInput');
+    var placeNoteInput = document.getElementById('placeNoteInput');
+    var placePermissionCheckbox = document.getElementById('placePermissionCheckbox');
+    var yearModal  = document.getElementById('yearModal');
+    var yearClose  = document.getElementById('yearClose');
+    var yearCancel = document.getElementById('yearCancel');
+    var yearForm   = document.getElementById('yearForm');
+    var yearInput  = document.getElementById('yearInput');
+    var yearError  = document.getElementById('yearError');
+    var customCategoriesEl = document.getElementById('categoriesPager');
+    var addCategoryBtn     = document.getElementById('addCategoryBtn');
+    var categoryModal      = document.getElementById('categoryModal');
+    var categoryClose      = document.getElementById('categoryClose');
+    var categoryCancel     = document.getElementById('categoryCancel');
+    var categoryForm       = document.getElementById('categoryForm');
+    var categoryNameInput  = document.getElementById('categoryNameInput');
+    var categoryError      = document.getElementById('categoryError');
+    var categoryYearLabel  = document.getElementById('categoryYearLabel');
+    var categoryPermissionCheckbox = document.getElementById('categoryPermissionCheckbox');
+    var categoryNav   = document.getElementById('categoryNav');
+    var categoryTabs  = document.getElementById('categoryTabs');
+    var catPrev       = document.getElementById('catPrev');
+    var catNext       = document.getElementById('catNext');
+    var catDots       = document.getElementById('catDots');
+    var catPageLabel  = document.getElementById('catPageLabel');
+    var defaultPageEl = document.querySelector('[data-cat-key="default"]');
+    var currentCategoryPage = 0;
+
+    var PATH_SVG_WIDTH = 1100, NODE_MARGIN_X = 110;
+    var NODE_SPAN_X = PATH_SVG_WIDTH - 2 * NODE_MARGIN_X;
+
+    function getGeometry(){var w=window.innerWidth;if(w<=310)return{firstY:200,rowH:320,botPad:180};if(w>=3840)return{firstY:400,rowH:700,botPad:400};if(w>=3440)return{firstY:380,rowH:600,botPad:380};if(w>=2560)return{firstY:300,rowH:520,botPad:300};return{firstY:150,rowH:240,botPad:150};}
+    function getRowNodes(){var w=window.innerWidth;if(w<=310)return 2;if(w<=420)return 3;if(w<=700)return 4;if(w>=3840)return 7;if(w>=3440)return 6;if(w>=2560)return 6;if(w>=1920)return 5;if(w>=1440)return 5;return 5;}
+    function nodePos(i){var RN=getRowNodes();var g=getGeometry();var step=NODE_SPAN_X/(RN-1);var row=Math.floor(i/RN);var colInRow=i%RN;var reverse=(row%2)===1;var col=reverse?(RN-1-colInRow):colInRow;return{x:NODE_MARGIN_X+col*step,y:g.firstY+row*g.rowH};}
+    function calcSvgHeight(t){var RN=getRowNodes();var g=getGeometry();if(t<=0)return g.firstY+g.botPad;var rows=Math.ceil(t/RN);return g.firstY+(rows-1)*g.rowH+g.botPad;}
+    function buildSnakePath(t){var RN=getRowNodes();if(t<2)return'';var d='';for(var i=0;i<t;i++){var p=nodePos(i);if(i===0){d+='M '+p.x+','+p.y;continue;}var prev=nodePos(i-1);var sameRow=Math.floor(i/RN)===Math.floor((i-1)/RN);if(sameRow){d+=' L '+p.x.toFixed(1)+','+p.y.toFixed(1);}else{var prevRowReverse=Math.floor((i-1)/RN)%2===1;var curlSign=prevRowReverse?-1:1;var curlAmt=80;var c1x=prev.x+curlSign*curlAmt;var c1y=prev.y+(p.y-prev.y)*0.35;var c2x=p.x+curlSign*curlAmt;var c2y=prev.y+(p.y-prev.y)*0.75;d+=' C '+c1x.toFixed(1)+','+c1y.toFixed(1)+' '+c2x.toFixed(1)+','+c2y.toFixed(1)+' '+p.x.toFixed(1)+','+p.y.toFixed(1);}}return d;}
+    function buildRoad(t){var d=buildSnakePath(t);roadShadow.setAttribute('d',d);roadMain.setAttribute('d',d);roadRed.setAttribute('d',d);roadDash.setAttribute('d',d);}
+
+    function buildNode(yearObj,svgPos,svgHeight,isCustom,animDelay){var node=document.createElement('div');node.className='path-node '+(yearObj.color||'purple')+(isCustom?' custom':'');node.dataset.year=yearObj.year;node.style.left=((svgPos.x/PATH_SVG_WIDTH)*100).toFixed(2)+'%';node.style.top=((svgPos.y/svgHeight)*100).toFixed(2)+'%';node.style.setProperty('--delay',(animDelay*2).toFixed(1)+'s');var startBadgeHTML=yearObj.isStart?'<div class="start-badge">START HERE</div>':'';var deleteBtnHTML=isCustom?'<button class="node-delete" type="button" data-del-year="'+yearObj.year+'" title="Remove this year">\u00d7</button>':'';node.innerHTML=deleteBtnHTML+'<div class="node-badge"><div class="yr">'+yearObj.year+'</div><div class="lbl">YEAR</div></div><div class="node-platform"><div class="platform-top"></div><div class="platform-gem" style="--delay:'+(animDelay*2).toFixed(1)+'s"></div><div class="platform-side"></div><div class="platform-rim"></div></div>'+startBadgeHTML;node.addEventListener('click',function(e){if(e.target.closest('.node-delete'))return;openAchModal(yearObj.year);});return node;}
+    function buildAddYearNode(svgPos,svgHeight){var node=document.createElement('div');node.className='add-year-node';node.style.left=((svgPos.x/PATH_SVG_WIDTH)*100).toFixed(2)+'%';node.style.top=((svgPos.y/svgHeight)*100).toFixed(2)+'%';node.innerHTML='<div class="add-year-badge">+</div><div class="add-year-label">Add Year</div>';node.addEventListener('click',requestAddYear);return node;}
+
+    function renderPath(){var allYears=getOrderedYears();allYears.forEach(function(y,i){y.isStart=(i===0);});var totalSlots=allYears.length+1;var svgHeight=calcSvgHeight(totalSlots);pathRoad.setAttribute('viewBox','0 0 '+PATH_SVG_WIDTH+' '+svgHeight);var ps=document.getElementById('pathStage');if(ps)ps.style.aspectRatio=PATH_SVG_WIDTH+' / '+svgHeight;buildRoad(totalSlots);pathNodes.innerHTML='';allYears.forEach(function(yObj,i){var pos=nodePos(i);pathNodes.appendChild(buildNode(yObj,pos,svgHeight,!!yObj.custom,i/totalSlots));});var addPos=nodePos(allYears.length);pathNodes.appendChild(buildAddYearNode(addPos,svgHeight));pathNodes.querySelectorAll('[data-del-year]').forEach(function(btn){btn.addEventListener('click',function(e){e.stopPropagation();requestDeleteYear(btn.dataset.delYear);});});}
+    function pickColorForYear(year){var palette=['purple','teal','gold','maroon'];return palette[(parseInt(year,10)||0)%palette.length];}
+
+    function buildStudentCard(student,categoryKey,itemKey){var card=document.createElement('div');card.className='student-card';var photoSrc=student.photoUrl||student.photo;var photoHTML=photoSrc?'<img src="'+photoSrc+'" alt="'+student.name+'" style="width:100%;aspect-ratio:1;object-fit:cover;border-bottom:1px solid rgba(245,200,74,0.3);" referrerpolicy="no-referrer">':'<div class="student-photo">'+(student.name||'?').trim().charAt(0)+'</div>';var gradeHTML=student.grade?'<div class="student-grade">'+student.grade+'</div>':'';card.innerHTML='<button class="card-delete" type="button" title="Remove this achievement">\u00d7</button>'+photoHTML+'<div class="student-info"><div class="student-name">'+student.name+'</div><div class="student-rank">'+student.rank+'</div>'+gradeHTML+'</div>';card.querySelector('.card-delete').addEventListener('click',function(e){e.stopPropagation();requestDeleteStudent(categoryKey,itemKey,student.name);});return card;}
+    function buildAddCard(categoryName){var add=document.createElement('button');add.className='add-card';add.type='button';add.innerHTML='<div class="plus-icon">+</div><div class="add-lbl">Add Photo</div>';add.addEventListener('click',function(){requestAdd(categoryName);});return add;}
+
+    function buildCategorySection(categoryName,studentsList){var section=document.createElement('div');section.className='category-section';section.dataset.category=categoryName;var header=document.createElement('div');header.className='category-header';var title=document.createElement('div');title.className='category-title';title.textContent=categoryName;var delBtn=document.createElement('button');delBtn.className='category-delete';delBtn.type='button';delBtn.title='Remove this category';delBtn.innerHTML='<span class="del-x">\u00d7</span><span>Remove</span>';delBtn.addEventListener('click',function(){requestDeleteCategory(categoryName);});header.appendChild(title);header.appendChild(delBtn);section.appendChild(header);var grid=document.createElement('div');grid.className='student-grid';studentsList.forEach(function(s){grid.appendChild(buildStudentCard(s,categoryName,s._key));});grid.appendChild(buildAddCard(categoryName));section.appendChild(grid);return section;}
+
+    function renderYear(year){var rec=getYearData(year);var cats=rec.categories;var defaultList=categoryToArray(cats['default']);studentGrid.innerHTML='';defaultList.forEach(function(s){studentGrid.appendChild(buildStudentCard(s,'default',s._key));});studentGrid.appendChild(buildAddCard('default'));emptyState.classList.toggle('show',defaultList.length===0);customCategoriesEl.querySelectorAll('.category-page:not([data-cat-key="default"])').forEach(function(el){el.remove();});var totalAchievements=defaultList.length;var customCatNames=Object.keys(cats).filter(function(k){return k!=='default';});customCatNames.forEach(function(catName){var list=categoryToArray(cats[catName]);totalAchievements+=list.length;var page=document.createElement('div');page.className='category-page';page.dataset.catKey=catName;page.appendChild(buildCategorySection(catName,list));customCategoriesEl.appendChild(page);});var pageCount=1+customCatNames.length;if(currentCategoryPage>=pageCount)currentCategoryPage=0;renderPagination(pageCount);var customCount=customCatNames.length;var catSummary=customCount?', '+customCount+' extra categor'+(customCount===1?'y':'ies'):'';modalSummary.textContent='Year '+year+' \u2014 '+totalAchievements+' achievement'+(totalAchievements===1?'':'s')+' recorded'+catSummary;if(rec.place&&rec.place.num){var noteHTML=rec.place.note?'<span class="place-note">'+rec.place.note+'</span>':'';placeValue.innerHTML='<span class="place-num">'+rec.place.num+'</span> Place'+noteHTML;}else{placeValue.innerHTML='<span class="place-empty">Not yet recorded for this year</span>';}}
+
+    function renderPagination(pageCount){var pages=customCategoriesEl.querySelectorAll('.category-page');pages.forEach(function(p,i){p.classList.toggle('active',i===currentCategoryPage);});categoryTabs.innerHTML='';pages.forEach(function(p,i){var key=p.dataset.catKey;var tab=document.createElement('button');tab.type='button';tab.className='category-tab'+(i===currentCategoryPage?' active':'');var isDefault=key==='default';tab.innerHTML='<span class="tab-icon">'+(isDefault?'\u2638':'\u2605')+'</span>'+(isDefault?'\u0DC3\u0DD2\u0DC3\u0DD4 \u0DB1\u0DD2\u0DB4\u0DD4\u0DAB\u0DAD\u0DCF':key);tab.addEventListener('click',function(){goToPage(i);});categoryTabs.appendChild(tab);});categoryTabs.classList.toggle('hidden',pageCount<=1);catDots.innerHTML='';for(var i=0;i<pageCount;i++){var dot=document.createElement('button');dot.type='button';dot.className='cat-dot'+(i===currentCategoryPage?' active':'');dot.setAttribute('aria-label','Go to page '+(i+1));(function(idx){dot.addEventListener('click',function(){goToPage(idx);});})(i);catDots.appendChild(dot);}var activePage=pages[currentCategoryPage];var catName=activePage?activePage.dataset.catKey:'';var displayName=catName==='default'?'\u0DC3\u0DD2\u0DC3\u0DD4 \u0DB1\u0DD2\u0DB4\u0DD4\u0DAB\u0DAD\u0DCF':catName;catPageLabel.textContent=pageCount>1?displayName+'  \u00b7  '+(currentCategoryPage+1)+' / '+pageCount:displayName;catPrev.disabled=currentCategoryPage===0;catNext.disabled=currentCategoryPage>=pageCount-1;categoryNav.classList.toggle('hidden',pageCount<=1);placeBlock.style.display=(currentCategoryPage===0)?'':'none';var activeTab=categoryTabs.querySelector('.category-tab.active');if(activeTab&&activeTab.scrollIntoView)activeTab.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});}
+
+    function goToPage(i){var pages=customCategoriesEl.querySelectorAll('.category-page');if(i<0||i>=pages.length)return;currentCategoryPage=i;renderPagination(pages.length);}
+    function openAchModal(year){currentYear=year;currentCategoryPage=0;modalYear.textContent=year;renderYear(year);achModal.classList.add('show');document.body.style.overflow='hidden';}
+    function closeAchModal(){achModal.classList.remove('show');document.body.style.overflow='';}
+
+    function requestAdd(categoryName){pendingAction={type:'addStudent',category:categoryName||'default'};gateAction();}
+    function requestAddPlace(){pendingAction='addPlace';gateAction();}
+    function requestAddYear(){pendingAction='addYear';gateAction();}
+    function requestDeleteYear(year){pendingAction={type:'deleteYear',year:year};gateAction(true);}
+    function requestAddCategory(){pendingAction='addCategory';gateAction();}
+    function requestDeleteCategory(name){pendingAction={type:'deleteCategory',name:name};gateAction(true);}
+    function requestDeleteStudent(categoryKey,itemKey,studentName){pendingAction={type:'deleteStudent',categoryKey:categoryKey,itemKey:itemKey,studentName:studentName};gateAction(true);}
+
+    function gateAction(forceFresh){if(isUnlocked&&!forceFresh){runPendingAction();}else{pwdError.classList.remove('show');pwdInput.value='';var sub=pwdModal.querySelector('.pwd-sub');if(sub)sub.textContent=forceFresh?'This action permanently deletes data. Please confirm your password.':'Enter the password to make changes.';pwdModal.classList.add('show');setTimeout(function(){pwdInput.focus();},100);}}
+    function runPendingAction(){if(pendingAction&&pendingAction.type==='addStudent'){currentCategory=pendingAction.category||'default';openUploadModal();}else if(pendingAction==='addPlace')openPlaceModal();else if(pendingAction==='addYear')openYearModal();else if(pendingAction==='addCategory')openCategoryModal();else if(pendingAction&&pendingAction.type==='deleteYear')doDeleteYear(pendingAction.year);else if(pendingAction&&pendingAction.type==='deleteCategory')doDeleteCategory(pendingAction.name);else if(pendingAction&&pendingAction.type==='deleteStudent')doDeleteStudent(pendingAction.categoryKey,pendingAction.itemKey,pendingAction.studentName);}
+
+    function closePwdModal(){pwdModal.classList.remove('show');}
+    pwdForm.addEventListener('submit',function(e){e.preventDefault();if(pwdInput.value===ADMIN_PASSWORD){isUnlocked=true;closePwdModal();runPendingAction();}else{pwdError.classList.add('show');pwdInput.value='';pwdInput.focus();}});
+    pwdClose.addEventListener('click',closePwdModal);
+    pwdCancel.addEventListener('click',closePwdModal);
+    pwdModal.addEventListener('click',function(e){if(e.target===pwdModal)closePwdModal();});
+
+    function openUploadModal(){uploadForm.reset();if(uploadPermissionCheckbox)uploadPermissionCheckbox.checked=false;uploadPreview.style.display='none';uploadPreview.src='';uploadPlaceholder.style.display='';uploadModal.classList.add('show');}
+    function closeUploadModal(){uploadModal.classList.remove('show');}
+    photoInput.addEventListener('change',function(e){var file=e.target.files[0];if(!file)return;var reader=new FileReader();reader.onload=function(ev){uploadPreview.src=ev.target.result;uploadPreview.style.display='block';uploadPlaceholder.style.display='none';};reader.readAsDataURL(file);});
+    uploadForm.addEventListener('submit',async function(e){e.preventDefault();var name=nameInput.value.trim();var place=placeInput2.value.trim();var grade=gradeInput.value.trim();var file=photoInput.files[0];var statusEl=document.getElementById('uploadStatus');var submitBtn=document.getElementById('uploadSubmit');if(!uploadPermissionCheckbox||!uploadPermissionCheckbox.checked){alert('Please confirm permission.');return;}if(!name||!place||!grade){alert('Please fill in name, place, and grade.');return;}if(!file){alert('Please select a photo.');return;}var catKey=currentCategory||'default';submitBtn.disabled=true;statusEl.classList.remove('error');statusEl.textContent='Uploading photo to Google Drive\u2026';try{var result=await uploadPhotoToDrive(file);statusEl.textContent='Saving to database\u2026';var entry={name:name,rank:place,grade:grade,photoUrl:result.url,fileId:result.fileId,createdAt:firebase.database.ServerValue.TIMESTAMP};await perYearRef.child(currentYear).child('categories').child(catKey).push(entry);statusEl.textContent='';closeUploadModal();}catch(err){console.error(err);statusEl.classList.add('error');statusEl.textContent='Failed: '+err.message;}finally{submitBtn.disabled=false;}});
+    uploadClose.addEventListener('click',closeUploadModal);
+    uploadCancel.addEventListener('click',closeUploadModal);
+    uploadModal.addEventListener('click',function(e){if(e.target===uploadModal)closeUploadModal();});
+
+    function openPlaceModal(){var rec=getYearData(currentYear);placeYearLabel.textContent=currentYear;placeNumInput.value=rec.place?(rec.place.num||''):'';placeNoteInput.value=rec.place?(rec.place.note||''):'';if(placePermissionCheckbox)placePermissionCheckbox.checked=false;placeModal.classList.add('show');setTimeout(function(){placeNumInput.focus();},100);}
+    function closePlaceModal(){placeModal.classList.remove('show');}
+    placeForm.addEventListener('submit',async function(e){e.preventDefault();var num=placeNumInput.value.trim();var note=placeNoteInput.value.trim();if(!placePermissionCheckbox||!placePermissionCheckbox.checked){alert('Please confirm permission.');return;}if(!num){alert('Please enter the place number.');return;}try{await perYearRef.child(currentYear).child('place').set({num:num,note:note});closePlaceModal();}catch(err){alert('Could not save place: '+err.message);}});
+    placeAddBtn.addEventListener('click',requestAddPlace);
+    placeClose.addEventListener('click',closePlaceModal);
+    placeCancel.addEventListener('click',closePlaceModal);
+    placeModal.addEventListener('click',function(e){if(e.target===placeModal)closePlaceModal();});
+
+    function openYearModal(){yearForm.reset();yearError.classList.remove('show');yearModal.classList.add('show');setTimeout(function(){yearInput.focus();},100);}
+    function closeYearModal(){yearModal.classList.remove('show');}
+    yearForm.addEventListener('submit',async function(e){e.preventDefault();var yr=yearInput.value.trim();var yrNum=parseInt(yr,10);if(!yr||isNaN(yrNum)||yrNum<2000||yrNum>2100){yearError.textContent='Please enter a valid year (2000\u20132100).';yearError.classList.add('show');return;}if(yearsMap[yr]){yearError.textContent='Year '+yr+' is already on the path.';yearError.classList.add('show');return;}var maxOrder=Object.values(yearsMap).reduce(function(m,y){return Math.max(m,y.order||0);},0);try{await yearsRef.child(yr).set({color:pickColorForYear(yr),custom:true,order:maxOrder+1});closeYearModal();}catch(err){yearError.textContent='Could not add year: '+err.message;yearError.classList.add('show');}});
+    yearClose.addEventListener('click',closeYearModal);
+    yearCancel.addEventListener('click',closeYearModal);
+    yearModal.addEventListener('click',function(e){if(e.target===yearModal)closeYearModal();});
+
+    function doDeleteYear(year){if(!confirm('Remove '+year+' from the path?\n(Any achievements saved for this year will also be deleted.)'))return;Promise.all([yearsRef.child(year).remove(),perYearRef.child(year).remove()]).catch(function(err){alert('Could not delete year: '+err.message);});}
+
+    function openCategoryModal(){categoryForm.reset();categoryError.classList.remove('show');if(categoryPermissionCheckbox)categoryPermissionCheckbox.checked=false;categoryYearLabel.textContent=currentYear||'this year';categoryModal.classList.add('show');setTimeout(function(){categoryNameInput.focus();},100);}
+    function closeCategoryModal(){categoryModal.classList.remove('show');}
+    categoryForm.addEventListener('submit',async function(e){e.preventDefault();var name=categoryNameInput.value.trim();if(!categoryPermissionCheckbox||!categoryPermissionCheckbox.checked){categoryError.textContent='Please confirm permission.';categoryError.classList.add('show');return;}if(!name){categoryError.textContent='Please enter a category name.';categoryError.classList.add('show');return;}if(name.toLowerCase()==='default'||name==='\u0DC3\u0DD2\u0DC3\u0DD4 \u0DB1\u0DD2\u0DB4\u0DD4\u0DAB\u0DAD\u0DCF'){categoryError.textContent='That name is reserved.';categoryError.classList.add('show');return;}if(/[.\$#\[\]\/]/.test(name)){categoryError.textContent='Category name cannot contain . $ # [ ] /';categoryError.classList.add('show');return;}var rec=getYearData(currentYear);if(rec.categories[name]){categoryError.textContent='A category called "'+name+'" already exists.';categoryError.classList.add('show');return;}try{await perYearRef.child(currentYear).child('categories').child(name).child('_init').set(true);var customCount=Object.keys(rec.categories).filter(function(k){return k!=='default';}).length;currentCategoryPage=customCount+1;closeCategoryModal();}catch(err){categoryError.textContent='Could not add category: '+err.message;categoryError.classList.add('show');}});
+    addCategoryBtn.addEventListener('click',requestAddCategory);
+    categoryClose.addEventListener('click',closeCategoryModal);
+    categoryCancel.addEventListener('click',closeCategoryModal);
+    categoryModal.addEventListener('click',function(e){if(e.target===categoryModal)closeCategoryModal();});
+
+    function doDeleteCategory(name){if(!confirm('Remove the "'+name+'" category from '+currentYear+'?\n(All achievements in this category will be deleted.)'))return;perYearRef.child(currentYear).child('categories').child(name).remove().then(function(){currentCategoryPage=Math.max(0,currentCategoryPage-1);}).catch(function(err){alert('Could not delete category: '+err.message);});}
+    function doDeleteStudent(categoryKey,itemKey,studentName){var label=studentName||'this achievement';if(!confirm('Remove '+label+' from '+currentYear+'?'))return;var catData=perYearMap[currentYear]&&perYearMap[currentYear].categories&&perYearMap[currentYear].categories[categoryKey];var fileId=catData&&catData[itemKey]&&catData[itemKey].fileId||null;perYearRef.child(currentYear).child('categories').child(categoryKey).child(itemKey).remove().then(function(){if(fileId)deletePhotoFromDrive(fileId);}).catch(function(err){alert('Could not delete: '+err.message);});}
+
+    modalClose.addEventListener('click',closeAchModal);
+    achModal.addEventListener('click',function(e){if(e.target===achModal)closeAchModal();});
+    catPrev.addEventListener('click',function(){goToPage(currentCategoryPage-1);});
+    catNext.addEventListener('click',function(){goToPage(currentCategoryPage+1);});
+    document.addEventListener('keydown',function(e){if(e.key!=='Escape')return;if(categoryModal.classList.contains('show'))closeCategoryModal();else if(yearModal.classList.contains('show'))closeYearModal();else if(placeModal.classList.contains('show'))closePlaceModal();else if(uploadModal.classList.contains('show'))closeUploadModal();else if(pwdModal.classList.contains('show'))closePwdModal();else if(achModal.classList.contains('show'))closeAchModal();});
   </script>
 </body>
 </html>
