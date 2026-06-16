@@ -10,7 +10,7 @@
    ═══════════════════════════════════════════════════════════════════ */
 
 /* ═══ CONFIG — set this to your Apps Script Web App URL ═══ */
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw4qb-_hwj551JjEFcI_8eTDuWJErNaJRfgfA7__DlqYg6nwpS9uO9nDcQWkLtVsE0S/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxxJGNLJaaBNbLdmM7q4wEUvFTNVgGM4JtVUH3574uQncmM_odGDQVyDhV7iKz8h5tK/exec';
 
 /* ═══ School registration code — required to sign up as student or teacher.
        Change this to a different value if students/teachers learn the current one.
@@ -996,7 +996,7 @@ auth.onAuthStateChanged(async u => {
    ANNUAL PROMOTION — checks if the server has had a year-end
    promotion since the user was last updated. If so:
      • increments their grade,  OR
-     • marks them alumni if they were in Grade 11,
+     • marks them alumni if they were in Grade 12,
    then asks them to re-upload their face photo (if not alumni).
    ═══════════════════════════════════════════════════════════════════ */
 async function checkAndPromoteStudent(user, userData) {
@@ -1031,13 +1031,13 @@ async function checkAndPromoteStudent(user, userData) {
 
   const ref = db.collection('users').doc(user.uid);
 
-  if (newGrade > 11) {
+  if (newGrade > 12) {
     // ═══ GRADUATED ═══
-    // The year they would have been in Grade 11
-    const passedBatchYear = userLast + (11 - currentGrade);
+    // The year they would have been in Grade 12
+    const passedBatchYear = userLast + (12 - currentGrade);
     await ref.update({
       role: 'alumni',
-      grade: 11,
+      grade: 12,
       passedBatchYear: passedBatchYear,
       lastPromotionYear: lastPromoYear,
       hasFace: false,

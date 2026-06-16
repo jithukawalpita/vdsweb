@@ -270,12 +270,170 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #050203; f
 .manual-mark-btn.present:hover, .manual-mark-btn.present.active { background: rgba(26,124,46,0.85); color: #fff; border-color: #1a7c2e; }
 .manual-mark-btn.absent:hover, .manual-mark-btn.absent.active { background: rgba(201,60,60,0.85); color: #fff; border-color: #c93c3c; }
 
+/* ★ Prefect toggle button */
+.manual-mark-btn.prefect {
+  color: rgba(245,200,80,0.7);
+  border-color: rgba(218,165,32,0.35);
+  font-size: 1rem;
+  padding: 6px 10px;
+  min-width: 36px;
+}
+.manual-mark-btn.prefect:hover { background: rgba(218,165,32,0.2); color: #f5c84a; border-color: #c9a84c; }
+.manual-mark-btn.prefect.active { background: linear-gradient(135deg, #c9a84c, #b89540); color: #1a0606; border-color: #f5c84a; }
+.manual-mark-btn.prefect.active:hover { background: linear-gradient(135deg, #e0b95c, #b88a20); }
+
 @media (max-width: 600px) {
   .stats-row { gap: 1.4rem; }
   .stat-num { font-size: 1.3rem; }
   .top-title { font-size: 0.95rem; }
   .status-bar { font-size: 0.7rem; padding: 6px 14px; }
 }
+
+/* ═══════════════ Special Event Creator ═══════════════ */
+.event-creator {
+  background: linear-gradient(135deg, rgba(30,18,5,0.9), rgba(20,10,3,0.85));
+  border: 1px solid rgba(218,165,32,0.35);
+  border-radius: 10px;
+  margin-bottom: 1rem;
+  overflow: hidden;
+}
+.event-creator-header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 10px 14px; cursor: pointer;
+  font-family: 'Cinzel', serif; font-size: 11px; font-weight: 600;
+  letter-spacing: 1.5px; text-transform: uppercase;
+  color: #f5c84a;
+  transition: background 0.2s;
+}
+.event-creator-header:hover { background: rgba(218,165,32,0.08); }
+.event-toggle-arrow { font-size: 14px; transition: transform 0.2s; }
+.event-toggle-arrow.open { transform: rotate(90deg); }
+.event-creator-body { padding: 12px 14px 14px; border-top: 1px solid rgba(218,165,32,0.15); }
+.event-field { margin-bottom: 10px; }
+.event-field label.ctrl-label { display: block; margin-bottom: 5px; }
+.event-checkboxes {
+  display: flex; flex-wrap: wrap; gap: 4px 10px;
+  padding: 8px; background: rgba(0,0,0,0.3);
+  border: 1px solid rgba(201,168,76,0.15); border-radius: 6px;
+}
+.event-cb {
+  display: flex; align-items: center; gap: 4px;
+  font-size: 0.78rem; color: rgba(245,222,179,0.75);
+  cursor: pointer; white-space: nowrap;
+  min-width: 85px;
+}
+.event-cb input[type="checkbox"] { accent-color: #c9a84c; cursor: pointer; }
+.event-select-btn {
+  background: rgba(201,168,76,0.1); border: 1px solid rgba(201,168,76,0.3);
+  color: rgba(201,168,76,0.7); font-size: 0.7rem; padding: 4px 10px;
+  border-radius: 4px; cursor: pointer; font-family: 'Cinzel', serif;
+  letter-spacing: 0.5px;
+}
+.event-select-btn:hover { background: rgba(201,168,76,0.2); color: #c9a84c; }
+.event-actions { margin-top: 10px; }
+.event-add-btn {
+  width: 100%; padding: 10px;
+  background: linear-gradient(135deg, rgba(218,165,32,0.25), rgba(180,130,20,0.15));
+  border: 1px solid rgba(218,165,32,0.5);
+  border-radius: 6px; color: #f5c84a;
+  font-family: 'Cinzel', serif; font-size: 11px; font-weight: 600;
+  letter-spacing: 1.5px; text-transform: uppercase;
+  cursor: pointer; transition: all 0.2s;
+}
+.event-add-btn:hover { background: linear-gradient(135deg, rgba(218,165,32,0.4), rgba(180,130,20,0.3)); border-color: #f5c84a; }
+.event-add-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.event-status {
+  margin-top: 8px; font-size: 0.8rem; color: rgba(201,168,76,0.7);
+  min-height: 1.2rem; text-align: center;
+}
+.event-active-row {
+  margin-top: 10px; padding: 8px 12px;
+  background: rgba(26,124,46,0.15);
+  border: 1px solid rgba(40,200,64,0.35);
+  border-radius: 6px;
+  display: flex; justify-content: space-between; align-items: center;
+  color: #80ffcc; font-size: 0.82rem;
+}
+.event-active-row strong { color: #f5c84a; }
+.event-clear-btn {
+  background: rgba(201,60,60,0.2); border: 1px solid rgba(201,60,60,0.4);
+  color: #ff9999; font-size: 0.75rem; padding: 4px 10px;
+  border-radius: 4px; cursor: pointer;
+}
+.event-clear-btn:hover { background: rgba(201,60,60,0.4); color: #fff; }
+/* ═══════════════ Current Events List ═══════════════ */
+.events-list-section {
+  background: linear-gradient(135deg, rgba(18,10,3,0.9), rgba(12,6,2,0.85));
+  border: 1px solid rgba(218,165,32,0.25);
+  border-radius: 10px;
+  margin-bottom: 1rem;
+  overflow: hidden;
+}
+.events-list-header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 10px 14px; cursor: pointer;
+  font-family: 'Cinzel', serif; font-size: 11px; font-weight: 600;
+  letter-spacing: 1.5px; text-transform: uppercase;
+  color: #f5c84a;
+  transition: background 0.2s;
+}
+.events-list-header:hover { background: rgba(218,165,32,0.08); }
+.events-list-body { padding: 10px 14px 14px; border-top: 1px solid rgba(218,165,32,0.15); }
+.event-item-row {
+  background: rgba(20,10,3,0.7);
+  border: 1px solid rgba(201,168,76,0.15);
+  border-radius: 7px;
+  padding: 9px 12px;
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 7px;
+  transition: border-color 0.15s;
+}
+.event-item-row:hover { border-color: rgba(201,168,76,0.4); }
+.event-item-info { flex: 1; min-width: 0; }
+.event-item-name { color: #f5c84a; font-size: 0.85rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.event-item-meta { color: rgba(245,222,179,0.45); font-size: 0.7rem; margin-top: 2px; }
+.event-item-actions { display: flex; gap: 5px; flex-shrink: 0; }
+.ev-btn {
+  background: transparent; border: 1px solid rgba(201,168,76,0.3);
+  border-radius: 4px; color: rgba(245,222,179,0.65);
+  font-size: 0.72rem; padding: 5px 9px; cursor: pointer;
+  transition: all 0.12s;
+}
+.ev-btn.edit:hover { background: rgba(201,168,76,0.2); color: #f5c84a; border-color: #c9a84c; }
+.ev-btn.del:hover  { background: rgba(201,60,60,0.25); color: #ff9999; border-color: #c93c3c; }
+.ev-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.events-loading { color: rgba(245,222,179,0.4); font-size: 0.8rem; text-align: center; padding: 0.8rem 0; font-style: italic; }
+
+/* Edit modal */
+.ev-modal-overlay {
+  position: fixed; inset: 0; z-index: 200;
+  background: rgba(0,0,0,0.75);
+  display: flex; align-items: center; justify-content: center;
+  padding: 1.5rem;
+}
+.ev-modal {
+  background: linear-gradient(160deg, #120808, #1c0c0c);
+  border: 1px solid rgba(201,168,76,0.4);
+  border-radius: 12px;
+  padding: 1.8rem 1.6rem;
+  width: 100%; max-width: 400px;
+  box-shadow: 0 0 60px rgba(0,0,0,0.8);
+}
+.ev-modal-title {
+  font-family: 'Cinzel', serif; font-size: 12px; letter-spacing: 2px;
+  color: #f5c84a; text-transform: uppercase; margin-bottom: 1rem;
+}
+.ev-modal-actions { display: flex; gap: 8px; margin-top: 1.2rem; }
+.ev-modal-btn {
+  flex: 1; padding: 10px;
+  border-radius: 5px; border: 1px solid rgba(201,168,76,0.4);
+  background: rgba(201,168,76,0.1); color: #f5deb3;
+  font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 1.5px;
+  text-transform: uppercase; cursor: pointer; transition: all 0.2s;
+}
+.ev-modal-btn.confirm { background: linear-gradient(135deg,#c9a84c,#a07810); color: #1a0800; border-color: #c9a84c; font-weight: 700; }
+.ev-modal-btn.confirm:hover { background: linear-gradient(135deg,#e0b95c,#b88a20); }
+.ev-modal-btn:hover:not(.confirm) { background: rgba(201,168,76,0.2); }
 </style>
 </head>
 <body>
@@ -333,6 +491,85 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #050203; f
 
   <!-- Manual mode panel (hidden by default) -->
   <div class="manual-panel" id="manualPanel" style="display:none">
+
+    <!-- ═══ Special Event Creator ═══ -->
+<div class="event-creator" id="eventCreator">
+  <div class="event-creator-header" onclick="toggleEventCreator()">
+    <span>🎪 Add Special Event</span>
+    <span class="event-toggle-arrow" id="eventArrow">▸</span>
+  </div>
+  <div class="event-creator-body" id="eventBody" style="display:none">
+    <div class="event-field">
+      <label class="ctrl-label">Event Name:</label>
+      <input type="text" id="eventNameInput" class="ctrl-input"
+             placeholder="e.g. Poson Budu Pujawa"
+             style="flex:1;color:#f5c84a;border-color:rgba(218,165,32,0.5);">
+    </div>
+    <div class="event-field">
+      <label class="ctrl-label">Add to sheets:</label>
+      <div class="event-checkboxes" id="eventCheckboxes">
+        <label class="event-cb"><input type="checkbox" value="g1"       checked> Grade 1</label>
+        <label class="event-cb"><input type="checkbox" value="g2"       checked> Grade 2</label>
+        <label class="event-cb"><input type="checkbox" value="g3"       checked> Grade 3</label>
+        <label class="event-cb"><input type="checkbox" value="g4"       checked> Grade 4</label>
+        <label class="event-cb"><input type="checkbox" value="g5"       checked> Grade 5</label>
+        <label class="event-cb"><input type="checkbox" value="g6"       checked> Grade 6</label>
+        <label class="event-cb"><input type="checkbox" value="g7"       checked> Grade 7</label>
+        <label class="event-cb"><input type="checkbox" value="g8"       checked> Grade 8</label>
+        <label class="event-cb"><input type="checkbox" value="g9"       checked> Grade 9</label>
+        <label class="event-cb"><input type="checkbox" value="g10"      checked> Grade 10</label>
+        <label class="event-cb"><input type="checkbox" value="g11"      checked> Grade 11</label>
+        <label class="event-cb"><input type="checkbox" value="g12"      checked> Grade 12</label>
+        <label class="event-cb"><input type="checkbox" value="teachers" checked> Teachers</label>
+       <label class="event-cb" style="border-left:1px solid rgba(201,168,76,0.25);padding-left:10px;margin-left:4px;"
+               title="Adds the column to the Prefects spreadsheet. If you tick ONLY this (no grades, no teachers), the event becomes prefects-only — only prefects can be marked.">
+          <input type="checkbox" value="prefects_only" id="eventPrefectsOnly"> ⭐ Prefects</label>
+      </div>
+      <div style="display:flex;gap:6px;margin-top:6px;">
+        <button class="event-select-btn" onclick="toggleAllEventCb(true)">Select All</button>
+        <button class="event-select-btn" onclick="toggleAllEventCb(false)">Deselect All</button>
+      </div>
+    </div>
+    <div class="event-actions">
+      <button class="event-add-btn" id="eventAddBtn" onclick="addSpecialEvent()">➕ Add Event to Sheets</button>
+    </div>
+    <div class="event-status" id="eventStatus"></div>
+
+    <!-- Active event indicator -->
+    <div class="event-active-row" id="eventActiveRow" style="display:none">
+      <span>📌 Active: <strong id="activeEventName"></strong></span>
+      <button class="event-clear-btn" onclick="clearActiveEvent()">✕ Clear</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ Current Special Events List ═══ -->
+<div class="events-list-section" id="eventsListSection">
+  <div class="events-list-header" onclick="toggleEventsList()">
+    <span>📋 Current Special Events</span>
+    <span class="event-toggle-arrow" id="eventsListArrow">▸</span>
+  </div>
+  <div id="eventsListBody" style="display:none">
+    <div class="events-list-body">
+      <div class="events-loading" id="eventsLoadingMsg">Click to load events…</div>
+      <div id="eventItemsList"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Edit-name modal (hidden) -->
+<div class="ev-modal-overlay" id="evEditModal" style="display:none" onclick="closeEditModal(event)">
+  <div class="ev-modal">
+    <div class="ev-modal-title">✏ Rename Special Event</div>
+    <label class="ctrl-label" style="display:block;margin-bottom:6px;">New name:</label>
+    <input type="text" id="evEditInput" class="ctrl-input" style="width:100%;color:#f5c84a;border-color:rgba(218,165,32,0.5);">
+    <div class="ev-modal-actions">
+      <button class="ev-modal-btn" onclick="closeEditModal()">Cancel</button>
+      <button class="ev-modal-btn confirm" onclick="confirmEditEvent()">Save</button>
+    </div>
+  </div>
+</div>
+
     <div class="manual-filter-row">
       <label>Grade:</label>
       <select id="gradeFilter" class="ctrl-select" onchange="renderManualList()">
@@ -340,6 +577,19 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #050203; f
         <option value="teacher">Teachers</option>
       </select>
       <input type="search" id="manualSearch" class="ctrl-input" placeholder="Search by name…" oninput="renderManualList()">
+    </div>
+
+    <!-- Active special event attendance banner -->
+    <div id="specialEventBanner" style="
+      display:none; align-items:center; justify-content:space-between; gap:10px;
+      background:linear-gradient(135deg,rgba(218,165,32,0.18),rgba(180,130,20,0.1));
+      border:1px solid rgba(218,165,32,0.5); border-radius:8px;
+      padding:10px 14px; margin-bottom:10px;">
+      <div style="color:#f5c84a; font-family:'Cinzel',serif; font-size:11px; letter-spacing:1.5px; text-transform:uppercase; display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+        🎪 Marking for special event:
+        <strong id="bannerEventName" style="color:#fff; font-size:13px; letter-spacing:0; font-family:'Lato',sans-serif; font-weight:700;"></strong>
+      </div>
+      <button onclick="clearActiveEvent()" style="background:rgba(201,60,60,0.2);border:1px solid rgba(201,60,60,0.4);color:#ff9999;font-size:0.75rem;padding:4px 10px;border-radius:4px;cursor:pointer;flex-shrink:0;">✕ Clear</button>
     </div>
     <div class="manual-list" id="manualList">
       <div class="manual-hint">Loading students…</div>
@@ -376,7 +626,7 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #050203; f
 <script>
 /* ═══════════════ CONFIG ═══════════════ */
 const TEACHER_ACCESS_CODE = 'vipassi teachers@';
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw4qb-_hwj551JjEFcI_8eTDuWJErNaJRfgfA7__DlqYg6nwpS9uO9nDcQWkLtVsE0S/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxxJGNLJaaBNbLdmM7q4wEUvFTNVgGM4JtVUH3574uQncmM_odGDQVyDhV7iKz8h5tK/exec';
 
 const FIREBASE_CONFIG = {
   apiKey:            "AIzaSyAWpPP3OevjIRAsoGIjOJTofV6l2jgyhNI",
@@ -463,7 +713,21 @@ let scanRunning = false;
 let lastDetection = 0;
 let frameCount = 0;
 let fpsTimer = 0;
-const markedToday = new Set(); // UIDs marked in this session
+const markedToday = new Set();   // UIDs marked in this session
+const prefectsSet = new Set();   // UIDs of students currently assigned as prefects
+
+/* ═══════════════ PREFECTS LOADER ═══════════════ */
+async function loadPrefects() {
+  try {
+    const res = await appsScriptPost({ action: 'list_prefects' });
+    if (res && res.ok) {
+      prefectsSet.clear();
+      (res.prefects || []).forEach(uid => prefectsSet.add(uid));
+    }
+  } catch (e) {
+    console.warn('Could not load prefects:', e);
+  }
+}
 
 /* ═══════════════ DATE + MODE ═══════════════ */
 let currentMode = 'scan'; // 'scan' or 'manual'
@@ -479,6 +743,267 @@ function getSelectedDate() {
     return sun.toISOString().substring(0, 10);
   }
   return sel.value;
+}
+
+function getSpecialEvent() {
+  const el = document.getElementById('activeEventName');
+  if (!el || !el.textContent) return '';
+  const row = document.getElementById('eventActiveRow');
+  if (!row || row.style.display === 'none') return '';
+  return el.textContent.trim();
+}
+
+
+
+/* ═══════════════ SPECIAL EVENT CREATOR ═══════════════ */
+let activeSpecialEvent = '';
+let _editingEventName  = '';   // original name being edited
+let _eventsListOpen    = false;
+
+function toggleEventCreator() {
+  const body  = document.getElementById('eventBody');
+  const arrow = document.getElementById('eventArrow');
+  const open  = body.style.display !== 'none';
+  body.style.display  = open ? 'none' : 'block';
+  arrow.classList.toggle('open', !open);
+}
+
+function toggleAllEventCb(state) {
+  document.querySelectorAll('#eventCheckboxes input[type="checkbox"]:not(#eventPrefectsOnly)')
+          .forEach(cb => cb.checked = state);
+}
+
+async function addSpecialEvent() {
+  const eventName = document.getElementById('eventNameInput').value.trim();
+  if (!eventName) {
+    document.getElementById('eventStatus').textContent = '⚠ Please enter an event name';
+    return;
+  }
+
+  const prefectsCb = document.getElementById('eventPrefectsOnly');
+  const includePrefects = prefectsCb && prefectsCb.checked;
+
+  const grades = [];
+  let includeTeachers = false;
+  document.querySelectorAll('#eventCheckboxes input[type="checkbox"]:checked')
+          .forEach(cb => {
+            if (cb.value === 'teachers')           includeTeachers = true;
+            else if (cb.value === 'prefects_only') { /* handled by includePrefects */ }
+            else                                   grades.push(parseInt(cb.value.replace('g', ''), 10));
+          });
+
+  if (!includePrefects && grades.length === 0 && !includeTeachers) {
+    document.getElementById('eventStatus').textContent = '⚠ Select at least one grade, Teachers, or Prefects';
+    return;
+  }
+
+  // True prefects-only = ONLY prefects ticked, nothing else
+  const isPrefectsOnly = includePrefects && grades.length === 0 && !includeTeachers;
+
+  const btn = document.getElementById('eventAddBtn');
+  btn.disabled = true;
+  document.getElementById('eventStatus').textContent = '⏳ Adding event columns…';
+
+  try {
+    const res = await appsScriptPost({
+      action:          'add_special_event',
+      eventName,
+      grades:          grades,                // send what teacher actually ticked
+      includeTeachers: includeTeachers,
+      includePrefects: includePrefects,       // new flag (backend reads this)
+      prefectsOnly:    isPrefectsOnly,        // legacy flag — backend back-compat
+      date:            getSelectedDate()
+    });
+
+    if (res.ok) {
+      const targets = [];
+      if (grades.length)   targets.push(grades.length + ' grade(s)');
+      if (includeTeachers) targets.push('Teachers');
+      if (includePrefects) targets.push('Prefects' + (res.prefectsOnly ? ' (prefects-only)' : ''));
+      document.getElementById('eventStatus').textContent =
+        '✓ "' + eventName + '" added to ' + targets.join(', ');
+      activeSpecialEvent = eventName;
+      document.getElementById('activeEventName').textContent = eventName;
+      document.getElementById('eventActiveRow').style.display = 'flex';
+      updateSpecialEventBanner();
+      if (_eventsListOpen) loadEventsList();
+    } else {
+      throw new Error(res.error || 'Failed to add event');
+    }
+  } catch (e) {
+    document.getElementById('eventStatus').textContent = '⚠ Error: ' + e.message;
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+function clearActiveEvent() {
+  activeSpecialEvent = '';
+  document.getElementById('activeEventName').textContent = '';
+  document.getElementById('eventActiveRow').style.display = 'none';
+  document.getElementById('eventStatus').textContent =
+    '📌 Cleared — marking normal Sunday attendance';
+  updateSpecialEventBanner();
+}
+
+function updateSpecialEventBanner() {
+  const banner = document.getElementById('specialEventBanner');
+  const nameEl = document.getElementById('bannerEventName');
+  if (!banner) return;
+  if (activeSpecialEvent) {
+    nameEl.textContent = activeSpecialEvent;
+    banner.style.display = 'flex';
+  } else {
+    banner.style.display = 'none';
+  }
+}
+
+/* ═══════════════ CURRENT EVENTS LIST ═══════════════ */
+function toggleEventsList() {
+  const body  = document.getElementById('eventsListBody');
+  const arrow = document.getElementById('eventsListArrow');
+  _eventsListOpen = body.style.display === 'none';
+  body.style.display = _eventsListOpen ? 'block' : 'none';
+  arrow.classList.toggle('open', _eventsListOpen);
+  if (_eventsListOpen) loadEventsList();
+}
+
+async function loadEventsList() {
+  const listEl = document.getElementById('eventItemsList');
+  const msgEl  = document.getElementById('eventsLoadingMsg');
+  msgEl.textContent = '⏳ Loading…';
+  listEl.innerHTML  = '';
+
+  try {
+    const res = await appsScriptPost({
+      action: 'list_special_events',
+      date:   getSelectedDate()
+    });
+
+    if (!res.ok) throw new Error(res.error || 'Failed to load');
+
+    const events = res.events || [];
+    msgEl.style.display = 'none';
+
+    if (events.length === 0) {
+      listEl.innerHTML = '<div class="events-loading">No special events found for this date.</div>';
+      return;
+    }
+
+   listEl.innerHTML = events.map(ev => {
+      const safeName = escapeHtml(ev.name).replace(/'/g, "\\'");
+      const isActive = activeSpecialEvent === ev.name;
+      return `
+      <div class="event-item-row" data-evname="${escapeHtml(ev.name)}" id="evrow-${escapeHtml(ev.name).replace(/\s+/g,'_')}">
+        <div class="event-item-info">
+          <div class="event-item-name">${escapeHtml(ev.name)}${isActive ? ' <span style="color:#80ffcc;font-size:0.7rem;font-weight:400;">● ACTIVE</span>' : ''}</div>
+          <div class="event-item-meta">${escapeHtml(ev.sheets || '')} · ${escapeHtml(ev.date || getSelectedDate())}</div>
+        </div>
+        <div class="event-item-actions">
+          <button class="ev-btn use"
+            style="${isActive
+              ? 'background:rgba(26,124,46,0.4);border-color:#1a7c2e;color:#80ffcc;'
+              : 'background:rgba(218,165,32,0.15);border-color:rgba(218,165,32,0.5);color:#f5c84a;'}"
+            onclick="setActiveEvent('${safeName}')">
+            ${isActive ? '✓ Active' : '▶ Use'}
+          </button>
+          <button class="ev-btn edit" onclick="openEditModal('${safeName}')">✏ Edit</button>
+          <button class="ev-btn del"  onclick="deleteEvent('${safeName}', this)">🗑 Delete</button>
+        </div>
+      </div>`;
+    }).join('');
+  } catch (e) {
+    msgEl.textContent = '⚠ ' + e.message;
+    msgEl.style.display = 'block';
+  }
+}
+function setActiveEvent(name) {
+  if (activeSpecialEvent === name) {
+    // Clicking active event again → deactivate
+    clearActiveEvent();
+    loadEventsList(); // refresh button states
+    return;
+  }
+  activeSpecialEvent = name;
+  document.getElementById('activeEventName').textContent = name;
+  document.getElementById('eventActiveRow').style.display = 'flex';
+  updateSpecialEventBanner();
+  loadEventsList(); // refresh button states to show new active
+
+  // Show a brief status message
+  document.getElementById('eventStatus').textContent =
+    '▶ Now marking attendance for: ' + name;
+
+  // Scroll down so teacher sees the student list
+  const listEl = document.getElementById('manualList');
+  if (listEl) setTimeout(() => listEl.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
+}
+function openEditModal(originalName) {
+  _editingEventName = originalName;
+  document.getElementById('evEditInput').value = originalName;
+  document.getElementById('evEditModal').style.display = 'flex';
+}
+
+function closeEditModal(e) {
+  if (e && e.target !== document.getElementById('evEditModal')) return;
+  document.getElementById('evEditModal').style.display = 'none';
+}
+
+async function confirmEditEvent() {
+  const newName = document.getElementById('evEditInput').value.trim();
+  if (!newName || newName === _editingEventName) {
+    document.getElementById('evEditModal').style.display = 'none';
+    return;
+  }
+
+  try {
+    const res = await appsScriptPost({
+      action:   'rename_special_event',
+      oldName:  _editingEventName,
+      newName:  newName,
+      date:     getSelectedDate()
+    });
+    if (!res.ok) throw new Error(res.error || 'Rename failed');
+    document.getElementById('evEditModal').style.display = 'none';
+    // Update active event label if it was the renamed one
+   if (activeSpecialEvent === _editingEventName) {
+      activeSpecialEvent = newName;
+      document.getElementById('activeEventName').textContent = newName;
+      updateSpecialEventBanner();
+    }
+    loadEventsList();
+  } catch (e) {
+    alert('Error: ' + e.message);
+  }
+}
+
+async function deleteEvent(name, btn) {
+  if (!confirm('Delete special event "' + name + '" from all sheets? This cannot be undone.')) return;
+  btn.disabled = true;
+  try {
+    const res = await appsScriptPost({
+      action: 'delete_special_event',
+      eventName: name,
+      date: getSelectedDate()
+    });
+    if (!res.ok) throw new Error(res.error || 'Delete failed');
+    if (activeSpecialEvent === name) clearActiveEvent();
+    loadEventsList();
+  } catch (e) {
+    alert('Error: ' + e.message);
+    btn.disabled = false;
+  }
+}
+
+/* ═══════════════ SHARED FETCH HELPER (fixes CORS) ═══════════════ */
+async function appsScriptPost(payload) {
+  const res = await fetch(APPS_SCRIPT_URL, {
+    method:  'POST',
+    // Do NOT set Content-Type to application/json —
+    // Google Apps Script requires no custom headers to avoid CORS preflight
+    body: JSON.stringify(payload)
+  });
+  return res.json();
 }
 
 // Populate the date selector with last 104 Sundays (2 years back) grouped by year
@@ -539,7 +1064,7 @@ function onDateChange() {
   if (currentMode === 'manual') renderManualList();
 }
 
-function setMode(mode) {
+async function setMode(mode) {
   currentMode = mode;
   document.getElementById('modeScanBtn').classList.toggle('active', mode === 'scan');
   document.getElementById('modeManualBtn').classList.toggle('active', mode === 'manual');
@@ -548,7 +1073,9 @@ function setMode(mode) {
 
   if (mode === 'manual') {
     populateGradeFilter();
+    await loadPrefects();      // pull current prefect roster
     renderManualList();
+    updateSpecialEventBanner();
     // Stop scanning loop in manual mode
     scanRunning = false;
   } else {
@@ -562,17 +1089,16 @@ function setMode(mode) {
 
 function populateGradeFilter() {
   const sel = document.getElementById('gradeFilter');
-  if (!sel || sel.options.length > 2) return; // already populated
-  // Find unique grades in knownFaces
-  const grades = new Set();
-  knownFaces.forEach(f => { if (f.role === 'student' && f.grade) grades.add(f.grade); });
-  const sortedGrades = Array.from(grades).sort((a,b) => a - b);
-  sortedGrades.forEach(g => {
+  if (!sel) return;
+  // Clear everything after the first two fixed options (All Students, Teachers)
+  while (sel.options.length > 2) sel.remove(2);
+  // Always show all 11 grades regardless of knownFaces
+  for (let g = 1; g <= 12; g++) {
     const opt = document.createElement('option');
     opt.value = 'g' + g;
     opt.textContent = 'Grade ' + g;
     sel.appendChild(opt);
-  });
+  }
 }
 
 function renderManualList() {
@@ -607,6 +1133,17 @@ function renderManualList() {
       ? '<img src="' + thumbUrl(p.photoURL) + '" alt="">'
       : initials;
     const subtitle = p.role === 'teacher' ? 'Teacher' : 'Grade ' + (p.grade || '?');
+
+    // ★ Prefect button — students only
+    const isPrefect = prefectsSet.has(p.uid);
+    const prefectBtn = (p.role === 'student')
+      ? '<button class="manual-mark-btn prefect ' + (isPrefect ? 'active' : '') + '"' +
+        ' title="' + (isPrefect ? 'Remove as prefect' : 'Assign as prefect') + '"' +
+        ' onclick="togglePrefect(\'' + p.uid + '\', this)">' +
+        (isPrefect ? '★' : '☆') +
+        '</button>'
+      : '';
+
     return '' +
       '<div class="manual-row" data-uid="' + p.uid + '">' +
         '<div class="manual-photo">' + photoHtml + '</div>' +
@@ -617,6 +1154,7 @@ function renderManualList() {
         '<div class="manual-actions">' +
           '<button class="manual-mark-btn present" onclick="manualMark(\'' + p.uid + '\', \'present\')">✓ Present</button>' +
           '<button class="manual-mark-btn absent"  onclick="manualMark(\'' + p.uid + '\', \'absent\')">✗ Absent</button>' +
+          prefectBtn +
         '</div>' +
       '</div>';
   }).join('');
@@ -651,7 +1189,8 @@ async function manualMark(uid, status) {
         role:   person.role,
         grade:  person.grade,
         date:   getSelectedDate(),
-        status: status
+        status: status,
+        specialEvent: getSpecialEvent()
       })
     });
     const json = await res.json();
@@ -663,7 +1202,10 @@ async function manualMark(uid, status) {
     } else if (json.ok) {
       // Highlight the chosen button
       if (row) {
-        row.querySelectorAll('.manual-mark-btn').forEach(b => b.classList.remove('active'));
+        row.querySelectorAll('.manual-mark-btn').forEach(b => {
+          // Don't strip 'active' off the prefect button
+          if (!b.classList.contains('prefect')) b.classList.remove('active');
+        });
         const btn = row.querySelector('.manual-mark-btn.' + status);
         if (btn) btn.classList.add('active');
       }
@@ -685,16 +1227,58 @@ async function manualMark(uid, status) {
   }
 }
 
-async function initScanner(teacherName) {
-  if (typeof SVFace === 'undefined') {
-    document.getElementById('loadText').innerHTML =
-      '<div style="color:#e07070; margin-bottom:12px;">⚠ face-utils.js failed to load.</div>' +
-      'Make sure <code>face-utils.js</code> is in the same folder as scanner.html.' +
-      '<br><br><button onclick="location.reload()" style="padding:10px 24px;background:#c9a84c;' +
-      'color:#1a0800;border:none;border-radius:4px;font-weight:700;cursor:pointer;">↺ Retry</button>';
+async function togglePrefect(uid, btn) {
+  const person = knownFaces.find(p => p.uid === uid);
+  if (!person) return;
+  if (person.role !== 'student') {
+    showToast({ type: 'warn', name: person.name, sub: 'Only students can be prefects', photo: person.photoURL });
     return;
   }
-  // ... rest of function unchanged
+
+  const wasActive = btn.classList.contains('active');
+  btn.disabled = true;
+  // Optimistic visual update
+  btn.textContent = wasActive ? '☆' : '★';
+  btn.classList.toggle('active');
+
+  try {
+    const res = await appsScriptPost({ action: 'toggle_prefect', uid: uid });
+    if (!res || !res.ok) throw new Error((res && res.error) || 'Toggle failed');
+
+    if (res.assigned) {
+      prefectsSet.add(uid);
+      btn.classList.add('active');
+      btn.textContent = '★';
+      btn.title = 'Remove as prefect';
+      showToast({
+        type: 'ok',
+        name: person.name,
+        sub: '★ Assigned as prefect · added to Prefects ' + new Date().getFullYear() + ' sheet',
+        photo: person.photoURL
+      });
+    } else {
+      prefectsSet.delete(uid);
+      btn.classList.remove('active');
+      btn.textContent = '☆';
+      btn.title = 'Assign as prefect';
+      showToast({
+        type: 'warn',
+        name: person.name,
+        sub: '☆ Removed as prefect',
+        photo: person.photoURL
+      });
+    }
+  } catch (e) {
+    // Roll back the optimistic update
+    btn.classList.toggle('active');
+    btn.textContent = wasActive ? '★' : '☆';
+    showToast({ type: 'err', name: person.name, sub: 'Error: ' + e.message, photo: person.photoURL });
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+async function initScanner(teacherName) {
   const status = document.getElementById('statusBar');
   const mask = document.getElementById('loadMask');
   const loadText = document.getElementById('loadText');
@@ -735,19 +1319,7 @@ async function initScanner(teacherName) {
     requestAnimationFrame(scanLoop);
     fpsTimer = setInterval(updateFps, 1000);
   } catch (e) {
-    loadText.innerHTML =
-      '<div style="color:#e07070; margin-bottom:12px; font-size:0.9rem;">⚠ ' + e.message + '</div>' +
-      '<button onclick="location.reload()" style="' +
-        'padding:10px 24px; background:#c9a84c; color:#1a0800; border:none;' +
-        'border-radius:4px; font-weight:700; font-size:11px; letter-spacing:1.5px;' +
-        'cursor:pointer; text-transform:uppercase; display:block; margin:0 auto 12px;' +
-      '">↺ Retry</button>' +
-      '<div style="font-size:11px; color:rgba(245,222,179,0.35); line-height:1.7;">' +
-        'If this keeps failing:<br>' +
-        '1. Check the browser Console (F12) for the exact error<br>' +
-        '2. Make sure the <code>models/</code> folder is uploaded to your server<br>' +
-        '3. Make sure <code>face-api.min.js</code> is next to scanner.html' +
-      '</div>';
+    loadText.innerHTML = '⚠ Setup failed:<br>' + e.message;
   }
 }
 
