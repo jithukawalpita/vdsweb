@@ -1617,7 +1617,12 @@ window.googleProvider.addScope('profile');
         <div class="am-field"><label class="am-label">Parent / Guardian's Phone *</label><input class="am-input" id="stGuardPhone" type="tel" placeholder="07X XXX XXXX"></div>
         <div class="am-field"><label class="am-label">Parent / Guardian's Email <span class="am-opt">(optional)</span></label><input class="am-input" id="stGuardEmail" type="email" placeholder="guardian@email.com"></div>
         <div class="am-field"><label class="am-label">Home Address *</label><textarea class="am-input am-textarea" id="stAddress" rows="2" placeholder="Street, City, Postal code"></textarea></div>
-        <div class="am-face-block">
+        <div class="am-face-block"><label class="am-label">Gender *</label>
+<select id="stGender" class="am-input" required>
+  <option value="">— Select gender —</option>
+  <option value="male">Male</option>
+  <option value="female">Female</option>
+</select>
           <div class="am-face-label">📸 Face Photo <span class="am-opt">(for face sign-in)</span></div>
           <div class="am-face-stage" id="stFaceStage"><video id="stVideo" autoplay playsinline muted></video><img id="stPreview" alt=""><div class="am-face-overlay" id="stFaceOverlay">Camera will appear here</div></div>
           <div class="am-face-btns"><button type="button" class="am-face-btn" id="stCamBtn" onclick="startFaceCapture('student')">Open Camera</button><button type="button" class="am-face-btn alt" id="stSnapBtn" onclick="snapFace('student')" disabled>Capture</button><button type="button" class="am-face-btn alt" id="stRetakeBtn" onclick="retakeFace('student')" style="display:none">Retake</button></div>
@@ -1635,7 +1640,12 @@ window.googleProvider.addScope('profile');
         <div class="am-field"><label class="am-label">Password *</label><input class="am-input" id="tcPass" type="password" placeholder="Min. 6 characters"></div>
         <div class="am-field"><label class="am-label">Phone Number *</label><input class="am-input" id="tcPhone" type="tel" placeholder="07X XXX XXXX"></div>
         <div class="am-field"><label class="am-label">Contact Number (alternate) *</label><input class="am-input" id="tcContact" type="tel" placeholder="07X XXX XXXX"></div>
-        <div class="am-field"><label class="am-label">Home Address *</label><textarea class="am-input am-textarea" id="tcAddress" rows="2" placeholder="Street, City, Postal code"></textarea></div>
+        <div class="am-field"><label class="am-label">Home Address *</label><textarea class="am-input am-textarea" id="tcAddress" rows="2" placeholder="Street, City, Postal code"></textarea></div><label class="am-label">Gender *</label>
+<select id="tcGender" class="am-input" required>
+  <option value="">— Select gender —</option>
+  <option value="male">Male</option>
+  <option value="female">Female</option>
+</select>
         <div class="am-field"><label class="am-label">Teaching Grade *</label><select class="am-input" id="tcGrade"><option value="">— Select grade —</option><option value="1">Grade 1</option><option value="2">Grade 2</option><option value="3">Grade 3</option><option value="4">Grade 4</option><option value="5">Grade 5</option><option value="6">Grade 6</option><option value="7">Grade 7</option><option value="8">Grade 8</option><option value="9">Grade 9</option><option value="10">Grade 10</option><option value="11">Grade 11</option><option value="12">Grade 12</option><option value="multi">Multiple grades</option></select></div>
         <div class="am-field"><label class="am-label">Subject *</label><input class="am-input" id="tcSubject" type="text" placeholder="e.g. Dhamma, Pali, History"></div>
         <div class="am-field"><label class="am-label">Medium *</label><select class="am-input" id="tcMedium"><option value="">— Select medium —</option><option value="Sinhala">Sinhala</option><option value="Tamil">Tamil</option><option value="English">English</option></select></div>
@@ -1721,12 +1731,24 @@ window.googleProvider.addScope('profile');
         <div class="am-field"><label class="am-label">Parent / Guardian's Phone *</label><input class="am-input" id="edGuardPhone" type="tel"></div>
         <div class="am-field"><label class="am-label">Parent / Guardian's Email <span class="am-opt">(optional)</span></label><input class="am-input" id="edGuardEmail" type="email"></div>
         <div class="am-field"><label class="am-label">Home Address *</label><textarea class="am-input am-textarea" id="edStAddress" rows="2"></textarea></div>
+        <label class="am-label">Gender *</label>
+<select id="edStGender" class="am-input" required>
+  <option value="">— Select gender —</option>
+  <option value="male">Male</option>
+  <option value="female">Female</option>
+</select>
         <div class="am-field"><label class="am-label">Current Grade</label><input class="am-input" id="edStGradeDisplay" type="text" disabled style="opacity:0.65;cursor:not-allowed"><div class="am-grade-note">Grade is managed automatically by the annual promotion system.</div></div>
       </div>
       <div id="edTeacherFields" style="display:none">
         <div class="am-field"><label class="am-label">Phone Number *</label><input class="am-input" id="edTcPhone" type="tel"></div>
         <div class="am-field"><label class="am-label">Contact Number (alternate) *</label><input class="am-input" id="edTcContact" type="tel"></div>
         <div class="am-field"><label class="am-label">Home Address *</label><textarea class="am-input am-textarea" id="edTcAddress" rows="2"></textarea></div>
+        <label class="am-label">Gender *</label>
+<select id="edTcGender" class="am-input" required>
+  <option value="">— Select gender —</option>
+  <option value="male">Male</option>
+  <option value="female">Female</option>
+</select>
         <div class="am-field"><label class="am-label">Teaching Grade *</label><select class="am-input" id="edTcGrade"><option value="">— Select grade —</option><option value="1">Grade 1</option><option value="2">Grade 2</option><option value="3">Grade 3</option><option value="4">Grade 4</option><option value="5">Grade 5</option><option value="6">Grade 6</option><option value="7">Grade 7</option><option value="8">Grade 8</option><option value="9">Grade 9</option><option value="10">Grade 10</option><option value="11">Grade 11</option><option value="12">Grade 12</option><option value="multi">Multiple grades</option></select></div>
         <div class="am-field"><label class="am-label">Subject *</label><input class="am-input" id="edTcSubject" type="text"></div>
         <div class="am-field"><label class="am-label">Medium *</label><select class="am-input" id="edTcMedium"><option value="">— Select medium —</option><option value="Sinhala">Sinhala</option><option value="Tamil">Tamil</option><option value="English">English</option></select></div>

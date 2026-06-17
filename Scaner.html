@@ -626,7 +626,7 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #050203; f
 <script>
 /* ═══════════════ CONFIG ═══════════════ */
 const TEACHER_ACCESS_CODE = 'vipassi teachers@';
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxxJGNLJaaBNbLdmM7q4wEUvFTNVgGM4JtVUH3574uQncmM_odGDQVyDhV7iKz8h5tK/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbweXkIy9S1M39mJcrA7Lr-B2L6MMBTYIzrVAIug63GLMk4EkWj8HI813xake9pf8DCy/exec';
 
 const FIREBASE_CONFIG = {
   apiKey:            "AIzaSyAWpPP3OevjIRAsoGIjOJTofV6l2jgyhNI",
@@ -1324,22 +1324,18 @@ async function initScanner(teacherName) {
 }
 
 async function loadFaces() {
-  // Pull all face descriptors from Firestore (single round-trip)
-  const snap = await db.collection('users').where('hasFace', '==', true).get();
-  knownFaces = [];
-  snap.forEach(doc => {
-    const d = doc.data();
-    if (d.faceDescriptor && d.faceDescriptor.length === 128) {
-      knownFaces.push({
-        uid:   d.uid,
-        name:  d.displayName || '(no name)',
-        role:  d.role || '',
-        grade: d.grade || d.teachingGrade || null,
-        photoURL: d.photoURL || '',
-        descriptor: d.faceDescriptor
-      });
-    }
-  });
+  // Pull all face descriptors from the Apps Script backend — this is the
+  // source of truth for everyone registered via register_student/teacher.
+  const res = await fetch(APPS_SCRIPT_URL + '?action=descriptors');
+  const json = await res.json();
+  knownFaces = (json.faces || []).map(f => ({
+    uid:        f.uid,
+    name:       f.name || '(no name)',
+    role:       f.role || '',
+    grade:      f.grade || null,
+    photoURL:   f.photoURL || '',
+    descriptor: f.descriptor
+  }));
   document.getElementById('stRegistered').textContent = knownFaces.length;
 }
 

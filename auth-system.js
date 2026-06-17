@@ -10,7 +10,7 @@
    ═══════════════════════════════════════════════════════════════════ */
 
 /* ═══ CONFIG — set this to your Apps Script Web App URL ═══ */
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxxJGNLJaaBNbLdmM7q4wEUvFTNVgGM4JtVUH3574uQncmM_odGDQVyDhV7iKz8h5tK/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbweXkIy9S1M39mJcrA7Lr-B2L6MMBTYIzrVAIug63GLMk4EkWj8HI813xake9pf8DCy/exec';
 
 /* ═══ School registration code — required to sign up as student or teacher.
        Change this to a different value if students/teachers learn the current one.
@@ -540,6 +540,20 @@ async function doSignUpStudent() {
     const uid = cred.user.uid;
 
     // 2. Save to Firestore
+    // Fetch the current promotion year FIRST so this new student isn't
+    // immediately "promoted" by checkAndPromoteStudent on first login.
+    // Without this, the user looks like they've missed every promotion
+    // since year 0 → produces wrong/negative passedBatchYear values
+    // (the "Class of -1" bug).
+    let currentPromoYear = new Date().getFullYear();
+    try {
+      const pyRes = await fetch(APPS_SCRIPT_URL + '?action=last_promotion');
+      const pyJson = await pyRes.json();
+      if (pyJson.year) currentPromoYear = pyJson.year;
+    } catch (e) {
+      console.warn('Could not fetch last_promotion, using calendar year:', e);
+    }
+
     await db.collection('users').doc(uid).set({
       uid, role: 'student',
       displayName:  data.name,
@@ -554,9 +568,9 @@ async function doSignUpStudent() {
       homeAddress:  data.address,
       faceDescriptor: capturedFace.student.descriptor,
       hasFace:      true,
+      lastPromotionYear: currentPromoYear,
       createdAt:    firebase.firestore.FieldValue.serverTimestamp()
     });
-
     // 3. Send to Apps Script — upload photo + add row to grade sheet
     okMsg('stErr', 'Account created. Uploading photo & registering on attendance sheet…');
     let ascJson;
@@ -629,10 +643,11 @@ async function doSignUpTeacher() {
     subject:   get('tcSubject'),
     medium:    get('tcMedium'),
     dob:       get('tcDOB'),
+    gender:    get('tcGender'),
     joinDate:  get('tcJoinDate')
   };
 
-  const required = ['name','email','password','phone','contact','address','grade','subject','medium','dob','joinDate'];
+  const required = ['name','email','password','phone','contact','address','grade','subject','medium','dob','gender','joinDate'];
   for (const f of required) {
     if (!data[f]) return errMsg('tcErr', 'Please fill in all required fields (*).');
   }
@@ -659,6 +674,7 @@ async function doSignUpTeacher() {
       subject:        data.subject,
       medium:         data.medium,
       dob:            data.dob,
+      gender:         data.gender,
       joiningDate:    data.joinDate,
       faceDescriptor: capturedFace.teacher.descriptor,
       hasFace:        true,
@@ -993,11 +1009,16 @@ auth.onAuthStateChanged(async u => {
 
 
 /* ═══════════════════════════════════════════════════════════════════
-   ANNUAL PROMOTION — checks if the server has had a year-end
-   promotion since the user was last updated. If so:
-     • increments their grade,  OR
-     • marks them alumni if they were in Grade 12,
+   ANNUAL PROMOTION — checks if the server has had a year-end promotion
+   since the user was last updated. If so:
+     • increments their grade (up to and including Grade 12), OR
+     • marks them alumni if they've finished their Grade 12 year,
    then asks them to re-upload their face photo (if not alumni).
+
+   Grade 12 is the final year. A student who reaches Grade 12 stays there
+   throughout that calendar year, and becomes alumni on the FIRST login
+   AFTER the year ends. Their passedBatchYear is the year they actually
+   sat in Grade 12 (e.g. Grade 12 in 2026 → Class of 2026).
    ═══════════════════════════════════════════════════════════════════ */
 async function checkAndPromoteStudent(user, userData) {
   // 1. What year did the server last promote?
@@ -1032,8 +1053,12 @@ async function checkAndPromoteStudent(user, userData) {
   const ref = db.collection('users').doc(user.uid);
 
   if (newGrade > 12) {
-    // ═══ GRADUATED ═══
-    // The year they would have been in Grade 12
+    // ═══ NOW ALUMNI — they've finished Grade 12 ═══
+    // passedBatchYear = the year they actually sat in Grade 12.
+    // Formula: userLast + (12 - currentGrade)
+    //   currentGrade=12, userLast=N → N    (they were in Grade 12 last year)
+    //   currentGrade=11, userLast=N → N+1  (promoted to G12 in N+1, finished N+1)
+    //   currentGrade=10, userLast=N → N+2  (G11 in N+1, G12 in N+2, finished N+2)
     const passedBatchYear = userLast + (12 - currentGrade);
     await ref.update({
       role: 'alumni',
@@ -1048,7 +1073,7 @@ async function checkAndPromoteStudent(user, userData) {
     return;
   }
 
-  // ═══ PROMOTED ═══
+  // ═══ PROMOTED (Grade 1-11 → next grade; Grade 11 → 12 also lands here) ═══
   await ref.update({
     grade: newGrade,
     lastPromotionYear: lastPromoYear,
@@ -1311,6 +1336,7 @@ async function openEditProfile() {
     document.getElementById('edAdmission').value   = data.admissionNo  || '';
     document.getElementById('edStContact').value   = data.contactNo    || '';
     document.getElementById('edStDOB').value       = data.dob          || '';
+    document.getElementById('edStGender').value    = data.gender       || '';
     document.getElementById('edGuardName').value   = data.guardianName || '';
     document.getElementById('edGuardPhone').value  = data.guardianPhone|| '';
     document.getElementById('edGuardEmail').value  = data.guardianEmail|| '';
@@ -1326,6 +1352,7 @@ async function openEditProfile() {
     document.getElementById('edTcSubject').value   = data.subject       || '';
     document.getElementById('edTcMedium').value    = data.medium        || '';
     document.getElementById('edTcDOB').value       = data.dob           || '';
+    document.getElementById('edTcGender').value    = data.gender        || '';
   } else {
     stBlock.style.display = 'none';
     tcBlock.style.display = 'none';
@@ -1403,16 +1430,18 @@ async function saveProfileEdits() {
     if (curRole === 'student') {
       const contact     = get('edStContact');
       const dob         = get('edStDOB');
+      const gender      = get('edStGender');
       const guardName   = get('edGuardName');
       const guardPhone  = get('edGuardPhone');
       const guardEmail  = get('edGuardEmail');
       const address     = get('edStAddress');
-      if (!contact || !dob || !guardName || !guardPhone || !address) {
+      if (!contact || !dob || !gender || !guardName || !guardPhone || !address) {
         throw new Error('Please fill in all required fields (*).');
       }
       updates.admissionNo   = get('edAdmission');
       updates.contactNo     = contact;
       updates.dob           = dob;
+      updates.gender        = gender;
       updates.guardianName  = guardName;
       updates.guardianPhone = guardPhone;
       updates.guardianEmail = guardEmail;
@@ -1427,7 +1456,8 @@ async function saveProfileEdits() {
       const subject = get('edTcSubject');
       const medium  = get('edTcMedium');
       const dob     = get('edTcDOB');
-      if (!phone || !contact || !address || !grade || !subject || !medium || !dob) {
+      const gender  = get('edTcGender');
+      if (!phone || !contact || !address || !grade || !subject || !medium || !dob || !gender) {
         throw new Error('Please fill in all required fields (*).');
       }
       updates.phoneNo       = phone;
@@ -1437,6 +1467,7 @@ async function saveProfileEdits() {
       updates.subject       = subject;
       updates.medium        = medium;
       updates.dob           = dob;
+      updates.gender        = gender;
       updates.role          = 'teacher';
     }
 
@@ -1700,13 +1731,15 @@ async function doSchoolSignIn() {
    No face capture. Role = 'normal'.
    ═══════════════════════════════════════════════════════════════════ */
 async function doSignUpNormal() {
-  const name  = document.getElementById('nmName').value.trim();
-  const email = document.getElementById('nmEmail').value.trim();
-  const pass  = document.getElementById('nmPass').value;
+  const name   = document.getElementById('nmName').value.trim();
+  const email  = document.getElementById('nmEmail').value.trim();
+  const pass   = document.getElementById('nmPass').value;
+  const gender = document.getElementById('nmGender').value.trim();
 
-  if (!name)  return errMsg('nmErr', 'Please enter your name.');
-  if (!email) return errMsg('nmErr', 'Please enter your email.');
-  if (!pass)  return errMsg('nmErr', 'Please enter a password.');
+  if (!name)   return errMsg('nmErr', 'Please enter your name.');
+  if (!email)  return errMsg('nmErr', 'Please enter your email.');
+  if (!pass)   return errMsg('nmErr', 'Please enter a password.');
+  if (!gender) return errMsg('nmErr', 'Please select your gender.');
   if (pass.length < 6) return errMsg('nmErr', 'Password must be at least 6 characters.');
 
   const btn = document.getElementById('nmBtn');
@@ -1738,6 +1771,7 @@ async function doSignUpNormal() {
       role:        'normal',
       displayName: name,
       email:       email,
+      gender:      gender,
       photoURL:    '',
       hasFace:     false,
       createdAt:   firebase.firestore.FieldValue.serverTimestamp()
