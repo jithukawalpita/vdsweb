@@ -1574,6 +1574,7 @@
 </script>
 
 <script>
+(function(){
   /* ---- Firebase: Data App ---- */
   const firebaseConfig = {
     apiKey: "AIzaSyDvM76YKHMynYhMEX-B6q1jmrjJn0JyXZE",
@@ -1584,35 +1585,70 @@
     messagingSenderId: "188983548531",
     appId: "1:188983548531:web:d976dc7d3f63cfe33f2806"
   };
-  const dataApp = firebase.initializeApp(firebaseConfig);
-  const db = dataApp.database();
+  let dataApp;
+  if (firebase.apps.find(a => a.name === 'alertsApp')) {
+    dataApp = firebase.app('alertsApp');
+  } else {
+    dataApp = firebase.initializeApp(firebaseConfig, 'alertsApp');
+  }
+  const alertsDb = dataApp.database();
 
-  if (!firebase.apps.find(a => a.name === 'authApp')) {
-  firebase.initializeApp({
-    apiKey:"AIzaSyAWpPP3OevjIRAsoGIjOJTofV6l2jgyhNI",
-    authDomain:"signin-f9656.firebaseapp.com",
-    projectId:"signin-f9656",
-    storageBucket:"signin-f9656.firebasestorage.app",
-    messagingSenderId:"1074665165821",
-    appId:"1:1074665165821:web:91ef329a0472fa138e7f94"
-  }, 'authApp');
-}
+ /* ---- Core variables ---- */
+  const alertsRef = alertsDb.ref('alerts');
+  const ADMIN_PWD = 'admin123';   // ← change to your real admin password
+  const PAGE_SIZE = 5;
+  let allAlerts = [];
+  let rawAlerts = [];
+  let currentPage = 0;
+  let currentUser = null;
 
-firebase.app('authApp').auth().onAuthStateChanged(u => {
-  currentUser = u;
-  const btn  = document.getElementById('loginBtn');
-  const mbtn = document.getElementById('mobileLoginBtn');
-  [btn, mbtn].filter(Boolean).forEach(b => {
-    if (u) {
-      const first = (u.displayName || u.email || 'User').split(/[ @]/)[0];
-      b.textContent = first;
-      b.classList.add('logged-in');
-    } else {
-      b.textContent = 'Login';
-      b.classList.remove('logged-in');
+ /* ---- Watch the auth instance that auth-system.js already created ---- */
+  function _attachAuthWatch(attempts) {
+    let authObj = null;
+    try { authObj = firebase.auth(); }                    // try the default app first
+    catch(_) {
+      try { authObj = firebase.app('authApp').auth(); }   // fall back to authApp if it exists
+      catch(__) {}
     }
-  });
-});forgotPw(){const email=document.getElementById("siEmail").value.trim();if(!email){errMsg("siErr","Enter your email above first.");return;}try{await auth.sendPasswordResetEmail(email);okMsg("siErr","Reset email sent — check your inbox.");}catch(e){errMsg("siErr",fErr(e.code));}}
+    if (!authObj) {
+      if (attempts > 0) return setTimeout(() => _attachAuthWatch(attempts - 1), 250);
+      console.warn('Could not find a Firebase auth instance.');
+      return;
+    }
+    authObj.onAuthStateChanged(_handleAuthChange);
+  }
+  function _handleAuthChange(u) {
+    currentUser = u;
+    const btn  = document.getElementById('loginBtn');
+    const mbtn = document.getElementById('mobileLoginBtn');
+    [btn, mbtn].filter(Boolean).forEach(b => {
+      if (u) {
+        const first = (u.displayName || u.email || 'User').split(/[ @]/)[0];
+        b.textContent = first;
+        b.classList.add('logged-in');
+      } else {
+        b.textContent = 'Login';
+        b.classList.remove('logged-in');
+      }
+    });
+    // Re-filter alerts so personal ones show/hide based on who is signed in
+    applyAlertFilter();
+  }
+  _attachAuthWatch(20);   // retry up to 5s while auth-system.js sets up its auth instance
+
+  /* ---- Personal-alert filter ---- */
+  function applyAlertFilter(){
+    allAlerts = rawAlerts.filter(v => {
+      if (v.targetUid) {
+        // Personal alert — only the target user sees it
+        return currentUser && currentUser.uid === v.targetUid;
+      }
+      // Public alert — visible to everyone
+      return true;
+    });
+    currentPage = 0;
+    renderPage();
+  }
 
   /* ---- Alerts Logic ---- */
   function getReadSet(){try{return new Set(JSON.parse(localStorage.getItem('vds_alerts_read')||'[]'))}catch{return new Set()}}
@@ -1649,12 +1685,15 @@ firebase.app('authApp').auth().onAuthStateChanged(u => {
   }
   function goPage(dir){const tp=Math.ceil(allAlerts.length/PAGE_SIZE);currentPage=Math.max(0,Math.min(tp-1,currentPage+dir));renderPage();window.scrollTo({top:0,behavior:'smooth'})}
 
-  alertsRef.orderByChild('createdAt').on('value',snap=>{
-    allAlerts=[];
-    snap.forEach(ch=>{const v=ch.val();if(v&&(v.text||v.attachUrl))allAlerts.push(Object.assign({_key:ch.key},v));});
-    allAlerts.reverse();
-    currentPage=0;
-    renderPage();
+  /* ---- Load alerts from DB ---- */
+  alertsRef.orderByChild('createdAt').on('value', snap => {
+    rawAlerts = [];
+    snap.forEach(ch => {
+      const v = ch.val();
+      if (v && (v.text || v.attachUrl)) rawAlerts.push(Object.assign({_key: ch.key}, v));
+    });
+    rawAlerts.reverse();
+    applyAlertFilter();
   });
 
   /* ---- Password gate (login-aware) ---- */
@@ -1781,6 +1820,35 @@ firebase.app('authApp').auth().onAuthStateChanged(u => {
     }else if(manualUrl&&manualType){payload.attachUrl=manualUrl;payload.attachType=manualType;}
     alertsRef.push(payload).then(()=>{closeAddModal();currentPage=0;}).catch(err=>alert('Could not save: '+err.message));
   }
+
+  /* ---- Forgot password ---- */
+  async function forgotPw(){
+    const email = document.getElementById("siEmail").value.trim();
+    if (!email) { if (typeof errMsg === 'function') errMsg("siErr","Enter your email above first."); return; }
+    try {
+      await firebase.app('authApp').auth().sendPasswordResetEmail(email);
+      if (typeof okMsg === 'function') okMsg("siErr","Reset email sent — check your inbox.");
+    } catch (e) {
+      if (typeof errMsg === 'function') errMsg("siErr", (typeof fErr === 'function' ? fErr(e.code) : e.message));
+    }
+  }
+
+  /* Expose functions called from HTML onclick attributes */
+  window._debugCurrentUser = () => currentUser;
+  window._debugRawAlerts = () => rawAlerts;
+  window.requestAdd = requestAdd;
+  window.requestDelete = requestDelete;
+  window.closePwd = closePwd;
+  window.checkPwd = checkPwd;
+  window.closeAddModal = closeAddModal;
+  window.submitAlert = submitAlert;
+  window.goPage = goPage;
+  window.openDetail = openDetail;
+  window.closeDetail = closeDetail;
+  window.openLightbox = openLightbox;
+  window.closeLightbox = closeLightbox;
+  window.forgotPw = forgotPw;
+})();
 </script>
 
 </body>

@@ -1,0 +1,3470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Attendance Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<!-- Firebase SDKs: app loads first, then firestore, then init -->
+<script>
+  /* Fetch a person's photoURL from Firestore by displayName and swap
+   it into the given avatar element once it resolves. Falls back to
+   the existing SVG silhouette on any error or if no photo exists. */
+function loadAvatarPhoto(avatarEl, displayName, fallbackFill){
+  if (!avatarEl || !displayName) return;
+
+  function doQuery(attempts){
+    if (window._db) {
+      window._db.collection('users')
+        .where('displayName', '==', displayName)
+        .limit(1)
+        .get()
+        .then(snap => {
+          if (snap.empty) return; // keep existing SVG silhouette
+          const data = snap.docs[0].data();
+          if (!data.photoURL) return;
+          avatarEl.innerHTML = `<img src="${data.photoURL}"
+            style="width:100%;height:100%;object-fit:cover;border-radius:50%"
+            onerror="this.parentElement.innerHTML=avatarSVG('${fallbackFill}')"/>`;
+        })
+        .catch(() => { /* keep existing SVG silhouette on error */ });
+    } else if (attempts > 0) {
+      setTimeout(() => doQuery(attempts - 1), 300);
+    }
+    // If Firebase never loads, just silently keep the placeholder.
+  }
+  doQuery(17);
+}
+  // Track which person the admin is currently viewing — used by sendPersonalAlert
+  let _currentDetailPerson = null;
+
+  function showPersonDetail(detailPage, personName) {
+    showPage(detailPage);
+
+    // Capture whichever Grade/Year filter was selected on the list page
+    // that was just left, so the attendance view can default to it.
+    const _kindForFilter = {
+      'page-student-detail': 'student',
+      'page-prefect-detail': 'prefect'
+    }[detailPage];
+    if (_kindForFilter) {
+      const gEl = document.getElementById(_kindForFilter + '-grade-filter');
+      const yEl = document.getElementById(_kindForFilter + '-year-filter');
+      window._listFilterContext = {
+        grade: gEl && gEl.value && gEl.value !== 'Grade' ? gEl.value : '',
+        year:  yEl && yEl.value  && yEl.value  !== 'Year'  ? yEl.value  : ''
+      };
+    } else {
+      window._listFilterContext = { grade: '', year: '' };
+    }
+
+    // Reset state + form for whichever detail page just opened
+    _currentDetailPerson = null;
+    const _kindMap = {
+      'page-student-detail': 'student',
+      'page-teacher-detail': 'teacher',
+      'page-prefect-detail': 'prefect'
+    };
+    const _formKind = _kindMap[detailPage];
+    if (_formKind) {
+      const t = document.getElementById('notif-title-' + _formKind);
+      const b = document.getElementById('notif-body-' + _formKind);
+      const s = document.getElementById('notif-status-' + _formKind);
+      if (t) t.value = '';
+      if (b) b.value = '';
+      if (s) s.textContent = '';
+    }
+
+    const container = document.getElementById(
+      detailPage === 'page-student-detail' ? 'student-detail-profile' :
+      detailPage === 'page-teacher-detail' ? 'teacher-detail-profile' :
+      'prefect-detail-profile'
+    );
+    if (!container) return;
+    container.innerHTML = '<div class="prof-loading"><div class="prof-spinner"></div> Loading profile…</div>';
+
+    function doQuery(attempts) {
+      if (window._db) {
+        window._db.collection('users')
+          .where('displayName', '==', personName)
+          .get()
+          .then(snap => {
+            if (snap.empty) {
+              container.innerHTML = `<div style="color:#fff;padding:20px;text-align:center">No profile found for: ${personName}</div>`;
+              return;
+            }
+            const docSnap = snap.docs[0];
+            const data = docSnap.data();
+
+            // Capture target person — needed for sending personal alerts
+            _currentDetailPerson = {
+              uid: data.uid || docSnap.id,
+              displayName: data.displayName || personName,
+              role: data.role || 'student'
+            };
+
+            // ── Update the big avatar with real photo ──
+            const bigAvatar = document.querySelector('#' + detailPage + ' .big-avatar');
+            if (bigAvatar) {
+              if (data.photoURL) {
+                bigAvatar.innerHTML = `<img src="${data.photoURL}"
+                  style="width:100%;height:100%;object-fit:cover;border-radius:50%"
+                  onerror="this.parentElement.innerHTML=avatarSVG('${data.gender === 'female' ? '#c0392b' : '#2980b9'}')"/>`;
+              } else {
+                bigAvatar.innerHTML = avatarSVG(data.gender === 'female' ? '#c0392b' : '#2980b9');
+              }
+            }
+
+            // ── Inject profile into the dark block ──
+            const tempDiv = document.createElement('div');
+            renderProfModal(tempDiv, data);
+            container.innerHTML = tempDiv.innerHTML;
+            container.style.background = 'var(--profile-block)';
+            container.style.borderRadius = '14px';
+            container.style.overflow = 'hidden';
+            container.querySelector('.prof-close')?.remove();
+          })
+          .catch(err => {
+            container.innerHTML = `<div style="color:#fff;padding:20px">Error: ${err.message}</div>`;
+          });
+      } else if (attempts > 0) {
+        setTimeout(() => doQuery(attempts - 1), 300);
+      } else {
+        container.innerHTML = '<div style="color:#fff;padding:20px">Firebase failed to load.</div>';
+      }
+    }
+    doQuery(17);
+  }
+
+  // Send a personal alert to the currently viewed person.
+  // kind: 'student' | 'teacher' | 'prefect' (matches the input IDs)
+  function sendPersonalAlert(kind) {
+    const titleEl  = document.getElementById('notif-title-' + kind);
+    const bodyEl   = document.getElementById('notif-body-' + kind);
+    const statusEl = document.getElementById('notif-status-' + kind);
+
+    const title = (titleEl?.value || '').trim();
+    const body  = (bodyEl?.value  || '').trim();
+
+    const setStatus = (msg, color) => {
+      if (!statusEl) return;
+      statusEl.textContent = msg;
+      statusEl.style.color = color || '#555';
+    };
+
+    if (!title && !body) {
+      setStatus('⚠ Please enter a title or a message first.', '#c0392b');
+      return;
+    }
+    if (!_currentDetailPerson || !_currentDetailPerson.uid) {
+      setStatus('⚠ No person selected — open a profile first.', '#c0392b');
+      return;
+    }
+    if (!window._alertsDb) {
+      setStatus('⚠ Database not ready yet — try again in a moment.', '#c0392b');
+      return;
+    }
+
+    // Combine title + body into the single `text` field the website already renders
+    const combined = title && body ? (title + '\n\n' + body) : (title || body);
+    const reporter = document.querySelector('.user-name')?.textContent?.trim() || 'School Administration';
+
+    const payload = {
+      reporter: reporter,
+      title: title,
+      text: combined,
+      createdAt: firebase.database.ServerValue.TIMESTAMP,
+      targetUid: _currentDetailPerson.uid,
+      targetDisplayName: _currentDetailPerson.displayName,
+      isPersonal: true
+    };
+
+    setStatus('Sending…', '#555');
+    window._alertsDb.ref('alerts').push(payload)
+      .then(() => {
+        setStatus('✓ Sent to ' + _currentDetailPerson.displayName, '#538E72');
+        if (titleEl) titleEl.value = '';
+        if (bodyEl)  bodyEl.value  = '';
+        setTimeout(() => setStatus('', '#555'), 3500);
+      })
+      .catch(err => setStatus('✗ Could not send: ' + err.message, '#c0392b'));
+  }
+ function _initFirestore() {
+    const _firebaseConfig = {
+      apiKey: "AIzaSyAWpPP3OevjIRAsoGIjOJTofV6l2jgyhNI",
+      authDomain: "signin-f9656.firebaseapp.com",
+      projectId: "signin-f9656",
+      storageBucket: "signin-f9656.firebasestorage.app",
+      messagingSenderId: "1074665165821",
+      appId: "1:1074665165821:web:91ef329a0472fa138e7f94",
+      measurementId: "G-SG9TZSLP6E"
+    };
+    firebase.initializeApp(_firebaseConfig);
+    window._db = firebase.firestore();
+
+    // Second app — the same Realtime Database used by daily-alerts.html
+    const _alertsConfig = {
+      apiKey: "AIzaSyDvM76YKHMynYhMEX-B6q1jmrjJn0JyXZE",
+      authDomain: "achievements-74236.firebaseapp.com",
+      databaseURL: "https://daily-quotes-1d937-default-rtdb.firebaseio.com",
+      projectId: "daily-quotes-1d937",
+      storageBucket: "daily-quotes-1d937.firebasestorage.app",
+      messagingSenderId: "188983548531",
+      appId: "1:188983548531:web:d976dc7d3f63cfe33f2806"
+    };
+    const _alertsApp = firebase.initializeApp(_alertsConfig, 'alertsApp');
+    window._alertsDb = _alertsApp.database();
+  }
+
+  function _loadScript(src, onload) {
+    const s = document.createElement('script');
+    s.src = src;
+    s.onload = onload;
+    s.onerror = () => console.error('Failed to load: ' + src);
+    document.head.appendChild(s);
+  }
+
+  // Chain: app → firestore → database → init
+  _loadScript(
+    'https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js',
+    function() {
+      _loadScript(
+        'https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js',
+        function() {
+          _loadScript(
+            'https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js',
+            _initFirestore
+          );
+        }
+      );
+    }
+  );
+</script>
+<style>
+:root{
+  /* From Figma spec */
+  --sidebar:#411515;
+  --sidebar-top:#453B3B;
+  --sidebar-active:rgba(206,192,129,0.22);
+  --sidebar-active-border:rgba(206,192,129,0.45);
+  --content-bg:#CECACA;
+  --header-bg:#453b3b;
+  --detail-green:#DDE6B7;
+  --card-teal:#759897;
+  --card-food:#759897;
+  --card-shadow:rgba(0,0,0,0.48);
+  --card-progress:#9AB2A3;
+  --card-pill:#FFFFFF;
+  --person-card:#A39E9E;
+  --person-card-hover:#959090;
+  --present:#538E72;
+  --absent:#8E5353;
+  --boys-bg:#79C1D9;
+  --girls-bg:#BB9BB7;
+  --pie-1st:#1F8616;
+  --pie-2nd:#231686;
+  --pie-3rd:#864C16;
+  --pie-dot-1:#349D24;
+  --pie-dot-2:#2E33B2;
+  --pie-dot-3:#8A5E21;
+  --gender-girls:#F526E4;
+  --gender-boys:#1A6EFF;
+  --flower-panel:rgba(221,206,167,0.38);
+  --flower-row:rgba(217,221,152,0.45);
+  --profile-block:#393434;
+  --daily-graph:#9D807B;
+  --gender-card:#BBC3C6;
+  --cert-search:#7D8873;
+  --cert-doc:#D9D9D9;
+  --cert-student:#F8F1F1;
+  --yellow-frame:#E0CB54;
+  --yellow-row:#D9DD98;
+  --yellow-row-border:#A3987B61;
+  --refresh-pill:#E7FFF3;
+  --primary:#6750a4;
+  --surface:#ece6f0;
+  --text-card-dark:#140F2E;
+  --text-card-body:#0E3636;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Inter,sans-serif;background:var(--content-bg);color:#1e1e1e;height:100vh;display:flex;flex-direction:column;overflow:hidden}
+html{font-size:clamp(10px, 1.1vw, 16px);}
+
+/* ══ HEADER ══ */
+.header{
+  background:var(--header-bg);
+  height:64px;
+  display:flex;align-items:center;
+  flex-shrink:0;
+  position:relative;
+  z-index:5;
+  box-shadow:0 4px 0 0 rgba(0,0,0,0.25), 0 8px 32px rgba(0,0,0,0.2);
+}
+.header-left{
+  width:180px;
+  display:flex;align-items:center;justify-content:center;
+  height:100%;
+  position:relative;
+}
+.header-right{
+  flex:1;
+  display:flex;align-items:center;justify-content:flex-end;
+  gap:14px;
+  padding:0 32px;
+  height:100%;
+}
+.logo-wrap{width:48px;height:48px;display:flex;align-items:center;justify-content:center}
+.logo-svg{width:48px;height:48px;filter:drop-shadow(0 4px 8px rgba(0,0,0,0.4))}
+.user-right{display:flex;align-items:center;gap:14px}
+.user-text{text-align:right;line-height:1.3}
+.user-name{color:#fff;font-size:14px;font-weight:500;letter-spacing:-0.3px}
+.user-role{color:#fff;font-size:11px;font-weight:700;letter-spacing:-0.2px}
+.user-photo{width:38px;height:38px;border-radius:8px;background:#888;overflow:hidden;border:2px solid rgba(255,255,255,0.1)}
+.user-photo svg{width:100%;height:100%}
+
+/* ══ LAYOUT ══ */
+.layout{display:flex;flex:1;overflow:hidden;position:relative}
+
+/* ══ SIDEBAR ══ */
+.sidebar{
+  width:180px;
+  background:var(--sidebar);
+  background-color:rgba(65,21,21,0.94);
+  padding:14px 10px 20px 10px;
+  overflow-y:auto;
+  display:flex;flex-direction:column;
+  gap:4px;flex-shrink:0;
+  border-top-right-radius:42px;
+  box-shadow:13px 33px 34px 12px rgba(0,0,0,0.25), inset -1px 0 0 rgba(255,255,255,0.04);
+  position:relative;
+  z-index:3;
+}
+.nav-item{
+  display:flex;align-items:center;gap:10px;
+  padding:8px 12px;
+  border-radius:14px;
+  cursor:pointer;
+  color:#fff;font-size:12px;font-weight:600;
+  letter-spacing:0.3px;
+  transition:background .18s, transform .12s, box-shadow .18s;
+  user-select:none;
+  position:relative;
+}
+.nav-item:hover{background:rgba(255,255,255,.06)}
+.nav-item:active{transform:scale(0.98)}
+.nav-item.active{
+  background:#5a2828;
+  box-shadow:0 4px 12px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.08);
+}
+.nav-icon{
+  width:26px;height:26px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(255,255,255,0.06);
+  border-radius:8px;
+}
+.nav-icon svg{width:16px;height:16px}
+
+/* ══ CONTENT ══ */
+.content{flex:1;overflow-y:auto;padding:16px 20px 32px;min-width:0;}
+.page{display:none}
+.page.active{display:block;animation:fadeIn .25s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+
+/* ══ FILTERS ══ */
+.filters{display:flex;align-items:center;gap:12px;margin-bottom:22px;flex-wrap:wrap}
+.f-sel{
+  padding:11px 36px 11px 16px;
+  border:1px solid #d9d9d9;
+  border-radius:10px;
+  font-size:14px;font-family:Inter,sans-serif;
+  background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23555'/%3E%3C/svg%3E") no-repeat right 13px center;
+  appearance:none;cursor:pointer;outline:none;
+  min-width:96px;
+  transition:border-color .15s;
+}
+.f-sel:hover{border-color:#999}
+.search-box{
+  flex:1;max-width:330px;margin-left:auto;
+  background:#fff;border:1px solid #d9d9d9;
+  border-radius:9999px;
+  display:flex;align-items:center;gap:8px;
+  padding:10px 18px;
+}
+.search-box input{border:none;background:none;outline:none;flex:1;font-size:14px;font-family:Inter,sans-serif}
+
+/* ══ DASHBOARD ══ */
+.dash-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;max-width:100%;}
+.dash-card{
+  background:var(--card-teal);
+  border-radius:34px;
+  padding:24px 24px;
+  color:#fff;
+  box-shadow:13px 10px 24px rgba(0,0,0,0.48);
+  position:relative;
+  overflow:visible;
+}
+.dash-card.food{background:var(--card-food)}
+.dc-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;gap:8px}
+.dc-title{font-size:19px;font-weight:700;line-height:1.25;color:var(--text-card-dark)}
+.dc-date{
+  font-size:12px;
+  background:rgba(255,255,255,0.55);
+  border-radius:9999px;
+  padding:6px 12px;
+  color:#000;
+  font-weight:500;
+  flex-shrink:0;
+  cursor:pointer;
+  display:inline-flex;align-items:center;gap:6px;
+  transition:background .15s, transform .12s;
+  border:none;
+  font-family:Inter,sans-serif;
+  position:relative;
+}
+.dc-date:hover{background:rgba(255,255,255,0.85);transform:translateY(-1px)}
+.dc-date:active{transform:translateY(0)}
+.dc-date::after{
+  content:'';
+  width:12px;height:12px;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2'%3E%3Crect x='3' y='4' width='18' height='18' rx='2'/%3E%3Cline x1='16' y1='2' x2='16' y2='6'/%3E%3Cline x1='8' y1='2' x2='8' y2='6'/%3E%3Cline x1='3' y1='10' x2='21' y2='10'/%3E%3C/svg%3E") no-repeat center/contain;
+  display:inline-block;
+  opacity:0.8;
+}
+
+/* ── CUSTOM CALENDAR POPUP ── */
+.cal-anchor{position:relative;display:inline-block}
+.cal-popup{
+  position:absolute;
+  top:calc(100% + 8px);
+  right:0;
+  background:#fff;
+  border-radius:18px;
+  padding:14px;
+  box-shadow:0 12px 40px rgba(0,0,0,0.28), 0 0 0 1px rgba(0,0,0,0.05);
+  z-index:50;
+  width:280px;
+  display:none;
+  font-family:Inter,sans-serif;
+  color:#1d1b20;
+  animation:calOpen .18s ease;
+}
+@keyframes calOpen{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+.cal-popup.shown{display:block}
+.cal-header{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:10px;
+  padding:0 4px;
+}
+.cal-title{
+  font-size:14px;font-weight:600;
+  color:#1d1b20;
+  font-family:Inter,sans-serif;
+  flex:1;text-align:center;
+}
+.cal-nav{
+  width:30px;height:30px;
+  border-radius:50%;border:none;
+  background:transparent;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;color:#444;
+  transition:background .12s;
+  font-family:Inter,sans-serif;
+}
+.cal-nav:hover{background:rgba(0,0,0,0.06)}
+.cal-grid{
+  display:grid;
+  grid-template-columns:repeat(7, 1fr);
+  gap:2px;
+}
+.cal-day-label{
+  font-size:10px;font-weight:600;
+  color:#888;
+  text-align:center;
+  padding:6px 0 4px;
+  text-transform:uppercase;
+  letter-spacing:0.5px;
+}
+.cal-day{
+  aspect-ratio:1;
+  display:flex;align-items:center;justify-content:center;
+  border:none;background:transparent;
+  cursor:pointer;
+  font-size:13px;
+  border-radius:50%;
+  color:#1d1b20;
+  font-family:Inter,sans-serif;
+  transition:background .12s, color .12s;
+}
+.cal-day:hover{background:rgba(103,80,164,0.12)}
+.cal-day.other-month{color:#c4c4c4}
+.cal-day.today{
+  box-shadow:inset 0 0 0 1.5px var(--primary);
+  font-weight:600;
+}
+.cal-day.selected{
+  background:var(--primary);
+  color:#fff;
+  font-weight:600;
+}
+.cal-day.selected:hover{background:#5840a0}
+.cal-footer{
+  display:flex;justify-content:space-between;align-items:center;
+  margin-top:8px;
+  padding-top:8px;
+  border-top:1px solid #eee;
+}
+.cal-today-btn{
+  background:none;border:none;
+  color:var(--primary);
+  font-weight:600;font-size:12px;
+  cursor:pointer;
+  padding:4px 8px;border-radius:6px;
+  font-family:Inter,sans-serif;
+}
+.cal-today-btn:hover{background:rgba(103,80,164,0.08)}
+.cal-close-btn{
+  background:none;border:none;
+  color:#777;
+  font-size:13px;
+  cursor:pointer;
+  padding:4px 8px;border-radius:6px;
+  font-family:Inter,sans-serif;
+}
+.cal-close-btn:hover{background:rgba(0,0,0,0.05);color:#000}
+.dc-summary{
+  background:rgba(0,0,0,0.18);
+  color:#fff;
+  font-size:12px;font-weight:600;
+  border-radius:9999px;
+  padding:6px 14px;
+  margin-bottom:12px;
+  display:inline-flex;align-items:center;gap:8px;
+  position:relative;
+  z-index:50;
+}
+.dc-summary .ds-sep{opacity:0.45}
+.dc-summary .ds-nodata{font-style:italic;opacity:0.7;font-weight:500}
+.dc-gender-note{
+  font-size:10px;color:rgba(0,0,0,0.45);
+  margin-top:10px;
+  font-style:italic;
+  line-height:1.4;
+}
+
+.dc-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:8px}
+.dc-lbl{font-size:13px;color:var(--text-card-body);font-weight:400;line-height:1.3}
+.dc-val{
+  background:var(--card-pill);
+  border-radius:9999px;height:22px;min-width:86px;
+  padding:0 14px;
+  display:inline-flex;align-items:center;justify-content:center;
+  font-size:12px;color:#222;font-weight:700;
+  flex-shrink:0;
+  box-shadow:inset 0 1px 2px rgba(0,0,0,0.08);
+  font-family:Inter,sans-serif;
+}
+.dc-val.empty{color:#999;font-weight:500}
+.dc-progress{
+  background:var(--card-progress);
+  border-radius:6px;
+  height:26px;width:100%;
+  margin-top:4px;
+  position:relative;
+  overflow:hidden;
+}
+.dc-progress-fill{
+  position:absolute;left:0;top:0;bottom:0;
+  background:#fff;
+  border-radius:6px;
+  transition:width .35s ease;
+}
+.dc-progress-text{
+  position:absolute;left:0;right:0;top:0;bottom:0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:700;color:#0E3636;
+  z-index:1;
+}
+.dc-footer{display:flex;gap:36px;margin-top:16px;align-items:flex-end}
+.dc-fi{display:flex;flex-direction:column;align-items:center;gap:6px}
+.dc-fb{
+  min-width:50px;height:30px;
+  padding:0 12px;
+  background:rgba(255,255,255,.32);
+  border-radius:6px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;color:#fff;font-weight:700;
+  font-family:Inter,sans-serif;
+}
+.dc-fb.empty{color:rgba(255,255,255,0.6);font-weight:500}
+.dc-fl{font-size:11px;color:var(--text-card-body);font-weight:500}
+.grade-sel{
+  background:rgba(255,255,255,.45);
+  border:none;border-radius:9999px;
+  color:#000;padding:4px 11px;font-size:11px;
+  cursor:pointer;appearance:none;outline:none;
+  font-family:Inter,sans-serif;
+}
+/* Food fields */
+.food-lbl{font-size:13px;color:var(--text-card-body);margin-bottom:4px;font-weight:500}
+.food-input{
+  width:100%;height:52px;
+  background:#fff;
+  border-radius:10px;border:none;
+  padding:0 14px;font-size:13px;
+  outline:none;font-family:Inter,sans-serif;
+  box-shadow:inset 0 1px 2px rgba(0,0,0,0.06);
+}
+.food-row{display:flex;justify-content:space-between;align-items:center;margin-top:10px;gap:12px}
+.food-qty{
+  background:#fff;border-radius:9999px;
+  height:26px;width:90px;border:none;outline:none;
+  padding:0 12px;font-size:12px;
+  flex-shrink:0;
+}
+
+/* ══ PERSON LIST ══ */
+.person-card{
+  background:var(--person-card);
+  border-radius:22px;
+  padding:14px 22px;
+  display:flex;align-items:center;gap:16px;
+  margin-bottom:14px;
+  cursor:pointer;
+  transition:background .15s, transform .12s;
+  box-shadow:0 4px 18px rgba(0,0,0,0.18);
+}
+.person-card:hover{background:var(--person-card-hover);transform:translateY(-1px)}
+.avatar-wrap{
+  width:64px;height:64px;border-radius:50%;
+  overflow:hidden;flex-shrink:0;
+  background:#7ab8d0;
+  box-shadow:0 2px 6px rgba(0,0,0,0.2);
+}
+.avatar-wrap img{width:100%;height:100%;object-fit:cover}
+.avatar-wrap svg{width:100%;height:100%}
+.person-info-name{font-weight:600;font-size:15px;color:#121616}
+.person-info-sub{font-size:12px;color:#3a3a3a;margin-top:3px}
+
+/* ══ PERSON DETAIL ══ */
+.detail-bg{
+  background:var(--detail-green);
+  border-radius:16px;
+  padding:24px;
+  min-height:100%;
+  box-shadow:0 4px 14px 17px rgba(0,0,0,0.18);
+}
+.back-btn{
+  background:none;border:none;font-size:28px;
+  cursor:pointer;margin-bottom:14px;
+  display:inline-flex;align-items:center;
+  color:#1e1e1e;
+  padding:4px 8px;border-radius:8px;
+  transition:background .15s;
+}
+.back-btn:hover{background:rgba(0,0,0,0.05)}
+.detail-flex{display:flex;gap:18px;margin-bottom:18px}
+.detail-left{flex:1}
+.detail-right{display:flex;flex-direction:column;align-items:center;gap:14px;flex-shrink:0}
+.big-avatar{
+  width:110px;height:110px;border-radius:50%;
+  overflow:hidden;background:#7ab8d0;
+  box-shadow:0 6px 20px rgba(0,0,0,0.2);
+}
+.big-avatar svg{width:100%;height:100%}
+.act-btns{display:flex;gap:10px}
+.act-btn{
+  background:var(--present);
+  color:#fff;border:none;
+  border-radius:14px;
+  padding:11px 22px;font-size:14px;font-weight:600;
+  cursor:pointer;
+  letter-spacing:1px;
+  box-shadow:0 4px 13px rgba(0,0,0,0.25);
+  transition:transform .12s;
+}
+.act-btn:active{transform:scale(0.97)}
+.notif-card{
+  background:#fff;
+  border:1px solid rgba(0,0,0,0.1);
+  border-radius:14px;
+  padding:18px;margin-bottom:14px;
+  box-shadow:0 4px 12px rgba(0,0,0,0.06);
+}
+.notif-title{font-weight:600;font-size:14px;display:flex;align-items:center;gap:6px;margin-bottom:4px}
+.notif-body{font-size:13px;color:#555;line-height:1.5}
+.send-btn{
+  background:#1e1e1e;color:#fff;
+  border:none;border-radius:8px;
+  padding:8px 16px;font-size:13px;
+  cursor:pointer;margin-top:12px;
+  font-family:Inter,sans-serif;
+}
+.profile-block{
+  background:var(--profile-block);
+  border-radius:14px;
+  padding:24px;color:#fff;
+  min-height:320px;
+  box-shadow:0 4px 28px 14px rgba(0,0,0,0.18);
+  position:relative;
+}
+.profile-block h3{
+  font-size:24px;
+  font-weight:600;
+  letter-spacing:2px;
+  text-align:center;
+  margin-bottom:8px;
+}
+
+/* ══ EXAM RESULTS ══ */
+.exam-list{display:flex;flex-direction:column;gap:14px}
+.exam-card{
+  background:var(--person-card);
+  border-radius:22px;
+  padding:14px 20px;
+  display:flex;align-items:center;gap:14px;
+  box-shadow:0 4px 18px 2px rgba(0,0,0,0.18);
+}
+.exam-ctrls{margin-left:auto;display:flex;align-items:center;gap:8px;flex-shrink:0;flex-wrap:wrap}
+.ex-pill{
+  background:var(--present);
+  color:#fff;
+  border-radius:9999px;
+  padding:7px 14px;font-size:11px;font-weight:600;
+  display:flex;align-items:center;gap:6px;
+  letter-spacing:1px;
+  box-shadow:0 4px 13px rgba(0,0,0,0.18);
+}
+.ex-pill select,.ex-pill input{
+  background:rgba(255,255,255,0.95);color:#222;
+  border:none;font-size:11px;outline:none;
+  font-family:Inter,sans-serif;
+  border-radius:9999px;
+  padding:3px 6px;
+}
+.ex-pill input{width:38px;text-align:center}
+.ex-toggle{
+  width:34px;height:18px;background:#ccc;
+  border-radius:9999px;cursor:pointer;
+  transition:background .2s;position:relative;
+}
+.ex-toggle::after{
+  content:'';position:absolute;
+  left:2px;top:2px;width:14px;height:14px;
+  background:#fff;border-radius:50%;
+  transition:left .2s;
+}
+.ex-toggle.on{background:#00b090}
+.ex-toggle.on::after{left:18px}
+
+/* ══ FLOWER MARKS ══ */
+.flower-top{
+  display:flex;align-items:center;justify-content:flex-end;
+  gap:12px;margin-bottom:14px;
+  font-size:20px;font-weight:600;
+}
+.flower-grid{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-bottom:24px}
+.flower-panel{
+  background:var(--flower-panel);
+  border:1px solid #000;
+  border-radius:14px;
+  padding:12px;
+  display:flex;flex-direction:column;gap:10px;
+  box-shadow:0 4px 20px 11px rgba(0,0,0,0.18);
+}
+.fl-row{
+  background:var(--flower-row);
+  border-radius:9999px;
+  padding:10px 14px 10px 18px;
+  display:flex;align-items:center;justify-content:space-between;
+  box-shadow:0 4px 10px 4px rgba(0,0,0,0.15);
+}
+.fl-date{font-size:15px;color:#0E3636;font-weight:400}
+.fl-btns{display:flex;gap:8px}
+.flower-right-col{display:flex;flex-direction:column;gap:14px}
+.charts-section-title{font-size:22px;font-weight:600;margin-bottom:14px;color:#121616}
+.charts-row{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+
+/* Interactive Pie chart card */
+.pie-card{
+  border-radius:22px;
+  padding:18px 20px;
+  display:flex;flex-direction:column;gap:12px;
+  border:1px solid rgba(0,0,0,0.36);
+  box-shadow:0 4px 21px 8px rgba(0,0,0,0.22);
+}
+.pie-card.boys-card{background:var(--boys-bg)}
+.pie-card.girls-card{background:var(--girls-bg)}
+.pie-card-title{font-weight:600;font-size:15px;margin-bottom:4px;color:#121616}
+.pie-inner{display:flex;align-items:center;gap:14px}
+.pie-legend{flex:1;min-width:80px}
+.legend-item{
+  display:flex;align-items:center;gap:10px;
+  font-size:14px;font-weight:600;
+  margin-bottom:10px;cursor:pointer;
+  border-radius:6px;padding:3px 5px;
+  transition:background .15s;
+  color:#121616;
+}
+.legend-item:hover{background:rgba(0,0,0,.08)}
+.legend-item.selected{background:rgba(0,0,0,.14);font-weight:700}
+.leg-dot{width:18px;height:18px;border-radius:2px;flex-shrink:0}
+.pie-container{position:relative;flex-shrink:0}
+.pie-svg{width:140px;height:140px;cursor:pointer;filter:drop-shadow(0 4px 8px rgba(0,0,0,0.2))}
+.pie-slice{transition:opacity .2s,filter .2s;transform-origin:center}
+.pie-slice:hover{filter:brightness(1.12)}
+.pie-slice.dimmed{opacity:.4}
+/* Detail card below chart */
+.pie-detail{
+  background:rgba(255,255,255,.55);
+  border-radius:10px;padding:11px 13px;
+  font-size:12px;min-height:52px;
+  transition:all .2s;
+}
+.pie-detail-rank{font-weight:700;font-size:15px;margin-bottom:3px}
+.pie-detail-name{font-size:13px;margin-bottom:2px}
+.pie-detail-score{color:#333;font-size:12px}
+.pie-detail-empty{color:#666;font-style:italic}
+
+/* ── PIE PROFILE POPUP (overlay card) ── */
+.pie-card{position:relative}
+.profile-popup{
+  position:absolute;
+  top:50%;left:50%;
+  transform:translate(-50%,-50%) scale(0.85);
+  width:88%;max-width:340px;
+  background:inherit;
+  border:1px solid rgba(0,0,0,0.36);
+  border-radius:22px;
+  padding:18px 20px;
+  box-shadow:0 8px 28px 8px rgba(0,0,0,0.32);
+  display:none;
+  opacity:0;
+  transition:opacity .2s, transform .2s;
+  z-index:10;
+}
+.pie-card.boys-card .profile-popup{background:var(--boys-bg)}
+.pie-card.girls-card .profile-popup{background:var(--girls-bg)}
+.profile-popup.shown{
+  display:block;opacity:1;
+  transform:translate(-50%,-50%) scale(1);
+}
+.popup-close{
+  position:absolute;top:8px;right:10px;
+  background:none;border:none;
+  font-size:20px;cursor:pointer;color:#121616;
+  width:26px;height:26px;
+  border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  transition:background .15s;
+}
+.popup-close:hover{background:rgba(0,0,0,0.1)}
+.popup-row{display:flex;gap:14px;align-items:flex-start}
+.popup-avatar{
+  width:74px;height:74px;border-radius:50%;
+  overflow:hidden;flex-shrink:0;
+  background:#fff;
+  box-shadow:0 4px 10px rgba(0,0,0,0.2);
+}
+.popup-avatar svg{width:100%;height:100%}
+.popup-info{flex:1;font-size:13px;color:#121616;line-height:1.55;font-weight:600}
+.popup-info .nm{font-size:15px;margin-bottom:2px}
+.popup-info .dash{letter-spacing:1px;color:#121616;opacity:0.7;font-weight:400}
+.popup-stats{margin-top:10px;display:flex;flex-direction:column;gap:3px}
+
+/* ══ CHARACTER CERTIFICATE ══ */
+.cert-top{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:18px}
+.cert-search-panel{
+  background:var(--cert-search);
+  border-radius:18px;
+  padding:22px;
+  display:flex;flex-direction:column;gap:14px;
+  box-shadow:0 4px 32px rgba(0,0,0,0.25);
+}
+.cert-name-row{position:relative}
+.cert-name-in{
+  width:100%;padding:11px 38px 11px 14px;
+  border-radius:9999px;border:none;
+  font-size:13px;font-family:Inter,sans-serif;
+  outline:none;
+  background:#fff;
+}
+.cert-search-icon{position:absolute;right:14px;top:50%;transform:translateY(-50%);color:#555;font-size:14px}
+.cert-search-btn{
+  background:#0088ff;color:#fff;border:none;
+  border-radius:9999px;
+  padding:10px 22px;font-size:13px;
+  cursor:pointer;display:flex;align-items:center;gap:6px;
+  align-self:flex-start;font-family:Inter,sans-serif;
+}
+.cert-student-card{
+  background:var(--cert-student);
+  border-radius:18px;padding:18px;
+  font-size:12px;position:relative;
+  box-shadow:0 4px 39px rgba(0,0,0,0.18);
+}
+.cert-expand-btn{
+  position:absolute;top:12px;right:12px;
+  background:none;border:none;cursor:pointer;
+  font-size:16px;color:#555;
+}
+.cert-s-name{font-size:20px;font-weight:500;margin-bottom:3px;color:#302C2C;letter-spacing:-0.5px}
+.cert-s-role{color:#302C2C;margin-bottom:10px;font-size:12px;line-height:1.7;font-weight:500}
+.cert-ev-lbl{font-weight:500;margin-bottom:6px;color:#302C2C;font-size:11px}
+.cert-ev-row{
+  display:flex;gap:8px;margin-bottom:4px;
+  color:#302C2C;
+  background:#C2BFBF;border-radius:7px;
+  padding:3px 8px;font-size:11px;
+  align-items:center;
+}
+.cert-stats-row{display:flex;gap:12px;margin-top:14px}
+.cert-stat{
+  background:#D9D9D9;border-radius:9px;
+  padding:12px;flex:1;text-align:center;
+  font-size:11px;font-weight:500;color:#302C2C;
+  min-height:55px;display:flex;align-items:center;justify-content:center;
+}
+.cert-doc{
+  background:var(--cert-doc);
+  border-radius:14px;
+  padding:18px;min-height:440px;
+  position:relative;
+  box-shadow:0 4px 34px 19px rgba(0,0,0,0.18);
+}
+.doc-btns{display:flex;gap:10px;margin-bottom:12px}
+.btn-edit{
+  background:#0088ff;color:#fff;border:none;
+  border-radius:9999px;
+  padding:8px 16px;cursor:pointer;
+  font-size:13px;font-family:Inter,sans-serif;
+  display:flex;align-items:center;gap:5px;
+}
+.btn-save{
+  background:#0088ff;color:#fff;border:none;
+  border-radius:9999px;
+  padding:8px 16px;cursor:pointer;
+  font-size:13px;font-family:Inter,sans-serif;
+  display:flex;align-items:center;gap:5px;
+}
+.doc-footer{position:absolute;bottom:18px;right:18px;display:flex;gap:10px;align-items:center}
+.btn-preview{
+  background:#0088ff;color:#fff;border:none;
+  border-radius:9999px;
+  padding:9px 18px;cursor:pointer;
+  font-size:13px;font-family:Inter,sans-serif;
+}
+.btn-dl,.btn-print{
+  width:40px;height:40px;border:none;
+  border-radius:50%;color:#fff;cursor:pointer;
+  font-size:15px;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 4px 12px rgba(0,0,0,0.18);
+}
+.btn-dl{background:#ff383c}
+.btn-print{background:#ff8d28}
+
+/* ══ DAILY ATTENDANCE TRAITS ══ */
+.daily-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:18px}
+.gender-card{
+  background:var(--gender-card);
+  border-radius:22px;
+  padding:20px;
+  border:1px solid rgba(0,0,0,0.36);
+  box-shadow:0 4px 20px 8px rgba(0,0,0,0.2);
+  position:relative;
+}
+.gender-title{font-size:15px;font-weight:600;margin-bottom:14px;color:#121616}
+.graph-area{
+  grid-column:1/-1;
+  background:var(--daily-graph);
+  border-radius:14px;
+  padding:22px;min-height:200px;
+  box-shadow:0 4px 42px 20px rgba(0,0,0,0.2);
+}
+.graph-area-title{font-size:14px;font-weight:600;margin-bottom:8px;color:#121616}
+
+/* ══ DATE MODAL ══ */
+.date-modal{
+  background:var(--surface);
+  border-radius:28px;
+  padding:18px;
+  box-shadow:0 4px 22px rgba(0,0,0,0.15);
+}
+.m-lbl{font-size:11px;color:#49454f;margin-bottom:8px;font-weight:500}
+.m-title-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.m-title{font-size:28px;font-weight:400;color:#1d1b20;font-family:Inter,sans-serif}
+.m-field{position:relative;margin-bottom:4px}
+.m-field-lbl{
+  position:absolute;top:-8px;left:12px;
+  background:var(--surface);padding:0 5px;
+  font-size:11px;color:var(--primary);z-index:1;
+}
+.m-field-input{
+  width:100%;border:2px solid var(--primary);
+  border-radius:6px;padding:12px;
+  font-size:13px;background:transparent;
+  outline:none;cursor:pointer;
+  font-family:Inter,sans-serif;
+  color:#1d1b20;
+}
+.m-error{font-size:11px;color:#ba1a1a;min-height:14px;margin-top:4px;padding-left:4px}
+.m-acts{display:flex;justify-content:flex-end;gap:4px;margin-top:8px}
+.m-btn{
+  background:none;border:none;
+  color:var(--primary);
+  font-size:14px;font-weight:600;
+  padding:9px 14px;cursor:pointer;
+  border-radius:6px;
+  font-family:Inter,sans-serif;
+}
+.m-btn:hover{background:rgba(103,80,164,.08)}
+
+/* ══ SHARED ══ */
+.toggle-pill{
+  display:inline-block;width:54px;height:23px;
+  background:#c8f0b0;border-radius:9999px;
+  cursor:pointer;border:none;
+  position:relative;
+  box-shadow:inset 0 1px 3px rgba(0,0,0,0.1);
+}
+.toggle-pill::after{
+  content:'';position:absolute;
+  top:2px;right:2px;width:19px;height:19px;
+  background:#fff;border-radius:50%;
+  box-shadow:0 1px 3px rgba(0,0,0,0.2);
+}
+.monthly-lbl{font-size:18px;font-weight:400;margin-bottom:6px;color:#0E3636}
+.monthly-sel{
+  width:100%;padding:11px 14px;
+  background:#fff;
+  border:1px solid #d9d9d9;border-radius:10px;
+  font-size:14px;cursor:pointer;outline:none;
+  appearance:none;font-family:Inter,sans-serif;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23555'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;
+  background-position:right 13px center;
+}
+.btn-present{
+  background:var(--present);color:#fff;border:none;
+  border-radius:9999px;
+  padding:7px 18px;font-size:14px;font-weight:600;
+  cursor:pointer;font-family:Inter,sans-serif;
+  letter-spacing:1.5px;
+  box-shadow:0 4px 13px rgba(0,0,0,0.2);
+  transition:transform .12s;
+}
+.btn-absent{
+  background:var(--absent);color:#fff;border:none;
+  border-radius:9999px;
+  padding:7px 18px;font-size:14px;font-weight:600;
+  cursor:pointer;font-family:Inter,sans-serif;
+  letter-spacing:1.5px;
+  box-shadow:0 4px 13px rgba(0,0,0,0.2);
+  transition:transform .12s;
+}
+.btn-present:active,.btn-absent:active{transform:scale(0.95)}
+.btn-present.active{outline:3px solid #1a5e50;outline-offset:1px}
+.btn-absent.active{outline:3px solid #5e1f1f;outline-offset:1px}
+
+/* Term boxes */
+.term-box{
+  background:rgba(0,0,0,.12);
+  border-radius:18px;
+  padding:28px 20px;
+  font-size:24px;font-weight:400;
+  color:#121616;
+  cursor:pointer;text-align:center;
+  border:3px solid transparent;
+  transition:background .15s,border-color .15s,transform .12s;
+  user-select:none;
+}
+.term-box:hover{background:rgba(0,0,0,.2)}
+.term-box:active{transform:scale(0.98)}
+.term-box.selected{
+  background:rgba(255,255,255,.45);
+  border-color:rgba(0,0,0,.35);
+}
+
+/* Yellow attendance frame */
+.yellow-frame{
+  background:var(--yellow-frame);
+  border-radius:30px;
+  padding:30px 24px;
+  max-width:540px;margin:0 auto;
+  box-shadow:0 4px 31.5px 26px rgba(0,0,0,0.25);
+}
+.yellow-rows{
+  background:var(--yellow-row-border);
+  border:1px solid #000;
+  border-radius:14px;
+  padding:11px;
+  display:flex;flex-direction:column;gap:9px;
+  box-shadow:0 4px 20px 11px rgba(0,0,0,0.15) inset;
+}
+.yellow-row{
+  background:var(--yellow-row);
+  border-radius:9999px;
+  padding:9px 14px 9px 18px;
+  display:flex;align-items:center;justify-content:space-between;
+  box-shadow:0 4px 10px 4px rgba(0,0,0,0.15);
+}
+.yellow-row-date{font-size:18px;color:#0E3636;font-weight:400;font-family:Inter,sans-serif}
+
+/* Sync status pill */
+#sync-status[data-kind="ok"]{color:#9CF0C4}
+#sync-status[data-kind="error"]{color:#FFB3B3}
+#sync-status[data-kind="loading"]{color:#E0CB54}
+
+/* Scroll */
+::-webkit-scrollbar{width:8px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(0,0,0,.16);border-radius:4px}
+::-webkit-scrollbar-thumb:hover{background:rgba(0,0,0,.28)}
+
+/* ── Summary chip dropdown ── */
+.ds-chip{
+  cursor:pointer;
+  border-radius:9999px;
+  padding:2px 7px;
+  transition:background .15s;
+  position:relative;
+  display:inline-flex;align-items:center;gap:4px;
+  user-select:none;
+}
+.ds-chip:hover{background:rgba(255,255,255,0.18)}
+.ds-chip b{pointer-events:none}
+.ds-chip-arrow{font-size:9px;opacity:0.7;pointer-events:none}
+.ds-dropdown{
+  position:absolute;
+  top:calc(100% + 8px);
+  left:50%;
+  transform:translateX(-50%);
+  background:#fff;
+  border-radius:14px;
+  padding:10px 0;
+  min-width:220px;max-width:280px;
+  box-shadow:0 12px 40px rgba(0,0,0,0.28), 0 0 0 1px rgba(0,0,0,0.06);
+  z-index:100;
+  display:none;
+  font-family:Inter,sans-serif;
+  color:#1d1b20;
+  animation:calOpen .15s ease;
+}
+.ds-dropdown.shown{display:block}
+.ds-dropdown-title{
+  font-size:11px;font-weight:700;
+  letter-spacing:0.8px;
+  text-transform:uppercase;
+  color:#888;
+  padding:0 14px 6px;
+  border-bottom:1px solid #eee;
+  margin-bottom:4px;
+}
+.ds-dropdown-item{
+  padding:7px 14px;
+  font-size:13px;
+  display:flex;align-items:center;gap:8px;
+  transition:background .12s;
+}
+.ds-dropdown-item:hover{background:#f5f5f5}
+.ds-dropdown-dot{
+  width:8px;height:8px;border-radius:50%;flex-shrink:0;
+}
+.ds-dropdown-empty{
+  padding:10px 14px;
+  font-size:13px;color:#aaa;font-style:italic;
+}
+/* ── Profile Modal ── */
+.prof-overlay{
+  position:fixed;inset:0;
+  background:rgba(0,0,0,0.55);
+  z-index:200;
+  display:flex;align-items:center;justify-content:center;
+  animation:fadeIn .2s ease;
+}
+.prof-overlay.hidden{display:none}
+.prof-modal{
+  background:#fff;
+  border-radius:24px;
+  width:min(480px,94vw);
+  max-height:88vh;
+  overflow-y:auto;
+  box-shadow:0 24px 64px rgba(0,0,0,0.38);
+  position:relative;
+  animation:calOpen .2s ease;
+}
+.prof-header{
+  background:var(--sidebar);
+  border-radius:24px 24px 0 0;
+  padding:28px 28px 20px;
+  display:flex;align-items:center;gap:18px;
+  position:relative;
+}
+.prof-photo{
+  width:80px;height:80px;border-radius:50%;
+  object-fit:cover;
+  border:3px solid rgba(255,255,255,0.3);
+  background:#7ab8d0;
+  flex-shrink:0;
+}
+.prof-photo-fallback{
+  width:80px;height:80px;border-radius:50%;
+  background:#7ab8d0;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+  border:3px solid rgba(255,255,255,0.3);
+}
+.prof-photo-fallback svg{width:50px;height:50px}
+.prof-header-info{flex:1;min-width:0}
+.prof-name{color:#fff;font-size:18px;font-weight:700;line-height:1.3;word-break:break-word}
+.prof-role-badge{
+  display:inline-block;
+  background:rgba(255,255,255,0.18);
+  color:#fff;font-size:11px;font-weight:600;
+  border-radius:9999px;padding:3px 10px;
+  margin-top:5px;letter-spacing:0.5px;text-transform:capitalize;
+}
+.prof-close{
+  position:absolute;top:14px;right:16px;
+  background:rgba(255,255,255,0.15);border:none;
+  color:#fff;font-size:20px;width:32px;height:32px;
+  border-radius:50%;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:background .15s;
+}
+.prof-close:hover{background:rgba(255,255,255,0.3)}
+.prof-body{padding:20px 28px 28px;}
+.prof-section{margin-bottom:18px}
+.prof-section-title{
+  font-size:10px;font-weight:700;letter-spacing:1px;
+  text-transform:uppercase;color:#aaa;
+  margin-bottom:8px;
+}
+.prof-row{
+  display:flex;align-items:flex-start;
+  gap:10px;padding:8px 0;
+  border-bottom:1px solid #f0f0f0;
+  font-size:13px;
+}
+.prof-row:last-child{border-bottom:none}
+.prof-row-label{color:#888;font-weight:500;min-width:120px;flex-shrink:0}
+.prof-row-val{color:#ede9e9;font-weight:400;word-break:break-word}
+.prof-loading{
+  display:flex;align-items:center;justify-content:center;
+  padding:48px;font-size:14px;color:#aaa;gap:10px;
+}
+.prof-spinner{
+  width:20px;height:20px;border:2px solid #eee;
+  border-top-color:#6750a4;border-radius:50%;
+  animation:spin .7s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.prof-error{padding:32px 28px;text-align:center;color:#c00;font-size:14px}
+
+</style>
+</head>
+<body>
+
+<!-- ══ HEADER ══ -->
+<header class="header">
+  <div class="header-left">
+    <!-- School Logo SVG (golden emblem) -->
+    <div class="logo-wrap">
+  <img src="logo.png" alt="School Logo" style="width:48px;height:48px;object-fit:contain;filter:drop-shadow(0 4px 8px rgba(0,0,0,0.4))"/>
+</div>
+  </div>
+  <div style="position:absolute;left:20%;transform:translateX(-50%);text-align:center;pointer-events:none;">
+  <div style="color:#fff;font-size:15px;font-weight:700;letter-spacing:1px;line-height:1.8;text-shadow:0 2px 8px rgba(0,0,0,0.4)">Sri Vipassi Damma School</div>
+  <div style="color:rgba(255,255,255,0.65);font-size:8px;font-weight:500;letter-spacing:2px;text-transform:uppercase">School Management System</div>
+</div>
+  <div class="header-right">
+    <button id="refresh-btn" title="Refresh from Drive" style="background:rgba(58, 22, 22, 0.12);border:none;color:#fff;border-radius:9999px;padding:8px 16px;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:8px;font-family:Inter,sans-serif;">
+      <span id="sync-status" data-kind="info">Syncing…</span>
+      <span style="font-size:14px">&#8635;</span>
+    </button>
+    <div class="user-text">
+      <div class="user-name">Waliwawa Nandasiri</div>
+      <div class="user-role">Teacher</div>
+    </div>
+    <div class="user-photo">
+      <svg viewBox="0 0 54 54" fill="none">
+        <rect width="54" height="54" fill="#888"/>
+        <circle cx="27" cy="20" r="9" fill="#bbb"/>
+        <ellipse cx="27" cy="45" rx="15" ry="11" fill="#bbb"/>
+      </svg>
+    </div>
+  </div>
+</header>
+
+<div class="layout">
+<!-- ══ SIDEBAR ══ -->
+<aside class="sidebar">
+  <div class="nav-item active" data-page="dashboard">
+    <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span>
+    Dash Board
+  </div>
+  <div class="nav-item" data-page="students">
+    <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></span>
+    Students
+  </div>
+  <div class="nav-item" data-page="teachers">
+    <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/><path d="M19 3l-2 2 2 2" stroke-width="1.5"/></svg></span>
+    Teachers
+  </div>
+  <div class="nav-item" data-page="prefects">
+    <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg></span>
+    Prefects
+  </div>
+  <div class="nav-item" data-page="character-cert">
+    <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><rect x="4" y="3" width="16" height="18" rx="2"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="12" y2="16"/></svg></span>
+    Character Cert
+  </div>
+  <div class="nav-item" data-page="flower-marks">
+    <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="5" r="3"/><circle cx="12" cy="19" r="3"/><circle cx="5" cy="12" r="3"/><circle cx="19" cy="12" r="3"/></svg></span>
+    Flower Marks
+  </div>
+  <div class="nav-item" data-page="term-marks">
+    <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="9" x2="9" y2="21"/></svg></span>
+    Term Tests Marks
+  </div>
+  <div class="nav-item" data-page="daily-attendance">
+    <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="9" y1="7" x2="15" y2="7"/><line x1="9" y1="11" x2="15" y2="11"/><line x1="9" y1="15" x2="12" y2="15"/></svg></span>
+    Daily Attendance
+  </div>
+</aside>
+
+<main class="content">
+
+<!-- ═══════ DASHBOARD ═══════ -->
+<div id="page-dashboard" class="page active">
+  <div class="dash-grid">
+    <!-- Students card -->
+    <div class="dash-card" id="card-students">
+      <div class="dc-head">
+        <div class="dc-title">Daily Attendance<br/>(Students)</div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+          <div class="cal-anchor">
+            <button class="dc-date" id="d-date-1" onclick="toggleCalendar(1, event)"></button>
+            <div class="cal-popup" id="cal-popup-1"></div>
+          </div>
+          <select class="grade-sel" id="grade-filter-students" onchange="renderDashboard()"><option value="">All Grades</option><option>Grade 1</option><option>Grade 2</option><option>Grade 3</option><option>Grade 4</option><option>Grade 5</option><option>Grade 6</option><option>Grade 7</option><option>Grade 8</option><option>Grade 9</option><option>Grade 10</option><option>Grade 11</option><option>Grade 12</option></select>
+        </div>
+      </div>
+      <div class="dc-summary" data-fill="students-summary">Loading…</div>
+      <div class="dc-row"><span class="dc-lbl">Students have present today (boys)</span><div class="dc-val" data-fill="students-present-boys">—</div></div>
+      <div class="dc-row"><span class="dc-lbl">Students have presesnt today (girls)</span><div class="dc-val" data-fill="students-present-girls">—</div></div>
+      <div class="dc-row"><span class="dc-lbl">Students have absent today (boys)</span><div class="dc-val" data-fill="students-absent-boys">—</div></div>
+      <div class="dc-row"><span class="dc-lbl">Students have absent today (girls)</span><div class="dc-val" data-fill="students-absent-girls">—</div></div>
+      <div class="dc-row" style="margin-bottom:6px"><span class="dc-lbl">Average daily attendance</span></div>
+      <div class="dc-progress"><div class="dc-progress-fill" data-fill="students-bar"></div><div class="dc-progress-text" data-fill="students-avg">—</div></div>
+      <div class="dc-footer">
+        <div class="dc-fi"><div class="dc-fb empty" data-fill="students-total-girls">—</div><span class="dc-fl">Total girls</span></div>
+        <div class="dc-fi"><div class="dc-fb" data-fill="students-total-boys">—</div><span class="dc-fl">Total boys</span></div>
+      </div>
+      <div class="dc-gender-note">Boys/girls split needs a <b>Gender</b> column in your spreadsheets.</div>
+    </div>
+    <!-- Teachers card -->
+    <div class="dash-card" id="card-teachers">
+      <div class="dc-head">
+        <div class="dc-title">Daily Attendance<br/>(Teachers)</div>
+        <div class="cal-anchor">
+          <button class="dc-date" id="d-date-2" onclick="toggleCalendar(2, event)"></button>
+          <div class="cal-popup" id="cal-popup-2"></div>
+        </div>
+      </div>
+      <div class="dc-summary" data-fill="teachers-summary">Loading…</div>
+      <div class="dc-row"><span class="dc-lbl">Teachers have present today</span><div class="dc-val" data-fill="teachers-present">—</div></div>
+      <div class="dc-row"><span class="dc-lbl">Teachers have absent today</span><div class="dc-val" data-fill="teachers-absent">—</div></div>
+      <div class="dc-row" style="margin-bottom:6px"><span class="dc-lbl">Average daily attendance</span></div>
+      <div class="dc-progress"><div class="dc-progress-fill" data-fill="teachers-bar"></div><div class="dc-progress-text" data-fill="teachers-avg">—</div></div>
+      <div class="dc-footer">
+        <div class="dc-fi"><div class="dc-fb" data-fill="teachers-total">—</div><span class="dc-fl">Total Teachers</span></div>
+      </div>
+    </div>
+    <!-- Prefects card -->
+    <div class="dash-card" id="card-prefects">
+      <div class="dc-head">
+        <div class="dc-title">Daily Attendance<br/>(Prefects)</div>
+        <div class="cal-anchor">
+          <button class="dc-date" id="d-date-3" onclick="toggleCalendar(3, event)"></button>
+          <div class="cal-popup" id="cal-popup-3"></div>
+        </div>
+      </div>
+      <div class="dc-summary" data-fill="prefects-summary">Loading…</div>
+      <div class="dc-row"><span class="dc-lbl">Prefects have present today (boys)</span><div class="dc-val" data-fill="prefects-present-boys">—</div></div>
+      <div class="dc-row"><span class="dc-lbl">Prefects have presesnt today (girls)</span><div class="dc-val" data-fill="prefects-present-girls">—</div></div>
+      <div class="dc-row"><span class="dc-lbl">Prefects have absent today (boys)</span><div class="dc-val" data-fill="prefects-absent-boys">—</div></div>
+      <div class="dc-row"><span class="dc-lbl">Prefects have absent today (girls)</span><div class="dc-val" data-fill="prefects-absent-girls">—</div></div>
+      <div class="dc-row" style="margin-bottom:6px"><span class="dc-lbl">Average daily attendance</span></div>
+      <div class="dc-progress"><div class="dc-progress-fill" data-fill="prefects-bar"></div><div class="dc-progress-text" data-fill="prefects-avg">—</div></div>
+      <div class="dc-footer">
+        <div class="dc-fi"><div class="dc-fb empty" data-fill="prefects-total-girls">—</div><span class="dc-fl">Total girls</span></div>
+        <div class="dc-fi"><div class="dc-fb" data-fill="prefects-total-boys">—</div><span class="dc-fl">Total boys</span></div>
+      </div>
+      <div class="dc-gender-note">Boys/girls split needs a <b>Gender</b> column in your spreadsheets.</div>
+    </div>
+    <!-- Food Provider card -->
+    <div class="dash-card food">
+      <div class="dc-head">
+        <div class="dc-title">Interval Food<br/>Provider Information</div>
+        <div class="cal-anchor">
+          <button class="dc-date" id="d-date-4" onclick="toggleCalendar(4, event)"></button>
+          <div class="cal-popup" id="cal-popup-4"></div>
+        </div>
+      </div>
+      <div style="margin-bottom:10px"><div class="food-lbl">Provided foods</div><input class="food-input" type="text"/></div>
+      <div style="margin-bottom:10px"><div class="food-lbl">Donator</div><input class="food-input" type="text"/></div>
+      <div style="margin-bottom:10px"><div class="food-lbl">Wish</div><input class="food-input" type="text"/></div>
+      <div class="food-row"><span class="food-lbl" style="margin:0">Quantity</span><input class="food-qty" type="text"/></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ STUDENTS ═══════ -->
+<div id="page-students" class="page">
+  <div class="filters">
+    <select class="f-sel" id="student-grade-filter" onchange="renderAllPersonLists()">
+  <option value="">Grade</option>
+  <option>Grade 1</option><option>Grade 2</option><option>Grade 3</option>
+  <option>Grade 4</option><option>Grade 5</option><option>Grade 6</option>
+  <option>Grade 7</option><option>Grade 8</option><option>Grade 9</option>
+  <option>Grade 10</option><option>Grade 11</option><option>Grade 12</option>
+  <option>Grade 13</option>
+</select>
+<select class="f-sel" id="student-year-filter" onchange="renderAllPersonLists()">
+  <option value="">Year</option>
+  <option>2023</option><option>2024</option><option>2025</option><option>2026</option>
+</select>
+    <div class="search-box"><input placeholder="Search the name"/><svg width="16" height="16" fill="none" stroke="#555" stroke-width="2"><circle cx="7" cy="7" r="5"/><line x1="11" y1="11" x2="15" y2="15"/></svg></div>
+  </div>
+  <div id="students-list"></div>
+</div>
+
+<!-- ═══════ TEACHERS ═══════ -->
+<div id="page-teachers" class="page">
+  <div class="filters">
+    <select class="f-sel"><option>Grade</option><option>Grade 6</option><option>Grade 7</option><option>Grade 8</option><option>Grade 9</option><option>Grade 10</option><option>Grade 11</option></select>
+    <select class="f-sel"><option>Year</option><option>2024</option><option>2025</option><option>2026</option></select>
+    <div class="search-box"><input placeholder="Search the name"/><svg width="16" height="16" fill="none" stroke="#555" stroke-width="2"><circle cx="7" cy="7" r="5"/><line x1="11" y1="11" x2="15" y2="15"/></svg></div>
+  </div>
+  <div id="teachers-list"></div>
+</div>
+
+<!-- ═══════ PREFECTS ═══════ -->
+<div id="page-prefects" class="page">
+  <div class="filters">
+    <select class="f-sel" id="prefect-grade-filter" onchange="renderAllPersonLists()">
+      <option value="">Grade</option>
+      <option>Grade 1</option><option>Grade 2</option><option>Grade 3</option>
+      <option>Grade 4</option><option>Grade 5</option><option>Grade 6</option>
+      <option>Grade 7</option><option>Grade 8</option><option>Grade 9</option>
+      <option>Grade 10</option><option>Grade 11</option><option>Grade 12</option>
+      <option>Grade 13</option>
+    </select>
+    <select class="f-sel" id="prefect-year-filter" onchange="renderAllPersonLists()">
+      <option value="">Year</option>
+      <option>2023</option><option>2024</option><option>2025</option><option>2026</option>
+    </select>
+    <div class="search-box"><input placeholder="Search the name"/><svg width="16" height="16" fill="none" stroke="#555" stroke-width="2"><circle cx="7" cy="7" r="5"/><line x1="11" y1="11" x2="15" y2="15"/></svg></div>
+  </div>
+  <div id="prefects-list"></div>
+</div>
+
+<!-- ═══════ STUDENT DETAIL ═══════ -->
+<div id="page-student-detail" class="page">
+  <div class="detail-bg">
+    <button class="back-btn" onclick="goBack()">&#8592;</button>
+    <div class="detail-flex">
+      <div class="detail-left">
+        <div class="notif-card">
+          <div class="notif-title">
+            <span>&#9432;</span>
+            <input id="notif-title-student" placeholder="Title" style="border:none;outline:none;background:transparent;font-family:Inter,sans-serif;font-weight:600;font-size:14px;flex:1;color:inherit"/>
+          </div>
+          <textarea id="notif-body-student" placeholder="Body text" style="width:100%;border:1px solid rgba(0,0,0,0.08);border-radius:8px;padding:8px 10px;font-family:Inter,sans-serif;font-size:13px;color:#555;line-height:1.5;resize:vertical;min-height:60px;outline:none;margin-top:8px;background:#fafafa"></textarea>
+          <button class="send-btn" onclick="sendPersonalAlert('student')">Send</button>
+          <div id="notif-status-student" style="margin-top:8px;font-size:12px;font-family:Inter,sans-serif;min-height:16px"></div>
+        </div>
+      </div>
+      <div class="detail-right">
+        <div class="big-avatar"><svg viewBox="0 0 110 110"><circle cx="55" cy="55" r="55" fill="#7ab8d0"/><circle cx="55" cy="40" r="18" fill="#f5c5a0"/><ellipse cx="55" cy="92" rx="27" ry="22" fill="#c0392b"/><ellipse cx="55" cy="98" rx="34" ry="17" fill="#c0392b"/></svg></div>
+        <div class="act-btns">
+         <button class="act-btn" onclick="openStudentAttendance()">Attendance</button>
+          <button class="act-btn" onclick="openStudentMarks()">Marks</button>
+        </div>
+      </div>
+    </div>
+   <div class="profile-block" id="student-detail-profile">
+  <div class="prof-loading"><div class="prof-spinner"></div> Loading profile…</div>
+</div>
+  </div>
+</div>
+
+<!-- ═══════ TEACHER DETAIL ═══════ -->
+<div id="page-teacher-detail" class="page">
+  <div class="detail-bg">
+    <button class="back-btn" onclick="goBack()">&#8592;</button>
+    <div class="detail-flex">
+      <div class="detail-left">
+        <div class="notif-card">
+          <div class="notif-title">
+            <span>&#9432;</span>
+            <input id="notif-title-teacher" placeholder="Title" style="border:none;outline:none;background:transparent;font-family:Inter,sans-serif;font-weight:600;font-size:14px;flex:1;color:inherit"/>
+          </div>
+          <textarea id="notif-body-teacher" placeholder="Body text" style="width:100%;border:1px solid rgba(0,0,0,0.08);border-radius:8px;padding:8px 10px;font-family:Inter,sans-serif;font-size:13px;color:#555;line-height:1.5;resize:vertical;min-height:60px;outline:none;margin-top:8px;background:#fafafa"></textarea>
+          <button class="send-btn" onclick="sendPersonalAlert('teacher')">Send</button>
+          <div id="notif-status-teacher" style="margin-top:8px;font-size:12px;font-family:Inter,sans-serif;min-height:16px"></div>
+        </div>
+      </div>
+      <div class="detail-right">
+        <div class="big-avatar"><svg viewBox="0 0 110 110"><circle cx="55" cy="55" r="55" fill="#7ab8d0"/><circle cx="55" cy="40" r="18" fill="#f5c5a0"/><ellipse cx="55" cy="92" rx="27" ry="22" fill="#2980b9"/><ellipse cx="55" cy="98" rx="34" ry="17" fill="#2980b9"/></svg></div>
+        <div class="act-btns"><button class="act-btn" onclick="openStudentAttendance()">Attendance</button></div>
+      </div>
+    </div>
+   <div class="profile-block" id="teacher-detail-profile">
+  <div class="prof-loading"><div class="prof-spinner"></div> Loading profile…</div>
+</div>
+  </div>
+</div>
+
+<!-- ═══════ PREFECT DETAIL ═══════ -->
+<div id="page-prefect-detail" class="page">
+  <div class="detail-bg">
+    <button class="back-btn" onclick="goBack()">&#8592;</button>
+    <div class="detail-flex">
+      <div class="detail-left">
+        <div class="notif-card">
+          <div class="notif-title">
+            <span>&#9432;</span>
+            <input id="notif-title-prefect" placeholder="Title" style="border:none;outline:none;background:transparent;font-family:Inter,sans-serif;font-weight:600;font-size:14px;flex:1;color:inherit"/>
+          </div>
+          <textarea id="notif-body-prefect" placeholder="Body text" style="width:100%;border:1px solid rgba(0,0,0,0.08);border-radius:8px;padding:8px 10px;font-family:Inter,sans-serif;font-size:13px;color:#555;line-height:1.5;resize:vertical;min-height:60px;outline:none;margin-top:8px;background:#fafafa"></textarea>
+          <button class="send-btn" onclick="sendPersonalAlert('prefect')">Send</button>
+          <div id="notif-status-prefect" style="margin-top:8px;font-size:12px;font-family:Inter,sans-serif;min-height:16px"></div>
+        </div>
+      </div>
+      <div class="detail-right">
+        <div class="big-avatar"><svg viewBox="0 0 110 110"><circle cx="55" cy="55" r="55" fill="#7ab8d0"/><circle cx="55" cy="40" r="18" fill="#f5c5a0"/><ellipse cx="55" cy="92" rx="27" ry="22" fill="#c0392b"/><ellipse cx="55" cy="98" rx="34" ry="17" fill="#c0392b"/></svg></div>
+        <div class="act-btns"><button class="act-btn" onclick="showPage('page-student-attendance')">Attendance</button></div>
+      </div>
+    </div>
+   <div class="profile-block" id="prefect-detail-profile">
+  <div class="prof-loading"><div class="prof-spinner"></div> Loading profile…</div>
+</div>
+  </div>
+</div>
+
+<!-- ═══════ STUDENT ATTENDANCE (yellow frame) ═══════ -->
+<div id="page-student-attendance" class="page">
+  <button class="back-btn" onclick="goBack()">&#8592;</button>
+  <div class="yellow-frame">
+    <div style="display:flex;flex-direction:column;align-items:center;position:relative;margin-bottom:20px;gap:4px">
+     <div id="att-student-info" style="font-size:16px;font-weight:600;color:#121616;text-align:center">—</div>
+      <div id="att-context-line" style="font-size:12px;color:#3a3a3a;text-align:center">—</div>
+      <div style="display:flex;align-items:baseline;gap:12px;margin-top:4px">
+        <span style="font-size:22px;font-weight:400;color:#121616">Attendance:</span>
+        <span id="att-pct-value" style="font-size:32px;font-weight:700;color:#538E72">— %</span>
+      </div>
+      <div id="att-pct-detail" style="font-size:11px;color:#555;text-align:center;font-style:italic">Loading data…</div>
+      <button onclick="resetAttDate()" style="position:absolute;right:0;top:0;background:#E7FFF3;border:none;font-size:18px;cursor:pointer;color:#333;width:42px;height:42px;border-radius:9999px;opacity:.73">&#8635;</button>
+    </div>
+    <div style="display:flex;gap:14px;margin-bottom:14px;flex-wrap:wrap">
+      <div style="flex:1;min-width:140px">
+        <p class="monthly-lbl">Month</p>
+        <select class="monthly-sel" id="att-monthly-sel" onchange="renderStudentAttendance()">
+          <option>January</option><option>February</option><option>March</option><option>April</option>
+          <option>May</option><option>June</option><option>July</option><option>August</option>
+          <option selected>September</option><option>October</option><option>November</option><option>December</option>
+        </select>
+      </div>
+      <div style="flex:1;min-width:100px">
+        <p class="monthly-lbl">Day</p>
+        <select class="monthly-sel" id="att-day-sel" onchange="renderStudentAttendance()"></select>
+      </div>
+    </div>
+    <div class="yellow-rows" id="att-rows"><div style="padding:20px;text-align:center;color:#666;font-size:14px">Open a student profile and click Attendance to view their record.</div></div>
+  </div>
+</div>
+
+<!-- ═══════ STUDENT MARKS (yellow frame) ═══════ -->
+<div id="page-student-marks" class="page">
+  <div class="yellow-frame" style="display:flex;flex-direction:column;gap:14px;min-height:560px">
+    <button class="back-btn" onclick="goBack()" style="margin-bottom:4px">&#8592;</button>
+    <div id="marks-student-info" style="font-size:16px;font-weight:600;color:#121616;text-align:center">—</div>
+    <div id="marks-context-line" style="font-size:12px;color:#3a3a3a;text-align:center;margin-bottom:6px">—</div>
+    <div id="marks-breakdown-rows" style="display:flex;flex-direction:column;gap:10px">
+      <div style="padding:20px;text-align:center;color:#666;font-size:14px">Loading…</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ TERM TESTS MARKS ═══════ -->
+<div id="page-term-marks" class="page">
+  <div class="filters">
+    <select class="f-sel" id="marks-grade-filter" onchange="onMarksFilterChange()">
+      <option value="">Grade</option>
+      <option>Grade 1</option><option>Grade 2</option><option>Grade 3</option>
+      <option>Grade 4</option><option>Grade 5</option><option>Grade 6</option>
+      <option>Grade 7</option><option>Grade 8</option><option>Grade 9</option>
+      <option>Grade 10</option><option>Grade 11</option><option>Grade 12</option>
+      <option>Grade 13</option>
+    </select>
+    <select class="f-sel" id="marks-year-filter" onchange="onMarksFilterChange()">
+      <option value="">Year</option>
+      <option>2023</option><option>2024</option><option>2025</option><option>2026</option>
+    </select>
+    <div style="display:flex;gap:8px;align-items:center">
+      <select class="f-sel" id="marks-exam-add-sel" style="min-width:150px">
+        <option value="">+ Add exam column</option>
+        <option value="custom">Custom name…</option>
+      </select>
+      <button class="cert-search-btn" style="padding:11px 16px" onclick="addExamColumnFromUI()">Add</button>
+    </div>
+    <div class="search-box"><input id="marks-search-input" placeholder="Search the name" oninput="renderExamList()"/><svg width="16" height="16" fill="none" stroke="#555" stroke-width="2"><circle cx="7" cy="7" r="5"/><line x1="11" y1="11" x2="15" y2="15"/></svg></div>
+  </div>
+  <div id="marks-status" style="font-size:12px;color:#555;margin-bottom:10px"></div>
+  <div class="exam-list" id="exam-list"></div>
+</div>
+
+<!-- ═══════ FLOWER MARKS ═══════ -->
+<div id="page-flower-marks" class="page">
+  <div class="filters">
+    <select class="f-sel"><option>Grade</option><option>Grade 6</option><option>Grade 7</option><option>Grade 8</option><option>Grade 9</option><option>Grade 10</option><option>Grade 11</option></select>
+    <select class="f-sel"><option>Year</option><option>2024</option><option>2025</option><option>2026</option></select>
+    <div class="search-box"><input placeholder="Search the name"/><svg width="16" height="16" fill="none" stroke="#555" stroke-width="2"><circle cx="7" cy="7" r="5"/><line x1="11" y1="11" x2="15" y2="15"/></svg></div>
+  </div>
+  <div class="flower-top"><span>Percentage</span><button class="toggle-pill"></button></div>
+  <div class="flower-grid">
+    <div class="flower-panel" id="flower-rows"></div>
+    <div class="flower-right-col">
+      <div class="date-modal">
+        <p class="m-lbl">Select date</p>
+        <div class="m-title-row"><h2 class="m-title">Enter date</h2><span style="font-size:20px">&#128197;</span></div>
+        <div class="m-field"><label class="m-field-lbl">Date</label><input type="date" class="m-field-input" id="flower-date"/></div>
+        <p class="m-error" id="flower-err"></p>
+        <div class="m-acts">
+          <button class="m-btn" onclick="resetFlower()">Cancel</button>
+          <button class="m-btn" onclick="applyFlower()">OK</button>
+        </div>
+      </div>
+      <div>
+        <p class="monthly-lbl">Monthly</p>
+        <select class="monthly-sel"><option>January</option><option>February</option><option>March</option><option>April</option><option>May</option><option>June</option><option>July</option><option>August</option><option selected>September</option><option>October</option><option>November</option><option>December</option></select>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px"><span style="font-size:15px;font-weight:400">Percentage</span><button class="toggle-pill"></button></div>
+    </div>
+  </div>
+  <!-- Interactive Pie Charts -->
+  <p class="charts-section-title">Top List Daily Flowers</p>
+  <div class="charts-row">
+    <div class="pie-card boys-card">
+      <div class="pie-card-title">Boys</div>
+      <div class="pie-inner">
+        <div class="pie-legend" id="boys-legend"></div>
+        <div class="pie-container">
+          <svg class="pie-svg" id="boys-pie" viewBox="0 0 100 100"></svg>
+        </div>
+      </div>
+      <div class="pie-detail" id="boys-detail"><span class="pie-detail-empty">Tap a segment to see details</span></div>
+      <div class="profile-popup" id="boys-popup">
+        <button class="popup-close" onclick="closePopup('boys')">&times;</button>
+        <div class="popup-row">
+          <div class="popup-avatar"></div>
+          <div class="popup-info">
+            <div class="nm">[Name]</div>
+            <div>Profile</div>
+            <div class="dash">----------------------</div>
+            <div class="dash">----------------------</div>
+            <div class="popup-stats">
+              <div>Percentage _ _ %</div>
+              <div>How many Days _ _</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="pie-card girls-card">
+      <div class="pie-card-title">Girls</div>
+      <div class="pie-inner">
+        <div class="pie-legend" id="girls-legend"></div>
+        <div class="pie-container">
+          <svg class="pie-svg" id="girls-pie" viewBox="0 0 100 100"></svg>
+        </div>
+      </div>
+      <div class="pie-detail" id="girls-detail"><span class="pie-detail-empty">Tap a segment to see details</span></div>
+      <div class="profile-popup" id="girls-popup">
+        <button class="popup-close" onclick="closePopup('girls')">&times;</button>
+        <div class="popup-row">
+          <div class="popup-avatar"></div>
+          <div class="popup-info">
+            <div class="nm">[Name]</div>
+            <div>Profile</div>
+            <div class="dash">----------------------</div>
+            <div class="dash">----------------------</div>
+            <div class="popup-stats">
+              <div>Percentage _ _ %</div>
+              <div>How many Days _ _</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ CHARACTER CERTIFICATE ═══════ -->
+<div id="page-character-cert" class="page">
+  <div class="cert-top">
+    <div class="cert-search-panel">
+      <div class="cert-name-row">
+        <input class="cert-name-in" placeholder="Name"/>
+        <span class="cert-search-icon">&#128269;</span>
+      </div>
+      <select class="f-sel" style="background-color:#fff;width:100%"><option>Grade</option><option>Grade 6</option><option>Grade 7</option><option>Grade 8</option><option>Grade 9</option><option>Grade 10</option><option>Grade 11</option></select>
+      <button class="cert-search-btn">&#128269; Search</button>
+    </div>
+    <div class="cert-student-card">
+      <button class="cert-expand-btn">&#8663;</button>
+      <div class="cert-s-name">[Name]</div>
+      <div class="cert-s-role">Student<br/>[Prefect or not]<br/>Profile</div>
+      <div class="cert-ev-lbl">Participated Special Events</div>
+      <div class="cert-ev-row"><span>[Date]</span><span>[Event Name]</span></div>
+      <div class="cert-ev-row"><span>[Date]</span><span>[Event Name]</span></div>
+      <div class="cert-ev-row"><span>[Date]</span><span>[Event Name]</span></div>
+      <div class="cert-stats-row">
+        <div class="cert-stat">Attendance %</div>
+        <div class="cert-stat">Last Term Marks</div>
+      </div>
+    </div>
+  </div>
+  <div class="cert-doc">
+    <button class="cert-expand-btn">&#8663;</button>
+    <div class="doc-btns">
+      <button class="btn-edit">&#9998; Edit</button>
+      <button class="btn-save">&#128190; Save</button>
+    </div>
+    <div class="doc-footer">
+      <button class="btn-preview">Preview</button>
+      <button class="btn-dl">&#8659;</button>
+      <button class="btn-print">&#128438;</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ DAILY ATTENDANCE TRAITS ═══════ -->
+<div id="page-daily-attendance" class="page">
+  <div class="filters">
+    <select class="f-sel"><option>Year</option><option>2024</option><option>2025</option><option>2026</option></select>
+    <select class="f-sel"><option>Month</option><option>January</option><option>February</option><option>March</option><option>April</option><option>May</option><option>June</option><option>July</option><option>August</option><option selected>September</option><option>October</option><option>November</option><option>December</option></select>
+    <select class="f-sel"><option>Grade</option><option>Grade 6</option><option>Grade 7</option><option>Grade 8</option><option>Grade 9</option><option>Grade 10</option><option>Grade 11</option></select>
+    <div class="search-box"><input placeholder="Search the name"/><svg width="16" height="16" fill="none" stroke="#555" stroke-width="2"><circle cx="7" cy="7" r="5"/><line x1="11" y1="11" x2="15" y2="15"/></svg></div>
+  </div>
+
+  <!-- Top List Pies (same as Flower Marks) -->
+  <div class="charts-row" style="margin-bottom:20px">
+    <div class="pie-card boys-card">
+      <div class="pie-card-title">Boys</div>
+      <div class="pie-inner">
+        <div class="pie-legend" id="da-boys-legend"></div>
+        <div class="pie-container">
+          <svg class="pie-svg" id="da-boys-pie" viewBox="0 0 100 100"></svg>
+        </div>
+      </div>
+      <div class="pie-detail" id="da-boys-detail"><span class="pie-detail-empty">Tap a segment to see details</span></div>
+      <div class="profile-popup" id="da-boys-popup">
+        <button class="popup-close" onclick="closePopup('da-boys')">&times;</button>
+        <div class="popup-row">
+          <div class="popup-avatar"></div>
+          <div class="popup-info">
+            <div class="nm">[Name]</div>
+            <div>Profile</div>
+            <div class="dash">----------------------</div>
+            <div class="dash">----------------------</div>
+            <div class="popup-stats">
+              <div>Percentage _ _ %</div>
+              <div>How many Days _ _</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="pie-card girls-card">
+      <div class="pie-card-title">Girls</div>
+      <div class="pie-inner">
+        <div class="pie-legend" id="da-girls-legend"></div>
+        <div class="pie-container">
+          <svg class="pie-svg" id="da-girls-pie" viewBox="0 0 100 100"></svg>
+        </div>
+      </div>
+      <div class="pie-detail" id="da-girls-detail"><span class="pie-detail-empty">Tap a segment to see details</span></div>
+      <div class="profile-popup" id="da-girls-popup">
+        <button class="popup-close" onclick="closePopup('da-girls')">&times;</button>
+        <div class="popup-row">
+          <div class="popup-avatar"></div>
+          <div class="popup-info">
+            <div class="nm">[Name]</div>
+            <div>Profile</div>
+            <div class="dash">----------------------</div>
+            <div class="dash">----------------------</div>
+            <div class="popup-stats">
+              <div>Percentage _ _ %</div>
+              <div>How many Days _ _</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="daily-grid">
+    <div class="date-modal">
+      <p class="m-lbl">Select date</p>
+      <div class="m-title-row"><h2 class="m-title">Enter date</h2><span style="font-size:20px">&#128197;</span></div>
+      <div class="m-field"><label class="m-field-lbl">Date</label><input type="date" class="m-field-input" id="daily-date"/></div>
+      <p class="m-error" id="daily-err"></p>
+      <div class="m-acts">
+        <button class="m-btn" onclick="resetDaily()">Cancel</button>
+        <button class="m-btn" onclick="applyDaily()">OK</button>
+      </div>
+    </div>
+    <div class="gender-card" style="position:relative">
+      <div class="gender-title">Daily Gender Trait</div>
+      <div style="display:flex;align-items:center;gap:14px">
+        <div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;margin-bottom:8px;color:#121616"><div style="width:18px;height:18px;border-radius:2px;background:var(--gender-girls)"></div>Girls</div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;color:#121616"><div style="width:18px;height:18px;border-radius:2px;background:#0088FF"></div>Boys</div>
+        </div>
+        <div id="gender-pie-container" style="flex:1;display:flex;justify-content:center">
+          <svg id="gender-pie" class="pie-svg" viewBox="0 0 100 100"></svg>
+        </div>
+      </div>
+      <div class="pie-detail" id="gender-detail" style="margin-top:12px"><span class="pie-detail-empty">Tap a segment to see details</span></div>
+      <div class="profile-popup" id="gender-popup" style="background:var(--gender-card)">
+        <button class="popup-close" onclick="closePopup('gender')">&times;</button>
+        <div class="popup-row">
+          <div class="popup-avatar"></div>
+          <div class="popup-info">
+            <div class="nm">[Name]</div>
+            <div>Profile</div>
+            <div class="dash">----------------------</div>
+            <div class="dash">----------------------</div>
+            <div class="popup-stats">
+              <div>Percentage _ _ %</div>
+              <div>Total Presents _ _</div>
+              <div>Total Absents _ _</div>
+              <div>Total _ _</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="graph-area">
+      <div class="graph-area-title">Graphically Represent</div>
+    </div>
+  </div>
+</div>
+
+</main>
+</div>
+
+<script>
+/* ════════════════════════════════════════════════════════════════
+   ATTENDANCE DATA — loaded live from Google Drive via Apps Script
+   ────────────────────────────────────────────────────────────────
+   Source folder:
+     https://drive.google.com/drive/folders/1dpyAY3hnNxaLV2QTkrMUqyQ7fn_Ze_Q-
+
+   The Apps Script Web App (see WEB_APP_URL below) walks the Drive
+   folder, reads the Students / Teachers / Prefects subfolders, and
+   returns { students:[], teachers:[], prefects:[], attendance:{} }.
+
+   Everything below starts EMPTY and is filled in by loadLiveData()
+   once the Apps Script responds — there is no hardcoded snapshot.
+   ════════════════════════════════════════════════════════════════ */
+const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbw3Cp93L2j9ubssvcOnzV-1XLjXnNSCO5pDpYX2ZQCHmWuvqK1WEN_ZnR-vAbgzClvFVA/exec';
+
+/* ── Exam Results — separate Apps Script project/Web App ──
+   PASTE YOUR DEPLOYED WEB APP URL HERE: */
+const EXAM_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxzon556gtIb0L9I2ODWGNJCKTACJVAAo5VNGAOeopXAIytbRn0QD0s11sh6u5uPHcj7w/exec';
+
+function examApiCall(params){
+  return new Promise((resolve, reject) => {
+    const callbackName = 'examCb_' + Date.now() + '_' + Math.floor(Math.random()*1e6);
+    let settled = false;
+    window[callbackName] = function(data){
+      if (settled) return;
+      settled = true;
+      delete window[callbackName];
+      document.getElementById(callbackName + '-script')?.remove();
+      resolve(data);
+    };
+    const query = Object.keys(params).map(k => `${k}=${encodeURIComponent(params[k])}`).join('&');
+    const script = document.createElement('script');
+    script.id = callbackName + '-script';
+    script.src = `${EXAM_WEB_APP_URL}?callback=${callbackName}&${query}`;
+    script.onerror = () => {
+      if (settled) return;
+      settled = true;
+      delete window[callbackName];
+      script.remove();
+      reject(new Error('Failed to reach Exam Results Apps Script'));
+    };
+    document.head.appendChild(script);
+    setTimeout(() => {
+      if (settled) return;
+      settled = true;
+      delete window[callbackName];
+      script.remove();
+      reject(new Error('Exam Results request timed out'));
+    }, 20000);
+  });
+}
+
+/* Roster + attendance start empty. loadLiveData() fills these in;
+   renderDashboard()/etc. all tolerate empty data gracefully. */
+const ROSTER = { students: [], teachers: [], prefects: [] };
+let ATTENDANCE_DATA = {};
+
+/* ─── Date Utilities ─── */
+function prevSunday(d){const x=new Date(d);x.setDate(x.getDate()-x.getDay());x.setHours(0,0,0,0);return x;}
+function toVal(d){return `${d.getFullYear()}-${p2(d.getMonth()+1)}-${p2(d.getDate())}`;}
+function p2(n){return String(n).padStart(2,'0');}
+function fmtUS(d){return `${p2(d.getMonth()+1)}/${p2(d.getDate())}/${d.getFullYear()}`;}
+function fmtDash(d){return d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});}
+function last5Sundays(from){const base=prevSunday(from);return Array.from({length:5},(_,i)=>{const x=new Date(base);x.setDate(base.getDate()-i*7);return x;});}
+
+const today=new Date();
+const lastSun=prevSunday(today);
+
+/* ─── Aggregator ─── */
+function dateISO(d){ return `${d.y}-${String(d.m+1).padStart(2,'0')}-${String(d.d).padStart(2,'0')}`; }
+
+function getRosterCount(type, gradeFilter){
+  const list = ROSTER[type] || [];
+  if(type==='students' && gradeFilter){
+    return list.filter(r=>r.grade===gradeFilter).length;
+  }
+  return list.length;
+}
+
+function aggregateForDate(type, iso, gradeFilter){
+  const total = getRosterCount(type, gradeFilter);
+  const dayData = ATTENDANCE_DATA[iso];
+  if(!dayData || !dayData[type]){
+    return { total, present:0, absent:0, noData:true };
+  }
+  let presentIds = dayData[type].presentIds || [];
+  // If nobody has been marked at all, treat as unmarked — show -- not 0/total
+  if(presentIds.length === 0 && (!dayData[type].absentIds || dayData[type].absentIds.length === 0)){
+    return { total, present:0, absent:0, noData:true };
+  }
+  if(type==='students' && gradeFilter){
+    presentIds = presentIds.filter(id => {
+      const s = ROSTER.students.find(r=>r.id===id);
+      return s && s.grade===gradeFilter;
+    });
+  }
+  const present = presentIds.length;
+  return { total, present, absent: Math.max(0,total-present), noData:false };
+}
+
+function computeAvgPct(type, iso, gradeFilter){
+  // Average present% across Sundays only in the same month
+  const monthPrefix = iso.slice(0,7);
+  const datesInMonth = Object.keys(ATTENDANCE_DATA)
+    .filter(d => {
+      if(!d.startsWith(monthPrefix)) return false;
+      const [y,m,day] = d.split('-').map(Number);
+      const date = new Date(y, m-1, day);
+      return date.getDay() === 0; // 0 = Sunday only
+    });
+  if(!datesInMonth.length) return 0;
+  let sum=0, n=0;
+  datesInMonth.forEach(d=>{
+    const agg = aggregateForDate(type, d, gradeFilter);
+    if(agg.total>0){ sum += agg.present/agg.total; n++; }
+  });
+  return n ? Math.round((sum/n)*100) : 0;
+}
+
+/* ─── Render Dashboard ─── */
+function renderDashboard(){
+  const cards = [
+    { n:1, type:'students', hasGender:true, gradeFilterId:'grade-filter-students' },
+    { n:2, type:'teachers', hasGender:false },
+    { n:3, type:'prefects', hasGender:true },
+  ];
+  cards.forEach(({n, type, hasGender, gradeFilterId})=>{
+    const state = calState[n];
+    if(!state || !state.selected) return;
+    const iso = dateISO(state.selected);
+    const gradeFilter = gradeFilterId ? (document.getElementById(gradeFilterId)?.value || '') : '';
+    const agg = aggregateForDate(type, iso, gradeFilter);
+    const avg = computeAvgPct(type, iso, gradeFilter);
+
+    const card = document.getElementById(`card-${type}`);
+    if(!card) return;
+
+    const setVal=(k,v,empty)=>{
+      const el = card.querySelector(`[data-fill="${k}"]`);
+      if(!el) return;
+      el.textContent = v;
+      el.classList.toggle('empty', !!empty);
+    };
+
+    // Summary banner — build clickable chips with name dropdowns
+    const sumEl = card.querySelector(`[data-fill="${type}-summary"]`);
+    if(sumEl){
+      if(agg.noData){
+        sumEl.innerHTML = `<span class="ds-nodata">No attendance recorded on this date</span>`;
+      } else {
+        // Collect names for each chip
+        const dayData = ATTENDANCE_DATA[iso];
+        const allPresentIds = (dayData && dayData[type] && dayData[type].presentIds) ? dayData[type].presentIds : [];
+        const roster = ROSTER[type] || [];
+        const gradeRosterAll = (type==='students' && gradeFilter)
+          ? roster.filter(r => r.grade === gradeFilter) : roster;
+
+        // Present: IDs that are in presentIds
+        const presentFiltered = (type==='students' && gradeFilter)
+          ? allPresentIds.filter(id => { const s=ROSTER.students.find(r=>r.id===id); return s && s.grade===gradeFilter; })
+          : allPresentIds;
+        const presentPeople = presentFiltered.map(id => {
+          const r = gradeRosterAll.find(x => x.id === id);
+          return r ? {id: r.id, name: r.name} : {id, name: id};
+        });
+
+        // Absent: roster members NOT in presentIds
+        const absentPeople = gradeRosterAll
+          .filter(r => !allPresentIds.includes(r.id))
+          .map(r => ({id: r.id, name: r.name}));
+
+        // Enrolled: all roster members
+        const enrolledPeople = gradeRosterAll.map(r => ({id: r.id, name: r.name}));
+
+        const makeItem = (p, color) =>
+          `<div class="ds-dropdown-item" style="cursor:pointer" onclick="openProfModal('${p.id}','${p.name.replace(/'/g,"\\'")}');event.stopPropagation()"><span class="ds-dropdown-dot" style="background:${color}"></span>${p.name}</div>`;
+
+        const chipId = `sum-chip-${type}`;
+
+        sumEl.innerHTML = `
+          <span class="ds-chip" onclick="toggleSummaryDrop('${chipId}-present',event)">
+            <b>${agg.present}</b> present <span class="ds-chip-arrow">▾</span>
+            <div class="ds-dropdown" id="${chipId}-present">
+              <div class="ds-dropdown-title">Present (${agg.present})</div>
+              ${presentPeople.length ? presentPeople.map(p=>makeItem(p,'#538E72')).join('') : '<div class="ds-dropdown-empty">None</div>'}
+            </div>
+          </span>
+          <span class="ds-sep">·</span>
+          <span class="ds-chip" onclick="toggleSummaryDrop('${chipId}-absent',event)">
+            <b>${agg.absent}</b> absent <span class="ds-chip-arrow">▾</span>
+            <div class="ds-dropdown" id="${chipId}-absent">
+              <div class="ds-dropdown-title">Absent (${agg.absent})</div>
+              ${absentPeople.length ? absentPeople.map(p=>makeItem(p,'#8E5353')).join('') : '<div class="ds-dropdown-empty">None</div>'}
+            </div>
+          </span>
+          <span class="ds-sep">·</span>
+          <span class="ds-chip" onclick="toggleSummaryDrop('${chipId}-enrolled',event)">
+            ${agg.total} enrolled <span class="ds-chip-arrow">▾</span>
+            <div class="ds-dropdown" id="${chipId}-enrolled">
+              <div class="ds-dropdown-title">Enrolled (${agg.total})</div>
+              ${enrolledPeople.length ? enrolledPeople.map(p=>makeItem(p,'#759897')).join('') : '<div class="ds-dropdown-empty">None</div>'}
+            </div>
+          </span>`;
+      }
+    }
+
+    // Per-card values
+    if(type==='teachers'){
+      setVal('teachers-present', agg.noData?'—':agg.present, agg.noData);
+      setVal('teachers-absent',  agg.noData?'—':agg.absent,  agg.noData);
+      setVal('teachers-total',   agg.total, agg.total===0);
+    } else {
+      // students or prefects — compute gender split from ROSTER gender field
+      const roster = ROSTER[type] || [];
+      const gradeRoster = (type==='students' && gradeFilter)
+        ? roster.filter(r => r.grade === gradeFilter)
+        : roster;
+
+      const totalBoys  = gradeRoster.filter(r => r.gender === 'male').length;
+      const totalGirls = gradeRoster.filter(r => r.gender === 'female').length;
+      const hasGenderData = totalBoys + totalGirls > 0;
+
+      if (!agg.noData && hasGenderData) {
+        // Get present IDs for this date
+        const dayData = ATTENDANCE_DATA[iso];
+        let presentIds = (dayData && dayData[type] && dayData[type].presentIds) ? dayData[type].presentIds : [];
+        if (type === 'students' && gradeFilter) {
+          presentIds = presentIds.filter(id => {
+            const s = ROSTER.students.find(r => r.id === id);
+            return s && s.grade === gradeFilter;
+          });
+        }
+        // Map present IDs to gender
+        const presentBoys  = presentIds.filter(id => {
+          const r = gradeRoster.find(x => x.id === id);
+          return r && r.gender === 'male';
+        }).length;
+        const presentGirls = presentIds.filter(id => {
+          const r = gradeRoster.find(x => x.id === id);
+          return r && r.gender === 'female';
+        }).length;
+        const absentBoys  = Math.max(0, totalBoys  - presentBoys);
+        const absentGirls = Math.max(0, totalGirls - presentGirls);
+
+        setVal(`${type}-present-boys`,  presentBoys,  false);
+        setVal(`${type}-present-girls`, presentGirls, false);
+        setVal(`${type}-absent-boys`,   absentBoys,   false);
+        setVal(`${type}-absent-girls`,  absentGirls,  false);
+        setVal(`${type}-total-boys`,    totalBoys,    totalBoys  === 0);
+        setVal(`${type}-total-girls`,   totalGirls,   totalGirls === 0);
+      } else if (!agg.noData) {
+        // No gender column yet — show totals in boys row, dash girls
+        setVal(`${type}-present-boys`,  agg.present, false);
+        setVal(`${type}-present-girls`, '—', true);
+        setVal(`${type}-absent-boys`,   agg.absent,  false);
+        setVal(`${type}-absent-girls`,  '—', true);
+        setVal(`${type}-total-boys`,    agg.total, agg.total === 0);
+        setVal(`${type}-total-girls`,   '—', true);
+      } else {
+        // No data for this date
+        setVal(`${type}-present-boys`,  '—', true);
+        setVal(`${type}-present-girls`, '—', true);
+        setVal(`${type}-absent-boys`,   '—', true);
+        setVal(`${type}-absent-girls`,  '—', true);
+        setVal(`${type}-total-boys`,    agg.total, agg.total === 0);
+        setVal(`${type}-total-girls`,   '—', true);
+      }
+    }
+
+    // Progress bar + avg text
+    const bar = card.querySelector(`[data-fill="${type}-bar"]`);
+    if(bar) bar.style.width = `${avg}%`;
+    setVal(`${type}-avg`, `${avg}%`);
+  });
+}
+
+/* ─── Live data loader (Google Apps Script JSONP) ───
+   Calls the Apps Script Web App, which reads the Drive folder's
+   Students/Teachers/Prefects subfolders and their spreadsheets,
+   then returns roster + attendance JSON. Updates a small status
+   pill in the header so it's obvious when data is syncing/loaded/failed.
+*/
+function setSyncStatus(msg, kind){
+  const el = document.getElementById('sync-status');
+  if(!el) return;
+  el.textContent = msg;
+  el.dataset.kind = kind || 'info';
+}
+
+function loadLiveData(){
+  setSyncStatus('Syncing from Drive…', 'loading');
+  const callbackName = 'attendanceCallback_' + Date.now();
+  let settled = false; // true once we've handled success, error, or timeout
+
+  window[callbackName] = function(data){
+    if(settled){
+      // A late response arrived after we already gave up — ignore it
+      // quietly instead of crashing (this fixes the old ReferenceError,
+      // which happened because the callback had been deleted entirely).
+      console.warn('Apps Script responded after timeout — ignoring stale response');
+      return;
+    }
+    settled = true;
+    delete window[callbackName];
+    document.getElementById('jsonp-script')?.remove();
+
+    if(data.error){
+      console.warn('Apps Script error:', data.error);
+      setSyncStatus('Sync failed — using last known data', 'error');
+      return;
+    }
+
+    if(data.attendance && Object.keys(data.attendance).length){
+      ATTENDANCE_DATA = data.attendance;
+    }
+    if(data.students) ROSTER.students = data.students;
+    if(data.teachers) ROSTER.teachers = data.teachers;
+    if(data.prefects) ROSTER.prefects = data.prefects;
+
+    // Jump all cards to the most recent date that has real data
+    const liveKeys = Object.keys(ATTENDANCE_DATA).sort().reverse();
+    const bestKey = liveKeys.find(d => {
+      const dt = ATTENDANCE_DATA[d];
+      return (dt.students?.presentIds?.length||0)+
+             (dt.teachers?.presentIds?.length||0)+
+             (dt.prefects?.presentIds?.length||0) > 0;
+    });
+    if(bestKey){
+      const [y,m,d] = bestKey.split('-').map(Number);
+      const date = new Date(y, m-1, d);
+      const label = fmtDash(date);
+      [1,2,3,4].forEach(i=>{
+        calState[i].selected = {y, m:m-1, d};
+        calState[i].viewYear  = y;
+        calState[i].viewMonth = m-1;
+        document.getElementById(`d-date-${i}`).textContent = label;
+      });
+    }
+
+    renderDashboard();
+    renderAllPersonLists();
+    rebuildAllPies();
+    setSyncStatus(`Synced · ${fmtDash(new Date())}`, 'ok');
+    console.log('✅ Live data loaded from Drive');
+    console.log('📅 Dates in live data:', Object.keys(ATTENDANCE_DATA));
+  };
+
+  const script = document.createElement('script');
+  script.id = 'jsonp-script';
+  script.src = `${WEB_APP_URL}?callback=${callbackName}`;
+  script.onerror = (err) => {
+    if(settled) return;
+    settled = true;
+    console.error('❌ Failed to load live data from Apps Script', err);
+    setSyncStatus('Sync failed — check connection', 'error');
+    document.getElementById('jsonp-script')?.remove();
+  };
+  document.head.appendChild(script);
+
+  // Timeout — Apps Script cold-starts (first scan with no cache yet) can
+  // legitimately take 30-60s+ when scanning many spreadsheets. We give up
+  // showing "syncing" after 45s, but we DO NOT delete the callback function
+  // itself — we just mark settled=true so a late response is ignored
+  // instead of crashing with "callback is not defined".
+  setTimeout(()=>{
+    if(!settled){
+      settled = true;
+      console.warn('⏰ Apps Script taking a while — no response after 45s. It may still arrive in the background.');
+      setSyncStatus('Still syncing… tap to retry', 'error');
+      document.getElementById('jsonp-script')?.remove();
+    }
+  }, 45000);
+}
+
+const MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
+const DAY_LABELS=['S','M','T','W','T','F','S'];
+const calState={};
+
+/* Initialize calendar state for each card BEFORE anything (including
+   inline onclick handlers that could fire during initial paint) might
+   try to read calState. Default to "last Sunday" until live data
+   arrives and (if it has real entries) jumps the cards forward. */
+[1,2,3,4].forEach(n=>{
+  calState[n]={
+    viewYear:lastSun.getFullYear(),
+    viewMonth:lastSun.getMonth(),
+    selected:{y:lastSun.getFullYear(),m:lastSun.getMonth(),d:lastSun.getDate()}
+  };
+});
+// Reflect the default date in the date pill labels
+['d-date-1','d-date-2','d-date-3','d-date-4'].forEach(id=>{
+  document.getElementById(id).textContent=fmtDash(lastSun);
+});
+
+function toggleCalendar(n,evt){
+  if(evt) evt.stopPropagation();
+  const popup=document.getElementById(`cal-popup-${n}`);
+  const wasOpen=popup.classList.contains('shown');
+  // Close all popups first
+  document.querySelectorAll('.cal-popup').forEach(p=>p.classList.remove('shown'));
+  if(!wasOpen){
+    renderCalendar(n);
+    popup.classList.add('shown');
+  }
+}
+
+function renderCalendar(n){
+  const state=calState[n];
+  const popup=document.getElementById(`cal-popup-${n}`);
+  const y=state.viewYear, m=state.viewMonth;
+  const firstDay=new Date(y,m,1);
+  const lastDay=new Date(y,m+1,0);
+  const startWeekday=firstDay.getDay();
+  const daysInMonth=lastDay.getDate();
+  const prevMonthLastDay=new Date(y,m,0).getDate();
+  const todayDate=new Date();
+
+  let html=`
+    <div class="cal-header">
+      <button class="cal-nav" onclick="navMonth(${n},-1,event)">&#8249;</button>
+      <div class="cal-title">${MONTHS[m]} ${y}</div>
+      <button class="cal-nav" onclick="navMonth(${n},1,event)">&#8250;</button>
+    </div>
+    <div class="cal-grid">`;
+
+  // Day labels
+  DAY_LABELS.forEach(d=>html+=`<div class="cal-day-label">${d}</div>`);
+
+  // Previous month days
+  for(let i=startWeekday-1;i>=0;i--){
+    const day=prevMonthLastDay-i;
+    html+=`<button class="cal-day other-month" onclick="navMonth(${n},-1,event)">${day}</button>`;
+  }
+
+  // Current month days
+  for(let day=1;day<=daysInMonth;day++){
+    const isToday=todayDate.getFullYear()===y && todayDate.getMonth()===m && todayDate.getDate()===day;
+    const isSelected=state.selected && state.selected.y===y && state.selected.m===m && state.selected.d===day;
+    const cls=['cal-day'];
+    if(isToday) cls.push('today');
+    if(isSelected) cls.push('selected');
+    html+=`<button class="${cls.join(' ')}" onclick="selectDay(${n},${y},${m},${day},event)">${day}</button>`;
+  }
+
+  // Next month days (fill row)
+  const totalCells=startWeekday+daysInMonth;
+  const remaining=(7-(totalCells%7))%7;
+  for(let day=1;day<=remaining;day++){
+    html+=`<button class="cal-day other-month" onclick="navMonth(${n},1,event)">${day}</button>`;
+  }
+
+  html+=`</div>
+    <div class="cal-footer">
+      <button class="cal-today-btn" onclick="jumpToday(${n},event)">Today</button>
+      <button class="cal-close-btn" onclick="closeCal(${n},event)">Close</button>
+    </div>`;
+
+  popup.innerHTML=html;
+}
+
+function navMonth(n,delta,evt){
+  if(evt) evt.stopPropagation();
+  const state=calState[n];
+  state.viewMonth+=delta;
+  if(state.viewMonth<0){state.viewMonth=11;state.viewYear--;}
+  if(state.viewMonth>11){state.viewMonth=0;state.viewYear++;}
+  renderCalendar(n);
+}
+
+function selectDay(n,year,month,day,evt){
+  if(evt) evt.stopPropagation();
+  const date=new Date(year,month,day);
+  const label=fmtDash(date);
+  // Sync ALL cards to the same selected date
+  [1,2,3,4].forEach(i=>{
+    calState[i].selected={y:year,m:month,d:day};
+    calState[i].viewYear=year;
+    calState[i].viewMonth=month;
+    document.getElementById(`d-date-${i}`).textContent=label;
+  });
+  document.getElementById(`cal-popup-${n}`).classList.remove('shown');
+  renderDashboard();
+}
+function jumpToday(n,evt){
+  if(evt) evt.stopPropagation();
+  const t=new Date();
+  calState[n].viewYear=t.getFullYear();
+  calState[n].viewMonth=t.getMonth();
+  renderCalendar(n);
+}
+
+function closeCal(n,evt){
+  if(evt) evt.stopPropagation();
+  document.getElementById(`cal-popup-${n}`).classList.remove('shown');
+}
+
+// Click-outside dismissal
+document.addEventListener('click',e=>{
+  if(!e.target.closest('.cal-anchor')){
+    document.querySelectorAll('.cal-popup').forEach(p=>p.classList.remove('shown'));
+  }
+});
+
+// Initial dashboard render (with empty data — shows "—" everywhere,
+// which is correct until loadLiveData() resolves), then kick off the
+// real fetch from Drive.
+renderDashboard();
+loadLiveData();
+
+/* ─── Avatar SVG builder ─── */
+function avatarSVG(fill='#c0392b'){
+  return `<svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="32" fill="#7ab8d0"/><circle cx="32" cy="22" r="11" fill="#f5c5a0"/><ellipse cx="32" cy="54" rx="17" ry="14" fill="${fill}"/></svg>`;
+}
+
+/* ─── Profile Popup Avatar (larger) ─── */
+function popupAvatarSVG(fill='#c0392b'){
+  return `<svg viewBox="0 0 74 74"><circle cx="37" cy="37" r="37" fill="#7ab8d0"/><circle cx="37" cy="26" r="13" fill="#f5c5a0"/><ellipse cx="37" cy="62" rx="20" ry="16" fill="${fill}"/></svg>`;
+}
+
+/* Inject avatar SVGs into all popups */
+function injectPopupAvatars(){
+  document.querySelectorAll('.popup-avatar').forEach(el=>{
+    if(el.innerHTML.trim()!=='') return;
+    const inGirls = el.closest('.girls-card')!==null;
+    const inGender = el.closest('#gender-popup')!==null;
+    const fill = (inGirls||inGender) ? '#c0392b' : '#2980b9';
+    el.innerHTML = popupAvatarSVG(fill);
+  });
+}
+document.addEventListener('DOMContentLoaded',injectPopupAvatars);
+window.setTimeout(injectPopupAvatars,0);
+
+/* ─── Person Lists: now driven by ROSTER (live data) instead of fake samples ─── */
+function genderLabel(r){
+  if(!r.grade && !r.subject) return r.role ? r.role : '';
+  return r.gender === 'female' ? 'Female' : (r.gender === 'male' ? 'Male' : '');
+}
+function fillColorFor(r){ return r.gender === 'female' ? '#c0392b' : '#2980b9'; }
+
+function renderPersonList(list, containerId, detailPage, kind){
+  const el = document.getElementById(containerId);
+  if(!list || !list.length){
+    el.innerHTML = `<div style="padding:24px;text-align:center;color:#666;font-size:14px">
+      No ${kind || 'records'} loaded yet. Waiting on data from Drive…
+    </div>`;
+    return;
+  }
+  el.innerHTML = list.map((p, i) => {
+    const sub = kind === 'teachers'
+      ? (p.subject || p.medium || '')
+      : [p.grade ? `Grade ${p.grade}` : '', genderLabel(p)].filter(Boolean).join(' · ');
+    return `
+    <div class="person-card" onclick="showPersonDetail('${detailPage}','${p.name.replace(/'/g,"\\'")}')">
+      <div class="avatar-wrap" id="avatar-${kind}-${i}">${avatarSVG(fillColorFor(p))}</div>
+      <div>
+        <div class="person-info-name">${p.name || p.id}</div>
+        <div class="person-info-sub">${sub}</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  list.forEach((p, i) => {
+    const avatarEl = document.getElementById(`avatar-${kind}-${i}`);
+    loadAvatarPhoto(avatarEl, p.name, fillColorFor(p));
+  });
+}
+
+function getDisplayGrade(student, selectedYear) {
+  if (!selectedYear) return student.grade || null;
+  const yearRecords = student.yearRecords || {};
+  if (yearRecords[selectedYear] !== undefined) return yearRecords[selectedYear];
+  return null; // hide if not in that year's spreadsheet
+}
+
+function getDisplayGrade(student, selectedYear) {
+  if (!selectedYear) return student.grade || null;
+  const yearRecords = student.yearRecords || {};
+  if (yearRecords[selectedYear] !== undefined) {
+    return String(yearRecords[selectedYear]).replace(/^grade\s*/i, '').trim();
+  }
+  return null;
+}
+
+function renderAllPersonLists() {
+  const gradeVal = document.getElementById('student-grade-filter')?.value || '';
+  const yearVal  = document.getElementById('student-year-filter')?.value  || '';
+  const gradeFilter = (gradeVal && gradeVal !== 'Grade') ? gradeVal : '';
+  const yearFilter  = (yearVal  && yearVal  !== 'Year')  ? yearVal  : '';
+
+  console.log('yearFilter:', yearFilter, '| gradeFilter:', gradeFilter);
+  console.log('Total students:', ROSTER.students.length);
+  ROSTER.students.slice(0,3).forEach(function(p){
+    console.log('Student:', p.name, '| grade:', p.grade, '| yearRecords:', JSON.stringify(p.yearRecords));
+  });
+
+  const el = document.getElementById('students-list');
+  const list = ROSTER.students;
+
+  if (!list || !list.length) {
+    el.innerHTML = '<div style="padding:24px;text-align:center;color:#666;font-size:14px">No students loaded yet. Waiting on data from Drive…</div>';
+  } else {
+    const filtered = list.filter(function(p) {
+  const displayGrade = getDisplayGrade(p, yearFilter);
+  if (displayGrade === null) return false;
+  if (gradeFilter) {
+    const filterNum = gradeFilter.replace(/^grade\s*/i, '').trim();
+    if (String(displayGrade).trim() !== filterNum) return false;
+  }
+  return true;
+});
+
+    console.log('Filtered count:', filtered.length);
+
+    if (!filtered.length) {
+      el.innerHTML = '<div style="padding:24px;text-align:center;color:#666;font-size:14px">No students found for the selected filters.</div>';
+    } else {
+      el.innerHTML = filtered.map(function(p, i) {
+        const displayGrade = getDisplayGrade(p, yearFilter) || p.grade;
+        const gradeLabel = displayGrade ? 'Grade ' + displayGrade : '';
+        const gLabel = p.gender === 'female' ? 'Female' : (p.gender === 'male' ? 'Male' : '');
+        const sub = [gradeLabel, gLabel].filter(Boolean).join(' · ');
+        return '<div class="person-card" onclick="showPersonDetail(\'page-student-detail\',\'' + p.name.replace(/'/g,"\\'") + '\')">'
+          + '<div class="avatar-wrap" id="avatar-students-' + i + '">' + avatarSVG(fillColorFor(p)) + '</div>'
+          + '<div>'
+          + '<div class="person-info-name">' + (p.name || p.id) + '</div>'
+          + '<div class="person-info-sub">' + sub + '</div>'
+          + '</div></div>';
+      }).join('');
+
+      // Fetch real photos in the background for every visible card
+      filtered.forEach(function(p, i){
+        const avatarEl = document.getElementById('avatar-students-' + i);
+        loadAvatarPhoto(avatarEl, p.name, fillColorFor(p));
+      });
+    }
+  }
+
+  // ─── Prefects with filtering ───
+  const prefectGradeVal = document.getElementById('prefect-grade-filter')?.value || '';
+  const prefectYearVal  = document.getElementById('prefect-year-filter')?.value  || '';
+  const pGradeFilter = (prefectGradeVal && prefectGradeVal !== 'Grade') ? prefectGradeVal : '';
+  const pYearFilter  = (prefectYearVal  && prefectYearVal  !== 'Year')  ? prefectYearVal  : '';
+  const pEl = document.getElementById('prefects-list');
+  const pList = ROSTER.prefects;
+  if (!pList || !pList.length) {
+    pEl.innerHTML = '<div style="padding:24px;text-align:center;color:#666;font-size:14px">No prefects loaded yet. Waiting on data from Drive…</div>';
+  } else {
+    const pFiltered = pList.filter(function(p) {
+      const displayGrade = getDisplayGrade(p, pYearFilter);
+      if (displayGrade === null) return false;
+      if (pGradeFilter) {
+        const filterNum = pGradeFilter.replace(/^grade\s*/i, '').trim();
+        if (String(displayGrade).trim() !== filterNum) return false;
+      }
+      return true;
+    });
+    if (!pFiltered.length) {
+      pEl.innerHTML = '<div style="padding:24px;text-align:center;color:#666;font-size:14px">No prefects found for the selected filters.</div>';
+    } else {
+      pEl.innerHTML = pFiltered.map(function(p, i) {
+        const displayGrade = getDisplayGrade(p, pYearFilter) || p.grade;
+        const gradeLabel = displayGrade ? 'Grade ' + displayGrade : '';
+        const gLabel = p.gender === 'female' ? 'Female' : (p.gender === 'male' ? 'Male' : '');
+        const sub = [gradeLabel, gLabel].filter(Boolean).join(' · ');
+        return '<div class="person-card" onclick="showPersonDetail(\'page-prefect-detail\',\'' + p.name.replace(/'/g,"\\'") + '\')">'
+          + '<div class="avatar-wrap" id="avatar-prefects-' + i + '">' + avatarSVG(fillColorFor(p)) + '</div>'
+          + '<div>'
+          + '<div class="person-info-name">' + (p.name || p.id) + '</div>'
+          + '<div class="person-info-sub">' + sub + '</div>'
+          + '</div></div>';
+      }).join('');
+
+      pFiltered.forEach(function(p, i){
+        const avatarEl = document.getElementById('avatar-prefects-' + i);
+        loadAvatarPhoto(avatarEl, p.name, fillColorFor(p));
+      });
+    }
+  }
+
+  renderPersonList(ROSTER.teachers, 'teachers-list', 'page-teacher-detail', 'teachers');
+}
+renderAllPersonLists();
+/* ─── Exam List — backed by the Exam Results Apps Script ─── */
+let _examData = null; // { grade, year, columns, students }
+
+function onMarksFilterChange(){
+  const grade = document.getElementById('marks-grade-filter')?.value || '';
+  const year  = document.getElementById('marks-year-filter')?.value  || '';
+  const statusEl = document.getElementById('marks-status');
+  const listEl = document.getElementById('exam-list');
+
+  if (!grade || !year) {
+    _examData = null;
+    listEl.innerHTML = `<div style="padding:24px;text-align:center;color:#666;font-size:14px">Select a Grade and Year to view results.</div>`;
+    if (statusEl) statusEl.textContent = '';
+    return;
+  }
+
+  listEl.innerHTML = `<div style="padding:24px;text-align:center;color:#666;font-size:14px">Loading results…</div>`;
+  if (statusEl) statusEl.textContent = 'Loading…';
+
+  examApiCall({ action: 'getResults', grade, year })
+    .then(data => {
+      if (data.error) {
+        _examData = null;
+        if (statusEl) statusEl.textContent = 'Marks unavailable: ' + data.error;
+        renderExamList(); // still show names, just without marks/rank
+        return;
+      }
+      _examData = data;
+      populateExamColumnDropdown(data.columns);
+      renderExamList();
+      if (statusEl) statusEl.textContent = '';
+    })
+    .catch(err => {
+      _examData = null;
+      if (statusEl) statusEl.textContent = 'Marks unavailable: ' + err.message;
+      renderExamList(); // still show names, just without marks/rank
+    });
+}
+
+function populateExamColumnDropdown(columns){
+  const sel = document.getElementById('marks-exam-add-sel');
+  if (!sel) return;
+  const fixedAndTrailing = ['Name','1st Term','2nd Term','3rd Term','Average','Rank'];
+  const extras = (columns || []).filter(c => !fixedAndTrailing.includes(c));
+  let html = '<option value="">+ Add exam column</option>';
+  extras.forEach(c => { html += `<option value="__existing__${c}">${c} (existing)</option>`; });
+  html += '<option value="custom">Custom name…</option>';
+  sel.innerHTML = html;
+}
+
+function addExamColumnFromUI(){
+  if (!_examData) { alert('Select a Grade and Year first.'); return; }
+  const sel = document.getElementById('marks-exam-add-sel');
+  const val = sel ? sel.value : '';
+  if (!val) return;
+  if (val.startsWith('__existing__')) return; // already exists, nothing to add
+
+  let examName = val;
+  if (val === 'custom') {
+    examName = prompt('Enter a name for the new exam column:');
+    if (!examName || !examName.trim()) return;
+    examName = examName.trim();
+  }
+
+  const statusEl = document.getElementById('marks-status');
+  if (statusEl) statusEl.textContent = 'Adding column…';
+
+  examApiCall({
+    action: 'addExamColumn',
+    grade: _examData.grade,
+    year: _examData.year,
+    examName: examName
+  }).then(res => {
+    if (res.error) {
+      if (statusEl) statusEl.textContent = '';
+      alert('Could not add column: ' + res.error);
+      return;
+    }
+    if (statusEl) statusEl.textContent = '';
+    onMarksFilterChange(); // reload fresh data including the new column
+  }).catch(err => {
+    if (statusEl) statusEl.textContent = '';
+    alert('Could not add column: ' + err.message);
+  });
+}
+
+function getExamColumnsForRow(){
+  // The term/exam columns are everything between "Name" and "Average".
+  if (!_examData) return [];
+  const all = _examData.columns;
+  const avgIdx = all.indexOf('Average');
+  return all.slice(1, avgIdx === -1 ? all.length : avgIdx);
+}
+
+function renderExamList(){
+  const listEl = document.getElementById('exam-list');
+  const gradeVal = document.getElementById('marks-grade-filter')?.value || '';
+  if (!gradeVal) return; // nothing selected yet — onMarksFilterChange() handles that message
+
+  const searchVal = (document.getElementById('marks-search-input')?.value || '').trim().toLowerCase();
+  const examCols = getExamColumnsForRow();
+
+  // People list always comes from ROSTER (same source/pattern as the
+  // Students/Teachers/Prefects pages) — never from the Exam Results
+  // script. Marks data (if loaded) is merged in afterward, but the
+  // page still works even if _examData failed to load.
+  //
+  // Use getDisplayGrade() (year-aware, same as the Students page) so
+  // a student who has since been promoted still shows up correctly
+  // when looking at an earlier year's Grade/marks.
+  const gradeNum = String(gradeVal).replace(/^grade\s*/i, '').trim();
+  const yearVal = document.getElementById('marks-year-filter')?.value || '';
+  const roster = ROSTER.students.filter(s => {
+    const displayGrade = getDisplayGrade(s, yearVal);
+    return displayGrade !== null && String(displayGrade).trim() === gradeNum;
+  });
+
+  const byName = {};
+  if (_examData && _examData.students) {
+    _examData.students.forEach(s => { byName[String(s.Name).trim()] = s; });
+  }
+
+  let people = roster.map(r => ({ name: r.name, gender: r.gender }));
+
+  if (searchVal) {
+    people = people.filter(p => (p.name || '').toLowerCase().includes(searchVal));
+  }
+
+  if (!people.length) {
+    listEl.innerHTML = `<div style="padding:24px;text-align:center;color:#666;font-size:14px">No students found for this Grade${searchVal ? ' matching "' + searchVal + '"' : ''}.</div>`;
+    return;
+  }
+  listEl.innerHTML = people.map((p, i) => {
+    const rec = byName[String(p.name).trim()] || {};
+    const avatarFill = p.gender === 'female' ? '#c0392b' : '#2980b9';
+    const examOptions = examCols.map(c => `<option value="${c}">${c}</option>`).join('');
+    const avgVal = rec.Average !== undefined && rec.Average !== '' ? rec.Average : '—';
+    const rankVal = rec.Rank !== undefined && rec.Rank !== '' ? rec.Rank : '—';
+
+   return `
+    <div class="exam-card" id="exam-row-${i}">
+      <div class="avatar-wrap" id="exam-avatar-${i}">${avatarSVG(avatarFill)}</div>
+      <div style="font-weight:600;font-size:14px;color:#121616;min-width:120px;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${p.name.replace(/"/g,'&quot;')}">${p.name}</div>
+      <div class="exam-ctrls">
+        <span class="ex-pill">TERM (EXAM)
+          <select id="exam-term-sel-${i}" onchange="onExamTermChange(${i})">${examOptions}</select>
+        </span>
+        <span class="ex-pill">MARKS
+          <input type="number" id="exam-marks-in-${i}" data-student-name="${p.name.replace(/"/g,'&quot;')}" style="width:48px" min="0" max="100"/>%
+          <button class="ex-toggle" id="exam-save-${i}" onclick="saveExamMark(${i}, '${p.name.replace(/'/g,"\\'")}')" title="Save" style="margin-left:4px;width:auto;height:auto;background:none;border-radius:6px;padding:2px 6px;color:#fff;font-size:10px;font-weight:700;cursor:pointer">SAVE</button>
+        </span>
+        <span class="ex-pill" id="exam-place-${i}">PLACE&nbsp;<b style="margin-left:4px">${rankVal}</b></span>
+      </div>
+      <div style="margin-left:10px;font-size:12px;color:#222;font-weight:600;min-width:90px;text-align:right">Avg: ${avgVal}${avgVal!=='—' ? '%':''}</div>
+    </div>`;
+  }).join('');
+
+  // Pre-fill each row's marks input with whatever value already exists
+  // for the currently-selected term/exam column, and load real photos.
+  people.forEach((p, i) => {
+    const termSel = document.getElementById(`exam-term-sel-${i}`);
+    if (termSel) onExamTermChange(i);
+    const avatarEl = document.getElementById(`exam-avatar-${i}`);
+    loadAvatarPhoto(avatarEl, p.name, p.gender === 'female' ? '#c0392b' : '#2980b9');
+  });
+}
+
+function onExamTermChange(i){
+  const termSel = document.getElementById(`exam-term-sel-${i}`);
+  const marksIn = document.getElementById(`exam-marks-in-${i}`);
+  if (!termSel || !marksIn || !_examData) return;
+  const nameDiv = document.querySelector(`#exam-row-${i} > div[style*="position:absolute"]`);
+  // Find the student name from the row's data (re-derive from current render pass)
+  const term = termSel.value;
+  const row = _examData.students.find(s => {
+    // We don't have direct index->name mapping stored, so match by row position
+    // against the same filtered/sorted list renderExamList() used.
+    return true;
+  });
+  // Simpler + robust: store name on the element itself.
+  const name = marksIn.dataset.studentName;
+  const rec = (_examData.students || []).find(s => String(s.Name).trim() === String(name).trim());
+  marksIn.value = (rec && rec[term] !== undefined && rec[term] !== '') ? rec[term] : '';
+}
+
+function saveExamMark(i, studentName){
+  const termSel = document.getElementById(`exam-term-sel-${i}`);
+  const marksIn = document.getElementById(`exam-marks-in-${i}`);
+  const placeEl = document.getElementById(`exam-place-${i}`);
+  if (!termSel || !marksIn || !_examData) return;
+
+  const term = termSel.value;
+  const marks = Number(marksIn.value);
+  if (!term) { alert('Choose a term/exam first.'); return; }
+  if (isNaN(marks) || marks < 0 || marks > 100) { alert('Enter a valid mark between 0 and 100.'); return; }
+
+  const statusEl = document.getElementById('marks-status');
+  if (statusEl) statusEl.textContent = 'Saving…';
+
+  examApiCall({
+    action: 'saveMark',
+    grade: _examData.grade,
+    year: _examData.year,
+    studentName: studentName,
+    examColumn: term,
+    marks: marks
+  }).then(res => {
+    if (statusEl) statusEl.textContent = '';
+    if (res.error) { alert('Could not save: ' + res.error); return; }
+    if (placeEl) placeEl.innerHTML = `PLACE&nbsp;<b style="margin-left:4px">${res.rank}</b>`;
+    // Refresh full data in the background so Average/Rank stay in sync
+    // for every row (saving one mark can shift everyone's rank).
+    onMarksFilterChange();
+  }).catch(err => {
+    if (statusEl) statusEl.textContent = '';
+    alert('Could not save: ' + err.message);
+  });
+}
+
+document.getElementById('exam-list').innerHTML = `<div style="padding:24px;text-align:center;color:#666;font-size:14px">Select a Grade and Year to view results.</div>`;
+
+/* ─── Attendance Rows ─── */
+function makeAttRows(from,containerId){
+  const rows=last5Sundays(from);
+  document.getElementById(containerId).innerHTML=rows.map(d=>`
+    <div class="yellow-row">
+      <span class="yellow-row-date">${fmtUS(d)}</span>
+      <div style="display:flex;gap:8px">
+        <button class="btn-present" onclick="markAtt(this)">Present</button>
+        <button class="btn-absent" onclick="markAtt(this)">Absent</button>
+      </div>
+    </div>`).join('');
+}
+function markAtt(btn){btn.parentElement.querySelectorAll('button').forEach(b=>b.classList.remove('active'));btn.classList.add('active');}
+
+/* ─── Sunday enforcement ─── */
+function forceSunday(inputId,errId,ref,cb){
+  document.getElementById(inputId).addEventListener('change',function(){
+    const [y,m,d]=this.value.split('-').map(Number);
+    const p=new Date(y,m-1,d);
+    if(p.getDay()!==0){
+      const s=prevSunday(p);this.value=toVal(s);ref.d=s;
+      document.getElementById(errId).textContent='Only Sundays allowed — snapped to previous Sunday.';
+      setTimeout(()=>{document.getElementById(errId).textContent='';},2500);
+    } else {ref.d=p;document.getElementById(errId).textContent='';}
+    if(cb)cb(ref.d);
+  });
+}
+const flRef={d:new Date(lastSun)},dailyRef={d:new Date(lastSun)};
+document.getElementById('flower-date').value=toVal(lastSun);
+document.getElementById('daily-date').value=toVal(lastSun);
+forceSunday('flower-date','flower-err',flRef,d=>makeAttRows(d,'flower-rows'));
+forceSunday('daily-date','daily-err',dailyRef,null);
+// ────── Per-student attendance view ──────
+let _attendanceStudent = null;
+
+function openStudentAttendance() {
+  if (!_currentDetailPerson || !_currentDetailPerson.displayName) {
+    alert('Please open a profile first.');
+    return;
+  }
+  const name = _currentDetailPerson.displayName;
+  let rosterType = null, rosterEntry = null;
+  rosterEntry = ROSTER.students.find(r => r.name === name);
+  if (rosterEntry) rosterType = 'students';
+  else {
+    rosterEntry = ROSTER.prefects.find(r => r.name === name);
+    if (rosterEntry) rosterType = 'prefects';
+    else {
+      rosterEntry = ROSTER.teachers.find(r => r.name === name);
+      if (rosterEntry) rosterType = 'teachers';
+    }
+  }
+
+  // Use whatever Grade/Year was selected on the list page when this
+  // person was opened. Fall back to the roster's own grade / current
+  // year if nothing was selected there.
+  const ctx = window._listFilterContext || { grade: '', year: '' };
+  const ctxYear = ctx.year ? parseInt(ctx.year, 10) : new Date().getFullYear();
+  const ctxGrade = ctx.grade || (rosterEntry ? rosterEntry.grade : null);
+
+  _attendanceStudent = {
+    name: name,
+    rosterId: rosterEntry ? rosterEntry.id : null,
+    grade: ctxGrade,
+    year: ctxYear,
+    rosterType: rosterType || 'students'
+  };
+
+  showPage('page-student-attendance');
+
+  // Default month to current month when opening, day to "All Sundays"
+  const curMonthIdx = new Date().getMonth();
+  const monthSel = document.getElementById('att-monthly-sel');
+  if (monthSel) monthSel.value = MONTHS[curMonthIdx];
+  populateAttDaySelect(ctxYear, curMonthIdx, null);
+
+  // Show the Year/Grade context (read-only) that was selected on the list page
+  const ctxLine = document.getElementById('att-context-line');
+  if (ctxLine) {
+    const gradeLabel = ctxGrade ? 'Grade ' + String(ctxGrade).replace(/^grade\s*/i, '').trim() : 'All grades';
+    ctxLine.textContent = gradeLabel + ' · ' + ctxYear;
+  }
+
+  renderStudentAttendance();
+}
+
+function populateAttDaySelect(year, monthIdx, selectedDay){
+  const daySel = document.getElementById('att-day-sel');
+  if (!daySel) return;
+  const daysInMonth = new Date(year, monthIdx + 1, 0).getDate();
+  let html = '<option value="">All Sundays</option>';
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dow = new Date(year, monthIdx, d).getDay();
+    if (dow === 0) { // only Sundays
+      html += `<option value="${d}">${d}</option>`;
+    }
+  }
+  daySel.innerHTML = html;
+  daySel.value = selectedDay ? String(selectedDay) : '';
+}
+
+function renderStudentAttendance() {
+  if (!_attendanceStudent) return;
+  const rosterId   = _attendanceStudent.rosterId;
+  const rosterType = _attendanceStudent.rosterType;
+  const grade      = _attendanceStudent.grade;
+
+  // Header line: name · grade
+  const infoEl = document.getElementById('att-student-info');
+  if (infoEl) {
+    const gradeLabel = grade ? 'Grade ' + String(grade).replace(/^grade\s*/i, '').trim() : '';
+    infoEl.textContent = _attendanceStudent.name + (gradeLabel ? ' · ' + gradeLabel : '');
+  }
+
+  // Year is fixed from context (not user-selectable on this page).
+  // Month comes from the Month select, Day from the Day select.
+  const year = _attendanceStudent.year;
+  const monthSel = document.getElementById('att-monthly-sel');
+  const monthName = monthSel ? monthSel.value : MONTHS[new Date().getMonth()];
+  const monthIdx = MONTHS.indexOf(monthName);
+
+  // Rebuild the Day options whenever the month changes, keeping the
+  // previously chosen day if it's still valid for the new month.
+  const daySel = document.getElementById('att-day-sel');
+  const prevDayVal = daySel ? daySel.value : '';
+  populateAttDaySelect(year, monthIdx, prevDayVal || null);
+  const selectedDay = daySel && daySel.value ? parseInt(daySel.value, 10) : null;
+
+  // All Sundays in this month (or just the chosen day, if it's a Sunday)
+  const sundays = [];
+  for (let day = 1; day <= 31; day++) {
+    const d = new Date(year, monthIdx, day);
+    if (d.getMonth() !== monthIdx) break;
+    if (d.getDay() === 0) {
+      if (selectedDay === null || selectedDay === day) sundays.push(d);
+    }
+  }
+
+  // Build per-Sunday rows for this student
+  const rowsHtml = sundays.map(d => {
+    const iso = toVal(d);
+    const dayData = ATTENDANCE_DATA[iso] ? ATTENDANCE_DATA[iso][rosterType] : null;
+    let label = 'Not marked', color = '#666', bg = '#eee';
+    if (dayData && rosterId) {
+      const wasMarked = (dayData.presentIds && dayData.presentIds.length) ||
+                        (dayData.absentIds && dayData.absentIds.length);
+      if (dayData.presentIds && dayData.presentIds.indexOf(rosterId) !== -1) {
+        label = 'Present'; color = '#fff'; bg = '#538E72';
+      } else if (dayData.absentIds && dayData.absentIds.indexOf(rosterId) !== -1) {
+        label = 'Absent'; color = '#fff'; bg = '#8E5353';
+      } else if (wasMarked) {
+        label = 'Absent'; color = '#fff'; bg = '#8E5353';
+      }
+    }
+    return '<div class="yellow-row">' +
+      '<span class="yellow-row-date">' + fmtUS(d) + '</span>' +
+      '<span style="background:' + bg + ';color:' + color +
+      ';border-radius:9999px;padding:6px 20px;font-size:13px;font-weight:600;letter-spacing:0.5px">' + label + '</span>' +
+      '</div>';
+  }).join('');
+
+  document.getElementById('att-rows').innerHTML = rowsHtml ||
+    '<div style="padding:20px;text-align:center;color:#666;font-size:14px">No Sundays in this month.</div>';
+
+  // Year-wide percentage for THIS student
+  let totalMarked = 0, totalPresent = 0;
+  Object.keys(ATTENDANCE_DATA).forEach(iso => {
+    if (!iso.startsWith(year + '-')) return;
+    const parts = iso.split('-').map(Number);
+    const date = new Date(parts[0], parts[1] - 1, parts[2]);
+    if (date.getDay() !== 0) return;
+    const dayData = ATTENDANCE_DATA[iso] ? ATTENDANCE_DATA[iso][rosterType] : null;
+    if (!dayData) return;
+    const wasMarked = (dayData.presentIds && dayData.presentIds.length) ||
+                      (dayData.absentIds && dayData.absentIds.length);
+    if (!wasMarked) return;
+    totalMarked++;
+    if (rosterId && dayData.presentIds && dayData.presentIds.indexOf(rosterId) !== -1) totalPresent++;
+  });
+  const pct = totalMarked > 0 ? Math.round((totalPresent / totalMarked) * 100) : 0;
+
+  const pctEl = document.getElementById('att-pct-value');
+  if (pctEl) {
+    if (totalMarked === 0) {
+      pctEl.textContent = '— %';
+      pctEl.style.color = '#888';
+    } else {
+      pctEl.textContent = pct + '%';
+      pctEl.style.color = pct >= 75 ? '#538E72' : (pct >= 50 ? '#b58c00' : '#8E5353');
+    }
+  }
+  const pctDetailEl = document.getElementById('att-pct-detail');
+  if (pctDetailEl) {
+    pctDetailEl.textContent = totalMarked > 0
+      ? 'Present ' + totalPresent + ' of ' + totalMarked + ' Sundays in ' + year
+      : 'No attendance data for ' + year;
+  }
+}
+/* ────── Per-student Marks breakdown (cumulative avg/rank) ────── */
+function openStudentMarks(){
+  if (!_currentDetailPerson || !_currentDetailPerson.displayName) {
+    alert('Please open a profile first.');
+    return;
+  }
+  const name = _currentDetailPerson.displayName;
+  const rosterEntry = ROSTER.students.find(r => r.name === name);
+
+  const ctx = window._listFilterContext || { grade: '', year: '' };
+  const ctxYear = ctx.year ? parseInt(ctx.year, 10) : new Date().getFullYear();
+  const ctxGrade = ctx.grade || (rosterEntry ? rosterEntry.grade : null);
+
+  showPage('page-student-marks');
+
+  const infoEl = document.getElementById('marks-student-info');
+  if (infoEl) infoEl.textContent = name;
+
+  const ctxLine = document.getElementById('marks-context-line');
+  if (ctxLine) {
+    const gradeLabel = ctxGrade ? 'Grade ' + String(ctxGrade).replace(/^grade\s*/i, '').trim() : 'All grades';
+    ctxLine.textContent = gradeLabel + ' · ' + ctxYear;
+  }
+
+  const rowsEl = document.getElementById('marks-breakdown-rows');
+  if (!ctxGrade) {
+    rowsEl.innerHTML = `<div style="padding:20px;text-align:center;color:#666;font-size:14px">No Grade selected — open this student from the Students list with a Grade chosen first.</div>`;
+    return;
+  }
+  rowsEl.innerHTML = `<div style="padding:20px;text-align:center;color:#666;font-size:14px">Loading…</div>`;
+
+  examApiCall({ action: 'getCumulativeResults', grade: ctxGrade, year: ctxYear })
+    .then(data => {
+      if (data.error || !data.students) {
+        renderStudentMarksFallback(ctxGrade, ctxYear, name);
+        return;
+      }
+      const studentRec = data.students.find(s => String(s.name).trim() === String(name).trim());
+      if (!studentRec || !studentRec.steps || !studentRec.steps.length) {
+        rowsEl.innerHTML = `<div style="padding:20px;text-align:center;color:#666;font-size:14px">No marks entered yet for this student.</div>`;
+        return;
+      }
+      renderMarksBreakdownRows(studentRec.steps);
+    })
+    .catch(() => {
+      renderStudentMarksFallback(ctxGrade, ctxYear, name);
+    });
+}
+
+/* Front-end fallback: recompute the same cumulative average/rank
+   locally from whatever Term Tests Marks data (_examData) is already
+   in memory, in case the Apps Script call fails or hasn't been
+   reached yet for this grade/year. Mirrors the server's logic exactly
+   so results match once the network call does succeed later. */
+function renderStudentMarksFallback(grade, year, studentName){
+  const rowsEl = document.getElementById('marks-breakdown-rows');
+
+  // If we don't already have Term Tests Marks data for this exact
+  // grade/year in memory, we have nothing to fall back to.
+  if (!_examData || String(_examData.grade) !== String(grade) || String(_examData.year) !== String(year)) {
+    rowsEl.innerHTML = `<div style="padding:20px;text-align:center;color:#c00;font-size:14px">Could not load marks breakdown right now. Try opening the Term Tests Marks page for this Grade/Year first, then come back.</div>`;
+    return;
+  }
+
+  const all = _examData.columns || [];
+  const avgIdx = all.indexOf('Average');
+  const examColumns = all.slice(1, avgIdx === -1 ? all.length : avgIdx);
+  const students = _examData.students || [];
+
+  if (!examColumns.length || !students.length) {
+    rowsEl.innerHTML = `<div style="padding:20px;text-align:center;color:#666;font-size:14px">No marks entered yet for this Grade/Year.</div>`;
+    return;
+  }
+
+  const names = students.map(s => s.Name);
+  const runningSums = names.map(() => 0);
+  const runningCounts = names.map(() => 0);
+  const stepsByStudent = names.map(() => []);
+
+  examColumns.forEach(examName => {
+    const marksThisCol = students.map(s => s[examName]);
+    marksThisCol.forEach((val, sIdx) => {
+      if (val !== '' && val !== undefined && val !== null && !isNaN(val)) {
+        runningSums[sIdx] += Number(val);
+        runningCounts[sIdx] += 1;
+      }
+    });
+
+    const runningAverages = names.map((_, sIdx) =>
+      runningCounts[sIdx] > 0 ? Math.round((runningSums[sIdx] / runningCounts[sIdx]) * 100) / 100 : ''
+    );
+
+    const ranked = runningAverages
+      .map((avg, idx) => ({ avg, idx }))
+      .filter(r => r.avg !== '')
+      .sort((a, b) => b.avg - a.avg);
+
+    const ranksThisStep = names.map(() => '');
+    let rank = 1;
+    for (let i = 0; i < ranked.length; i++) {
+      if (i > 0 && ranked[i].avg === ranked[i - 1].avg) {
+        ranksThisStep[ranked[i].idx] = ranksThisStep[ranked[i - 1].idx];
+      } else {
+        ranksThisStep[ranked[i].idx] = rank;
+      }
+      rank++;
+    }
+
+    names.forEach((_, sIdx) => {
+      stepsByStudent[sIdx].push({
+        exam: examName,
+        marks: marksThisCol[sIdx] === '' || marksThisCol[sIdx] === undefined || marksThisCol[sIdx] === null ? '' : marksThisCol[sIdx],
+        average: runningAverages[sIdx],
+        rank: ranksThisStep[sIdx]
+      });
+    });
+  });
+
+  const idx = names.findIndex(n => String(n).trim() === String(studentName).trim());
+  if (idx === -1 || !stepsByStudent[idx].length) {
+    rowsEl.innerHTML = `<div style="padding:20px;text-align:center;color:#666;font-size:14px">No marks entered yet for this student.</div>`;
+    return;
+  }
+  renderMarksBreakdownRows(stepsByStudent[idx]);
+}
+
+function renderMarksBreakdownRows(steps){
+  const rowsEl = document.getElementById('marks-breakdown-rows');
+  rowsEl.innerHTML = steps.map(step => {
+    const noMark = step.marks === '' || step.marks === undefined || step.marks === null;
+    const marksLabel = noMark ? 'Not entered' : step.marks + '%';
+
+    // Only show Avg/Rank pills when THIS exam actually has a mark
+    // entered — otherwise they'd just repeat whatever was carried
+    // forward from an earlier exam, which is misleading.
+    const avgRankPills = noMark ? '' : `
+        <span class="ex-pill" style="font-size:11px">Avg&nbsp;<b style="margin-left:4px">${step.average === '' ? '—' : step.average + '%'}</b></span>
+        <span class="ex-pill" style="font-size:11px">Rank&nbsp;<b style="margin-left:4px">${step.rank === '' ? '—' : step.rank}</b></span>`;
+
+    return `
+    <div class="yellow-row" style="flex-wrap:wrap;gap:8px">
+      <span class="yellow-row-date" style="font-size:15px">${step.exam}</span>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <span class="ex-pill" style="font-size:11px">Marks&nbsp;<b style="margin-left:4px">${marksLabel}</b></span>${avgRankPills}
+      </div>
+    </div>`;
+  }).join('');
+}
+function resetAttDate() {
+  if (_attendanceStudent) {
+    const monthSel = document.getElementById('att-monthly-sel');
+    if (monthSel) monthSel.value = MONTHS[lastSun.getMonth()];
+    populateAttDaySelect(_attendanceStudent.year, lastSun.getMonth(), null);
+    renderStudentAttendance();
+  }
+}
+function applyFlower(){makeAttRows(flRef.d,'flower-rows');}
+function resetFlower(){flRef.d=new Date(lastSun);document.getElementById('flower-date').value=toVal(lastSun);document.getElementById('flower-err').textContent='';makeAttRows(lastSun,'flower-rows');}
+function applyDaily(){}
+function resetDaily(){dailyRef.d=new Date(lastSun);document.getElementById('daily-date').value=toVal(lastSun);document.getElementById('daily-err').textContent='';}
+
+// att-rows is populated when a profile's Attendance button is clicked
+makeAttRows(lastSun,'flower-rows');
+
+/* ─── Pie Chart Engine ───
+   Top-3 "flower" leaderboards aren't produced by the current Apps
+   Script (it only returns presentIds per day, no per-person flower
+   tally), so these charts render as empty placeholders rather than
+   fabricated names until that data source exists. */
+function polar(cx,cy,r,deg){const a=(deg-90)*Math.PI/180;return{x:cx+r*Math.cos(a),y:cy+r*Math.sin(a)};}
+function slicePath(cx,cy,r,s,e){
+  if(e-s>=360){e=359.999;}
+  const p1=polar(cx,cy,r,s),p2=polar(cx,cy,r,e);
+  const large=e-s>180?1:0;
+  return `M${cx},${cy} L${p1.x},${p1.y} A${r},${r} 0 ${large} 1 ${p2.x},${p2.y} Z`;
+}
+function labelPos(cx,cy,r,s,e){const mid=(s+e)/2;const p=polar(cx,cy,r*0.68,mid);return p;}
+
+/* pieData is populated lazily — empty until a real per-person ranking
+   source is wired up. buildPie() shows a friendly empty state when a
+   key has no slices instead of drawing fake data. */
+const pieData={ boys:[], girls:[], gender:[] };
+
+function computeGenderPieFromRoster(){
+  // This one we CAN compute today: total boys vs girls across loaded rosters.
+  const allPeople = [...ROSTER.students, ...ROSTER.prefects];
+  const boys  = allPeople.filter(p=>p.gender==='male').length;
+  const girls = allPeople.filter(p=>p.gender==='female').length;
+  const total = boys+girls;
+  if(!total){ pieData.gender = []; return; }
+  pieData.gender = [
+    {label:'Girls',name:'Girls',score:`${girls} of ${total}`,pct:Math.round((girls/total)*100)||0,color:'#F526E4',dot:'#F526E4'},
+    {label:'Boys', name:'Boys', score:`${boys} of ${total}`, pct:Math.round((boys/total)*100)||0, color:'#1A6EFF',dot:'#0088FF'},
+  ];
+}
+
+const selectedSlice={boys:null,girls:null,gender:null,'da-boys':null,'da-girls':null};
+
+/* Maps composite keys back to pieData base key */
+function dataKeyOf(key){
+  if(key==='da-boys') return 'boys';
+  if(key==='da-girls') return 'girls';
+  return key;
+}
+
+function buildPie(svgId,legendId,detailId,key,holeFill){
+  const svg=document.getElementById(svgId);
+  const data=pieData[dataKeyOf(key)];
+  if(!data || !data.length){
+    svg.innerHTML = `<circle cx="50" cy="50" r="46" fill="${holeFill||'#ccc'}" opacity="0.35"/>
+      <text x="50" y="53" text-anchor="middle" font-size="7" fill="#444" font-family="Inter,sans-serif">No data yet</text>`;
+    if(legendId) document.getElementById(legendId).innerHTML = `<div style="font-size:12px;color:#555;font-style:italic">No ranking data available</div>`;
+    renderDetail(key,detailId,null);
+    return;
+  }
+  const total=data.reduce((s,d)=>s+d.pct,0) || 1;
+  let cum=0;
+  const cx=50,cy=50,r=46,ir=18;
+  let html='';
+  data.forEach((d,i)=>{
+    const s=(cum/total)*360,e=((cum+d.pct)/total)*360;
+    const path=slicePath(cx,cy,r,s,e);
+    const lp=labelPos(cx,cy,r,s,e);
+    html+=`<path class="pie-slice" d="${path}" fill="${d.color}" stroke="#fff" stroke-width="1.2"
+      data-key="${key}" data-idx="${i}"
+      onclick="selectSlice('${key}','${svgId}','${legendId}','${detailId}',${i})"/>`;
+    html+=`<text x="${lp.x}" y="${lp.y+1}" text-anchor="middle" font-size="5" font-weight="600" fill="rgba(255,255,255,0.95)" pointer-events="none" font-family="Inter,sans-serif">${d.label}</text>`;
+    cum+=d.pct;
+  });
+  // inner hole
+  html+=`<circle cx="${cx}" cy="${cy}" r="${ir}" fill="${holeFill||'#79C1D9'}"/>`;
+  svg.innerHTML=html;
+
+  // Legend
+  if(legendId){
+    document.getElementById(legendId).innerHTML=data.map((d,i)=>`
+      <div class="legend-item" id="leg-${key}-${i}" onclick="selectSlice('${key}','${svgId}','${legendId}','${detailId}',${i})">
+        <div class="leg-dot" style="background:${d.dot}"></div>${d.label}
+      </div>`).join('');
+  }
+  renderDetail(key,detailId,null);
+}
+
+function selectSlice(key,svgId,legendId,detailId,idx){
+  if(selectedSlice[key]===idx){
+    selectedSlice[key]=null;
+    document.querySelectorAll(`#${svgId} .pie-slice`).forEach(p=>p.classList.remove('dimmed'));
+    if(legendId) document.querySelectorAll(`#${legendId} .legend-item`).forEach(l=>l.classList.remove('selected'));
+    renderDetail(key,detailId,null);
+    closePopup(key);
+  } else {
+    selectedSlice[key]=idx;
+    document.querySelectorAll(`#${svgId} .pie-slice`).forEach((p,i)=>{
+      p.classList.toggle('dimmed',i!==idx);
+    });
+    if(legendId) document.querySelectorAll(`#${legendId} .legend-item`).forEach((l,i)=>{
+      l.classList.toggle('selected',i===idx);
+    });
+    renderDetail(key,detailId,idx);
+    showPopup(key,idx);
+  }
+}
+
+function showPopup(key,idx){
+  const popup=document.getElementById(`${key}-popup`);
+  if(!popup) return;
+  const d = pieData[dataKeyOf(key)][idx];
+  if(!d) return;
+  const nm=popup.querySelector('.nm');
+  if(nm) nm.textContent=d.name || d.label;
+  popup.classList.add('shown');
+}
+
+function closePopup(key){
+  const popup=document.getElementById(`${key}-popup`);
+  if(popup) popup.classList.remove('shown');
+  // Reset selected slice for this pie
+  if(selectedSlice[key]!=null){
+    selectedSlice[key]=null;
+    const svgId=`${key}-pie`;
+    document.querySelectorAll(`#${svgId} .pie-slice`).forEach(p=>p.classList.remove('dimmed'));
+    const legendId=`${key}-legend`;
+    const legend=document.getElementById(legendId);
+    if(legend) legend.querySelectorAll('.legend-item').forEach(l=>l.classList.remove('selected'));
+    const detailId=`${key}-detail`;
+    if(document.getElementById(detailId)) renderDetail(key,detailId,null);
+  }
+}
+
+function renderDetail(key,detailId,idx){
+  const el=document.getElementById(detailId);
+  const data = pieData[dataKeyOf(key)];
+  if(idx===null || !data || !data.length){
+    el.innerHTML='<span class="pie-detail-empty">Tap a segment to see details</span>';
+    return;
+  }
+  const d=data[idx];
+  const medals=['🥇','🥈','🥉'];
+  el.innerHTML=`
+    <div class="pie-detail-rank">${medals[idx]||''} ${d.label}</div>
+    <div class="pie-detail-name">${d.name||''}</div>
+    <div class="pie-detail-score">${d.score||''}</div>`;
+}
+
+function rebuildAllPies(){
+  computeGenderPieFromRoster();
+  buildPie('boys-pie','boys-legend','boys-detail','boys','#79C1D9');
+  buildPie('girls-pie','girls-legend','girls-detail','girls','#BB9BB7');
+  buildPie('gender-pie',null,'gender-detail','gender','#BBC3C6');
+  buildPie('da-boys-pie','da-boys-legend','da-boys-detail','da-boys','#79C1D9');
+  buildPie('da-girls-pie','da-girls-legend','da-girls-detail','da-girls','#BB9BB7');
+}
+rebuildAllPies();
+
+/* ─── Profile Modal ─── */
+function openProfModal(rosterId, displayNameFallback){
+  // rosterId is currently unused — identity comes from the spreadsheet's
+  // Name column, and the lookup below is always by displayName against
+  // Firestore. Kept as a parameter for forward-compatibility if a real
+  // per-person ID source is added later.
+  const overlay = document.getElementById('prof-overlay');
+  const inner   = document.getElementById('prof-modal-inner');
+  overlay.classList.remove('hidden');
+  inner.innerHTML = '<div class="prof-loading"><div class="prof-spinner"></div> Loading profile…</div>';
+
+  // Close any open summary dropdowns
+  document.querySelectorAll('.ds-dropdown').forEach(d => d.classList.remove('shown'));
+
+  // Wait up to 5s for Firebase to be ready, then query
+  function doQuery(attempts) {
+    if(window._db) {
+      window._db.collection('users')
+        .where('displayName', '==', String(displayNameFallback))
+        .get()
+        .then(snap => {
+          if(snap.empty){
+            inner.innerHTML = `<div class="prof-error">No profile found for: ${displayNameFallback}</div>`;
+            return;
+          }
+          const data = snap.docs[0].data();
+          renderProfModal(inner, data);
+        })
+        .catch(err => {
+          inner.innerHTML = `<div class="prof-error">Error: ${err.message}</div>`;
+        });
+    } else if(attempts > 0) {
+      setTimeout(() => doQuery(attempts - 1), 300);
+    } else {
+      inner.innerHTML = '<div class="prof-error">⚠️ Firebase failed to load. Check your internet connection and try again.</div>';
+    }
+  }
+  doQuery(17); // retry up to 17× every 300ms = ~5 seconds
+}
+
+function closeProfModal(evt){
+  if(!evt || evt.target === document.getElementById('prof-overlay')){
+    document.getElementById('prof-overlay').classList.add('hidden');
+  }
+}
+document.addEventListener('keydown', e => { if(e.key==='Escape') closeProfModal(); });
+
+function fmtDOB(dob){
+  if(!dob) return '—';
+  // dob is "YYYY-MM-DD"
+  const [y,m,d] = dob.split('-');
+  const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return `${parseInt(d,10)} ${months[parseInt(m,10)-1]} ${y}`;
+}
+
+function renderProfModal(inner, d){
+  const photoBlock = d.photoURL
+    ? `<img class="prof-photo" src="${d.photoURL}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" alt="photo"/>
+       <div class="prof-photo-fallback" style="display:none"><svg viewBox="0 0 54 54" fill="none"><circle cx="27" cy="27" r="27" fill="#7ab8d0"/><circle cx="27" cy="20" r="9" fill="#f5c5a0"/><ellipse cx="27" cy="45" rx="15" ry="11" fill="#2980b9"/></svg></div>`
+    : `<div class="prof-photo-fallback"><svg viewBox="0 0 54 54" fill="none"><circle cx="27" cy="27" r="27" fill="#7ab8d0"/><circle cx="27" cy="20" r="9" fill="#f5c5a0"/><ellipse cx="27" cy="45" rx="15" ry="11" fill="#2980b9"/></svg></div>`;
+
+  const role = (d.role || 'student').toLowerCase();
+
+  const headerHtml = `
+    <div class="prof-header">
+      ${photoBlock}
+      <div class="prof-header-info">
+        <div class="prof-name">${d.displayName || '—'}</div>
+        <span class="prof-role-badge">${d.role || 'member'}</span>
+      </div>
+      <button class="prof-close" onclick="closeProfModal()">&#10005;</button>
+    </div>`;
+
+  let bodyHtml = '';
+
+  if(role === 'teacher') {
+    bodyHtml = `
+      <div class="prof-section">
+        <div class="prof-section-title">Teaching Details</div>
+        <div class="prof-row"><span class="prof-row-label">Teaching Grade</span><span class="prof-row-val">${d.teachingGrade != null ? 'Grade ' + d.teachingGrade : '—'}</span></div>
+        <div class="prof-row"><span class="prof-row-label">Subject</span><span class="prof-row-val" style="text-transform:capitalize">${d.subject || '—'}</span></div>
+        <div class="prof-row"><span class="prof-row-label">Medium</span><span class="prof-row-val">${d.medium || '—'}</span></div>
+        <div class="prof-row"><span class="prof-row-label">Joining Date</span><span class="prof-row-val">${fmtDOB(d.joiningDate)}</span></div>
+      </div>
+      <div class="prof-section">
+        <div class="prof-section-title">Personal</div>
+        <div class="prof-row"><span class="prof-row-label">Date of Birth</span><span class="prof-row-val">${fmtDOB(d.dob)}</span></div>
+        <div class="prof-row"><span class="prof-row-label">Home Address</span><span class="prof-row-val">${d.homeAddress || '—'}</span></div>
+      </div>
+      <div class="prof-section">
+        <div class="prof-section-title">Contact</div>
+        <div class="prof-row"><span class="prof-row-label">Email</span><span class="prof-row-val">${d.email || '—'}</span></div>
+        <div class="prof-row"><span class="prof-row-label">Phone</span><span class="prof-row-val">${d.phoneNo || d.contactNo || '—'}</span></div>
+      </div>`;
+  } else {
+    // student / prefect
+    bodyHtml = `
+      <div class="prof-section">
+        <div class="prof-section-title">Personal Details</div>
+        <div class="prof-row"><span class="prof-row-label">Admission No</span><span class="prof-row-val">${d.admissionNo || '—'}</span></div>
+        <div class="prof-row"><span class="prof-row-label">Date of Birth</span><span class="prof-row-val">${fmtDOB(d.dob)}</span></div>
+        <div class="prof-row"><span class="prof-row-label">Gender</span><span class="prof-row-val" style="text-transform:capitalize">${d.gender || '—'}</span></div>
+        <div class="prof-row"><span class="prof-row-label">Grade</span><span class="prof-row-val">${d.grade != null ? 'Grade ' + d.grade : '—'}</span></div>
+        <div class="prof-row"><span class="prof-row-label">Last Promotion</span><span class="prof-row-val">${d.lastPromotionYear || '—'}</span></div>
+        <div class="prof-row"><span class="prof-row-label">Home Address</span><span class="prof-row-val">${d.homeAddress || '—'}</span></div>
+      </div>
+      <div class="prof-section">
+        <div class="prof-section-title">Contact</div>
+        <div class="prof-row"><span class="prof-row-label">Email</span><span class="prof-row-val">${d.email || '—'}</span></div>
+        <div class="prof-row"><span class="prof-row-label">Phone</span><span class="prof-row-val">${d.contactNo || '—'}</span></div>
+      </div>
+      <div class="prof-section">
+        <div class="prof-section-title">Guardian</div>
+        <div class="prof-row"><span class="prof-row-label">Name</span><span class="prof-row-val">${d.guardianName || '—'}</span></div>
+        <div class="prof-row"><span class="prof-row-label">Phone</span><span class="prof-row-val">${d.guardianPhone || '—'}</span></div>
+        <div class="prof-row"><span class="prof-row-label">Email</span><span class="prof-row-val">${d.guardianEmail || '—'}</span></div>
+      </div>`;
+  }
+
+  inner.innerHTML = headerHtml + '<div class="prof-body">' + bodyHtml + '</div>';
+}
+
+/* ─── Summary Chip Dropdown ─── */
+function toggleSummaryDrop(id, evt){
+  if(evt) evt.stopPropagation();
+  const el = document.getElementById(id);
+  if(!el) return;
+  const wasShown = el.classList.contains('shown');
+  // close all summary dropdowns
+  document.querySelectorAll('.ds-dropdown').forEach(d => d.classList.remove('shown'));
+  if(!wasShown) el.classList.add('shown');
+}
+// Close dropdowns when clicking outside
+document.addEventListener('click', function(){
+  document.querySelectorAll('.ds-dropdown').forEach(d => d.classList.remove('shown'));
+});
+
+/* ─── Navigation ─── */
+let curPage='page-dashboard';
+const pageHistory=[];
+const navMap={'dashboard':'page-dashboard','students':'page-students','teachers':'page-teachers','prefects':'page-prefects','character-cert':'page-character-cert','flower-marks':'page-flower-marks','term-marks':'page-term-marks','daily-attendance':'page-daily-attendance'};
+const navReverseMap=Object.fromEntries(Object.entries(navMap).map(([k,v])=>[v,k]));
+
+function showPage(id, fromBack){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  const el=document.getElementById(id);
+  if(el){
+    el.classList.add('active');
+    if(!fromBack && curPage !== id) pageHistory.push(curPage);
+    curPage=id;
+  }
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  const navKey=navReverseMap[id];
+  if(navKey)document.querySelector(`[data-page="${navKey}"]`)?.classList.add('active');
+  document.querySelector('.content').scrollTop=0;
+}
+function goBack(){
+  const prev = pageHistory.pop();
+  if(prev) showPage(prev, true);
+}
+/* selectTerm() removed — the Marks page now shows a real per-exam
+   breakdown (see openStudentMarks/renderStudentMarksBreakdown) instead
+   of three static clickable term boxes. */
+
+document.querySelectorAll('.nav-item').forEach(item=>{
+  item.addEventListener('click',()=>showPage(navMap[item.dataset.page]||'page-dashboard'));
+});
+
+/* ─── Manual refresh button wiring ─── */
+document.getElementById('refresh-btn')?.addEventListener('click', ()=>{
+  loadLiveData();
+});
+</script>
+
+<!-- ═══════ PROFILE MODAL ═══════ -->
+<div class="prof-overlay hidden" id="prof-overlay" onclick="closeProfModal(event)">
+  <div class="prof-modal" id="prof-modal">
+    <div id="prof-modal-inner">
+      <div class="prof-loading"><div class="prof-spinner"></div> Loading profile…</div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
