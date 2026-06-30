@@ -35,6 +35,27 @@ function loadAvatarPhoto(avatarEl, displayName, fallbackFill){
   }
   doQuery(17);
 }
+
+// Fetch a full Firestore user doc by displayName — used by the
+// pie-chart leaderboard popups (boys/girls Top List).
+function fetchProfileByName(name, cb) {
+  function doQuery(attempts) {
+    if (window._db) {
+      window._db.collection('users')
+        .where('displayName', '==', name)
+        .limit(1)
+        .get()
+        .then(snap => cb(snap.empty ? null : snap.docs[0].data()))
+        .catch(() => cb(null));
+    } else if (attempts > 0) {
+      setTimeout(() => doQuery(attempts - 1), 300);
+    } else {
+      cb(null);
+    }
+  }
+  doQuery(17);
+}
+
   // Track which person the admin is currently viewing — used by sendPersonalAlert
   let _currentDetailPerson = null;
 
@@ -199,8 +220,10 @@ function loadAvatarPhoto(avatarEl, displayName, fallbackFill){
       appId: "1:1074665165821:web:91ef329a0472fa138e7f94",
       measurementId: "G-SG9TZSLP6E"
     };
-    firebase.initializeApp(_firebaseConfig);
+   firebase.initializeApp(_firebaseConfig);
     window._db = firebase.firestore();
+    window._auth = firebase.auth();
+    _initAuthGate();
 
     // Second app — the same Realtime Database used by daily-alerts.html
     const _alertsConfig = {
@@ -224,16 +247,21 @@ function loadAvatarPhoto(avatarEl, displayName, fallbackFill){
     document.head.appendChild(s);
   }
 
-  // Chain: app → firestore → database → init
+  // Chain: app → auth → firestore → database → init
   _loadScript(
     'https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js',
     function() {
       _loadScript(
-        'https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js',
+        'https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js',
         function() {
           _loadScript(
-            'https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js',
-            _initFirestore
+            'https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js',
+            function() {
+              _loadScript(
+                'https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js',
+                _initFirestore
+              );
+            }
           );
         }
       );
@@ -780,6 +808,115 @@ html{font-size:clamp(10px, 1.1vw, 16px);}
 }
 .fl-date{font-size:15px;color:#0E3636;font-weight:400}
 .fl-btns{display:flex;gap:8px}
+.fl-flower {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: filter .25s ease, transform .15s ease;
+  cursor: default;
+}
+.fl-flower.gray svg {
+  filter: grayscale(1) brightness(0.55) contrast(0.7);
+  opacity: 0.55;
+}
+.fl-flower.colorful svg {
+  filter: drop-shadow(0 3px 8px rgba(255,143,177,0.55));
+}
+.fl-flower:hover { transform: scale(1.08); }
+
+/* ── Gender-split layout ── */
+.flower-gender-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  width: 100%;
+}
+.flower-gender-col {
+  background: rgba(255,255,255,0.25);
+  border-radius: 12px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  min-width: 0;
+}
+.flower-gender-title {
+  font-size: 13px;
+  font-weight: 700;
+  text-align: center;
+  padding: 6px 0;
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-bottom: 1px solid rgba(14,54,54,0.18);
+  margin-bottom: 2px;
+}
+.flower-gender-title.girls { color: #c0397d; }
+.flower-gender-title.boys  { color: #1a5e90; }
+.flower-gender-count {
+  font-size: 10px;
+  font-weight: 600;
+  background: rgba(0,0,0,0.1);
+  border-radius: 9999px;
+  padding: 2px 8px;
+  color: inherit;
+}
+.flower-student-row {
+  background: var(--flower-row);
+  border-radius: 14px;
+  padding: 7px 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+  min-width: 0;
+}
+.flower-student-photo {
+  width: 32px; height: 32px; border-radius: 50%;
+  overflow: hidden; flex-shrink: 0;
+  background: #7ab8d0;
+}
+.flower-student-photo img,
+.flower-student-photo svg { width: 100%; height: 100%; object-fit: cover; }
+.flower-student-name {
+  font-size: 12px; font-weight: 600; color: #0E3636;
+  flex: 1; min-width: 0;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.flower-icons-row {
+  display: flex; gap: 4px; flex-shrink: 0;
+  align-items: flex-end;
+}
+.flower-icon-cell {
+  display: flex; flex-direction: column;
+  align-items: center; gap: 1px;
+}
+.flower-icon-cell .fl-flower svg {
+  width: 26px; height: 26px;
+}
+.flower-icon-cell .date-mini {
+  font-size: 8.5px; color: #555; font-weight: 600;
+  letter-spacing: 0.2px;
+}
+.flower-gender-empty {
+  padding: 18px 8px;
+  text-align: center;
+  color: #777;
+  font-size: 11px;
+  font-style: italic;
+}
+.flower-summary-strip {
+  background: rgba(255,255,255,0.45);
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 11px;
+  color: #0E3636;
+  text-align: center;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
 .flower-right-col{display:flex;flex-direction:column;gap:14px}
 .charts-section-title{font-size:22px;font-weight:600;margin-bottom:14px;color:#121616}
 .charts-row{display:grid;grid-template-columns:1fr 1fr;gap:18px}
@@ -1261,9 +1398,376 @@ html{font-size:clamp(10px, 1.1vw, 16px);}
 @keyframes spin{to{transform:rotate(360deg)}}
 .prof-error{padding:32px 28px;text-align:center;color:#c00;font-size:14px}
 
+/* ─────────── AUTH GATE ─────────── */
+.auth-gate {
+  position: fixed; inset: 0; z-index: 9999;
+  background:
+    radial-gradient(circle at 30% 20%, rgba(80,6,6,0.5), transparent 50%),
+    radial-gradient(circle at 70% 80%, rgba(120,90,10,0.3), transparent 50%),
+    linear-gradient(160deg, #1a0606 0%, #2a0d0d 60%, #0d0d0a 100%);
+  display: flex; align-items: center; justify-content: center;
+  padding: 2rem;
+  font-family: Inter, sans-serif;
+}
+.auth-card {
+  background: #fff;
+  border-radius: 20px;
+  padding: 36px 32px;
+  max-width: 400px; width: 100%;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.5);
+  text-align: center;
+  animation: calOpen .3s ease;
+}
+.auth-logo { width: 64px; height: 64px; margin: 0 auto 16px; }
+.auth-logo img { width: 100%; height: 100%; object-fit: contain; }
+.auth-title { font-size: 22px; font-weight: 700; color: #1e1e1e; margin-bottom: 4px; }
+.auth-sub {
+  font-size: 11px; color: #888;
+  letter-spacing: 2px; text-transform: uppercase;
+  margin-bottom: 26px; font-weight: 600;
+}
+.auth-input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  font-size: 14px;
+  margin-bottom: 12px;
+  font-family: Inter, sans-serif;
+  outline: none;
+  transition: border-color .15s;
+}
+.auth-input:focus { border-color: #411515; }
+.auth-btn {
+  width: 100%;
+  padding: 13px;
+  background: #411515;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 13px; font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  cursor: pointer;
+  font-family: Inter, sans-serif;
+  transition: background .15s;
+  margin-top: 8px;
+}
+.auth-btn:hover { background: #5a1f1f; }
+.auth-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+.auth-err {
+  color: #c0392b;
+  font-size: 13px;
+  margin-top: 12px;
+  min-height: 18px;
+  line-height: 1.4;
+}
+.auth-hint {
+  font-size: 11px; color: #aaa;
+  margin-top: 20px;
+  font-style: italic;
+  line-height: 1.5;
+}
+.signout-btn {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  color: #fff;
+  border-radius: 9999px;
+  padding: 6px 14px;
+  font-size: 11px; font-weight: 600;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  font-family: Inter, sans-serif;
+  transition: background .15s;
+  margin-left: 8px;
+}
+.signout-btn:hover { background: rgba(255,255,255,0.18); }
+
+.auth-suggestions {
+  position: absolute;
+  top: calc(100% - 8px);
+  left: 0; right: 0;
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  box-shadow: 0 12px 32px rgba(0,0,0,0.18);
+  max-height: 220px;
+  overflow-y: auto;
+  z-index: 20;
+  display: none;
+  text-align: left;
+}
+.auth-suggestions.shown { display: block; }
+.auth-sugg-item {
+  padding: 10px 14px;
+  cursor: pointer;
+  font-size: 13px;
+  color: #333;
+  transition: background .12s;
+  border-bottom: 1px solid #f5f5f5;
+}
+.auth-sugg-item:last-child { border-bottom: none; }
+.auth-sugg-item:hover { background: #f5f0f0; }
+.auth-sugg-item .sugg-name { font-weight: 600; }
+.auth-sugg-item .sugg-email { font-size: 11px; color: #888; margin-top: 2px; }
+.auth-sugg-empty {
+  padding: 12px 14px;
+  font-size: 12px;
+  color: #aaa;
+  font-style: italic;
+  text-align: center;
+}
+
 </style>
+
+<script>
+/* ═══════════════ AUTH GATE LOGIC ═══════════════ */
+let _teacherCache = null;        // [{ uid, name, email }] — loaded once
+let _selectedTeacher = null;     // teacher chosen from the suggestions
+
+function _initAuthGate() {
+  if (!window._auth || !window._db) {
+    setTimeout(_initAuthGate, 200);
+    return;
+  }
+
+  window._auth.onAuthStateChanged(async function(user) {
+    if (!user) {
+      showGate();
+      return;
+    }
+    // Signed in — verify they're a teacher in Firestore
+    try {
+      const snap = await window._db.collection('users').doc(user.uid).get();
+      if (!snap.exists) {
+        await window._auth.signOut();
+        showGate('⚠ No profile found for this account.');
+        return;
+      }
+      const data = snap.data();
+      if (data.role !== 'teacher') {
+        await window._auth.signOut();
+        showGate('⚠ Access denied — teachers only.');
+        return;
+      }
+      hideGate();
+      updateHeader(data);
+    } catch (e) {
+      await window._auth.signOut();
+      showGate('Could not verify account: ' + e.message);
+    }
+  });
+
+  // Preload the teacher list so the suggestions box can search instantly
+  preloadTeachers();
+}
+
+async function preloadTeachers() {
+  try {
+    const snap = await window._db.collection('users')
+      .where('role', '==', 'teacher').get();
+    _teacherCache = [];
+    snap.forEach(doc => {
+      const d = doc.data();
+      if (d.email && d.displayName) {
+        _teacherCache.push({
+          uid: doc.id,
+          name: d.displayName,
+          email: d.email
+        });
+      }
+    });
+  } catch (e) {
+    console.warn('Could not preload teacher list:', e.message);
+    _teacherCache = [];
+  }
+}
+
+function onAuthNameInput() {
+  const input = document.getElementById('auth-name');
+  const box   = document.getElementById('auth-suggestions');
+  const q = (input.value || '').trim().toLowerCase();
+  _selectedTeacher = null;
+
+  if (!q) { box.classList.remove('shown'); box.innerHTML = ''; return; }
+
+  if (!_teacherCache) {
+    box.innerHTML = '<div class="auth-sugg-empty">Loading teacher list…</div>';
+    box.classList.add('shown');
+    return;
+  }
+
+  const matches = _teacherCache.filter(t =>
+    (t.name || '').toLowerCase().indexOf(q) !== -1
+  ).slice(0, 6);
+
+  if (!matches.length) {
+    box.innerHTML = '<div class="auth-sugg-empty">No teacher matches "' +
+      escapeHtmlAuth(q) + '"</div>';
+    box.classList.add('shown');
+    return;
+  }
+
+  box.innerHTML = matches.map((t, i) =>
+    '<div class="auth-sugg-item" onclick="pickTeacher(' + i + ')">' +
+      '<div class="sugg-name">' + escapeHtmlAuth(t.name) + '</div>' +
+      '<div class="sugg-email">' + escapeHtmlAuth(t.email) + '</div>' +
+    '</div>'
+  ).join('');
+  box._matches = matches;
+  box.classList.add('shown');
+}
+
+function pickTeacher(idx) {
+  const box = document.getElementById('auth-suggestions');
+  const matches = box._matches || [];
+  const t = matches[idx];
+  if (!t) return;
+  _selectedTeacher = t;
+  document.getElementById('auth-name').value = t.name;
+  box.classList.remove('shown');
+  document.getElementById('auth-password').focus();
+}
+
+function escapeHtmlAuth(s) {
+  return String(s).replace(/[&<>"']/g, c =>
+    ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+// Hide suggestions when clicking outside the name input
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('#auth-name') &&
+      !e.target.closest('#auth-suggestions')) {
+    const box = document.getElementById('auth-suggestions');
+    if (box) box.classList.remove('shown');
+  }
+});
+
+function showGate(msg) {
+  const gate = document.getElementById('auth-gate');
+  if (gate) gate.style.display = 'flex';
+  const err = document.getElementById('auth-err');
+  if (err) err.textContent = msg || '';
+  const pw = document.getElementById('auth-password');
+  if (pw) pw.value = '';
+  const btn = document.getElementById('auth-btn');
+  if (btn) { btn.disabled = false; btn.textContent = 'Sign In'; }
+}
+
+function hideGate() {
+  const gate = document.getElementById('auth-gate');
+  if (gate) gate.style.display = 'none';
+}
+
+function updateHeader(userData) {
+  const nameEl = document.querySelector('.user-name');
+  const photoEl = document.getElementById('header-user-photo');
+  if (nameEl) nameEl.textContent = userData.displayName || 'Teacher';
+  if (photoEl && userData.photoURL) {
+    photoEl.innerHTML = '<img src="' + userData.photoURL +
+      '" style="width:100%;height:100%;object-fit:cover" ' +
+      'onerror="this.parentElement.innerHTML=\'<svg viewBox=&quot;0 0 54 54&quot;><rect width=&quot;54&quot; height=&quot;54&quot; fill=&quot;#888&quot;/><circle cx=&quot;27&quot; cy=&quot;20&quot; r=&quot;9&quot; fill=&quot;#bbb&quot;/><ellipse cx=&quot;27&quot; cy=&quot;45&quot; rx=&quot;15&quot; ry=&quot;11&quot; fill=&quot;#bbb&quot;/></svg>\'"/>';
+  }
+}
+
+async function signIn() {
+  const nameQ    = document.getElementById('auth-name').value.trim();
+  const password = document.getElementById('auth-password').value;
+  const errEl = document.getElementById('auth-err');
+  const btn   = document.getElementById('auth-btn');
+  errEl.textContent = '';
+
+  if (!nameQ || !password) {
+    errEl.textContent = '⚠ Please enter your name and password.';
+    return;
+  }
+  if (!window._auth) {
+    errEl.textContent = '⚠ Authentication not ready — please wait a moment.';
+    return;
+  }
+
+  // Resolve which teacher this name refers to
+  let teacher = _selectedTeacher;
+  if (!teacher) {
+    if (!_teacherCache) {
+      errEl.textContent = '⚠ Teacher list still loading — try again in a moment.';
+      return;
+    }
+    const q = nameQ.toLowerCase();
+    const matches = _teacherCache.filter(t =>
+      (t.name || '').toLowerCase().indexOf(q) !== -1
+    );
+    if (matches.length === 0) {
+      errEl.textContent = '⚠ No teacher found matching "' + nameQ + '".';
+      return;
+    }
+    // Prefer an exact (case-insensitive) full-name match if one exists
+    const exact = matches.find(t => t.name.toLowerCase() === q);
+    if (exact) {
+      teacher = exact;
+    } else if (matches.length > 1) {
+      errEl.textContent = '⚠ ' + matches.length +
+        ' teachers match — pick one from the list or type more of the name.';
+      onAuthNameInput();
+      return;
+    } else {
+      teacher = matches[0];
+    }
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Signing in…';
+  try {
+    await window._auth.signInWithEmailAndPassword(teacher.email, password);
+    // onAuthStateChanged verifies role and hides the gate
+  } catch (e) {
+    let msg = e.message;
+    if (e.code === 'auth/user-not-found')          msg = '⚠ No account exists for ' + teacher.name + '.';
+    else if (e.code === 'auth/wrong-password')     msg = '⚠ Incorrect password.';
+    else if (e.code === 'auth/too-many-requests')  msg = '⚠ Too many attempts. Try again later.';
+    else if (e.code === 'auth/invalid-credential') msg = '⚠ Incorrect password for ' + teacher.name + '.';
+    errEl.textContent = msg;
+    btn.disabled = false;
+    btn.textContent = 'Sign In';
+  }
+}
+
+async function signOut() {
+  if (!window._auth) return;
+  if (!confirm('Sign out?')) return;
+  await window._auth.signOut();
+}
+
+// Enter key submits the login form
+document.addEventListener('DOMContentLoaded', function() {
+  ['auth-name', 'auth-password'].forEach(function(id) {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') signIn();
+    });
+  });
+});
+</script>
+
 </head>
 <body>
+
+<!-- ══ AUTH GATE ══ -->
+<div class="auth-gate" id="auth-gate">
+  <div class="auth-card">
+    <div class="auth-logo"><img src="logo.png" alt=""/></div>
+    <div class="auth-title">Attendance Dashboard</div>
+    <div class="auth-sub">Sri Vipassi Dhamma School</div>
+    <div style="position:relative">
+      <input class="auth-input" id="auth-name" type="text" placeholder="Your name (or part of it)" autocomplete="off" oninput="onAuthNameInput()" onfocus="onAuthNameInput()"/>
+      <div class="auth-suggestions" id="auth-suggestions"></div>
+    </div>
+    <input class="auth-input" id="auth-password" type="password" placeholder="Password" autocomplete="current-password"/>
+    <button class="auth-btn" id="auth-btn" onclick="signIn()">Sign In</button>
+    <div class="auth-err" id="auth-err"></div>
+    <div class="auth-hint">Access restricted to registered teachers only.</div>
+  </div>
+</div>
 
 <!-- ══ HEADER ══ -->
 <header class="header">
@@ -1283,10 +1787,11 @@ html{font-size:clamp(10px, 1.1vw, 16px);}
       <span style="font-size:14px">&#8635;</span>
     </button>
     <div class="user-text">
-      <div class="user-name">Waliwawa Nandasiri</div>
+      <div class="user-name">—</div>
       <div class="user-role">Teacher</div>
     </div>
-    <div class="user-photo">
+    <button class="signout-btn" onclick="signOut()" title="Sign out">Sign Out</button>
+    <div class="user-photo" id="header-user-photo">
       <svg viewBox="0 0 54 54" fill="none">
         <rect width="54" height="54" fill="#888"/>
         <circle cx="27" cy="20" r="9" fill="#bbb"/>
@@ -1629,29 +2134,43 @@ html{font-size:clamp(10px, 1.1vw, 16px);}
 <!-- ═══════ FLOWER MARKS ═══════ -->
 <div id="page-flower-marks" class="page">
   <div class="filters">
-    <select class="f-sel"><option>Grade</option><option>Grade 6</option><option>Grade 7</option><option>Grade 8</option><option>Grade 9</option><option>Grade 10</option><option>Grade 11</option></select>
-    <select class="f-sel"><option>Year</option><option>2024</option><option>2025</option><option>2026</option></select>
-    <div class="search-box"><input placeholder="Search the name"/><svg width="16" height="16" fill="none" stroke="#555" stroke-width="2"><circle cx="7" cy="7" r="5"/><line x1="11" y1="11" x2="15" y2="15"/></svg></div>
+    <select class="f-sel" id="flower-grade-filter" onchange="renderFlowerView()">
+      <option value="">Grade</option>
+      <option>Grade 1</option><option>Grade 2</option><option>Grade 3</option>
+      <option>Grade 4</option><option>Grade 5</option><option>Grade 6</option>
+      <option>Grade 7</option><option>Grade 8</option><option>Grade 9</option>
+      <option>Grade 10</option><option>Grade 11</option><option>Grade 12</option>
+      <option>Grade 13</option>
+    </select>
+    <select class="f-sel" id="flower-year-filter" onchange="renderFlowerView()">
+      <option value="">Year</option>
+      <option>2023</option><option>2024</option><option>2025</option><option>2026</option>
+    </select>
+    <div class="search-box"><input id="flower-search-input" placeholder="Search the name" oninput="renderFlowerView()"/><svg width="16" height="16" fill="none" stroke="#555" stroke-width="2"><circle cx="7" cy="7" r="5"/><line x1="11" y1="11" x2="15" y2="15"/></svg></div>
   </div>
-  <div class="flower-top"><span>Percentage</span><button class="toggle-pill"></button></div>
   <div class="flower-grid">
-    <div class="flower-panel" id="flower-rows"></div>
+    <div class="flower-panel" id="flower-rows">
+      <div style="padding:24px;text-align:center;color:#666;font-size:14px;font-style:italic">Select Grade and Year above to view flower offerings.</div>
+    </div>
     <div class="flower-right-col">
-      <div class="date-modal">
-        <p class="m-lbl">Select date</p>
-        <div class="m-title-row"><h2 class="m-title">Enter date</h2><span style="font-size:20px">&#128197;</span></div>
-        <div class="m-field"><label class="m-field-lbl">Date</label><input type="date" class="m-field-input" id="flower-date"/></div>
-        <p class="m-error" id="flower-err"></p>
-        <div class="m-acts">
-          <button class="m-btn" onclick="resetFlower()">Cancel</button>
-          <button class="m-btn" onclick="applyFlower()">OK</button>
-        </div>
+      <div>
+        <p class="monthly-lbl">Month</p>
+        <select class="monthly-sel" id="flower-month-sel" onchange="onFlowerMonthChange()">
+          <option>January</option><option>February</option><option>March</option><option>April</option>
+          <option>May</option><option>June</option><option>July</option><option>August</option>
+          <option>September</option><option>October</option><option>November</option><option>December</option>
+        </select>
       </div>
       <div>
-        <p class="monthly-lbl">Monthly</p>
-        <select class="monthly-sel"><option>January</option><option>February</option><option>March</option><option>April</option><option>May</option><option>June</option><option>July</option><option>August</option><option selected>September</option><option>October</option><option>November</option><option>December</option></select>
+        <p class="monthly-lbl">Day (Sunday)</p>
+        <select class="monthly-sel" id="flower-day-sel" onchange="renderFlowerView()">
+          <option value="">All Sundays</option>
+        </select>
       </div>
-      <div style="display:flex;align-items:center;gap:10px"><span style="font-size:15px;font-weight:400">Percentage</span><button class="toggle-pill"></button></div>
+      <div style="background:rgba(255,255,255,0.4);border-radius:10px;padding:12px;font-size:11px;color:#0E3636;line-height:1.5">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><span style="display:inline-block;width:18px;height:18px"><svg viewBox="0 0 64 64" width="18" height="18" style="filter:grayscale(1) brightness(0.55);opacity:0.55"><g transform="translate(32 32)"><ellipse cx="0" cy="-16" rx="10" ry="14" fill="#ff8fb1"/><ellipse cx="0" cy="-16" rx="10" ry="14" fill="#ff8fb1" transform="rotate(72)"/><ellipse cx="0" cy="-16" rx="10" ry="14" fill="#ff8fb1" transform="rotate(144)"/><ellipse cx="0" cy="-16" rx="10" ry="14" fill="#ff8fb1" transform="rotate(216)"/><ellipse cx="0" cy="-16" rx="10" ry="14" fill="#ff8fb1" transform="rotate(288)"/><circle r="7" fill="#ffd966"/></g></svg></span> Not provided</div>
+        <div style="display:flex;align-items:center;gap:8px"><span style="display:inline-block;width:18px;height:18px"><svg viewBox="0 0 64 64" width="18" height="18"><g transform="translate(32 32)"><ellipse cx="0" cy="-16" rx="10" ry="14" fill="#ff8fb1"/><ellipse cx="0" cy="-16" rx="10" ry="14" fill="#ff8fb1" transform="rotate(72)"/><ellipse cx="0" cy="-16" rx="10" ry="14" fill="#ff8fb1" transform="rotate(144)"/><ellipse cx="0" cy="-16" rx="10" ry="14" fill="#ff8fb1" transform="rotate(216)"/><ellipse cx="0" cy="-16" rx="10" ry="14" fill="#ff8fb1" transform="rotate(288)"/><circle r="7" fill="#ffd966"/></g></svg></span> Flower provided</div>
+      </div>
     </div>
   </div>
   <!-- Interactive Pie Charts -->
@@ -1666,18 +2185,18 @@ html{font-size:clamp(10px, 1.1vw, 16px);}
         </div>
       </div>
       <div class="pie-detail" id="boys-detail"><span class="pie-detail-empty">Tap a segment to see details</span></div>
-      <div class="profile-popup" id="boys-popup">
+  <div class="profile-popup" id="boys-popup">
         <button class="popup-close" onclick="closePopup('boys')">&times;</button>
         <div class="popup-row">
           <div class="popup-avatar"></div>
           <div class="popup-info">
             <div class="nm">[Name]</div>
-            <div>Profile</div>
-            <div class="dash">----------------------</div>
-            <div class="dash">----------------------</div>
+            <div class="popup-role">Profile</div>
+            <div class="popup-detail-1"></div>
+            <div class="popup-detail-2"></div>
             <div class="popup-stats">
-              <div>Percentage _ _ %</div>
-              <div>How many Days _ _</div>
+              <div>Percentage <span class="popup-pct">_ _</span>%</div>
+              <div>How many Days <span class="popup-days">_ _</span></div>
             </div>
           </div>
         </div>
@@ -1698,12 +2217,12 @@ html{font-size:clamp(10px, 1.1vw, 16px);}
           <div class="popup-avatar"></div>
           <div class="popup-info">
             <div class="nm">[Name]</div>
-            <div>Profile</div>
-            <div class="dash">----------------------</div>
-            <div class="dash">----------------------</div>
+            <div class="popup-role">Profile</div>
+            <div class="popup-detail-1"></div>
+            <div class="popup-detail-2"></div>
             <div class="popup-stats">
-              <div>Percentage _ _ %</div>
-              <div>How many Days _ _</div>
+              <div>Percentage <span class="popup-pct">_ _</span>%</div>
+              <div>How many Days <span class="popup-days">_ _</span></div>
             </div>
           </div>
         </div>
@@ -1777,12 +2296,12 @@ html{font-size:clamp(10px, 1.1vw, 16px);}
           <div class="popup-avatar"></div>
           <div class="popup-info">
             <div class="nm">[Name]</div>
-            <div>Profile</div>
-            <div class="dash">----------------------</div>
-            <div class="dash">----------------------</div>
+            <div class="popup-role">Profile</div>
+            <div class="popup-detail-1"></div>
+            <div class="popup-detail-2"></div>
             <div class="popup-stats">
-              <div>Percentage _ _ %</div>
-              <div>How many Days _ _</div>
+              <div>Percentage <span class="popup-pct">_ _</span>%</div>
+              <div>How many Days <span class="popup-days">_ _</span></div>
             </div>
           </div>
         </div>
@@ -1797,18 +2316,18 @@ html{font-size:clamp(10px, 1.1vw, 16px);}
         </div>
       </div>
       <div class="pie-detail" id="da-girls-detail"><span class="pie-detail-empty">Tap a segment to see details</span></div>
-      <div class="profile-popup" id="da-girls-popup">
+   <div class="profile-popup" id="da-girls-popup">
         <button class="popup-close" onclick="closePopup('da-girls')">&times;</button>
         <div class="popup-row">
           <div class="popup-avatar"></div>
           <div class="popup-info">
             <div class="nm">[Name]</div>
-            <div>Profile</div>
-            <div class="dash">----------------------</div>
-            <div class="dash">----------------------</div>
+            <div class="popup-role">Profile</div>
+            <div class="popup-detail-1"></div>
+            <div class="popup-detail-2"></div>
             <div class="popup-stats">
-              <div>Percentage _ _ %</div>
-              <div>How many Days _ _</div>
+              <div>Percentage <span class="popup-pct">_ _</span>%</div>
+              <div>How many Days <span class="popup-days">_ _</span></div>
             </div>
           </div>
         </div>
@@ -1886,6 +2405,71 @@ const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbw3Cp93L2j9ubssvcOn
 /* ── Exam Results — separate Apps Script project/Web App ──
    PASTE YOUR DEPLOYED WEB APP URL HERE: */
 const EXAM_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxzon556gtIb0L9I2ODWGNJCKTACJVAAo5VNGAOeopXAIytbRn0QD0s11sh6u5uPHcj7w/exec';
+
+const SCANNER_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx9ys4NG6fYGcjHs-gEE9nNVsmQQRfajzcDEEsBB-Rm_m3G89lyetMT4h4CJu1__1H2/exec';
+
+let _flowerDataCache = {};
+let _flowerLoadingYear = null;
+
+function ensureFlowerData(year, cb) {
+  const key = String(year);
+  if (_flowerDataCache[key]) { cb(_flowerDataCache[key]); return; }
+  if (_flowerLoadingYear === key) return;
+  _flowerLoadingYear = key;
+
+  const callbackName = 'flowerCb_' + Date.now() + '_' + Math.floor(Math.random() * 1e6);
+  let settled = false;
+
+  window[callbackName] = function(json) {
+    if (settled) return;
+    settled = true;
+    delete window[callbackName];
+    document.getElementById(callbackName + '-script')?.remove();
+    _flowerLoadingYear = null;
+    if (json && json.ok) {
+      _flowerDataCache[key] = json.flowers;
+      cb(json.flowers);
+    } else {
+      console.warn('Flower data fetch failed:', json && json.error);
+    }
+  };
+
+  const script = document.createElement('script');
+  script.id = callbackName + '-script';
+  script.src = SCANNER_APPS_SCRIPT_URL + '?action=get_flowers&year=' +
+               encodeURIComponent(year) + '&callback=' + callbackName;
+  script.onerror = () => {
+    if (settled) return;
+    settled = true;
+    delete window[callbackName];
+    script.remove();
+    _flowerLoadingYear = null;
+    console.warn('Flower data script failed to load');
+  };
+  document.head.appendChild(script);
+
+ setTimeout(() => {
+    if (settled) return;
+    settled = true;
+    // Don't delete the callback — Apps Script cold-starts can take
+    // 30-60s+ (see loadLiveData's 45s timeout for the same reason).
+    // If we delete it now and the slow response arrives later, the
+    // browser throws "callback is not defined". Instead, replace it
+    // with a no-op so a late response is silently absorbed.
+    window[callbackName] = function(json) {
+      delete window[callbackName];
+      if (json && json.ok) {
+        _flowerDataCache[key] = json.flowers;
+        // Re-render now that data finally arrived, even though we
+        // already gave up waiting.
+        if (typeof renderFlowerView === 'function') renderFlowerView();
+      }
+    };
+    document.getElementById(callbackName + '-script')?.remove();
+    _flowerLoadingYear = null;
+    console.warn('Flower data request taking a while — will apply data if it arrives late');
+  }, 45000);
+}
 
 function examApiCall(params){
   return new Promise((resolve, reject) => {
@@ -2187,6 +2771,8 @@ function loadLiveData(){
     if(data.teachers) ROSTER.teachers = data.teachers;
     if(data.prefects) ROSTER.prefects = data.prefects;
 
+    enrichRosterGenders();
+
     // Jump all cards to the most recent date that has real data
     const liveKeys = Object.keys(ATTENDANCE_DATA).sort().reverse();
     const bestKey = liveKeys.find(d => {
@@ -2210,6 +2796,7 @@ function loadLiveData(){
     renderDashboard();
     renderAllPersonLists();
     rebuildAllPies();
+    if (typeof renderFlowerView === 'function') renderFlowerView();
     setSyncStatus(`Synced · ${fmtDash(new Date())}`, 'ok');
     console.log('✅ Live data loaded from Drive');
     console.log('📅 Dates in live data:', Object.keys(ATTENDANCE_DATA));
@@ -2380,6 +2967,31 @@ loadLiveData();
 /* ─── Avatar SVG builder ─── */
 function avatarSVG(fill='#c0392b'){
   return `<svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="32" fill="#7ab8d0"/><circle cx="32" cy="22" r="11" fill="#f5c5a0"/><ellipse cx="32" cy="54" rx="17" ry="14" fill="${fill}"/></svg>`;
+}
+
+function enrichRosterGenders(){
+  if(!window._db) { setTimeout(enrichRosterGenders, 300); return; }
+  window._db.collection('users').where('role','==','student').get()
+    .then(snap=>{
+      const byName = {};
+      snap.forEach(doc=>{
+        const d = doc.data();
+        if(d.displayName && d.gender) byName[d.displayName.trim().toLowerCase()] = d.gender;
+      });
+      ['students','prefects'].forEach(type=>{
+        (ROSTER[type]||[]).forEach(p=>{
+          if(!p.gender){
+            const g = byName[(p.name||'').trim().toLowerCase()];
+            if(g) p.gender = g;
+          }
+        });
+      });
+      renderDashboard();
+      renderAllPersonLists();
+      rebuildAllPies();
+      if (typeof renderFlowerView === 'function') renderFlowerView();
+    })
+    .catch(err=>console.warn('Gender enrich failed:', err.message));
 }
 
 /* ─── Profile Popup Avatar (larger) ─── */
@@ -2799,9 +3411,7 @@ function forceSunday(inputId,errId,ref,cb){
   });
 }
 const flRef={d:new Date(lastSun)},dailyRef={d:new Date(lastSun)};
-document.getElementById('flower-date').value=toVal(lastSun);
 document.getElementById('daily-date').value=toVal(lastSun);
-forceSunday('flower-date','flower-err',flRef,d=>makeAttRows(d,'flower-rows'));
 forceSunday('daily-date','daily-err',dailyRef,null);
 // ────── Per-student attendance view ──────
 let _attendanceStudent = null;
@@ -3125,13 +3735,255 @@ function resetAttDate() {
     renderStudentAttendance();
   }
 }
-function applyFlower(){makeAttRows(flRef.d,'flower-rows');}
-function resetFlower(){flRef.d=new Date(lastSun);document.getElementById('flower-date').value=toVal(lastSun);document.getElementById('flower-err').textContent='';makeAttRows(lastSun,'flower-rows');}
+// Old flower-date calendar removed — handlers kept as no-ops for back-compat
+function applyFlower(){}
+function resetFlower(){}
 function applyDaily(){}
 function resetDaily(){dailyRef.d=new Date(lastSun);document.getElementById('daily-date').value=toVal(lastSun);document.getElementById('daily-err').textContent='';}
 
-// att-rows is populated when a profile's Attendance button is clicked
-makeAttRows(lastSun,'flower-rows');
+/* ─── Flower Marks Page ─── */
+function onFlowerMonthChange() {
+  populateFlowerDaySelect();
+  renderFlowerView();
+}
+
+function populateFlowerDaySelect() {
+  const yearVal = document.getElementById('flower-year-filter')?.value;
+  const year = yearVal ? parseInt(yearVal, 10) : new Date().getFullYear();
+  const monthName = document.getElementById('flower-month-sel')?.value;
+  const monthIdx = MONTHS.indexOf(monthName);
+  const daySel = document.getElementById('flower-day-sel');
+  if (!daySel || monthIdx === -1) return;
+
+  const prev = daySel.value;
+  let html = '<option value="">All Sundays</option>';
+  for (let day = 1; day <= 31; day++) {
+    const d = new Date(year, monthIdx, day);
+    if (d.getMonth() !== monthIdx) break;
+    if (d.getDay() === 0) {
+      html += '<option value="' + day + '">' + monthName.substring(0,3) + ' ' + day + '</option>';
+    }
+  }
+  daySel.innerHTML = html;
+  if (prev && Array.from(daySel.options).some(o => o.value === prev)) {
+    daySel.value = prev;
+  }
+}
+
+function getFlowerSundays() {
+  const yearVal = document.getElementById('flower-year-filter')?.value;
+  const year = yearVal ? parseInt(yearVal, 10) : new Date().getFullYear();
+  const monthName = document.getElementById('flower-month-sel')?.value;
+  const monthIdx = MONTHS.indexOf(monthName);
+  if (monthIdx === -1) return [];
+
+  const daySel = document.getElementById('flower-day-sel');
+  const selectedDay = daySel && daySel.value ? parseInt(daySel.value, 10) : null;
+
+  const sundays = [];
+  for (let day = 1; day <= 31; day++) {
+    const d = new Date(year, monthIdx, day);
+    if (d.getMonth() !== monthIdx) break;
+    if (d.getDay() === 0) {
+      if (selectedDay === null || selectedDay === day) sundays.push(d);
+    }
+  }
+  return sundays;
+}
+
+function getFlowerStatusForDate(iso, gradeFilter, searchQuery) {
+  const dayData = ATTENDANCE_DATA[iso];
+  if (!dayData || !dayData.students) {
+    return { provided: false, count: 0 };
+  }
+  // flowerIds will be returned by the dashboard Apps Script once it's
+  // updated to read 🌸 markings from the spreadsheets. Until then this
+  // is an empty array and all flowers render as ash/gray.
+  const flowerIds = dayData.students.flowerIds || [];
+
+  let filtered = flowerIds;
+  if (gradeFilter) {
+    filtered = filtered.filter(id => {
+      const s = ROSTER.students.find(r => r.id === id);
+      return s && String(s.grade || '').trim() === String(gradeFilter).trim();
+    });
+  }
+  if (searchQuery) {
+    filtered = filtered.filter(id => {
+      const s = ROSTER.students.find(r => r.id === id);
+      return s && (s.name || '').toLowerCase().includes(searchQuery);
+    });
+  }
+
+  return { provided: filtered.length > 0, count: filtered.length };
+}
+
+function flowerIconSVG() {
+  return '<svg viewBox="0 0 64 64" width="44" height="44">' +
+    '<g transform="translate(32 32)">' +
+      '<ellipse cx="0" cy="-16" rx="10" ry="14" fill="#ff8fb1"/>' +
+      '<ellipse cx="0" cy="-16" rx="10" ry="14" fill="#ff8fb1" transform="rotate(72)"/>' +
+      '<ellipse cx="0" cy="-16" rx="10" ry="14" fill="#ff8fb1" transform="rotate(144)"/>' +
+      '<ellipse cx="0" cy="-16" rx="10" ry="14" fill="#ff8fb1" transform="rotate(216)"/>' +
+      '<ellipse cx="0" cy="-16" rx="10" ry="14" fill="#ff8fb1" transform="rotate(288)"/>' +
+      '<circle r="7" fill="#ffd966"/>' +
+      '<circle r="3" fill="#e89c00"/>' +
+    '</g>' +
+  '</svg>';
+}
+
+// True if the student's id appears in the flowerIds array for that date.
+// flowerIds is populated by the dashboard Apps Script from 🌸 markings in
+// the spreadsheets — until the backend is updated to return it, every
+// student renders as ash/gray (correct empty state).
+function studentProvidedFlower(student, iso) {
+  const year = iso.split('-')[0];
+  const data = _flowerDataCache[year];
+  if (!data || !data.students) return false;
+  const list = data.students[iso] || [];
+  const name = (student.name || '').trim().toLowerCase();
+  return list.some(n => String(n).trim().toLowerCase() === name);
+}
+
+function renderFlowerView() {
+  populateFlowerDaySelect();
+
+  const container = document.getElementById('flower-rows');
+  if (!container) return;
+
+  const gradeVal = document.getElementById('flower-grade-filter')?.value || '';
+  const yearVal  = document.getElementById('flower-year-filter')?.value  || '';
+  const gradeFilter = (gradeVal && gradeVal !== 'Grade')
+    ? gradeVal.replace(/^grade\s*/i, '').trim() : '';
+  const yearFilter = (yearVal && yearVal !== 'Year') ? yearVal : '';
+  const searchQuery = (document.getElementById('flower-search-input')?.value || '').trim().toLowerCase();
+
+ if (!gradeFilter || !yearFilter) {
+    container.innerHTML = '<div style="padding:24px;text-align:center;color:#666;font-size:14px;font-style:italic">Select Grade and Year above to view flower offerings.</div>';
+    return;
+  }
+
+ if (!_flowerDataCache[String(yearFilter)]) {
+    ensureFlowerData(yearFilter, function(){ renderFlowerView(); });
+    container.innerHTML = '<div style="padding:24px;text-align:center;color:#666;font-size:14px;font-style:italic">Loading flower data…</div>';
+    return;
+  }
+
+  const sundays = getFlowerSundays();
+  if (!sundays.length) {
+    container.innerHTML = '<div style="padding:24px;text-align:center;color:#666">No Sundays in this month.</div>';
+    return;
+  }
+
+  // Filter students by grade (year-aware) first; search narrows the
+  // row list below but should NOT change who appears in the Top List
+  // pies, so the leaderboard stays computed from the full grade.
+  const gradeStudents = ROSTER.students.filter(s => {
+    const displayGrade = getDisplayGrade(s, yearFilter);
+    if (displayGrade === null) return false;
+    if (String(displayGrade).trim() !== gradeFilter) return false;
+    return true;
+  });
+  const students = searchQuery
+    ? gradeStudents.filter(s => (s.name || '').toLowerCase().includes(searchQuery))
+    : gradeStudents;
+
+  computeFlowerLeaderboards(gradeStudents, yearFilter);
+  buildPie('boys-pie',  'boys-legend',  'boys-detail',  'boys',  '#79C1D9');
+  buildPie('girls-pie', 'girls-legend', 'girls-detail', 'girls', '#BB9BB7');
+
+  const girls   = students.filter(s => s.gender === 'female').sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+  const boys    = students.filter(s => s.gender === 'male').sort((a, b)   => (a.name || '').localeCompare(b.name || ''));
+  const unknown = students.filter(s => s.gender !== 'female' && s.gender !== 'male');
+
+  // Build a single student row with one flower per selected Sunday
+  function renderStudentRow(s) {
+    const safeName = String(s.name || '—').replace(/"/g, '&quot;');
+    const photoHtml = '<div class="flower-student-photo" id="fl-photo-' + s.id + '">' +
+      avatarSVG(s.gender === 'female' ? '#c0392b' : '#2980b9') +
+      '</div>';
+
+    const flowersHtml = sundays.map(d => {
+      const iso = toVal(d);
+      const provided = studentProvidedFlower(s, iso);
+      const cls = provided ? 'fl-flower colorful' : 'fl-flower gray';
+      const tooltip = (provided ? '🌸 Provided' : '— Not provided') + ' on ' + fmtUS(d);
+      const dateLabel = (sundays.length > 1)
+        ? '<span class="date-mini">' + (d.getMonth() + 1) + '/' + d.getDate() + '</span>'
+        : '';
+      return '<div class="flower-icon-cell" title="' + tooltip + '">' +
+        '<div class="' + cls + '">' + flowerIconSVG() + '</div>' +
+        dateLabel +
+      '</div>';
+    }).join('');
+
+    return '<div class="flower-student-row">' +
+      photoHtml +
+      '<div class="flower-student-name" title="' + safeName + '">' + s.name + '</div>' +
+      '<div class="flower-icons-row">' + flowersHtml + '</div>' +
+    '</div>';
+  }
+
+  // Summary strip — total flowers given across all visible students × sundays
+  let totalSlots = 0, totalProvided = 0;
+  students.forEach(s => sundays.forEach(d => {
+    totalSlots++;
+   if (studentProvidedFlower(s, toVal(d))) totalProvided++;
+  }));
+  const summaryHtml = '<div class="flower-summary-strip">' +
+    '🌸 ' + totalProvided + ' of ' + totalSlots + ' flower offerings · ' +
+    students.length + ' students · ' + sundays.length + ' Sunday' + (sundays.length !== 1 ? 's' : '') +
+  '</div>';
+
+  const girlsHtml = girls.length
+    ? girls.map(renderStudentRow).join('')
+    : '<div class="flower-gender-empty">No girls in this grade.</div>';
+  const boysHtml = boys.length
+    ? boys.map(renderStudentRow).join('')
+    : '<div class="flower-gender-empty">No boys in this grade.</div>';
+
+  let unknownBlock = '';
+  if (unknown.length) {
+    unknownBlock =
+      '<div class="flower-gender-col" style="margin-top:10px">' +
+        '<div class="flower-gender-title" style="color:#555">Other ' +
+          '<span class="flower-gender-count">' + unknown.length + '</span>' +
+        '</div>' +
+        unknown.map(renderStudentRow).join('') +
+      '</div>';
+  }
+
+  container.innerHTML =
+    summaryHtml +
+    '<div class="flower-gender-grid">' +
+      '<div class="flower-gender-col">' +
+        '<div class="flower-gender-title girls">👧 Girls ' +
+          '<span class="flower-gender-count">' + girls.length + '</span>' +
+        '</div>' +
+        girlsHtml +
+      '</div>' +
+      '<div class="flower-gender-col">' +
+        '<div class="flower-gender-title boys">👦 Boys ' +
+          '<span class="flower-gender-count">' + boys.length + '</span>' +
+        '</div>' +
+        boysHtml +
+      '</div>' +
+    '</div>' +
+    unknownBlock;
+
+  // Fetch real profile photos from Firestore in the background
+  students.forEach(s => {
+    const el = document.getElementById('fl-photo-' + s.id);
+    if (el) loadAvatarPhoto(el, s.name, s.gender === 'female' ? '#c0392b' : '#2980b9');
+  });
+}
+
+// Initialize the flower view (renders into #flower-rows when user opens the Flower Marks page)
+(function initFlowerPage(){
+  const monthSel = document.getElementById('flower-month-sel');
+  if (monthSel) monthSel.value = MONTHS[new Date().getMonth()];
+  if (typeof populateFlowerDaySelect === 'function') populateFlowerDaySelect();
+})();
 
 /* ─── Pie Chart Engine ───
    Top-3 "flower" leaderboards aren't produced by the current Apps
@@ -3146,7 +3998,56 @@ function slicePath(cx,cy,r,s,e){
   return `M${cx},${cy} L${p1.x},${p1.y} A${r},${r} 0 ${large} 1 ${p2.x},${p2.y} Z`;
 }
 function labelPos(cx,cy,r,s,e){const mid=(s+e)/2;const p=polar(cx,cy,r*0.68,mid);return p;}
+/* Builds the Top-3 Boys/Girls flower-offering leaderboard for the
+   currently selected grade+year, from the same _flowerDataCache the
+   gray/colorful flower icons already use. */
+function computeFlowerLeaderboards(students, year) {
+  const data = _flowerDataCache[String(year)];
+  const counts = {}; // name (lowercased) -> total flowers given
 
+  if (data && data.students) {
+    Object.values(data.students).forEach(list => {
+      (list || []).forEach(name => {
+        const key = String(name).trim().toLowerCase();
+        if (!key) return;
+        counts[key] = (counts[key] || 0) + 1;
+      });
+    });
+  }
+
+  const boysCounts = [];
+  const girlsCounts = [];
+  students.forEach(s => {
+    const key = (s.name || '').trim().toLowerCase();
+    const c = counts[key] || 0;
+    if (c <= 0) return;
+    const entry = { name: s.name, count: c };
+    if (s.gender === 'male') boysCounts.push(entry);
+    else if (s.gender === 'female') girlsCounts.push(entry);
+  });
+  boysCounts.sort((a, b) => b.count - a.count);
+  girlsCounts.sort((a, b) => b.count - a.count);
+
+  const colors = ['#1F8616', '#231686', '#864C16'];
+  const dots   = ['#349D24', '#2E33B2', '#8A5E21'];
+  const labels = ['1st', '2nd', '3rd'];
+
+  function toPieData(arr) {
+    const top3 = arr.slice(0, 3);
+    const total = top3.reduce((s, x) => s + x.count, 0) || 1;
+    return top3.map((x, i) => ({
+      label: labels[i] || (i + 1) + 'th',
+      name:  x.name,
+      score: x.count + ' flower' + (x.count !== 1 ? 's' : ''),
+      pct:   Math.round((x.count / total) * 100) || Math.round(100 / top3.length),
+      color: colors[i] || '#888',
+      dot:   dots[i] || '#888'
+    }));
+  }
+
+  pieData.boys  = toPieData(boysCounts);
+  pieData.girls = toPieData(girlsCounts);
+}
 /* pieData is populated lazily — empty until a real per-person ranking
    source is wired up. buildPie() shows a friendly empty state when a
    key has no slices instead of drawing fake data. */
@@ -3237,9 +4138,50 @@ function showPopup(key,idx){
   if(!popup) return;
   const d = pieData[dataKeyOf(key)][idx];
   if(!d) return;
+
   const nm=popup.querySelector('.nm');
   if(nm) nm.textContent=d.name || d.label;
   popup.classList.add('shown');
+
+  if (key === 'gender') return; // aggregate slice (Girls/Boys totals) — not a real Firestore person
+
+  const avatarEl = popup.querySelector('.popup-avatar');
+  const roleEl   = popup.querySelector('.popup-role');
+  const d1El     = popup.querySelector('.popup-detail-1');
+  const d2El     = popup.querySelector('.popup-detail-2');
+  const pctEl    = popup.querySelector('.popup-pct');
+  const daysEl   = popup.querySelector('.popup-days');
+
+  if (avatarEl) avatarEl.innerHTML = popupAvatarSVG();
+  if (roleEl)   roleEl.textContent = 'Loading…';
+  if (d1El)     d1El.textContent = '';
+  if (d2El)     d2El.textContent = '';
+  const dayMatch = (d.score || '').match(/\d+/);
+  if (pctEl)  pctEl.textContent  = d.pct != null ? d.pct : '_ _';
+  if (daysEl) daysEl.textContent = dayMatch ? dayMatch[0] : '_ _';
+
+  fetchProfileByName(d.name, function(data) {
+    // Bail if the popup moved on to a different slice/person in the meantime
+    const curNm = popup.querySelector('.nm');
+    if (!popup.classList.contains('shown') || !curNm || curNm.textContent !== (d.name || d.label)) return;
+
+    if (!data) {
+      if (roleEl) roleEl.textContent = 'No profile found';
+      return;
+    }
+    const fill = data.gender === 'female' ? '#c0392b' : '#2980b9';
+    if (avatarEl) {
+      avatarEl.innerHTML = data.photoURL
+        ? `<img src="${data.photoURL}" style="width:100%;height:100%;object-fit:cover;border-radius:50%" onerror="this.parentElement.innerHTML=popupAvatarSVG('${fill}')"/>`
+        : popupAvatarSVG(fill);
+    }
+    if (roleEl) {
+      const roleLabel = (data.role || 'student').replace(/^\w/, c => c.toUpperCase());
+      roleEl.textContent = roleLabel + (data.grade != null ? ' · Grade ' + data.grade : '');
+    }
+    if (d1El) d1El.textContent = data.admissionNo ? 'Admission No: ' + data.admissionNo : '';
+    if (d2El) d2El.textContent = data.gender ? 'Gender: ' + (data.gender.charAt(0).toUpperCase() + data.gender.slice(1)) : '';
+  });
 }
 
 function closePopup(key){

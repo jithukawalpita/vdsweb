@@ -281,7 +281,33 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #050203; f
 .manual-mark-btn.prefect:hover { background: rgba(218,165,32,0.2); color: #f5c84a; border-color: #c9a84c; }
 .manual-mark-btn.prefect.active { background: linear-gradient(135deg, #c9a84c, #b89540); color: #1a0606; border-color: #f5c84a; }
 .manual-mark-btn.prefect.active:hover { background: linear-gradient(135deg, #e0b95c, #b88a20); }
-
+/* ★ Flower offering toggle button */
+.manual-mark-btn.flower {
+  color: rgba(220,220,220,0.55);
+  border-color: rgba(180,180,180,0.3);
+  font-size: 1rem;
+  padding: 6px 10px;
+  min-width: 36px;
+  filter: grayscale(1) brightness(0.65);
+  transition: all 0.2s ease;
+}
+.manual-mark-btn.flower:hover {
+  filter: grayscale(0.2) brightness(1.05);
+  background: rgba(255,180,210,0.18);
+  color: #ffc0d8;
+  border-color: rgba(255,140,180,0.6);
+}
+.manual-mark-btn.flower.active {
+  filter: none;
+  background: linear-gradient(135deg, rgba(255,150,200,0.95), rgba(220,90,140,0.95));
+  color: #fff;
+  border-color: #ff90b8;
+  box-shadow: 0 0 10px rgba(255,150,200,0.4);
+}
+.manual-mark-btn.flower.active:hover {
+  background: linear-gradient(135deg, rgba(255,170,220,1), rgba(230,110,150,1));
+  box-shadow: 0 0 14px rgba(255,150,200,0.6);
+}
 @media (max-width: 600px) {
   .stats-row { gap: 1.4rem; }
   .stat-num { font-size: 1.3rem; }
@@ -626,7 +652,7 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #050203; f
 <script>
 /* ═══════════════ CONFIG ═══════════════ */
 const TEACHER_ACCESS_CODE = 'vipassi teachers@';
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbweXkIy9S1M39mJcrA7Lr-B2L6MMBTYIzrVAIug63GLMk4EkWj8HI813xake9pf8DCy/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx9ys4NG6fYGcjHs-gEE9nNVsmQQRfajzcDEEsBB-Rm_m3G89lyetMT4h4CJu1__1H2/exec';
 
 const FIREBASE_CONFIG = {
   apiKey:            "AIzaSyAWpPP3OevjIRAsoGIjOJTofV6l2jgyhNI",
@@ -715,7 +741,8 @@ let frameCount = 0;
 let fpsTimer = 0;
 const markedToday = new Set();   // UIDs marked in this session
 const prefectsSet = new Set();   // UIDs of students currently assigned as prefects
-
+const flowerMarked = new Set();  // UIDs with flower offering marked in this session
+let dayFlowerNames = new Set();  // lowercased names with a flower ALREADY marked for the selected date (from get_flowers)
 /* ═══════════════ PREFECTS LOADER ═══════════════ */
 async function loadPrefects() {
   try {
@@ -726,6 +753,27 @@ async function loadPrefects() {
     }
   } catch (e) {
     console.warn('Could not load prefects:', e);
+  }
+}
+
+/* ═══════════════ DAY FLOWER STATUS LOADER ═══════════════
+   Reuses the same get_flowers endpoint the dashboard's Flower Marks
+   page already relies on (see dashboard.html's ensureFlowerData()).
+   That endpoint returns { ok:true, flowers:{ students:{ 'YYYY-MM-DD':
+   ['Name One','Name Two',...] } } } — keyed by STUDENT NAME, not uid.
+   So matching here is done on lowercased/trimmed name, same as the
+   dashboard's studentProvidedFlower() does.
+*/
+async function loadDayFlowerStatus() {
+  try {
+    const iso = getSelectedDate();
+    const year = iso.split('-')[0];
+    const res = await appsScriptGet('action=get_flowers&year=' + encodeURIComponent(year));
+    const namesForDate = (res && res.ok && res.flowers && res.flowers.students && res.flowers.students[iso]) || [];
+    dayFlowerNames = new Set(namesForDate.map(n => String(n).trim().toLowerCase()));
+  } catch (e) {
+    console.warn('Could not load day flower status:', e);
+    dayFlowerNames = new Set();
   }
 }
 
@@ -996,6 +1044,31 @@ async function deleteEvent(name, btn) {
 }
 
 /* ═══════════════ SHARED FETCH HELPER (fixes CORS) ═══════════════ */
+
+// Safely parse an Apps Script response. If the deployment is stale,
+// deleted, or misconfigured, Google often returns an HTML error/login
+// page instead of JSON — res.json() throws a cryptic "Unexpected
+// token '<'" in that case. This gives a clear, actionable message
+// instead, surfaced in the toast UI so it's obvious it's a deployment
+// problem and not a code bug.
+async function parseAppsScriptResponse(res) {
+  if (!res.ok) {
+    throw new Error(
+      'Server returned HTTP ' + res.status +
+      ' — the Apps Script deployment may be stale, deleted, or not set to "Anyone" access.'
+    );
+  }
+  const raw = await res.text();
+  try {
+    return JSON.parse(raw);
+  } catch (e) {
+    throw new Error(
+      'Server did not return JSON (got an HTML error page instead). ' +
+      'The Apps Script /exec URL is likely outdated — check Deploy → Manage deployments.'
+    );
+  }
+}
+
 async function appsScriptPost(payload) {
   const res = await fetch(APPS_SCRIPT_URL, {
     method:  'POST',
@@ -1003,9 +1076,13 @@ async function appsScriptPost(payload) {
     // Google Apps Script requires no custom headers to avoid CORS preflight
     body: JSON.stringify(payload)
   });
-  return res.json();
+  return parseAppsScriptResponse(res);
 }
 
+async function appsScriptGet(queryString) {
+  const res = await fetch(APPS_SCRIPT_URL + '?' + queryString);
+  return parseAppsScriptResponse(res);
+}
 // Populate the date selector with last 104 Sundays (2 years back) grouped by year
 function populateDateSelector() {
   const sel = document.getElementById('dateSelect');
@@ -1053,15 +1130,19 @@ function populateDateSelector() {
     sel.value = firstOptGroup.children[0].value;
   }
 }
-
-function onDateChange() {
+async function onDateChange() {
   const date = getSelectedDate();
   const status = document.getElementById('statusBar');
   if (status) status.textContent = '📅 Date set to ' + date + ' — scans/marks will go to this Sunday';
   markedToday.clear();
+  flowerMarked.clear();
+  dayFlowerNames.clear();
   document.getElementById('stMarked').textContent = '0';
-  // If we're in manual mode, re-render to show fresh state
-  if (currentMode === 'manual') renderManualList();
+  // If we're in manual mode, re-render to show fresh state for the new date
+  if (currentMode === 'manual') {
+    await loadDayFlowerStatus();
+    renderManualList();
+  }
 }
 
 async function setMode(mode) {
@@ -1073,7 +1154,8 @@ async function setMode(mode) {
 
   if (mode === 'manual') {
     populateGradeFilter();
-    await loadPrefects();      // pull current prefect roster
+    await loadPrefects();          // pull current prefect roster
+    await loadDayFlowerStatus();   // pull which names already have a flower marked for this date
     renderManualList();
     updateSpecialEventBanner();
     // Stop scanning loop in manual mode
@@ -1143,6 +1225,15 @@ function renderManualList() {
         (isPrefect ? '★' : '☆') +
         '</button>'
       : '';
+     // ★ Flower offering button — for everyone (students + teachers).
+      // Reflects either a toggle made this session OR an offering
+      // already saved for this date (matched by name, since get_flowers
+      // is keyed by student name rather than uid).
+      const isFlower = flowerMarked.has(p.uid) ||
+        dayFlowerNames.has((p.name || '').trim().toLowerCase());
+const flowerBtn = '<button class="manual-mark-btn flower ' + (isFlower ? 'active' : '') + '"' +
+  ' title="' + (isFlower ? 'Remove flower offering' : 'Mark flower offering') + '"' +
+  ' onclick="toggleFlower(\'' + p.uid + '\', this)">🌸</button>';
 
     return '' +
       '<div class="manual-row" data-uid="' + p.uid + '">' +
@@ -1152,9 +1243,10 @@ function renderManualList() {
           '<div class="manual-sub">' + subtitle + '</div>' +
         '</div>' +
         '<div class="manual-actions">' +
-          '<button class="manual-mark-btn present" onclick="manualMark(\'' + p.uid + '\', \'present\')">✓ Present</button>' +
-          '<button class="manual-mark-btn absent"  onclick="manualMark(\'' + p.uid + '\', \'absent\')">✗ Absent</button>' +
-          prefectBtn +
+  flowerBtn +
+  '<button class="manual-mark-btn present" onclick="manualMark(\'' + p.uid + '\', \'present\')">✓ Present</button>' +
+  '<button class="manual-mark-btn absent"  onclick="manualMark(\'' + p.uid + '\', \'absent\')">✗ Absent</button>' +
+  prefectBtn +
         '</div>' +
       '</div>';
   }).join('');
@@ -1193,7 +1285,7 @@ async function manualMark(uid, status) {
         specialEvent: getSpecialEvent()
       })
     });
-    const json = await res.json();
+    const json = await parseAppsScriptResponse(res);
 
     if (json.notSunday) {
       showToast({ type: 'warn', name: person.name, sub: '📅 ' + (json.error || 'Selected date is not a Sunday'), photo: person.photoURL });
@@ -1277,7 +1369,64 @@ async function togglePrefect(uid, btn) {
     btn.disabled = false;
   }
 }
+async function toggleFlower(uid, btn) {
+  const person = knownFaces.find(p => p.uid === uid);
+  if (!person) return;
 
+  const wasActive = btn.classList.contains('active');
+  btn.disabled = true;
+
+  // Optimistic visual flip
+  btn.classList.toggle('active');
+  btn.title = wasActive ? 'Mark flower offering' : 'Remove flower offering';
+
+  try {
+    const res = await appsScriptPost({
+      action:       'toggle_flower',
+      uid:          person.uid,
+      role:         person.role,
+      grade:        person.grade,
+      date:         getSelectedDate(),
+      specialEvent: getSpecialEvent()
+    });
+
+    if (res.notSunday) {
+      // Roll back
+      btn.classList.toggle('active');
+      btn.title = wasActive ? 'Remove flower offering' : 'Mark flower offering';
+      showToast({ type: 'warn', name: person.name,
+        sub: '📅 ' + (res.error || 'Selected date is not a Sunday'), photo: person.photoURL });
+    } else if (res.ok) {
+    const nameKey = (person.name || '').trim().toLowerCase();
+      if (res.flowerMarked) {
+        flowerMarked.add(uid);
+        dayFlowerNames.add(nameKey);
+        btn.classList.add('active');
+        btn.title = 'Remove flower offering';
+        showToast({ type: 'ok', name: person.name,
+          sub: '🌸 Flower offering marked for ' + (res.dateLabel || getSelectedDate()),
+          photo: person.photoURL });
+      } else {
+        flowerMarked.delete(uid);
+        dayFlowerNames.delete(nameKey);
+        btn.classList.remove('active');
+        btn.title = 'Mark flower offering';
+        showToast({ type: 'warn', name: person.name,
+          sub: '🌸 Flower offering removed', photo: person.photoURL });
+      }
+    } else {
+      throw new Error(res.error || 'Toggle failed');
+    }
+  } catch (e) {
+    // Roll back the optimistic update
+    btn.classList.toggle('active');
+    btn.title = wasActive ? 'Remove flower offering' : 'Mark flower offering';
+    showToast({ type: 'err', name: person.name,
+      sub: 'Error: ' + e.message, photo: person.photoURL });
+  } finally {
+    btn.disabled = false;
+  }
+}
 async function initScanner(teacherName) {
   const status = document.getElementById('statusBar');
   const mask = document.getElementById('loadMask');
@@ -1327,7 +1476,31 @@ async function loadFaces() {
   // Pull all face descriptors from the Apps Script backend — this is the
   // source of truth for everyone registered via register_student/teacher.
   const res = await fetch(APPS_SCRIPT_URL + '?action=descriptors');
-  const json = await res.json();
+
+  if (!res.ok) {
+    throw new Error(
+      'Apps Script returned HTTP ' + res.status +
+      ' — the Web App deployment may be deleted, redeployed under a new URL, ' +
+      'or its access permission isn\'t set to "Anyone". Check Deploy → Manage deployments.'
+    );
+  }
+
+  const raw = await res.text();
+  let json;
+  try {
+    json = JSON.parse(raw);
+  } catch (e) {
+    throw new Error(
+      'Apps Script did not return JSON (got HTML/error page instead). ' +
+      'This usually means the /exec URL is stale or doGet() has no "descriptors" handler. ' +
+      'Raw response started with: ' + raw.slice(0, 80).replace(/\s+/g, ' ')
+    );
+  }
+
+  if (json.error) {
+    throw new Error('Apps Script error: ' + json.error);
+  }
+
   knownFaces = (json.faces || []).map(f => ({
     uid:        f.uid,
     name:       f.name || '(no name)',
@@ -1428,7 +1601,7 @@ async function handleMatch(person) {
         status: 'present'
       })
     });
-    const json = await res.json();
+    const json = await parseAppsScriptResponse(res);
     if (json.notSunday) {
       // Today isn't Sunday — school is Sunday-only, so we can't mark attendance.
       showToast({
