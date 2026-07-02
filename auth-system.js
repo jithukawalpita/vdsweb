@@ -11,6 +11,13 @@
 
 /* ═══ CONFIG — set this to your Apps Script Web App URL ═══ */
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbweXkIy9S1M39mJcrA7Lr-B2L6MMBTYIzrVAIug63GLMk4EkWj8HI813xake9pf8DCy/exec';
+const PASSWORD_RESET_PAGE = (window.location.protocol === 'http:' || window.location.protocol === 'https:')
+  ? window.location.origin + '/reset-password.html'
+  : 'https://signin-f9656.firebaseapp.com/reset-password.html';
+const PASSWORD_RESET_ACTION_CODE_SETTINGS = {
+  url: PASSWORD_RESET_PAGE,
+  handleCodeInApp: true
+};
 
 /* ═══ School registration code — required to sign up as student or teacher.
        Change this to a different value if students/teachers learn the current one.
@@ -156,6 +163,22 @@ function showPan(id) {
     tabs.style.display = (loggedInPanels.indexOf(id) >= 0) ? "none" : "flex";
   }
 }
+
+function openAuthFromUrl() {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const authTab = params.get('openAuth') || params.get('auth');
+    if (!authTab) return;
+    params.delete('openAuth');
+    params.delete('auth');
+    const newSearch = params.toString();
+    history.replaceState({}, document.title, window.location.pathname + (newSearch ? '?' + newSearch : '') + window.location.hash);
+    openAuth(authTab);
+  } catch (e) {
+    console.warn('openAuthFromUrl failed:', e);
+  }
+}
+window.addEventListener('load', openAuthFromUrl);
 
 function clearErrs() {
   ["siErr","siNmErr","stErr","tcErr","nmErr","fcErr","ruErr","edErr","mgErr"].forEach(id => {
@@ -431,9 +454,11 @@ async function forgotPw() {
   const email = document.getElementById("siEmail").value.trim();
   if (!email) return errMsg("siErr", "Enter your email above first.");
   try {
-    await auth.sendPasswordResetEmail(email);
-    okMsg("siErr", "Reset email sent — check your inbox.");
-  } catch (e) { errMsg("siErr", fErr(e.code)); }
+    await auth.sendPasswordResetEmail(email, PASSWORD_RESET_ACTION_CODE_SETTINGS);
+    okMsg("siErr", "Password reset email sent to " + email + ". Check your inbox or spam folder.");
+  } catch (e) {
+    errMsg("siErr", fErr(e.code) || e.message || 'Could not send reset email.');
+  }
 }
 
 // For Student/Teacher Sign-In: looks up email from the name field, then
@@ -469,8 +494,8 @@ async function forgotPwForName() {
     if (validEmails.length === 0) throw new Error('No account found with that name.');
     if (validEmails.length > 1)  throw new Error('Multiple accounts match — type more of your name first.');
 
-    await auth.sendPasswordResetEmail(validEmails[0]);
-    okMsg('siNmErr', '✓ Password reset email sent to ' + validEmails[0].replace(/(.).+(@.+)/, '$1***$2') + '. Check your inbox.');
+    await auth.sendPasswordResetEmail(validEmails[0], PASSWORD_RESET_ACTION_CODE_SETTINGS);
+    okMsg('siNmErr', '✓ Password reset email sent to ' + validEmails[0].replace(/(.).+(@.+)/, '$1***$2') + '. Check your inbox or spam folder.');
   } catch (e) {
     const msg = e.code ? fErr(e.code) : (e.message || 'Could not send reset email.');
     errMsg('siNmErr', msg);

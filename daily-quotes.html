@@ -13,6 +13,8 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 <script src="face-utils.js"></script>
 <script src="auth-system.js"></script>
+<script src="auth-gate.js"></script>
+<script src="auth-gate.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Noto+Sans+Sinhala:wght@400;600;700&family=Cormorant+Garamond:wght@400;500;600&family=Lora:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
@@ -798,6 +800,7 @@
         <div class="am-field"><label class="am-label">Date of Birth *</label><input class="am-input" id="edTcDOB" type="date"></div>
       </div>
       <button class="am-btn" id="edBtn" onclick="saveProfileEdits()">Save Changes</button>
+      <button class="am-btn am-btn-ghost" onclick="openChangePassword()" style="margin-top:10px">Change Password</button>
       <div class="am-err" id="edErr"></div>
       <button class="am-btn am-btn-ghost" onclick="openManualReupload()" style="margin-top:10px">📷 Re-register Face Photo</button>
     </div>

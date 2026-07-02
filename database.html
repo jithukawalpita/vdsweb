@@ -1119,7 +1119,120 @@ html{font-size:clamp(10px, 1.1vw, 16px);}
   box-shadow:0 4px 42px 20px rgba(0,0,0,0.2);
 }
 .graph-area-title{font-size:14px;font-weight:600;margin-bottom:8px;color:#121616}
+.graph-card {
+  background: #C79B96;
+  border-radius: 20px;
+  padding: 18px 22px;
+  color: #2d1e1e;
+  position: relative;
+  width: 100%;
+  grid-column: 1 / -1;      /* span every column when inside a grid */
+  margin-top: 20px;
+}
+.graph-plot-wrap {
+  position: relative;
+  width: 100%;
+  height: 320px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 12px;
+  padding: 6px;
+  box-sizing: border-box;
+}
+.graph-title {
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: #2d1e1e;
+}
+.graph-legend-row {
+  display: flex;
+  gap: 22px;
+  justify-content: center;
+  font-size: 11px;
+  color: #2d1e1e;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+.graph-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 500;
+}
+.graph-dot {
+  width: 9px; height: 9px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.graph-plot-wrap {
+  position: relative;
+  width: 100%;
+  height: 260px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 12px;
+  padding: 6px;
+  box-sizing: border-box;
+}
+.graph-plot-wrap svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.graph-empty {
+  position: absolute;
+  inset: 60px 0 0 0;
+  text-align: center;
+  font-style: italic;
+  color: rgba(255,255,255,0.85);
+  font-size: 13px;
+  pointer-events: none;
+  display: none;
+}
+.graph-empty.shown { display: block; }
+.graph-tooltip {
+  position: absolute;
+  background: #2d1e1e;
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 11px;
+  line-height: 1.5;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.35);
+  pointer-events: none;
+  opacity: 0;
+  transform: translate(-50%, -110%);
+  transition: opacity .12s;
+  white-space: nowrap;
+  z-index: 20;
+}
+.graph-tooltip.shown { opacity: 1; }
+.graph-tooltip b { color: #ffd28a; }
 
+/* SVG element styling */
+.graph-area-girls { fill: rgba(192,57,125,0.35); stroke: #c0397d; stroke-width: 2; }
+.graph-area-boys  { fill: rgba(26,110,255,0.30); stroke: #1a6eff; stroke-width: 2; }
+.graph-line-total { fill: none; stroke: rgba(255,255,255,0.55); stroke-width: 1.2; stroke-dasharray: 4 3; }
+.graph-axis-line  { stroke: rgba(255,255,255,0.25); stroke-width: 1; }
+.graph-axis-label { fill: rgba(255,255,255,0.9); font-size: 10px; font-family: Inter, sans-serif; }
+.graph-scope-label {
+  fill: rgba(255,255,255,0.85);
+  font-size: 11px;
+  font-family: Inter, sans-serif;
+  font-weight: 600;
+  text-anchor: middle;
+}
+.graph-hover-dot {
+  fill: #fff;
+  stroke-width: 2;
+  cursor: pointer;
+  transition: r .1s;
+}
+.graph-hover-dot:hover { r: 6; }
+.graph-scope-divider {
+  stroke: rgba(255,255,255,0.35);
+  stroke-width: 1;
+  stroke-dasharray: 2 3;
+}
 /* ══ DATE MODAL ══ */
 .date-modal{
   background:var(--surface);
@@ -2273,10 +2386,28 @@ document.addEventListener('DOMContentLoaded', function() {
 <!-- ═══════ DAILY ATTENDANCE TRAITS ═══════ -->
 <div id="page-daily-attendance" class="page">
   <div class="filters">
-    <select class="f-sel"><option>Year</option><option>2024</option><option>2025</option><option>2026</option></select>
-    <select class="f-sel"><option>Month</option><option>January</option><option>February</option><option>March</option><option>April</option><option>May</option><option>June</option><option>July</option><option>August</option><option selected>September</option><option>October</option><option>November</option><option>December</option></select>
-    <select class="f-sel"><option>Grade</option><option>Grade 6</option><option>Grade 7</option><option>Grade 8</option><option>Grade 9</option><option>Grade 10</option><option>Grade 11</option></select>
-    <div class="search-box"><input placeholder="Search the name"/><svg width="16" height="16" fill="none" stroke="#555" stroke-width="2"><circle cx="7" cy="7" r="5"/><line x1="11" y1="11" x2="15" y2="15"/></svg></div>
+    <select class="f-sel" id="da-year-filter" onchange="onDailyFilterChange()">
+      <option value="">Year</option>
+      <option>2023</option><option>2024</option><option>2025</option><option>2026</option>
+    </select>
+    <select class="f-sel" id="da-month-filter" onchange="onDailyFilterChange()">
+      <option value="">All months</option>
+      <option>January</option><option>February</option><option>March</option><option>April</option>
+      <option>May</option><option>June</option><option>July</option><option>August</option>
+      <option>September</option><option>October</option><option>November</option><option>December</option>
+    </select>
+    <select class="f-sel" id="da-day-filter" onchange="renderDailyAttendance()">
+      <option value="">All Sundays</option>
+    </select>
+    <select class="f-sel" id="da-grade-filter" onchange="renderDailyAttendance()">
+      <option value="">Grade</option>
+      <option>Grade 1</option><option>Grade 2</option><option>Grade 3</option>
+      <option>Grade 4</option><option>Grade 5</option><option>Grade 6</option>
+      <option>Grade 7</option><option>Grade 8</option><option>Grade 9</option>
+      <option>Grade 10</option><option>Grade 11</option><option>Grade 12</option>
+      <option>Grade 13</option>
+    </select>
+    <div class="search-box"><input id="da-search-input" placeholder="Search the name" oninput="renderDailyAttendance()"/><svg width="16" height="16" fill="none" stroke="#555" stroke-width="2"><circle cx="7" cy="7" r="5"/><line x1="11" y1="11" x2="15" y2="15"/></svg></div>
   </div>
 
   <!-- Top List Pies (same as Flower Marks) -->
@@ -2336,18 +2467,14 @@ document.addEventListener('DOMContentLoaded', function() {
   </div>
 
   <div class="daily-grid">
-    <div class="date-modal">
-      <p class="m-lbl">Select date</p>
-      <div class="m-title-row"><h2 class="m-title">Enter date</h2><span style="font-size:20px">&#128197;</span></div>
-      <div class="m-field"><label class="m-field-lbl">Date</label><input type="date" class="m-field-input" id="daily-date"/></div>
-      <p class="m-error" id="daily-err"></p>
-      <div class="m-acts">
-        <button class="m-btn" onclick="resetDaily()">Cancel</button>
-        <button class="m-btn" onclick="applyDaily()">OK</button>
+    <div class="gender-card" style="position:relative;background:#DDE6B7">
+      <div class="gender-title" id="da-selection-title">Attendance Summary</div>
+      <div id="da-summary-body" style="display:flex;flex-direction:column;gap:8px;font-size:13px;color:#0E3636;line-height:1.55">
+        <div style="font-style:italic;color:#666">Select a Year to see the top attendance leaders.</div>
       </div>
     </div>
     <div class="gender-card" style="position:relative">
-      <div class="gender-title">Daily Gender Trait</div>
+      <div class="gender-title" id="da-gender-title">Daily Gender Trait</div>
       <div style="display:flex;align-items:center;gap:14px">
         <div>
           <div style="display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;margin-bottom:8px;color:#121616"><div style="width:18px;height:18px;border-radius:2px;background:var(--gender-girls)"></div>Girls</div>
@@ -2377,9 +2504,19 @@ document.addEventListener('DOMContentLoaded', function() {
         </div>
       </div>
     </div>
-    <div class="graph-area">
-      <div class="graph-area-title">Graphically Represent</div>
-    </div>
+    <div class="graph-card">
+  <div class="graph-title">Graphically Represent</div>
+  <div class="graph-legend-row" id="da-graph-legend">
+    <div class="graph-legend-item"><span class="graph-dot" style="background:#c0397d"></span>Girls Present</div>
+    <div class="graph-legend-item"><span class="graph-dot" style="background:#1a6eff"></span>Boys Present</div>
+    <div class="graph-legend-item"><span class="graph-dot" style="background:#7a7a7a;border-radius:2px;width:16px;height:2px"></span>Total Enrolled</div>
+  </div>
+  <div class="graph-plot-wrap">
+    <svg id="da-graph-svg" viewBox="0 0 800 320" preserveAspectRatio="none"></svg>
+    <div class="graph-tooltip" id="da-graph-tooltip"></div>
+  </div>
+  <div class="graph-empty" id="da-graph-empty">Select a Year to see attendance trends.</div>
+</div>
   </div>
 </div>
 
@@ -2797,6 +2934,7 @@ function loadLiveData(){
     renderAllPersonLists();
     rebuildAllPies();
     if (typeof renderFlowerView === 'function') renderFlowerView();
+    if (typeof renderDailyAttendance === 'function') renderDailyAttendance();
     setSyncStatus(`Synced · ${fmtDash(new Date())}`, 'ok');
     console.log('✅ Live data loaded from Drive');
     console.log('📅 Dates in live data:', Object.keys(ATTENDANCE_DATA));
@@ -2990,6 +3128,7 @@ function enrichRosterGenders(){
       renderAllPersonLists();
       rebuildAllPies();
       if (typeof renderFlowerView === 'function') renderFlowerView();
+      if (typeof renderDailyAttendance === 'function') renderDailyAttendance();
     })
     .catch(err=>console.warn('Gender enrich failed:', err.message));
 }
@@ -3411,8 +3550,7 @@ function forceSunday(inputId,errId,ref,cb){
   });
 }
 const flRef={d:new Date(lastSun)},dailyRef={d:new Date(lastSun)};
-document.getElementById('daily-date').value=toVal(lastSun);
-forceSunday('daily-date','daily-err',dailyRef,null);
+// (daily-date input removed — Daily Attendance now uses Year/Month/Day dropdowns)
 // ────── Per-student attendance view ──────
 let _attendanceStudent = null;
 
@@ -3739,7 +3877,7 @@ function resetAttDate() {
 function applyFlower(){}
 function resetFlower(){}
 function applyDaily(){}
-function resetDaily(){dailyRef.d=new Date(lastSun);document.getElementById('daily-date').value=toVal(lastSun);document.getElementById('daily-err').textContent='';}
+function resetDaily(){}
 
 /* ─── Flower Marks Page ─── */
 function onFlowerMonthChange() {
@@ -4051,7 +4189,7 @@ function computeFlowerLeaderboards(students, year) {
 /* pieData is populated lazily — empty until a real per-person ranking
    source is wired up. buildPie() shows a friendly empty state when a
    key has no slices instead of drawing fake data. */
-const pieData={ boys:[], girls:[], gender:[] };
+const pieData={ boys:[], girls:[], gender:[], 'da-boys':[], 'da-girls':[] };
 
 function computeGenderPieFromRoster(){
   // This one we CAN compute today: total boys vs girls across loaded rosters.
@@ -4070,8 +4208,9 @@ const selectedSlice={boys:null,girls:null,gender:null,'da-boys':null,'da-girls':
 
 /* Maps composite keys back to pieData base key */
 function dataKeyOf(key){
-  if(key==='da-boys') return 'boys';
-  if(key==='da-girls') return 'girls';
+  // da-boys / da-girls now have dedicated storage in pieData so the
+  // Daily Attendance page can rank by presence-count without stomping
+  // the Flower Marks page's boys/girls flower ranking, and vice-versa.
   return key;
 }
 
@@ -4224,6 +4363,540 @@ function rebuildAllPies(){
   buildPie('da-girls-pie','da-girls-legend','da-girls-detail','da-girls','#BB9BB7');
 }
 rebuildAllPies();
+
+/* ═══════════════ DAILY ATTENDANCE PAGE ═══════════════ */
+function onDailyFilterChange() {
+  populateDailyDaySelect();
+  renderDailyAttendance();
+}
+
+/* Populate the Day dropdown with only the Sundays of the selected month/year */
+function populateDailyDaySelect() {
+  const yearVal = document.getElementById('da-year-filter')?.value;
+  const monthName = document.getElementById('da-month-filter')?.value;
+  const daySel = document.getElementById('da-day-filter');
+  if (!daySel) return;
+
+  if (!yearVal || !monthName) {
+    daySel.innerHTML = '<option value="">All Sundays</option>';
+    daySel.disabled = !yearVal;
+    return;
+  }
+  daySel.disabled = false;
+
+  const year = parseInt(yearVal, 10);
+  const monthIdx = MONTHS.indexOf(monthName);
+  const prev = daySel.value;
+
+  let html = '<option value="">All Sundays</option>';
+  for (let day = 1; day <= 31; day++) {
+    const d = new Date(year, monthIdx, day);
+    if (d.getMonth() !== monthIdx) break;
+    if (d.getDay() === 0) {
+      html += '<option value="' + day + '">' + monthName.substring(0,3) + ' ' + day + '</option>';
+    }
+  }
+  daySel.innerHTML = html;
+  if (prev && Array.from(daySel.options).some(o => o.value === prev)) {
+    daySel.value = prev;
+  }
+}
+
+/* All Sunday ISO date strings within the current selection */
+function getDailySundayISOs() {
+  const yearVal = document.getElementById('da-year-filter')?.value;
+  const monthName = document.getElementById('da-month-filter')?.value;
+  const dayVal = document.getElementById('da-day-filter')?.value;
+  if (!yearVal) return [];
+  const year = parseInt(yearVal, 10);
+  const isos = [];
+
+  if (dayVal && monthName) {
+    const monthIdx = MONTHS.indexOf(monthName);
+    const d = new Date(year, monthIdx, parseInt(dayVal, 10));
+    if (d.getDay() === 0) isos.push(toVal(d));
+  } else if (monthName) {
+    const monthIdx = MONTHS.indexOf(monthName);
+    for (let day = 1; day <= 31; day++) {
+      const d = new Date(year, monthIdx, day);
+      if (d.getMonth() !== monthIdx) break;
+      if (d.getDay() === 0) isos.push(toVal(d));
+    }
+  } else {
+    for (let month = 0; month < 12; month++) {
+      for (let day = 1; day <= 31; day++) {
+        const d = new Date(year, month, day);
+        if (d.getMonth() !== month) break;
+        if (d.getDay() === 0) isos.push(toVal(d));
+      }
+    }
+  }
+  return isos;
+}
+
+/* Year+grade-aware student roster for the Daily Attendance page */
+function getDailyFilteredStudents() {
+  const gradeVal = document.getElementById('da-grade-filter')?.value || '';
+  const yearVal = document.getElementById('da-year-filter')?.value || '';
+  const searchQ = (document.getElementById('da-search-input')?.value || '').trim().toLowerCase();
+
+  const gradeFilter = (gradeVal && gradeVal !== 'Grade')
+    ? gradeVal.replace(/^grade\s*/i, '').trim() : '';
+
+  let students = ROSTER.students || [];
+  if (gradeFilter) {
+    students = students.filter(s => {
+      const displayGrade = getDisplayGrade(s, yearVal);
+      return displayGrade !== null && String(displayGrade).trim() === gradeFilter;
+    });
+  } else if (yearVal) {
+    students = students.filter(s => {
+      const displayGrade = getDisplayGrade(s, yearVal);
+      return displayGrade !== null;
+    });
+  }
+
+  if (searchQ) {
+    students = students.filter(s => (s.name || '').toLowerCase().includes(searchQ));
+  }
+  return students;
+}
+
+/* Main render function */
+function renderDailyAttendance() {
+  const yearVal   = document.getElementById('da-year-filter')?.value;
+  const monthName = document.getElementById('da-month-filter')?.value;
+  const dayVal    = document.getElementById('da-day-filter')?.value;
+  const summaryTitleEl = document.getElementById('da-selection-title');
+  const summaryBodyEl  = document.getElementById('da-summary-body');
+  const genderTitleEl  = document.getElementById('da-gender-title');
+
+  // No year selected → clear everything
+  if (!yearVal) {
+    pieData['da-boys']  = [];
+    pieData['da-girls'] = [];
+    pieData.gender      = [];
+    buildPie('da-boys-pie',  'da-boys-legend',  'da-boys-detail',  'da-boys',  '#79C1D9');
+    buildPie('da-girls-pie', 'da-girls-legend', 'da-girls-detail', 'da-girls', '#BB9BB7');
+    buildPie('gender-pie',    null,             'gender-detail',   'gender',   '#BBC3C6');
+    if (summaryTitleEl) summaryTitleEl.textContent = 'Attendance Summary';
+    if (summaryBodyEl)  summaryBodyEl.innerHTML =
+      '<div style="font-style:italic;color:#666">Select a Year to see the top attendance leaders.</div>';
+    if (genderTitleEl)  genderTitleEl.textContent = 'Daily Gender Trait';
+    return;
+  }
+
+  const students = getDailyFilteredStudents();
+  const isos = getDailySundayISOs();
+
+  // Per-student presence counts across the selected Sundays
+  const counts = {};
+  students.forEach(s => { counts[s.id] = 0; });
+  isos.forEach(iso => {
+    const dayData = ATTENDANCE_DATA[iso];
+    if (!dayData || !dayData.students || !dayData.students.presentIds) return;
+    dayData.students.presentIds.forEach(id => {
+      if (counts[id] !== undefined) counts[id]++;
+    });
+  });
+
+  // Split into boys/girls, take top 3 each
+  const boysCounts  = [];
+  const girlsCounts = [];
+  students.forEach(s => {
+    const c = counts[s.id] || 0;
+    if (c <= 0) return;
+    const entry = { name: s.name, count: c };
+    if (s.gender === 'male')        boysCounts.push(entry);
+    else if (s.gender === 'female') girlsCounts.push(entry);
+  });
+  boysCounts.sort((a,b) => b.count - a.count);
+  girlsCounts.sort((a,b) => b.count - a.count);
+
+  const colors = ['#1F8616', '#231686', '#864C16'];
+  const dots   = ['#349D24', '#2E33B2', '#8A5E21'];
+  const labels = ['1st', '2nd', '3rd'];
+
+  function toPieData(arr) {
+    const top3 = arr.slice(0, 3);
+    const total = top3.reduce((s, x) => s + x.count, 0) || 1;
+    const totalDays = isos.length || 1;
+    return top3.map((x, i) => ({
+      label: labels[i] || (i + 1) + 'th',
+      name:  x.name,
+      score: x.count + ' of ' + totalDays + ' Sunday' + (totalDays !== 1 ? 's' : ''),
+      pct:   Math.round((x.count / total) * 100) || Math.round(100 / top3.length),
+      color: colors[i] || '#888',
+      dot:   dots[i]   || '#888'
+    }));
+  }
+
+  pieData['da-boys']  = toPieData(boysCounts);
+  pieData['da-girls'] = toPieData(girlsCounts);
+  buildPie('da-boys-pie',  'da-boys-legend',  'da-boys-detail',  'da-boys',  '#79C1D9');
+  buildPie('da-girls-pie', 'da-girls-legend', 'da-girls-detail', 'da-girls', '#BB9BB7');
+
+  // Scope label
+  const gradeVal = document.getElementById('da-grade-filter')?.value || '';
+  const gradeLabel = gradeVal ? gradeVal : 'All Grades';
+
+  let scopeLabel = 'Year ' + yearVal;
+  if (dayVal && monthName) {
+    const monthIdx = MONTHS.indexOf(monthName);
+    const d = new Date(parseInt(yearVal, 10), monthIdx, parseInt(dayVal, 10));
+    scopeLabel = fmtUS(d) + ' (' + monthName + ' ' + dayVal + ')';
+  } else if (monthName) {
+    scopeLabel = monthName + ' ' + yearVal;
+  }
+  if (summaryTitleEl) summaryTitleEl.textContent = 'Attendance · ' + gradeLabel + ' · ' + scopeLabel;
+
+  // ─── Single-day scope ───
+  if (dayVal && monthName) {
+    const iso = isos[0];
+    const dayData = iso ? ATTENDANCE_DATA[iso] : null;
+    const presentIds = (dayData && dayData.students && dayData.students.presentIds) ? dayData.students.presentIds : [];
+
+    let presentBoys = 0, presentGirls = 0, presentUnknown = 0;
+    let totalBoys   = 0, totalGirls   = 0;
+    students.forEach(s => {
+      if (s.gender === 'male')        totalBoys++;
+      else if (s.gender === 'female') totalGirls++;
+      if (presentIds.indexOf(s.id) !== -1) {
+        if (s.gender === 'male')        presentBoys++;
+        else if (s.gender === 'female') presentGirls++;
+        else                            presentUnknown++;
+      }
+    });
+    const totalPresent = presentBoys + presentGirls + presentUnknown;
+    const totalStudents = students.length;
+
+    if (summaryBodyEl) {
+      if (!dayData) {
+        summaryBodyEl.innerHTML =
+          '<div style="font-style:italic;color:#666">No attendance recorded on ' + scopeLabel + '.</div>';
+      } else {
+        summaryBodyEl.innerHTML =
+          '<div style="font-size:26px;font-weight:700;color:#1F8616">' + totalPresent + ' / ' + totalStudents + '</div>' +
+          '<div style="font-size:11px;color:#555;letter-spacing:0.5px;text-transform:uppercase;font-weight:600">Present that day</div>' +
+          '<div style="display:flex;gap:12px;margin-top:8px">' +
+            '<div style="flex:1;background:rgba(26,110,255,0.14);border-radius:10px;padding:8px 10px">' +
+              '<div style="font-size:11px;color:#1a5e90;font-weight:600">👦 Boys</div>' +
+              '<div style="font-size:18px;font-weight:700;color:#1a5e90">' + presentBoys + ' / ' + totalBoys + '</div>' +
+            '</div>' +
+            '<div style="flex:1;background:rgba(245,38,228,0.12);border-radius:10px;padding:8px 10px">' +
+              '<div style="font-size:11px;color:#c0397d;font-weight:600">👧 Girls</div>' +
+              '<div style="font-size:18px;font-weight:700;color:#c0397d">' + presentGirls + ' / ' + totalGirls + '</div>' +
+            '</div>' +
+          '</div>';
+      }
+    }
+
+    if (genderTitleEl) genderTitleEl.textContent = 'Daily Gender Trait · ' + scopeLabel;
+    const genderTotal = presentBoys + presentGirls;
+    if (genderTotal > 0) {
+      pieData.gender = [
+        { label:'Girls', name:'Girls', score: presentGirls + ' of ' + genderTotal + ' present',
+          pct: Math.round((presentGirls/genderTotal)*100) || 0, color:'#F526E4', dot:'#F526E4' },
+        { label:'Boys',  name:'Boys',  score: presentBoys  + ' of ' + genderTotal + ' present',
+          pct: Math.round((presentBoys/genderTotal)*100)  || 0, color:'#1A6EFF', dot:'#0088FF' }
+      ];
+    } else {
+      pieData.gender = [];
+    }
+    buildPie('gender-pie', null, 'gender-detail', 'gender', '#BBC3C6');
+    return;
+  }
+
+  // ─── Month or Year scope ───
+  if (summaryBodyEl) {
+    const boysTop  = boysCounts[0];
+    const girlsTop = girlsCounts[0];
+    const totalDays = isos.length;
+    const boysLine  = boysTop
+      ? '<div style="display:flex;align-items:center;gap:8px"><span style="background:#1F8616;color:#fff;font-size:10px;font-weight:700;border-radius:9999px;padding:2px 8px">🥇 BOY</span> <span style="font-weight:600">' + boysTop.name + '</span> — ' + boysTop.count + ' of ' + totalDays + ' Sundays</div>'
+      : '<div style="color:#888;font-style:italic">No boys attendance recorded</div>';
+    const girlsLine = girlsTop
+      ? '<div style="display:flex;align-items:center;gap:8px"><span style="background:#c0397d;color:#fff;font-size:10px;font-weight:700;border-radius:9999px;padding:2px 8px">🥇 GIRL</span> <span style="font-weight:600">' + girlsTop.name + '</span> — ' + girlsTop.count + ' of ' + totalDays + ' Sundays</div>'
+      : '<div style="color:#888;font-style:italic">No girls attendance recorded</div>';
+
+    summaryBodyEl.innerHTML =
+      '<div style="font-size:11px;color:#555;letter-spacing:0.5px;text-transform:uppercase;font-weight:600;margin-bottom:4px">Top attendance leaders</div>' +
+      boysLine + girlsLine +
+      '<div style="margin-top:10px;padding-top:8px;border-top:1px solid rgba(14,54,54,0.15);font-size:11px;color:#666">' +
+        students.length + ' student' + (students.length !== 1 ? 's' : '') + ' · ' +
+        totalDays + ' Sunday' + (totalDays !== 1 ? 's' : '') + ' in scope' +
+      '</div>';
+  }
+
+  if (genderTitleEl) genderTitleEl.textContent = 'Gender Trait · ' + scopeLabel;
+  const totalPresBoys  = boysCounts.reduce((s, x) => s + x.count, 0);
+  const totalPresGirls = girlsCounts.reduce((s, x) => s + x.count, 0);
+  const totalPresences = totalPresBoys + totalPresGirls;
+  if (totalPresences > 0) {
+    pieData.gender = [
+      { label:'Girls', name:'Girls', score: totalPresGirls + ' presences',
+        pct: Math.round((totalPresGirls/totalPresences)*100) || 0, color:'#F526E4', dot:'#F526E4' },
+      { label:'Boys',  name:'Boys',  score: totalPresBoys  + ' presences',
+        pct: Math.round((totalPresBoys/totalPresences)*100)  || 0, color:'#1A6EFF', dot:'#0088FF' }
+    ];
+  } else {
+    pieData.gender = [];
+  }
+  buildPie('gender-pie', null, 'gender-detail', 'gender', '#BBC3C6');
+}
+
+/* ═══════════════ GRAPHICALLY REPRESENT (stacked areas) ═══════════════ */
+function buildGraphSeries() {
+  const yearVal   = document.getElementById('da-year-filter')?.value;
+  const monthName = document.getElementById('da-month-filter')?.value;
+  const dayVal    = document.getElementById('da-day-filter')?.value;
+  if (!yearVal) return { points: [], scopeLabel: '', xAxisLabels: [] };
+
+  const students = getDailyFilteredStudents();
+  const boyIds  = new Set(students.filter(s => s.gender === 'male').map(s => s.id));
+  const girlIds = new Set(students.filter(s => s.gender === 'female').map(s => s.id));
+  const totalEnrolled = students.length;
+
+  const year = parseInt(yearVal, 10);
+  const points = [];
+
+  // ── Single Sunday scope → point-per-hour is meaningless, so we synthesize
+  //    a mini series comparing that Sunday to its neighbouring Sundays (±2)
+  //    so the graph stays a trend chart rather than a single dot.
+  if (dayVal && monthName) {
+    const monthIdx = MONTHS.indexOf(monthName);
+    const centerD = new Date(year, monthIdx, parseInt(dayVal, 10));
+    for (let offset = -2; offset <= 2; offset++) {
+      const d = new Date(centerD);
+      d.setDate(d.getDate() + offset * 7);
+      const iso = toVal(d);
+      const dayData = ATTENDANCE_DATA[iso];
+      const presentIds = (dayData && dayData.students && dayData.students.presentIds) || [];
+      let g = 0, b = 0;
+      presentIds.forEach(id => {
+        if (girlIds.has(id)) g++;
+        else if (boyIds.has(id)) b++;
+      });
+      points.push({
+        label: (d.getMonth() + 1) + '/' + d.getDate(),
+        fullLabel: fmtUS(d),
+        girls: g, boys: b, total: totalEnrolled,
+        isCenter: offset === 0
+      });
+    }
+    return {
+      points,
+      scopeLabel: fmtUS(centerD) + ' (±2 weeks)',
+      xAxisLabels: points.map(p => p.label)
+    };
+  }
+
+  // ── Month scope → one point per Sunday of that month
+  if (monthName) {
+    const monthIdx = MONTHS.indexOf(monthName);
+    for (let day = 1; day <= 31; day++) {
+      const d = new Date(year, monthIdx, day);
+      if (d.getMonth() !== monthIdx) break;
+      if (d.getDay() !== 0) continue;
+      const iso = toVal(d);
+      const dayData = ATTENDANCE_DATA[iso];
+      const presentIds = (dayData && dayData.students && dayData.students.presentIds) || [];
+      let g = 0, b = 0;
+      presentIds.forEach(id => {
+        if (girlIds.has(id)) g++;
+        else if (boyIds.has(id)) b++;
+      });
+      points.push({
+        label: monthName.substring(0,3) + ' ' + day,
+        fullLabel: fmtUS(d),
+        girls: g, boys: b, total: totalEnrolled
+      });
+    }
+    return {
+      points,
+      scopeLabel: monthName + ' ' + year,
+      xAxisLabels: points.map(p => p.label)
+    };
+  }
+
+  // ── Year scope → one aggregated point per month (summed presences across all
+  //    Sundays that month) — mirrors the hiring-behaviour reference where each
+  //    tick is a month label.
+  const scopeDividerAt = 6; // between June/July for that split-year look
+  for (let month = 0; month < 12; month++) {
+    let girlsMonth = 0, boysMonth = 0, sundayCount = 0;
+    for (let day = 1; day <= 31; day++) {
+      const d = new Date(year, month, day);
+      if (d.getMonth() !== month) break;
+      if (d.getDay() !== 0) continue;
+      sundayCount++;
+      const iso = toVal(d);
+      const dayData = ATTENDANCE_DATA[iso];
+      const presentIds = (dayData && dayData.students && dayData.students.presentIds) || [];
+      presentIds.forEach(id => {
+        if (girlIds.has(id)) girlsMonth++;
+        else if (boyIds.has(id)) boysMonth++;
+      });
+    }
+    // Average across Sundays so the Y-axis stays comparable to the enrolment total
+    const girlsAvg = sundayCount ? Math.round(girlsMonth / sundayCount) : 0;
+    const boysAvg  = sundayCount ? Math.round(boysMonth  / sundayCount) : 0;
+    points.push({
+      label: MONTHS[month].substring(0,3),
+      fullLabel: MONTHS[month] + ' ' + year,
+      girls: girlsAvg, boys: boysAvg, total: totalEnrolled,
+      sundayCount
+    });
+  }
+  return {
+    points,
+    scopeLabel: 'Year ' + year,
+    xAxisLabels: points.map(p => p.label),
+    dividerAt: scopeDividerAt
+  };
+}
+
+/* Build a smooth Catmull-Rom → cubic-Bezier path so lines curve naturally */
+function smoothPath(pts, closeToBottom) {
+  if (!pts.length) return '';
+  if (pts.length === 1) {
+    return 'M ' + pts[0].x + ' ' + pts[0].y +
+      (closeToBottom ? ' L ' + pts[0].x + ' ' + closeToBottom + ' Z' : '');
+  }
+  let d = 'M ' + pts[0].x + ' ' + pts[0].y;
+  for (let i = 0; i < pts.length - 1; i++) {
+    const p0 = pts[i - 1] || pts[i];
+    const p1 = pts[i];
+    const p2 = pts[i + 1];
+    const p3 = pts[i + 2] || p2;
+    const cp1x = p1.x + (p2.x - p0.x) / 6;
+    const cp1y = p1.y + (p2.y - p0.y) / 6;
+    const cp2x = p2.x - (p3.x - p1.x) / 6;
+    const cp2y = p2.y - (p3.y - p1.y) / 6;
+    d += ' C ' + cp1x + ' ' + cp1y + ',' + cp2x + ' ' + cp2y + ',' + p2.x + ' ' + p2.y;
+  }
+  if (closeToBottom !== undefined) {
+    d += ' L ' + pts[pts.length - 1].x + ' ' + closeToBottom;
+    d += ' L ' + pts[0].x + ' ' + closeToBottom + ' Z';
+  }
+  return d;
+}
+
+function renderDailyGraph() {
+  const svg = document.getElementById('da-graph-svg');
+  const emptyEl = document.getElementById('da-graph-empty');
+  const tooltipEl = document.getElementById('da-graph-tooltip');
+  if (!svg) return;
+
+  const { points, scopeLabel, xAxisLabels, dividerAt } = buildGraphSeries();
+
+  if (!points.length || points.every(p => p.girls === 0 && p.boys === 0 && p.total === 0)) {
+    svg.innerHTML = '';
+    if (emptyEl) {
+      emptyEl.textContent = points.length
+        ? 'No attendance data recorded for ' + (scopeLabel || 'this selection') + '.'
+        : 'Select a Year to see attendance trends.';
+      emptyEl.classList.add('shown');
+    }
+    if (tooltipEl) tooltipEl.classList.remove('shown');
+    return;
+  }
+  if (emptyEl) emptyEl.classList.remove('shown');
+
+  const W = 800, H = 320;
+  const padL = 42, padR = 20, padT = 20, padB = 40;
+  const plotW = W - padL - padR;
+  const plotH = H - padT - padB;
+
+  // Y-axis max = ceil to nearest 10 above the biggest of (total, girls, boys)
+  let yMax = 0;
+  points.forEach(p => {
+    yMax = Math.max(yMax, p.total || 0, p.girls || 0, p.boys || 0);
+  });
+  yMax = Math.max(10, Math.ceil(yMax / 10) * 10);
+
+  const xOf = i => padL + (points.length === 1 ? plotW / 2 : (i * plotW / (points.length - 1)));
+  const yOf = v => padT + plotH - (v / yMax) * plotH;
+
+  const girlsPts = points.map((p, i) => ({ x: xOf(i), y: yOf(p.girls) }));
+  const boysPts  = points.map((p, i) => ({ x: xOf(i), y: yOf(p.boys) }));
+  const totalPts = points.map((p, i) => ({ x: xOf(i), y: yOf(p.total) }));
+  const bottomY = padT + plotH;
+
+  // Build SVG
+  let out = '';
+
+  // Gridlines + Y-axis labels
+  for (let step = 0; step <= 4; step++) {
+    const y = padT + (plotH * step / 4);
+    const v = Math.round(yMax - (yMax * step / 4));
+    out += '<line class="graph-axis-line" x1="' + padL + '" x2="' + (W - padR) + '" y1="' + y + '" y2="' + y + '"/>';
+    out += '<text class="graph-axis-label" x="' + (padL - 6) + '" y="' + (y + 3) + '" text-anchor="end">' + v + '</text>';
+  }
+
+  // Optional divider (for Year scope, splits Jan-Jun / Jul-Dec)
+  if (dividerAt && dividerAt > 0 && dividerAt < points.length) {
+    const dx = xOf(dividerAt - 0.5);
+    out += '<line class="graph-scope-divider" x1="' + dx + '" x2="' + dx + '" y1="' + padT + '" y2="' + bottomY + '"/>';
+    out += '<text class="graph-scope-label" x="' + ((padL + dx) / 2) + '" y="' + (H - 6) + '">' + points[0].fullLabel.split(' ').pop() + '</text>';
+    out += '<text class="graph-scope-label" x="' + ((dx + W - padR) / 2) + '" y="' + (H - 6) + '">' + points[points.length - 1].fullLabel.split(' ').pop() + '</text>';
+  }
+
+  // X-axis baseline
+  out += '<line class="graph-axis-line" x1="' + padL + '" x2="' + (W - padR) + '" y1="' + bottomY + '" y2="' + bottomY + '"/>';
+
+  // Total-enrolment dashed line
+  out += '<path class="graph-line-total" d="' + smoothPath(totalPts) + '"/>';
+
+  // Areas — draw boys first (wider), girls on top so both peaks are visible
+  out += '<path class="graph-area-boys"  d="' + smoothPath(boysPts,  bottomY) + '"/>';
+  out += '<path class="graph-area-girls" d="' + smoothPath(girlsPts, bottomY) + '"/>';
+
+  // X-axis tick labels
+  points.forEach((p, i) => {
+    const x = xOf(i);
+    out += '<text class="graph-axis-label" x="' + x + '" y="' + (bottomY + 16) +
+      '" text-anchor="middle" transform="rotate(-30 ' + x + ' ' + (bottomY + 16) + ')">' +
+      p.label + '</text>';
+  });
+
+  // Hover dots (girls + boys)
+  points.forEach((p, i) => {
+    const x = xOf(i);
+    out += '<circle class="graph-hover-dot" cx="' + x + '" cy="' + yOf(p.girls) +
+      '" r="4" stroke="#c0397d" data-idx="' + i + '" data-kind="girls"/>';
+    out += '<circle class="graph-hover-dot" cx="' + x + '" cy="' + yOf(p.boys) +
+      '" r="4" stroke="#1a6eff" data-idx="' + i + '" data-kind="boys"/>';
+  });
+
+  // Scope title (top-left inside plot)
+  out += '<text class="graph-scope-label" x="' + (W / 2) + '" y="' + (padT - 5) +
+    '" text-anchor="middle">' + scopeLabel + '</text>';
+
+  svg.innerHTML = out;
+
+  // Tooltip wiring
+  const wrap = svg.parentElement;
+  svg.querySelectorAll('.graph-hover-dot').forEach(dot => {
+    dot.addEventListener('mouseenter', function(e) {
+      const idx = parseInt(this.getAttribute('data-idx'), 10);
+      const p = points[idx];
+      const bb = this.getBoundingClientRect();
+      const wrapBB = wrap.getBoundingClientRect();
+      tooltipEl.innerHTML =
+        '<b>' + p.fullLabel + '</b><br>' +
+        '<span style="color:#f8a2c5">● Girls:</span> ' + p.girls + '<br>' +
+        '<span style="color:#8bb4ff">● Boys:</span> ' + p.boys + '<br>' +
+        '<span style="color:#ccc">Total enrolled:</span> ' + p.total;
+      tooltipEl.style.left = (bb.left - wrapBB.left + bb.width/2) + 'px';
+      tooltipEl.style.top  = (bb.top  - wrapBB.top) + 'px';
+      tooltipEl.classList.add('shown');
+    });
+    dot.addEventListener('mouseleave', function() {
+      tooltipEl.classList.remove('shown');
+    });
+  });
+}
 
 /* ─── Profile Modal ─── */
 function openProfModal(rosterId, displayNameFallback){
@@ -4394,9 +5067,455 @@ document.querySelectorAll('.nav-item').forEach(item=>{
 });
 
 /* ─── Manual refresh button wiring ─── */
-document.getElementById('refresh-btn')?.addEventListener('click', ()=>{
-  loadLiveData();
+document.getElementById('refresh-btn')?.addEventListener('click', ()=>{ 
+  loadLiveData(); 
 });
+
+/* ═══════════════ DAILY ATTENDANCE — filter helpers ═══════════════ */
+function onDailyFilterChange() {
+  populateDailyDaySelect();
+  renderDailyAttendance();
+}
+
+function populateDailyDaySelect() {
+  const yearVal = document.getElementById('da-year-filter')?.value;
+  const monthName = document.getElementById('da-month-filter')?.value;
+  const daySel = document.getElementById('da-day-filter');
+  if (!daySel) return;
+
+  if (!yearVal || !monthName) {
+    daySel.innerHTML = '<option value="">All Sundays</option>';
+    daySel.disabled = !yearVal;
+    return;
+  }
+  daySel.disabled = false;
+
+  const year = parseInt(yearVal, 10);
+  const monthIdx = MONTHS.indexOf(monthName);
+  const prev = daySel.value;
+
+  let html = '<option value="">All Sundays</option>';
+  for (let day = 1; day <= 31; day++) {
+    const d = new Date(year, monthIdx, day);
+    if (d.getMonth() !== monthIdx) break;
+    if (d.getDay() === 0) {
+      html += '<option value="' + day + '">' + monthName.substring(0,3) + ' ' + day + '</option>';
+    }
+  }
+  daySel.innerHTML = html;
+  if (prev && Array.from(daySel.options).some(o => o.value === prev)) {
+    daySel.value = prev;
+  }
+}
+
+function getDailySundayISOs() {
+  const yearVal = document.getElementById('da-year-filter')?.value;
+  const monthName = document.getElementById('da-month-filter')?.value;
+  const dayVal = document.getElementById('da-day-filter')?.value;
+  if (!yearVal) return [];
+  const year = parseInt(yearVal, 10);
+  const isos = [];
+
+  if (dayVal && monthName) {
+    const monthIdx = MONTHS.indexOf(monthName);
+    const d = new Date(year, monthIdx, parseInt(dayVal, 10));
+    if (d.getDay() === 0) isos.push(toVal(d));
+  } else if (monthName) {
+    const monthIdx = MONTHS.indexOf(monthName);
+    for (let day = 1; day <= 31; day++) {
+      const d = new Date(year, monthIdx, day);
+      if (d.getMonth() !== monthIdx) break;
+      if (d.getDay() === 0) isos.push(toVal(d));
+    }
+  } else {
+    for (let month = 0; month < 12; month++) {
+      for (let day = 1; day <= 31; day++) {
+        const d = new Date(year, month, day);
+        if (d.getMonth() !== month) break;
+        if (d.getDay() === 0) isos.push(toVal(d));
+      }
+    }
+  }
+  return isos;
+}
+
+function getDailyFilteredStudents() {
+  const gradeVal = document.getElementById('da-grade-filter')?.value || '';
+  const yearVal = document.getElementById('da-year-filter')?.value || '';
+  const searchQ = (document.getElementById('da-search-input')?.value || '').trim().toLowerCase();
+  const gradeFilter = (gradeVal && gradeVal !== 'Grade')
+    ? gradeVal.replace(/^grade\s*/i, '').trim() : '';
+
+  let students = ROSTER.students || [];
+  if (gradeFilter) {
+    students = students.filter(s => {
+      const displayGrade = getDisplayGrade(s, yearVal);
+      return displayGrade !== null && String(displayGrade).trim() === gradeFilter;
+    });
+  } else if (yearVal) {
+    students = students.filter(s => {
+      const displayGrade = getDisplayGrade(s, yearVal);
+      return displayGrade !== null;
+    });
+  }
+  if (searchQ) students = students.filter(s => (s.name || '').toLowerCase().includes(searchQ));
+  return students;
+}
+
+/* ═══════════════ DAILY ATTENDANCE — main render ═══════════════ */
+function renderDailyAttendance() {
+  const yearVal   = document.getElementById('da-year-filter')?.value;
+  const monthName = document.getElementById('da-month-filter')?.value;
+  const dayVal    = document.getElementById('da-day-filter')?.value;
+  const summaryTitleEl = document.getElementById('da-selection-title');
+  const summaryBodyEl  = document.getElementById('da-summary-body');
+  const genderTitleEl  = document.getElementById('da-gender-title');
+
+  if (!yearVal) {
+    pieData['da-boys']  = [];
+    pieData['da-girls'] = [];
+    pieData.gender      = [];
+    buildPie('da-boys-pie','da-boys-legend','da-boys-detail','da-boys','#79C1D9');
+    buildPie('da-girls-pie','da-girls-legend','da-girls-detail','da-girls','#BB9BB7');
+    buildPie('gender-pie',null,'gender-detail','gender','#BBC3C6');
+    if (summaryTitleEl) summaryTitleEl.textContent = 'Attendance Summary';
+    if (summaryBodyEl)  summaryBodyEl.innerHTML = '<div style="font-style:italic;color:#666">Select a Year to see the top attendance leaders.</div>';
+    if (genderTitleEl)  genderTitleEl.textContent = 'Daily Gender Trait';
+    renderDailyGraph();
+    return;
+  }
+
+  const students = getDailyFilteredStudents();
+  const isos = getDailySundayISOs();
+
+  const counts = {};
+  students.forEach(s => { counts[s.id] = 0; });
+  isos.forEach(iso => {
+    const dayData = ATTENDANCE_DATA[iso];
+    if (!dayData || !dayData.students || !dayData.students.presentIds) return;
+    dayData.students.presentIds.forEach(id => {
+      if (counts[id] !== undefined) counts[id]++;
+    });
+  });
+
+  const boysCounts  = [];
+  const girlsCounts = [];
+  students.forEach(s => {
+    const c = counts[s.id] || 0;
+    if (c <= 0) return;
+    const entry = { name: s.name, count: c };
+    if (s.gender === 'male')        boysCounts.push(entry);
+    else if (s.gender === 'female') girlsCounts.push(entry);
+  });
+  boysCounts.sort((a,b) => b.count - a.count);
+  girlsCounts.sort((a,b) => b.count - a.count);
+
+  const colors = ['#1F8616', '#231686', '#864C16'];
+  const dots   = ['#349D24', '#2E33B2', '#8A5E21'];
+  const labels = ['1st', '2nd', '3rd'];
+
+  function toPieData(arr) {
+    const top3 = arr.slice(0, 3);
+    const total = top3.reduce((s, x) => s + x.count, 0) || 1;
+    const totalDays = isos.length || 1;
+    return top3.map((x, i) => ({
+      label: labels[i] || (i + 1) + 'th',
+      name:  x.name,
+      score: x.count + ' of ' + totalDays + ' Sunday' + (totalDays !== 1 ? 's' : ''),
+      pct:   Math.round((x.count / total) * 100) || Math.round(100 / top3.length),
+      color: colors[i] || '#888',
+      dot:   dots[i]   || '#888'
+    }));
+  }
+
+  pieData['da-boys']  = toPieData(boysCounts);
+  pieData['da-girls'] = toPieData(girlsCounts);
+  buildPie('da-boys-pie','da-boys-legend','da-boys-detail','da-boys','#79C1D9');
+  buildPie('da-girls-pie','da-girls-legend','da-girls-detail','da-girls','#BB9BB7');
+
+  const gradeVal = document.getElementById('da-grade-filter')?.value || '';
+  const gradeLabel = gradeVal || 'All Grades';
+
+  let scopeLabel = 'Year ' + yearVal;
+  if (dayVal && monthName) {
+    const monthIdx = MONTHS.indexOf(monthName);
+    const d = new Date(parseInt(yearVal, 10), monthIdx, parseInt(dayVal, 10));
+    scopeLabel = fmtUS(d) + ' (' + monthName + ' ' + dayVal + ')';
+  } else if (monthName) {
+    scopeLabel = monthName + ' ' + yearVal;
+  }
+  if (summaryTitleEl) summaryTitleEl.textContent = 'Attendance · ' + gradeLabel + ' · ' + scopeLabel;
+
+  if (dayVal && monthName) {
+    const iso = isos[0];
+    const dayData = iso ? ATTENDANCE_DATA[iso] : null;
+    const presentIds = (dayData && dayData.students && dayData.students.presentIds) ? dayData.students.presentIds : [];
+
+    let presentBoys = 0, presentGirls = 0, presentUnknown = 0;
+    let totalBoys   = 0, totalGirls   = 0;
+    students.forEach(s => {
+      if (s.gender === 'male')        totalBoys++;
+      else if (s.gender === 'female') totalGirls++;
+      if (presentIds.indexOf(s.id) !== -1) {
+        if (s.gender === 'male')        presentBoys++;
+        else if (s.gender === 'female') presentGirls++;
+        else                            presentUnknown++;
+      }
+    });
+    const totalPresent = presentBoys + presentGirls + presentUnknown;
+
+    if (summaryBodyEl) {
+      if (!dayData) {
+        summaryBodyEl.innerHTML = '<div style="font-style:italic;color:#666">No attendance recorded on ' + scopeLabel + '.</div>';
+      } else {
+        summaryBodyEl.innerHTML =
+          '<div style="font-size:26px;font-weight:700;color:#1F8616">' + totalPresent + ' / ' + students.length + '</div>' +
+          '<div style="font-size:11px;color:#555;letter-spacing:0.5px;text-transform:uppercase;font-weight:600">Present that day</div>' +
+          '<div style="display:flex;gap:12px;margin-top:8px">' +
+            '<div style="flex:1;background:rgba(26,110,255,0.14);border-radius:10px;padding:8px 10px">' +
+              '<div style="font-size:11px;color:#1a5e90;font-weight:600">👦 Boys</div>' +
+              '<div style="font-size:18px;font-weight:700;color:#1a5e90">' + presentBoys + ' / ' + totalBoys + '</div>' +
+            '</div>' +
+            '<div style="flex:1;background:rgba(245,38,228,0.12);border-radius:10px;padding:8px 10px">' +
+              '<div style="font-size:11px;color:#c0397d;font-weight:600">👧 Girls</div>' +
+              '<div style="font-size:18px;font-weight:700;color:#c0397d">' + presentGirls + ' / ' + totalGirls + '</div>' +
+            '</div>' +
+          '</div>';
+      }
+    }
+
+    if (genderTitleEl) genderTitleEl.textContent = 'Daily Gender Trait · ' + scopeLabel;
+    const genderTotal = presentBoys + presentGirls;
+    pieData.gender = genderTotal > 0 ? [
+      { label:'Girls', name:'Girls', score: presentGirls + ' of ' + genderTotal + ' present',
+        pct: Math.round((presentGirls/genderTotal)*100), color:'#F526E4', dot:'#F526E4' },
+      { label:'Boys',  name:'Boys',  score: presentBoys + ' of ' + genderTotal + ' present',
+        pct: Math.round((presentBoys/genderTotal)*100),  color:'#1A6EFF', dot:'#0088FF' }
+    ] : [];
+    buildPie('gender-pie', null, 'gender-detail', 'gender', '#BBC3C6');
+    renderDailyGraph();
+    return;
+  }
+
+  if (summaryBodyEl) {
+    const boysTop  = boysCounts[0];
+    const girlsTop = girlsCounts[0];
+    const totalDays = isos.length;
+    const boysLine  = boysTop
+      ? '<div style="display:flex;align-items:center;gap:8px"><span style="background:#1F8616;color:#fff;font-size:10px;font-weight:700;border-radius:9999px;padding:2px 8px">🥇 BOY</span> <span style="font-weight:600">' + boysTop.name + '</span> — ' + boysTop.count + ' of ' + totalDays + ' Sundays</div>'
+      : '<div style="color:#888;font-style:italic">No boys attendance recorded</div>';
+    const girlsLine = girlsTop
+      ? '<div style="display:flex;align-items:center;gap:8px"><span style="background:#c0397d;color:#fff;font-size:10px;font-weight:700;border-radius:9999px;padding:2px 8px">🥇 GIRL</span> <span style="font-weight:600">' + girlsTop.name + '</span> — ' + girlsTop.count + ' of ' + totalDays + ' Sundays</div>'
+      : '<div style="color:#888;font-style:italic">No girls attendance recorded</div>';
+
+    summaryBodyEl.innerHTML =
+      '<div style="font-size:11px;color:#555;letter-spacing:0.5px;text-transform:uppercase;font-weight:600;margin-bottom:4px">Top attendance leaders</div>' +
+      boysLine + girlsLine +
+      '<div style="margin-top:10px;padding-top:8px;border-top:1px solid rgba(14,54,54,0.15);font-size:11px;color:#666">' +
+        students.length + ' student' + (students.length !== 1 ? 's' : '') + ' · ' +
+        totalDays + ' Sunday' + (totalDays !== 1 ? 's' : '') + ' in scope' +
+      '</div>';
+  }
+
+  if (genderTitleEl) genderTitleEl.textContent = 'Gender Trait · ' + scopeLabel;
+  const totalPresBoys  = boysCounts.reduce((s, x) => s + x.count, 0);
+  const totalPresGirls = girlsCounts.reduce((s, x) => s + x.count, 0);
+  const totalPresences = totalPresBoys + totalPresGirls;
+  pieData.gender = totalPresences > 0 ? [
+    { label:'Girls', name:'Girls', score: totalPresGirls + ' presences',
+      pct: Math.round((totalPresGirls/totalPresences)*100), color:'#F526E4', dot:'#F526E4' },
+    { label:'Boys',  name:'Boys',  score: totalPresBoys + ' presences',
+      pct: Math.round((totalPresBoys/totalPresences)*100),  color:'#1A6EFF', dot:'#0088FF' }
+  ] : [];
+  buildPie('gender-pie', null, 'gender-detail', 'gender', '#BBC3C6');
+  renderDailyGraph();
+}
+
+/* ═══════════════ GRAPHICALLY REPRESENT ═══════════════ */
+function buildGraphSeries() {
+  const yearVal   = document.getElementById('da-year-filter')?.value;
+  const monthName = document.getElementById('da-month-filter')?.value;
+  const dayVal    = document.getElementById('da-day-filter')?.value;
+  if (!yearVal) return { points: [], scopeLabel: '' };
+
+  const students = getDailyFilteredStudents();
+  const boyIds  = new Set(students.filter(s => s.gender === 'male').map(s => s.id));
+  const girlIds = new Set(students.filter(s => s.gender === 'female').map(s => s.id));
+  const totalEnrolled = students.length;
+  const year = parseInt(yearVal, 10);
+  const points = [];
+
+  if (dayVal && monthName) {
+    const monthIdx = MONTHS.indexOf(monthName);
+    const centerD = new Date(year, monthIdx, parseInt(dayVal, 10));
+    for (let offset = -2; offset <= 2; offset++) {
+      const d = new Date(centerD);
+      d.setDate(d.getDate() + offset * 7);
+      const iso = toVal(d);
+      const dayData = ATTENDANCE_DATA[iso];
+      const presentIds = (dayData && dayData.students && dayData.students.presentIds) || [];
+      let g = 0, b = 0;
+      presentIds.forEach(id => { if (girlIds.has(id)) g++; else if (boyIds.has(id)) b++; });
+      points.push({ label: (d.getMonth() + 1) + '/' + d.getDate(), fullLabel: fmtUS(d), girls: g, boys: b, total: totalEnrolled });
+    }
+    return { points, scopeLabel: fmtUS(centerD) + ' (±2 weeks)' };
+  }
+
+  if (monthName) {
+    const monthIdx = MONTHS.indexOf(monthName);
+    for (let day = 1; day <= 31; day++) {
+      const d = new Date(year, monthIdx, day);
+      if (d.getMonth() !== monthIdx) break;
+      if (d.getDay() !== 0) continue;
+      const iso = toVal(d);
+      const dayData = ATTENDANCE_DATA[iso];
+      const presentIds = (dayData && dayData.students && dayData.students.presentIds) || [];
+      let g = 0, b = 0;
+      presentIds.forEach(id => { if (girlIds.has(id)) g++; else if (boyIds.has(id)) b++; });
+      points.push({ label: monthName.substring(0,3) + ' ' + day, fullLabel: fmtUS(d), girls: g, boys: b, total: totalEnrolled });
+    }
+    return { points, scopeLabel: monthName + ' ' + year };
+  }
+
+  for (let month = 0; month < 12; month++) {
+    let girlsMonth = 0, boysMonth = 0, sundayCount = 0;
+    for (let day = 1; day <= 31; day++) {
+      const d = new Date(year, month, day);
+      if (d.getMonth() !== month) break;
+      if (d.getDay() !== 0) continue;
+      sundayCount++;
+      const iso = toVal(d);
+      const dayData = ATTENDANCE_DATA[iso];
+      const presentIds = (dayData && dayData.students && dayData.students.presentIds) || [];
+      presentIds.forEach(id => { if (girlIds.has(id)) girlsMonth++; else if (boyIds.has(id)) boysMonth++; });
+    }
+    points.push({
+      label: MONTHS[month].substring(0,3),
+      fullLabel: MONTHS[month] + ' ' + year,
+      girls: sundayCount ? Math.round(girlsMonth / sundayCount) : 0,
+      boys:  sundayCount ? Math.round(boysMonth  / sundayCount) : 0,
+      total: totalEnrolled
+    });
+  }
+  return { points, scopeLabel: 'Year ' + year, dividerAt: 6 };
+}
+
+function smoothPath(pts, closeToBottom) {
+  if (!pts.length) return '';
+  if (pts.length === 1) {
+    return 'M ' + pts[0].x + ' ' + pts[0].y + (closeToBottom ? ' L ' + pts[0].x + ' ' + closeToBottom + ' Z' : '');
+  }
+  let d = 'M ' + pts[0].x + ' ' + pts[0].y;
+  for (let i = 0; i < pts.length - 1; i++) {
+    const p0 = pts[i - 1] || pts[i];
+    const p1 = pts[i];
+    const p2 = pts[i + 1];
+    const p3 = pts[i + 2] || p2;
+    const cp1x = p1.x + (p2.x - p0.x) / 6;
+    const cp1y = p1.y + (p2.y - p0.y) / 6;
+    const cp2x = p2.x - (p3.x - p1.x) / 6;
+    const cp2y = p2.y - (p3.y - p1.y) / 6;
+    d += ' C ' + cp1x + ' ' + cp1y + ',' + cp2x + ' ' + cp2y + ',' + p2.x + ' ' + p2.y;
+  }
+  if (closeToBottom !== undefined) {
+    d += ' L ' + pts[pts.length - 1].x + ' ' + closeToBottom;
+    d += ' L ' + pts[0].x + ' ' + closeToBottom + ' Z';
+  }
+  return d;
+}
+
+function renderDailyGraph() {
+  const svg = document.getElementById('da-graph-svg');
+  const emptyEl = document.getElementById('da-graph-empty');
+  const tooltipEl = document.getElementById('da-graph-tooltip');
+  if (!svg) return;
+
+  const { points, scopeLabel, dividerAt } = buildGraphSeries();
+
+  if (!points.length || points.every(p => p.girls === 0 && p.boys === 0 && p.total === 0)) {
+    svg.innerHTML = '';
+    if (emptyEl) {
+      emptyEl.textContent = points.length ? 'No attendance data recorded for ' + (scopeLabel || 'this selection') + '.' : 'Select a Year to see attendance trends.';
+      emptyEl.classList.add('shown');
+    }
+    if (tooltipEl) tooltipEl.classList.remove('shown');
+    return;
+  }
+  if (emptyEl) emptyEl.classList.remove('shown');
+
+  const W = 800, H = 320;
+  const padL = 42, padR = 20, padT = 20, padB = 40;
+  const plotW = W - padL - padR;
+  const plotH = H - padT - padB;
+
+  let yMax = 0;
+  points.forEach(p => { yMax = Math.max(yMax, p.total || 0, p.girls || 0, p.boys || 0); });
+  yMax = Math.max(10, Math.ceil(yMax / 10) * 10);
+
+  const xOf = i => padL + (points.length === 1 ? plotW / 2 : (i * plotW / (points.length - 1)));
+  const yOf = v => padT + plotH - (v / yMax) * plotH;
+
+  const girlsPts = points.map((p, i) => ({ x: xOf(i), y: yOf(p.girls) }));
+  const boysPts  = points.map((p, i) => ({ x: xOf(i), y: yOf(p.boys) }));
+  const totalPts = points.map((p, i) => ({ x: xOf(i), y: yOf(p.total) }));
+  const bottomY = padT + plotH;
+
+  let out = '';
+
+  for (let step = 0; step <= 4; step++) {
+    const y = padT + (plotH * step / 4);
+    const v = Math.round(yMax - (yMax * step / 4));
+    out += '<line class="graph-axis-line" x1="' + padL + '" x2="' + (W - padR) + '" y1="' + y + '" y2="' + y + '"/>';
+    out += '<text class="graph-axis-label" x="' + (padL - 6) + '" y="' + (y + 3) + '" text-anchor="end">' + v + '</text>';
+  }
+
+  if (dividerAt && dividerAt > 0 && dividerAt < points.length) {
+    const dx = xOf(dividerAt - 0.5);
+    out += '<line class="graph-scope-divider" x1="' + dx + '" x2="' + dx + '" y1="' + padT + '" y2="' + bottomY + '"/>';
+  }
+
+  out += '<line class="graph-axis-line" x1="' + padL + '" x2="' + (W - padR) + '" y1="' + bottomY + '" y2="' + bottomY + '"/>';
+  out += '<path class="graph-line-total" d="' + smoothPath(totalPts) + '"/>';
+  out += '<path class="graph-area-boys"  d="' + smoothPath(boysPts,  bottomY) + '"/>';
+  out += '<path class="graph-area-girls" d="' + smoothPath(girlsPts, bottomY) + '"/>';
+
+  points.forEach((p, i) => {
+    const x = xOf(i);
+    out += '<text class="graph-axis-label" x="' + x + '" y="' + (bottomY + 16) + '" text-anchor="middle" transform="rotate(-30 ' + x + ' ' + (bottomY + 16) + ')">' + p.label + '</text>';
+  });
+
+  points.forEach((p, i) => {
+    const x = xOf(i);
+    out += '<circle class="graph-hover-dot" cx="' + x + '" cy="' + yOf(p.girls) + '" r="4" stroke="#c0397d" data-idx="' + i + '"/>';
+    out += '<circle class="graph-hover-dot" cx="' + x + '" cy="' + yOf(p.boys) + '" r="4" stroke="#1a6eff" data-idx="' + i + '"/>';
+  });
+
+  out += '<text class="graph-scope-label" x="' + (W / 2) + '" y="' + (padT - 5) + '" text-anchor="middle">' + scopeLabel + '</text>';
+
+  svg.innerHTML = out;
+
+  const wrap = svg.parentElement;
+  svg.querySelectorAll('.graph-hover-dot').forEach(dot => {
+    dot.addEventListener('mouseenter', function() {
+      const idx = parseInt(this.getAttribute('data-idx'), 10);
+      const p = points[idx];
+      const bb = this.getBoundingClientRect();
+      const wrapBB = wrap.getBoundingClientRect();
+      tooltipEl.innerHTML =
+        '<b>' + p.fullLabel + '</b><br>' +
+        '<span style="color:#f8a2c5">● Girls:</span> ' + p.girls + '<br>' +
+        '<span style="color:#8bb4ff">● Boys:</span> ' + p.boys + '<br>' +
+        '<span style="color:#ccc">Total enrolled:</span> ' + p.total;
+      tooltipEl.style.left = (bb.left - wrapBB.left + bb.width/2) + 'px';
+      tooltipEl.style.top  = (bb.top  - wrapBB.top) + 'px';
+      tooltipEl.classList.add('shown');
+    });
+    dot.addEventListener('mouseleave', function() { tooltipEl.classList.remove('shown'); });
+  });
+}
+
+// Initial render
+renderDailyAttendance();
 </script>
 
 <!-- ═══════ PROFILE MODAL ═══════ -->

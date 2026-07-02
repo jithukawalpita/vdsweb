@@ -1529,6 +1529,7 @@ window.googleProvider.addScope('profile');
 </script>
 <script src="face-utils.js"></script>
 <script src="auth-system.js"></script>
+<script src="auth-gate.js"></script>
 
 
 <div class="auth-overlay" id="authOverlay" onclick="overlayClick(event)">
@@ -1755,6 +1756,7 @@ window.googleProvider.addScope('profile');
         <div class="am-field"><label class="am-label">Date of Birth *</label><input class="am-input" id="edTcDOB" type="date"></div>
       </div>
       <button class="am-btn" id="edBtn" onclick="saveProfileEdits()">Save Changes</button>
+      <button class="am-btn am-btn-ghost" onclick="openChangePassword()" style="margin-top:10px">Change Password</button>
       <div class="am-err" id="edErr"></div>
       <button class="am-btn am-btn-ghost" onclick="openManualReupload()" style="margin-top:10px">📷 Re-register Face Photo</button>
     </div>

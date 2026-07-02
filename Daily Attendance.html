@@ -1366,6 +1366,7 @@
         <div class="am-field"><label class="am-label">Date of Birth *</label><input class="am-input" id="edTcDOB" type="date"></div>
       </div>
       <button class="am-btn" id="edBtn" onclick="saveProfileEdits()">Save Changes</button>
+      <button class="am-btn am-btn-ghost" onclick="openChangePassword()" style="margin-top:10px">Change Password</button>
       <div class="am-err" id="edErr"></div>
       <button class="am-btn am-btn-ghost" onclick="openManualReupload()" style="margin-top:10px">📷 Re-register Face Photo</button>
     </div>
@@ -1859,6 +1860,8 @@ checkExistingSession();
 <!-- Shared auth system -->
 <script src="face-utils.js"></script>
 <script src="auth-system.js"></script>
+<script src="auth-gate.js"></script>
+<script src="auth-gate.js"></script>
 
 <script>
   firebase.auth().onAuthStateChanged(function(u) {
