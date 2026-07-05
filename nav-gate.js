@@ -3,7 +3,7 @@
  * NAV-GATE.JS — shared role-based nav link visibility
  * ───────────────────────────────────────────────────────────────────
  * Drop this one file on ANY page that already loads Firebase + Auth +
- * Firestore (the same way Daily Attendance.html does), and any link
+ * Firestore (the same way daily-attendance.html does), and any link
  * marked with data-role-gate will be hidden until a signed-in user's
  * Firestore role matches.
  *
@@ -13,7 +13,7 @@
  *
  *   2. On any nav link you want gated, add data-role-gate + hide it
  *      by default:
- *        <a href="Daily Attendance.html"
+ *        <a href="daily-attendance.html"
  *           data-role-gate="student,teacher"
  *           style="display:none;">Daily Attendance</a>
  *
@@ -83,3 +83,4 @@
   }
   waitForFirebaseThenListen(60);
 })();
+
