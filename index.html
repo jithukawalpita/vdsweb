@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <!-- Favicon for browser tab -->
@@ -17,9 +17,9 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <script src="face-utils.js"></script>
-
-
-
+<script src="auth-system.js"></script>
+<script src="auth-gate.js"></script>
+<script src="auth-gate.js"></script>
 <link rel="stylesheet" href="auth-modal.css">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -163,7 +163,7 @@ body::before{content:"";position:fixed;top:0;left:0;width:100%;height:100%;z-ind
 /* BADGE */
 .badge{display:inline-flex;align-items:center;gap:10px;background:linear-gradient(180deg,#4a2208 0%,#2e1404 45%,#1a0a02 100%);border:1.5px solid #d4a850;color:#ffe680;font-size:10px;font-weight:700;letter-spacing:3.5px;text-transform:uppercase;padding:11px 28px;border-radius:40px;margin-bottom:18px;box-shadow:0 0 18px rgba(255,170,50,0.28),0 0 36px rgba(255,130,30,0.14),0 8px 20px rgba(0,0,0,0.85),0 3px 6px rgba(0,0,0,0.6),inset 0 2px 0 rgba(255,235,160,0.55),inset 0 1px 0 rgba(255,250,200,0.35),inset 0 -2px 3px rgba(0,0,0,0.85),inset 0 -1px 0 rgba(0,0,0,0.6),inset 0 0 18px rgba(255,180,80,0.18),0 0 0 1px rgba(0,0,0,0.4);text-shadow:0 1px 0 rgba(0,0,0,1),0 2px 1px rgba(0,0,0,0.7),0 -1px 0 rgba(255,230,150,0.35),0 0 6px rgba(255,180,60,0.45);position:relative;animation:fadeDown 0.8s ease both}
 .badge::after{content:'';position:absolute;top:2px;left:6%;right:6%;height:42%;background:linear-gradient(180deg,rgba(255,235,170,0.22) 0%,rgba(255,200,100,0.08) 60%,transparent 100%);border-radius:40px 40px 50% 50%/100% 100% 30% 30%;pointer-events:none}
-.badge::before{content:'?';font-size:14px;color:#ffd966;text-shadow:0 0 4px rgba(255,200,80,0.8),0 0 10px rgba(255,160,40,0.5),0 1px 0 rgba(0,0,0,0.9);animation:spin 8s linear infinite;display:inline-block}
+.badge::before{content:'☸';font-size:14px;color:#ffd966;text-shadow:0 0 4px rgba(255,200,80,0.8),0 0 10px rgba(255,160,40,0.5),0 1px 0 rgba(0,0,0,0.9);animation:spin 8s linear infinite;display:inline-block}
 
 /* SCHOOL NAME */
 .school-name{display:block;width:auto;max-width:min(720px,90vw);height:auto;margin:0 auto 12px;text-align:center;position:relative;font-size:clamp(48px,7vw,96px);line-height:1.05;letter-spacing:0.3px;filter:drop-shadow(0 0 2px rgba(255,235,180,0.3)) drop-shadow(0 0 8px rgba(255,200,90,0.18)) drop-shadow(0 4px 8px rgba(0,0,0,0.45));animation:fadeDown 0.9s 0.1s ease both,titleBreathe 6s ease-in-out infinite 1s;overflow:visible;isolation:isolate;z-index:2}
@@ -176,10 +176,10 @@ body::before{content:"";position:fixed;top:0;left:0;width:100%;height:100%;z-ind
 .hero-tagline{display:flex;align-items:center;gap:10px;color:#fffd7fa5;font-size:clamp(12px,1.5vw,18px);font-weight:700;font-style:italic;text-shadow:0 2px 10px rgba(0,0,0,0.8);text-align:center;line-height:1.3;justify-content:center;margin-bottom:24px;animation:fadeDown 1s 0.2s ease both}
 .hero-tagline .wheel{font-size:1.5em;animation:spin 8s linear infinite;display:inline-block;flex-shrink:0}
 
-/* HERO ROW � flag only, centred */
+/* HERO ROW — flag only, centred */
 .hero-row{width:100%;display:flex;justify-content:center;align-items:center;gap:24px;animation:fadeIn 1.1s 0.3s ease both;margin-bottom:24px}
 
-/* FLAG � reduced size */
+/* FLAG — reduced size */
 .hero-flag{
   width:clamp(160px,22vw,280px);
   display:flex;align-items:center;justify-content:center;
@@ -323,7 +323,7 @@ body::before{content:"";position:fixed;top:0;left:0;width:100%;height:100%;z-ind
 .footer-col ul{list-style:none}
 .footer-col ul li{margin-bottom:10px}
 .footer-col ul li a{font-size:12.5px;color:rgba(245,222,179,0.42);text-decoration:none;letter-spacing:0.2px;transition:color 0.2s;display:flex;align-items:center;gap:6px}
-.footer-col ul li a::before{content:'�';color:rgba(153,101,21,0.5);font-size:14px;line-height:1}
+.footer-col ul li a::before{content:'›';color:rgba(153,101,21,0.5);font-size:14px;line-height:1}
 .footer-col ul li a:hover{color:rgba(201,168,76,0.85)}
 .contact-item{display:flex;gap:10px;margin-bottom:12px;align-items:flex-start}
 .contact-icon{width:28px;height:28px;border-radius:6px;background:rgba(153,101,21,0.1);border:1px solid rgba(153,101,21,0.25);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:rgba(201,168,76,0.85);transition:all 0.2s}
@@ -348,7 +348,7 @@ body::before{content:"";position:fixed;top:0;left:0;width:100%;height:100%;z-ind
 .tagline-bar .tmark{color:#c9a84c;font-size:18px}
 .tagline-bar .ttext{color:rgba(255,255,255,0.45);font-size:11.5px;letter-spacing:2px;text-transform:uppercase}
 .tagline-bar .ttext span{color:#c9a84c}
-/* -- RESPONSIVE -- */
+/* ── RESPONSIVE ── */
 @media(max-width:600px){.chakra-3,.chakra-5,.chakra-6{display:none}.petal-3,.petal-6,.petal-9,.petal-11,.petal-12,.petal-13{display:none}.bg-chakra{width:500px;height:500px;opacity:0.03}}
 
 @media(max-width:1024px) and (min-width:769px){
@@ -435,7 +435,7 @@ body::before{content:"";position:fixed;top:0;left:0;width:100%;height:100%;z-ind
   .contact-txt{font-size:10.5px}
 }
 /* ============================================================
-   large-screen.css � Sri Vipassi Dhamma School
+   large-screen.css — Sri Vipassi Dhamma School
    Add to every page <head>:
    <link rel="stylesheet" href="large-screen.css">
    ============================================================ */
@@ -464,7 +464,7 @@ body::before{content:"";position:fixed;top:0;left:0;width:100%;height:100%;z-ind
    ============================================================ */
 @media(min-width:1440px){
 
-  /* -- NAV -- */
+  /* ── NAV ── */
   .nav { padding:0 48px; }
   .nav > img, .nav img { width:36px !important; height:36px !important; margin-right:12px !important; }
   .brand { font-size:17px; }
@@ -474,7 +474,7 @@ body::before{content:"";position:fixed;top:0;left:0;width:100%;height:100%;z-ind
   .lb, .lb-lang { font-size:14px; padding:4px 12px; }
   .login-btn { font-size:14px; padding:5px 16px; }
 
-  /* -- INDEX HERO -- */
+  /* ── INDEX HERO ── */
   .hero-content {
     padding: 44px 48px 36px;
     align-items: center !important;
@@ -546,7 +546,7 @@ body::before{content:"";position:fixed;top:0;left:0;width:100%;height:100%;z-ind
   .stxt { font-size:12px; }
   .stxt strong { font-size:9px; letter-spacing:1.5px; }
 
-  /* -- PROJECTS PAGE -- */
+  /* ── PROJECTS PAGE ── */
   .hero { padding:6rem 3rem 3.5rem; }
   .hero h1 { font-size:min(4rem, 4vw); }
   .hero-sub { font-size:1.1rem; }
@@ -563,7 +563,7 @@ body::before{content:"";position:fixed;top:0;left:0;width:100%;height:100%;z-ind
   .card-title-si { font-size:1.55rem; }
   .card-desc { font-size:0.92rem; line-height:1.85; }
 
-  /* -- SUBJECT PAGE -- */
+  /* ── SUBJECT PAGE ── */
   .page-content { padding:2.5rem 2rem 4rem; max-width:1500px; }
   .page-hero { margin-bottom:3rem; }
   .page-hero h1 { font-size:min(3rem, 3.5vw); }
@@ -601,7 +601,7 @@ body::before{content:"";position:fixed;top:0;left:0;width:100%;height:100%;z-ind
   .drop-text { font-size:13.5px; }
   .drop-sub { font-size:11px; }
 
-  /* -- ATTENDANCE -- */
+  /* ── ATTENDANCE ── */
   .main-card { max-width:560px; border-radius:34px; }
   .mac-bar { padding:14px 20px; gap:8px; }
   .mac-bar span { width:13px; height:13px; }
@@ -624,7 +624,7 @@ body::before{content:"";position:fixed;top:0;left:0;width:100%;height:100%;z-ind
   th { font-size:0.82rem; padding:12px 10px; }
   td { font-size:0.82rem; padding:11px 10px; }
 
-  /* -- CONTACT -- */
+  /* ── CONTACT ── */
   .wrap { max-width:1300px; padding:3rem 2rem 5rem; }
   .faq-section { max-width:1300px; padding:0 2rem 5rem; }
   .contact-layout { grid-template-columns:1fr 1.45fr; gap:2.5rem; }
@@ -645,7 +645,7 @@ body::before{content:"";position:fixed;top:0;left:0;width:100%;height:100%;z-ind
   .faq-q { font-size:0.84rem; padding:1rem 1.2rem; }
   .faq-a-inner { font-size:0.8rem; padding:0.9rem 1.2rem 1rem; }
 
-  /* -- FOOTER -- */
+  /* ── FOOTER ── */
   .footer-wrap .footer-top {
     display: grid !important;
     grid-template-columns: 1.5fr 1fr 1fr 1.2fr !important;
@@ -695,7 +695,7 @@ body::before{content:"";position:fixed;top:0;left:0;width:100%;height:100%;z-ind
    ============================================================ */
 @media(min-width:1920px){
 
-  /* -- NAV -- */
+  /* ── NAV ── */
   .nav { padding:0 64px; min-height:58px; }
   .nav > img, .nav img { width:38px !important; height:38px !important; margin-right:13px !important; }
   .brand { font-size:28.5px; }
@@ -704,7 +704,7 @@ body::before{content:"";position:fixed;top:0;left:0;width:100%;height:100%;z-ind
   .lb, .lb-lang { font-size:25.5px; padding:5px 13px; }
   .login-btn { font-size:25.5px; padding:5px 18px; }
 
-  /* -- INDEX HERO -- */
+  /* ── INDEX HERO ── */
   .hero-content {
     padding: 56px 64px 48px;
     align-items: center !important;
@@ -767,7 +767,7 @@ body::before{content:"";position:fixed;top:0;left:0;width:100%;height:100%;z-ind
   .stxt { font-size:12.5px; }
   .stxt strong { font-size:9.5px; }
 
-  /* -- PROJECTS PAGE -- */
+  /* ── PROJECTS PAGE ── */
   .hero { padding:7rem 4rem 4rem; }
   .hero h1 { font-size:min(5rem, 3.8vw); }
   .hero-sub { font-size:1.2rem; }
@@ -783,7 +783,7 @@ body::before{content:"";position:fixed;top:0;left:0;width:100%;height:100%;z-ind
   .card-title-si { font-size:1.7rem; }
   .card-desc { font-size:0.96rem; line-height:1.9; }
 
-  /* -- SUBJECT PAGE -- */
+  /* ── SUBJECT PAGE ── */
   .page-content { padding:3rem 3rem 5rem; max-width:1900px; }
   .page-hero { margin-bottom:4rem; }
   .page-hero h1 { font-size:min(3.5rem, 3vw); }
@@ -813,7 +813,7 @@ body::before{content:"";position:fixed;top:0;left:0;width:100%;height:100%;z-ind
   .pw-btn { font-size:14px; padding:10px 22px; }
   .up-btn { font-size:15px; padding:12px; }
 
-  /* -- ATTENDANCE -- */
+  /* ── ATTENDANCE ── */
   .main-card { max-width:620px; border-radius:38px; }
   .mac-bar { padding:15px 22px; gap:9px; }
   .mac-bar span { width:14px; height:14px; }
@@ -833,7 +833,7 @@ body::before{content:"";position:fixed;top:0;left:0;width:100%;height:100%;z-ind
   th { font-size:0.84rem; padding:13px 11px; }
   td { font-size:0.84rem; padding:12px 11px; }
 
-  /* -- CONTACT -- */
+  /* ── CONTACT ── */
   .wrap { max-width:1560px; padding:3.5rem 2.5rem 6rem; }
   .faq-section { max-width:1560px; padding:0 2.5rem 6rem; }
   .contact-layout { grid-template-columns:1fr 1.5fr; gap:3rem; }
@@ -850,7 +850,7 @@ body::before{content:"";position:fixed;top:0;left:0;width:100%;height:100%;z-ind
   .faq-q { font-size:0.88rem; padding:1.1rem 1.3rem; }
   .faq-a-inner { font-size:0.82rem; }
 
-  /* -- FOOTER -- */
+  /* ── FOOTER ── */
   .footer-wrap .footer-top {
     grid-template-columns: 1.5fr 1fr 1fr 1.2fr !important;
     gap: 40px !important;
@@ -896,7 +896,7 @@ body::before{content:"";position:fixed;top:0;left:0;width:100%;height:100%;z-ind
    ============================================================ */
 @media(min-width:2560px){
 
-  /* -- NAV -- */
+  /* ── NAV ── */
   .nav { padding:0 100px; min-height:68px; }
   .nav > img, .nav img { width:48px !important; height:48px !important; margin-right:16px !important; }
   .brand { font-size:29px; }
@@ -905,7 +905,7 @@ body::before{content:"";position:fixed;top:0;left:0;width:100%;height:100%;z-ind
   .lb, .lb-lang { font-size:25px; padding:6px 18px; }
   .login-btn { font-size:25px; padding:7px 24px; }
 
-  /* -- INDEX HERO -- */
+  /* ── INDEX HERO ── */
   .hero-content {
     padding: 70px 96px 58px;
     align-items: center !important;
@@ -968,7 +968,7 @@ body::before{content:"";position:fixed;top:0;left:0;width:100%;height:100%;z-ind
   .stxt { font-size:14.5px; }
   .stxt strong { font-size:11.5px; letter-spacing:2px; }
 
-  /* -- PROJECTS PAGE -- */
+  /* ── PROJECTS PAGE ── */
   .hero { padding:10rem 7rem 6rem; }
   .hero h1 { font-size:min(6.5rem, 3.5vw); }
   .hero-sub { font-size:1.55rem; }
@@ -985,7 +985,7 @@ body::before{content:"";position:fixed;top:0;left:0;width:100%;height:100%;z-ind
   .card-title-si { font-size:2.3rem; }
   .card-desc { font-size:1.15rem; line-height:2; }
 
-  /* -- SUBJECT PAGE -- */
+  /* ── SUBJECT PAGE ── */
   .page-content { padding:5rem 5rem 9rem; max-width:2600px; }
   .page-hero { margin-bottom:5rem; }
   .page-hero h1 { font-size:min(5rem, 2.8vw); }
@@ -1024,7 +1024,7 @@ body::before{content:"";position:fixed;top:0;left:0;width:100%;height:100%;z-ind
   .drop-sub { font-size:14px; }
   .drop-icon { font-size:40px; }
 
-  /* -- ATTENDANCE -- */
+  /* ── ATTENDANCE ── */
   .main-card { max-width:880px; border-radius:52px; }
   .mac-bar { padding:22px 32px; gap:13px; }
   .mac-bar span { width:19px; height:19px; }
@@ -1045,7 +1045,7 @@ body::before{content:"";position:fixed;top:0;left:0;width:100%;height:100%;z-ind
   th { font-size:1rem; padding:17px 15px; }
   td { font-size:1rem; padding:15px 15px; }
 
-  /* -- CONTACT -- */
+  /* ── CONTACT ── */
   .wrap { max-width:2200px; padding:4.5rem 4rem 8rem; }
   .faq-section { max-width:2200px; padding:0 4rem 8rem; }
   .contact-layout { grid-template-columns:1fr 1.55fr; gap:5rem; }
@@ -1068,7 +1068,7 @@ body::before{content:"";position:fixed;top:0;left:0;width:100%;height:100%;z-ind
   .faq-q { font-size:1rem; padding:1.4rem 1.7rem; }
   .faq-a-inner { font-size:0.9rem; padding:1.2rem 1.7rem 1.4rem; }
 
-  /* -- FOOTER -- */
+  /* ── FOOTER ── */
   .footer-wrap .footer-top {
     grid-template-columns: 1.5fr 1fr 1fr 1.2fr !important;
     gap: 56px !important;
@@ -1121,7 +1121,7 @@ body::before{content:"";position:fixed;top:0;left:0;width:100%;height:100%;z-ind
    ============================================================ */
 @media(min-width:3440px){
 
-  /* -- NAV -- */
+  /* ── NAV ── */
   .nav { padding:0 140px; min-height:82px; }
   .nav > img, .nav img { width:62px !important; height:62px !important; margin-right:20px !important; }
   .brand { font-size:40px; }
@@ -1130,7 +1130,7 @@ body::before{content:"";position:fixed;top:0;left:0;width:100%;height:100%;z-ind
   .lb, .lb-lang { font-size:35px; padding:9px 24px; }
   .login-btn { font-size:34px; padding:10px 32px; }
 
-  /* -- INDEX HERO -- */
+  /* ── INDEX HERO ── */
   .hero-content {
     padding: 120px 160px 100px;
     align-items: center !important;
@@ -1192,7 +1192,7 @@ body::before{content:"";position:fixed;top:0;left:0;width:100%;height:100%;z-ind
   .stxt { font-size:18px; }
   .stxt strong { font-size:14px; letter-spacing:2.5px; }
 
-  /* -- PROJECTS PAGE -- */
+  /* ── PROJECTS PAGE ── */
   .hero { padding:14rem 11rem 8rem; }
   .hero h1 { font-size:min(8.5rem, 3.2vw); }
   .hero-sub { font-size:2rem; }
@@ -1209,7 +1209,7 @@ body::before{content:"";position:fixed;top:0;left:0;width:100%;height:100%;z-ind
   .card-title-si { font-size:2.8rem; }
   .card-desc { font-size:1.45rem; line-height:2.1; }
 
-  /* -- SUBJECT PAGE -- */
+  /* ── SUBJECT PAGE ── */
   .page-content { padding:7rem 8rem 13rem; max-width:3400px; }
   .page-hero { margin-bottom:6.5rem; }
   .page-hero h1 { font-size:min(6.5rem, 2.6vw); }
@@ -1248,7 +1248,7 @@ body::before{content:"";position:fixed;top:0;left:0;width:100%;height:100%;z-ind
   .drop-sub { font-size:18px; }
   .drop-icon { font-size:52px; }
 
-  /* -- ATTENDANCE -- */
+  /* ── ATTENDANCE ── */
   .main-card { max-width:1180px; border-radius:66px; }
   .mac-bar { padding:30px 42px; gap:17px; }
   .mac-bar span { width:25px; height:25px; }
@@ -1269,7 +1269,7 @@ body::before{content:"";position:fixed;top:0;left:0;width:100%;height:100%;z-ind
   th { font-size:1.3rem; padding:22px 18px; }
   td { font-size:1.3rem; padding:20px 18px; }
 
-  /* -- CONTACT -- */
+  /* ── CONTACT ── */
   .wrap { max-width:3000px; padding:6.5rem 6rem 11rem; }
   .faq-section { max-width:3000px; padding:0 6rem 11rem; }
   .contact-layout { gap:8rem; }
@@ -1292,7 +1292,7 @@ body::before{content:"";position:fixed;top:0;left:0;width:100%;height:100%;z-ind
   .faq-q { font-size:1.2rem; padding:1.8rem 2.2rem; }
   .faq-a-inner { font-size:1.1rem; padding:1.5rem 2.2rem 1.8rem; }
 
-  /* -- FOOTER -- */
+  /* ── FOOTER ── */
   .footer-wrap .footer-top {
     grid-template-columns: 1.5fr 1fr 1fr 1.2fr !important;
     gap: 80px !important;
@@ -1345,7 +1345,7 @@ body::before{content:"";position:fixed;top:0;left:0;width:100%;height:100%;z-ind
    ============================================================ */
 @media(min-width:3840px){
 
-  /* -- NAV -- */
+  /* ── NAV ── */
   .nav { padding:0 200px; min-height:100px; }
   .nav > img, .nav img { width:76px !important; height:76px !important; margin-right:26px !important; }
   .brand { font-size:50px; }
@@ -1354,7 +1354,7 @@ body::before{content:"";position:fixed;top:0;left:0;width:100%;height:100%;z-ind
   .lb, .lb-lang { font-size:43px; padding:11px 30px; }
   .login-btn { font-size:42px; padding:12px 40px; }
 
-  /* -- INDEX HERO -- */
+  /* ── INDEX HERO ── */
   .hero-content {
     padding: 120px 200px 100px;
     align-items: center !important;
@@ -1415,7 +1415,7 @@ body::before{content:"";position:fixed;top:0;left:0;width:100%;height:100%;z-ind
   .stxt { font-size:22px; }
   .stxt strong { font-size:17px; letter-spacing:3px; }
 
-  /* -- PROJECTS PAGE -- */
+  /* ── PROJECTS PAGE ── */
   .hero { padding:18rem 15rem 10rem; }
   .hero h1 { font-size:min(11rem, 3.6vw); }
   .hero-sub { font-size:2.5rem; }
@@ -1432,7 +1432,7 @@ body::before{content:"";position:fixed;top:0;left:0;width:100%;height:100%;z-ind
   .card-title-si { font-size:3.6rem; }
   .card-desc { font-size:1.8rem; line-height:2.2; }
 
-  /* -- SUBJECT PAGE -- */
+  /* ── SUBJECT PAGE ── */
   .page-content { padding:9rem 12rem 17rem; max-width:4000px; }
   .page-hero { margin-bottom:8.5rem; }
   .page-hero h1 { font-size:min(8rem, 2.8vw); }
@@ -1471,7 +1471,7 @@ body::before{content:"";position:fixed;top:0;left:0;width:100%;height:100%;z-ind
   .drop-sub { font-size:22px; }
   .drop-icon { font-size:64px; }
 
-  /* -- ATTENDANCE -- */
+  /* ── ATTENDANCE ── */
   .main-card { max-width:1480px; border-radius:82px; }
   .mac-bar { padding:38px 54px; gap:21px; }
   .mac-bar span { width:31px; height:31px; }
@@ -1492,7 +1492,7 @@ body::before{content:"";position:fixed;top:0;left:0;width:100%;height:100%;z-ind
   th { font-size:1.6rem; padding:28px 22px; }
   td { font-size:1.6rem; padding:25px 22px; }
 
-  /* -- CONTACT -- */
+  /* ── CONTACT ── */
   .wrap { max-width:3700px; padding:8.5rem 8rem 14rem; }
   .faq-section { max-width:3700px; padding:0 8rem 14rem; }
   .contact-layout { gap:12rem; }
@@ -1515,7 +1515,7 @@ body::before{content:"";position:fixed;top:0;left:0;width:100%;height:100%;z-ind
   .faq-q { font-size:1.5rem; padding:2.2rem 2.8rem; }
   .faq-a-inner { font-size:1.38rem; padding:1.9rem 2.8rem 2.3rem; }
 
-  /* -- FOOTER -- */
+  /* ── FOOTER ── */
   .footer-wrap .footer-top {
     grid-template-columns: 1.5fr 1fr 1fr 1.2fr !important;
     gap: 120px !important;
@@ -1578,7 +1578,7 @@ body::before{content:"";position:fixed;top:0;left:0;width:100%;height:100%;z-ind
   <div class="brand">Sri Vipassi Dhamma School</div>
   <div class="nav-links" style="margin-left: 80px;">
     <a href="index.html">Home</a>
-    <a href="daily-attendance.html" data-role-gate="student,teacher" style="display:none;">Daily Attendance</a>
+    <a href="Daily Attendance.html">Daily Attendance</a>
     <a href="About.html">About</a>
     <a href="galery.html">Gallery</a>
     <a href="achievements (2).html">Achievements</a>
@@ -1589,8 +1589,8 @@ body::before{content:"";position:fixed;top:0;left:0;width:100%;height:100%;z-ind
   </div>
   <div class="lang-row">
     <button class="lb on">EN</button>
-    <button class="lb">???</button>
-    <button class="lb">?????</button>
+    <button class="lb">සිං</button>
+    <button class="lb">தமிழ்</button>
     <button class="login-btn" id="loginBtn" onclick="openAuth('signin')">Login</button>
   </div>
   <button class="hamburger" onclick="toggleMobileMenu()" aria-label="Open menu">
@@ -1605,11 +1605,11 @@ body::before{content:"";position:fixed;top:0;left:0;width:100%;height:100%;z-ind
 <div class="mobile-sidebar" id="mobileSidebar">
   <div class="mobile-sidebar-header">
     <div class="brand">Sri Vipassi Dhamma School</div>
-    <button class="mobile-close" onclick="closeMobileMenu()">?</button>
+    <button class="mobile-close" onclick="closeMobileMenu()">✕</button>
   </div>
   <div class="mobile-nav-links">
     <a href="index.html" onclick="closeMobileMenu()">Home</a>
-    <a href="daily-attendance.html" data-role-gate="student,teacher" style="display:none;" onclick="closeMobileMenu()">Daily Attendance</a>
+    <a href="Daily Attendance.html" onclick="closeMobileMenu()">Daily Attendance</a>
     <a href="About.html" onclick="closeMobileMenu()">About</a>
     <a href="galery.html" onclick="closeMobileMenu()">Gallery</a>
     <a href="achievements (2).html" onclick="closeMobileMenu()">Achievements</a>
@@ -1621,8 +1621,8 @@ body::before{content:"";position:fixed;top:0;left:0;width:100%;height:100%;z-ind
   <div class="mobile-lang-row">
   <div style="display:flex;gap:5px;align-items:center;">
     <button class="lb on">EN</button>
-    <button class="lb">???</button>
-    <button class="lb">?????</button>
+    <button class="lb">සිං</button>
+    <button class="lb">தமிழ்</button>
   </div>
   <button class="login-btn" id="mobileLoginBtn"
     onclick="openAuth('si');closeMobileMenu()">Login</button>
@@ -1690,14 +1690,14 @@ body::before{content:"";position:fixed;top:0;left:0;width:100%;height:100%;z-ind
   
 <!-- HERO CONTENT -->
   <div class="hero-content">
-    <div class="badge">Kande Viharaya � Horana � Sri Lanka</div>
+    <div class="badge">Kande Viharaya · Horana · Sri Lanka</div>
 
-    <div class="school-name">????? ??????? ???? ????</div>
+    <div class="school-name">ශ්‍රී විපස්සි දහම් පාසල</div>
 
     <div class="hero-tagline">
-      <span class="wheel">?</span>
+      <span class="wheel">☸</span>
       We are making an encouragable society
-      <span class="wheel">?</span>
+      <span class="wheel">☸</span>
     </div>
 
     <div class="hero-row">
@@ -1711,7 +1711,7 @@ body::before{content:"";position:fixed;top:0;left:0;width:100%;height:100%;z-ind
       <div class="quote-card-dots">
         <span></span><span></span><span></span>
       </div>
-      <div class="quote-card-text">"????? ?????? ????? - ?????????? ????? ?????."</div>
+      <div class="quote-card-text">"අපදාන සෝභිනී පඤ්ඤා - ප්‍රඥාවෙන් චරිතය බබලයි."</div>
       <div class="quote-card-btns">
         <a href="About.html" class="qc-btn">Explore</a>
         <a href="Contact.html" class="qc-btn">Help</a>
@@ -1731,9 +1731,9 @@ body::before{content:"";position:fixed;top:0;left:0;width:100%;height:100%;z-ind
   <div class="auth-modal">
 
     <div class="am-head">
-      <span class="am-wheel">?</span>
+      <span class="am-wheel">☸</span>
       <span class="am-brand">Sri Vipassi Dhamma School</span>
-      <button class="am-close" onclick="closeAuth()">?</button>
+      <button class="am-close" onclick="closeAuth()">✕</button>
     </div>
 
     <div class="am-tabs">
@@ -1745,7 +1745,7 @@ body::before{content:"";position:fixed;top:0;left:0;width:100%;height:100%;z-ind
     <!-- SIGN IN -->
     <div class="am-body" id="panSI">
       <div class="am-signin-section">
-        <div class="am-section-label">?? Student / Teacher Sign-In</div>
+        <div class="am-section-label">🎒 Student / Teacher Sign-In</div>
         <div class="am-field"><label class="am-label">Your Name</label>
           <input class="am-input" id="siNm" type="text" placeholder="Any part of your full name" autocomplete="username"></div>
         <div class="am-field"><label class="am-label">Password</label>
@@ -1755,12 +1755,12 @@ body::before{content:"";position:fixed;top:0;left:0;width:100%;height:100%;z-ind
         <div class="am-forgot"><a href="#" onclick="forgotPwForName();return false">Forgot password?</a></div>
         <div class="am-migration-link">
           Existing account that won't sign in by name?
-          <a href="#" onclick="openMigration();return false;">Click to migrate ?</a>
+          <a href="#" onclick="openMigration();return false;">Click to migrate →</a>
         </div>
       </div>
       <div class="am-divider"><span>OR</span></div>
       <div class="am-signin-section am-guest-section">
-        <div class="am-section-label">?? Guest Sign-In</div>
+        <div class="am-section-label">👤 Guest Sign-In</div>
         <p class="am-guest-note">For community visitors only. Students &amp; teachers must use the section above.</p>
         <div class="am-field"><label class="am-label">Email</label>
           <input class="am-input" id="siEmail" type="email" placeholder="you@email.com" autocomplete="email"></div>
@@ -1782,32 +1782,32 @@ body::before{content:"";position:fixed;top:0;left:0;width:100%;height:100%;z-ind
     <!-- SIGN UP -->
     <div class="am-body" id="panSU" style="display:none">
       <div id="suStep1">
-        <div class="am-role-prompt">I am a�</div>
+        <div class="am-role-prompt">I am a…</div>
         <div class="am-role-grid am-role-grid-3">
           <button class="am-role-card" onclick="pickRole('student')">
-            <div class="am-role-ico">??</div><div class="am-role-title">Student</div>
+            <div class="am-role-ico">🎒</div><div class="am-role-title">Student</div>
             <div class="am-role-sub">Sign up as a Dhamma school student</div>
           </button>
           <button class="am-role-card" onclick="pickRole('teacher')">
-            <div class="am-role-ico">?????</div><div class="am-role-title">Teacher</div>
+            <div class="am-role-ico">👨‍🏫</div><div class="am-role-title">Teacher</div>
             <div class="am-role-sub">Sign up as a Dhamma school teacher</div>
           </button>
           <button class="am-role-card" onclick="pickRole('normal')">
-            <div class="am-role-ico">??</div><div class="am-role-title">Visitor</div>
-            <div class="am-role-sub">Community member � no school code needed</div>
+            <div class="am-role-ico">👤</div><div class="am-role-title">Visitor</div>
+            <div class="am-role-sub">Community member — no school code needed</div>
           </button>
         </div>
       </div>
       <div id="suStudent" style="display:none">
-        <button class="am-back" onclick="backToRolePick()">? Choose different role</button>
+        <button class="am-back" onclick="backToRolePick()">← Choose different role</button>
         <div class="am-section-label">Student Registration</div>
-        <div class="am-field am-reg-code"><label class="am-label">?? School Registration Code *</label><input class="am-input" id="stRegCode" type="password" placeholder="Required to register as a student" autocomplete="off"><div class="am-grade-note">Get the code from your teacher or the school office.</div></div>
+        <div class="am-field am-reg-code"><label class="am-label">🔒 School Registration Code *</label><input class="am-input" id="stRegCode" type="password" placeholder="Required to register as a student" autocomplete="off"><div class="am-grade-note">Get the code from your teacher or the school office.</div></div>
         <div class="am-field"><label class="am-label">Full Name *</label><input class="am-input" id="stName" type="text" placeholder="Your full name"></div>
         <div class="am-field"><label class="am-label">Email *</label><input class="am-input" id="stEmail" type="email" placeholder="you@email.com"></div>
         <div class="am-field"><label class="am-label">Password *</label><input class="am-input" id="stPass" type="password" placeholder="Min. 6 characters"></div>
         <div class="am-field"><label class="am-label">Admission Number *</label><input class="am-input" id="stAdmission" type="text" placeholder="e.g. SVDS-2025-042"></div>
         <div class="am-field"><label class="am-label">Contact Number *</label><input class="am-input" id="stContact" type="tel" placeholder="07X XXX XXXX"></div>
-        <div class="am-field"><label class="am-label">Current Grade *</label><select class="am-input" id="stGrade"><option value="">� Select grade �</option><option value="1">Grade 1</option><option value="2">Grade 2</option><option value="3">Grade 3</option><option value="4">Grade 4</option><option value="5">Grade 5</option><option value="6">Grade 6</option><option value="7">Grade 7</option><option value="8">Grade 8</option><option value="9">Grade 9</option><option value="10">Grade 10</option><option value="11">Grade 11</option><option value="12">Grade 12</option></select></div>
+        <div class="am-field"><label class="am-label">Current Grade *</label><select class="am-input" id="stGrade"><option value="">— Select grade —</option><option value="1">Grade 1</option><option value="2">Grade 2</option><option value="3">Grade 3</option><option value="4">Grade 4</option><option value="5">Grade 5</option><option value="6">Grade 6</option><option value="7">Grade 7</option><option value="8">Grade 8</option><option value="9">Grade 9</option><option value="10">Grade 10</option><option value="11">Grade 11</option><option value="12">Grade 12</option></select></div>
         <div class="am-field"><label class="am-label">Date of Birth *</label><input class="am-input" id="stDOB" type="date"></div>
         <div class="am-field"><label class="am-label">Parent / Guardian's Name *</label><input class="am-input" id="stGuardName" type="text" placeholder="Mother / Father / Guardian"></div>
         <div class="am-field"><label class="am-label">Parent / Guardian's Phone *</label><input class="am-input" id="stGuardPhone" type="tel" placeholder="07X XXX XXXX"></div>
@@ -1815,11 +1815,11 @@ body::before{content:"";position:fixed;top:0;left:0;width:100%;height:100%;z-ind
         <div class="am-field"><label class="am-label">Home Address *</label><textarea class="am-input am-textarea" id="stAddress" rows="2" placeholder="Street, City, Postal code"></textarea></div>
         <div class="am-face-block"><label class="am-label">Gender *</label>
 <select id="stGender" class="am-input" required>
-  <option value="">� Select gender �</option>
+  <option value="">— Select gender —</option>
   <option value="male">Male</option>
   <option value="female">Female</option>
 </select>
-          <div class="am-face-label">?? Face Photo <span class="am-opt">(for face sign-in)</span></div>
+          <div class="am-face-label">📸 Face Photo <span class="am-opt">(for face sign-in)</span></div>
           <div class="am-face-stage" id="stFaceStage"><video id="stVideo" autoplay playsinline muted></video><img id="stPreview" alt=""><div class="am-face-overlay" id="stFaceOverlay">Camera will appear here</div></div>
           <div class="am-face-btns"><button type="button" class="am-face-btn" id="stCamBtn" onclick="startFaceCapture('student')">Open Camera</button><button type="button" class="am-face-btn alt" id="stSnapBtn" onclick="snapFace('student')" disabled>Capture</button><button type="button" class="am-face-btn alt" id="stRetakeBtn" onclick="retakeFace('student')" style="display:none">Retake</button></div>
           <div class="am-face-hint" id="stFaceHint">Look straight at the camera in good light.</div>
@@ -1828,9 +1828,9 @@ body::before{content:"";position:fixed;top:0;left:0;width:100%;height:100%;z-ind
         <div class="am-err" id="stErr"></div>
       </div>
       <div id="suTeacher" style="display:none">
-        <button class="am-back" onclick="backToRolePick()">? Choose different role</button>
+        <button class="am-back" onclick="backToRolePick()">← Choose different role</button>
         <div class="am-section-label">Teacher Registration</div>
-        <div class="am-field am-reg-code"><label class="am-label">?? School Registration Code *</label><input class="am-input" id="tcRegCode" type="password" placeholder="Required to register as a teacher" autocomplete="off"><div class="am-grade-note">Provided by school administration.</div></div>
+        <div class="am-field am-reg-code"><label class="am-label">🔒 School Registration Code *</label><input class="am-input" id="tcRegCode" type="password" placeholder="Required to register as a teacher" autocomplete="off"><div class="am-grade-note">Provided by school administration.</div></div>
         <div class="am-field"><label class="am-label">Full Name *</label><input class="am-input" id="tcName" type="text" placeholder="Your full name"></div>
         <div class="am-field"><label class="am-label">Email *</label><input class="am-input" id="tcEmail" type="email" placeholder="you@email.com"></div>
         <div class="am-field"><label class="am-label">Password *</label><input class="am-input" id="tcPass" type="password" placeholder="Min. 6 characters"></div>
@@ -1838,17 +1838,17 @@ body::before{content:"";position:fixed;top:0;left:0;width:100%;height:100%;z-ind
         <div class="am-field"><label class="am-label">Contact Number (alternate) *</label><input class="am-input" id="tcContact" type="tel" placeholder="07X XXX XXXX"></div>
         <div class="am-field"><label class="am-label">Home Address *</label><textarea class="am-input am-textarea" id="tcAddress" rows="2" placeholder="Street, City, Postal code"></textarea></div><label class="am-label">Gender *</label>
 <select id="tcGender" class="am-input" required>
-  <option value="">� Select gender �</option>
+  <option value="">— Select gender —</option>
   <option value="male">Male</option>
   <option value="female">Female</option>
 </select>
-        <div class="am-field"><label class="am-label">Teaching Grade *</label><select class="am-input" id="tcGrade"><option value="">� Select grade �</option><option value="1">Grade 1</option><option value="2">Grade 2</option><option value="3">Grade 3</option><option value="4">Grade 4</option><option value="5">Grade 5</option><option value="6">Grade 6</option><option value="7">Grade 7</option><option value="8">Grade 8</option><option value="9">Grade 9</option><option value="10">Grade 10</option><option value="11">Grade 11</option><option value="12">Grade 12</option><option value="multi">Multiple grades</option></select></div>
+        <div class="am-field"><label class="am-label">Teaching Grade *</label><select class="am-input" id="tcGrade"><option value="">— Select grade —</option><option value="1">Grade 1</option><option value="2">Grade 2</option><option value="3">Grade 3</option><option value="4">Grade 4</option><option value="5">Grade 5</option><option value="6">Grade 6</option><option value="7">Grade 7</option><option value="8">Grade 8</option><option value="9">Grade 9</option><option value="10">Grade 10</option><option value="11">Grade 11</option><option value="12">Grade 12</option><option value="multi">Multiple grades</option></select></div>
         <div class="am-field"><label class="am-label">Subject *</label><input class="am-input" id="tcSubject" type="text" placeholder="e.g. Dhamma, Pali, History"></div>
-        <div class="am-field"><label class="am-label">Medium *</label><select class="am-input" id="tcMedium"><option value="">� Select medium �</option><option value="Sinhala">Sinhala</option><option value="Tamil">Tamil</option><option value="English">English</option></select></div>
+        <div class="am-field"><label class="am-label">Medium *</label><select class="am-input" id="tcMedium"><option value="">— Select medium —</option><option value="Sinhala">Sinhala</option><option value="Tamil">Tamil</option><option value="English">English</option></select></div>
         <div class="am-field"><label class="am-label">Date of Birth *</label><input class="am-input" id="tcDOB" type="date"></div>
         <div class="am-field"><label class="am-label">Joining Date *</label><input class="am-input" id="tcJoinDate" type="date"></div>
         <div class="am-face-block">
-          <div class="am-face-label">?? Face Photo <span class="am-opt">(for face sign-in)</span></div>
+          <div class="am-face-label">📸 Face Photo <span class="am-opt">(for face sign-in)</span></div>
           <div class="am-face-stage" id="tcFaceStage"><video id="tcVideo" autoplay playsinline muted></video><img id="tcPreview" alt=""><div class="am-face-overlay" id="tcFaceOverlay">Camera will appear here</div></div>
           <div class="am-face-btns"><button type="button" class="am-face-btn" id="tcCamBtn" onclick="startFaceCapture('teacher')">Open Camera</button><button type="button" class="am-face-btn alt" id="tcSnapBtn" onclick="snapFace('teacher')" disabled>Capture</button><button type="button" class="am-face-btn alt" id="tcRetakeBtn" onclick="retakeFace('teacher')" style="display:none">Retake</button></div>
           <div class="am-face-hint" id="tcFaceHint">Look straight at the camera in good light.</div>
@@ -1857,9 +1857,9 @@ body::before{content:"";position:fixed;top:0;left:0;width:100%;height:100%;z-ind
         <div class="am-err" id="tcErr"></div>
       </div>
       <div id="suNormal" style="display:none">
-        <button class="am-back" onclick="backToRolePick()">? Choose different role</button>
+        <button class="am-back" onclick="backToRolePick()">← Choose different role</button>
         <div class="am-section-label">Visitor Registration</div>
-        <p class="am-visitor-intro">A free community account � no school code or face photo needed.</p>
+        <p class="am-visitor-intro">A free community account — no school code or face photo needed.</p>
         <div class="am-field"><label class="am-label">Full Name *</label><input class="am-input" id="nmName" type="text" placeholder="Your full name"></div>
         <div class="am-field"><label class="am-label">Email *</label><input class="am-input" id="nmEmail" type="email" placeholder="you@email.com"></div>
         <div class="am-field"><label class="am-label">Password *</label><input class="am-input" id="nmPass" type="password" placeholder="Min. 6 characters"></div>
@@ -1883,7 +1883,7 @@ body::before{content:"";position:fixed;top:0;left:0;width:100%;height:100%;z-ind
       <div class="ru-greeting" id="ruGreeting">Welcome back!</div>
       <div class="ru-message">A new academic year has begun and you've been promoted to <span class="ru-new-grade" id="ruNewGrade">Grade ?</span>.<br>Please re-upload your face photo to continue using face sign-in.</div>
       <div class="am-face-block">
-        <div class="am-face-label">?? New Face Photo</div>
+        <div class="am-face-label">📸 New Face Photo</div>
         <div class="am-face-stage" id="ruFaceStage"><video id="ruVideo" autoplay playsinline muted></video><img id="ruPreview" alt=""><div class="am-face-overlay" id="ruFaceOverlay">Click "Open Camera" to begin</div></div>
         <div class="am-face-btns"><button type="button" class="am-face-btn" id="ruCamBtn" onclick="startReuploadCapture()">Open Camera</button><button type="button" class="am-face-btn alt" id="ruSnapBtn" onclick="snapReupload()" disabled>Capture</button><button type="button" class="am-face-btn alt" id="ruRetakeBtn" onclick="retakeReupload()" style="display:none">Retake</button></div>
         <div class="am-face-hint" id="ruFaceHint">Look straight at the camera in good light.</div>
@@ -1895,17 +1895,17 @@ body::before{content:"";position:fixed;top:0;left:0;width:100%;height:100%;z-ind
 
     <!-- ALUMNI -->
     <div class="am-body am-loggedin" id="panAL" style="display:none">
-      <div class="am-avatar" style="font-size:2.2rem">??</div>
+      <div class="am-avatar" style="font-size:2.2rem">🎓</div>
       <div class="am-lg-name" id="alName">Congratulations!</div>
-      <div class="al-batch">Class of <span id="alBatchYear">�</span></div>
-      <p class="al-text">You've completed Grade 12 at Sri Vipassi Dhamma School.<br>Your records are preserved in the school archives.<br>? May the Dhamma continue to guide you on your journey.</p>
+      <div class="al-batch">Class of <span id="alBatchYear">—</span></div>
+      <p class="al-text">You've completed Grade 12 at Sri Vipassi Dhamma School.<br>Your records are preserved in the school archives.<br>☸ May the Dhamma continue to guide you on your journey.</p>
       <button class="am-btn" onclick="doSignOut()">Sign Out</button>
       <button class="am-btn am-btn-ghost" onclick="closeAuth()" style="margin-top:10px">Continue Browsing</button>
     </div>
 
     <!-- LOGGED IN -->
     <div class="am-body am-loggedin" id="panLI" style="display:none">
-      <div class="am-avatar" id="lgAvatar">?</div>
+      <div class="am-avatar" id="lgAvatar">☸</div>
       <div class="am-lg-name" id="lgName">Welcome!</div>
       <div class="am-lg-email" id="lgEmail"></div>
       <div class="am-lg-role" id="lgRole"></div>
@@ -1916,7 +1916,7 @@ body::before{content:"";position:fixed;top:0;left:0;width:100%;height:100%;z-ind
 
     <!-- EDIT PROFILE -->
     <div class="am-body" id="panED" style="display:none">
-      <button class="am-back" onclick="cancelEdit()">? Back to profile</button>
+      <button class="am-back" onclick="cancelEdit()">← Back to profile</button>
       <div class="am-section-label">Edit Your Details</div>
       <div class="am-field"><label class="am-label">Full Name *</label><input class="am-input" id="edName" type="text" placeholder="Your full name"></div>
       <div id="edStudentFields" style="display:none">
@@ -1929,7 +1929,7 @@ body::before{content:"";position:fixed;top:0;left:0;width:100%;height:100%;z-ind
         <div class="am-field"><label class="am-label">Home Address *</label><textarea class="am-input am-textarea" id="edStAddress" rows="2"></textarea></div>
         <label class="am-label">Gender *</label>
 <select id="edStGender" class="am-input" required>
-  <option value="">� Select gender �</option>
+  <option value="">— Select gender —</option>
   <option value="male">Male</option>
   <option value="female">Female</option>
 </select>
@@ -1941,24 +1941,24 @@ body::before{content:"";position:fixed;top:0;left:0;width:100%;height:100%;z-ind
         <div class="am-field"><label class="am-label">Home Address *</label><textarea class="am-input am-textarea" id="edTcAddress" rows="2"></textarea></div>
         <label class="am-label">Gender *</label>
 <select id="edTcGender" class="am-input" required>
-  <option value="">� Select gender �</option>
+  <option value="">— Select gender —</option>
   <option value="male">Male</option>
   <option value="female">Female</option>
 </select>
-        <div class="am-field"><label class="am-label">Teaching Grade *</label><select class="am-input" id="edTcGrade"><option value="">� Select grade �</option><option value="1">Grade 1</option><option value="2">Grade 2</option><option value="3">Grade 3</option><option value="4">Grade 4</option><option value="5">Grade 5</option><option value="6">Grade 6</option><option value="7">Grade 7</option><option value="8">Grade 8</option><option value="9">Grade 9</option><option value="10">Grade 10</option><option value="11">Grade 11</option><option value="12">Grade 12</option><option value="multi">Multiple grades</option></select></div>
+        <div class="am-field"><label class="am-label">Teaching Grade *</label><select class="am-input" id="edTcGrade"><option value="">— Select grade —</option><option value="1">Grade 1</option><option value="2">Grade 2</option><option value="3">Grade 3</option><option value="4">Grade 4</option><option value="5">Grade 5</option><option value="6">Grade 6</option><option value="7">Grade 7</option><option value="8">Grade 8</option><option value="9">Grade 9</option><option value="10">Grade 10</option><option value="11">Grade 11</option><option value="12">Grade 12</option><option value="multi">Multiple grades</option></select></div>
         <div class="am-field"><label class="am-label">Subject *</label><input class="am-input" id="edTcSubject" type="text"></div>
-        <div class="am-field"><label class="am-label">Medium *</label><select class="am-input" id="edTcMedium"><option value="">� Select medium �</option><option value="Sinhala">Sinhala</option><option value="Tamil">Tamil</option><option value="English">English</option></select></div>
+        <div class="am-field"><label class="am-label">Medium *</label><select class="am-input" id="edTcMedium"><option value="">— Select medium —</option><option value="Sinhala">Sinhala</option><option value="Tamil">Tamil</option><option value="English">English</option></select></div>
         <div class="am-field"><label class="am-label">Date of Birth *</label><input class="am-input" id="edTcDOB" type="date"></div>
       </div>
       <button class="am-btn" id="edBtn" onclick="saveProfileEdits()">Save Changes</button>
       <button class="am-btn am-btn-ghost" onclick="openChangePassword()" style="margin-top:10px">Change Password</button>
       <div class="am-err" id="edErr"></div>
-      <button class="am-btn am-btn-ghost" onclick="openManualReupload()" style="margin-top:10px">?? Re-register Face Photo</button>
+      <button class="am-btn am-btn-ghost" onclick="openManualReupload()" style="margin-top:10px">📷 Re-register Face Photo</button>
     </div>
 
     <!-- MIGRATE -->
     <div class="am-body" id="panMG" style="display:none">
-      <button class="am-back" onclick="cancelMigration()">? Back to sign-in</button>
+      <button class="am-back" onclick="cancelMigration()">← Back to sign-in</button>
       <div class="am-section-label">Migrate Existing Account</div>
       <p class="am-migration-intro">For students &amp; teachers who signed up <strong>before</strong> name-based sign-in. Enter your email and password <strong>once</strong> here to upgrade.</p>
       <div class="am-field"><label class="am-label">Your School Email</label><input class="am-input" id="mgEmail" type="email" placeholder="you@email.com" autocomplete="email"></div>
@@ -1975,8 +1975,8 @@ body::before{content:"";position:fixed;top:0;left:0;width:100%;height:100%;z-ind
   <div class="footer-top">
     <div class="brand-col footer-col">
       <div class="brand-name">Sri Vipassi Dhamma School</div>
-      <div class="brand-pali">Kande Viharaya � Horana</div>
-      <p>Nurturing wisdom, compassion, and the noble Dhamma � guiding Sri Lanka toward a virtuous society.</p>
+      <div class="brand-pali">Kande Viharaya · Horana</div>
+      <p>Nurturing wisdom, compassion, and the noble Dhamma — guiding Sri Lanka toward a virtuous society.</p>
       <div class="social-row">
         <a class="soc-btn" title="Facebook" href="https://web.facebook.com/srivipassi/?_rdc=1&_rdr#"><svg viewBox="0 0 24 24"><path d="M22 12c0-5.52-4.48-10-10-10S2 6.48 2 12c0 4.84 3.44 8.87 8 9.8V15H8v-3h2V9.5C10 7.57 11.57 6 13.5 6H16v3h-2c-.55 0-1 .45-1 1v2h3v3h-3v6.95c5.05-.5 9-4.76 9-9.95z"/></svg></a>
         <a class="soc-btn" title="YouTube" href="#"><svg viewBox="0 0 24 24"><path d="M23.5 6.2c-.3-1-1.1-1.8-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6c-1 .3-1.8 1.1-2.1 2.1C0 8.1 0 12 0 12s0 3.9.5 5.8c.3 1 1.1 1.8 2.1 2.1 1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6c1-.3 1.8-1.1 2.1-2.1.5-1.9.5-5.8.5-5.8s0-3.9-.5-5.8zM9.6 15.6V8.4l6.3 3.6-6.3 3.6z"/></svg></a>
@@ -1989,7 +1989,7 @@ body::before{content:"";position:fixed;top:0;left:0;width:100%;height:100%;z-ind
       <ul>
         <li><a href="index.html">Home</a></li>
         <li><a href="About.html">About Us</a></li>
-        <li><a href="daily-attendance.html" data-role-gate="student,teacher" style="display:none;">Daily Attendance</a></li>
+        <li><a href="Daily Attendance.html">Daily Attendance</a></li>
         <li><a href="galery.html">Gallery</a></li>
         <li><a href="Subject.html">Syllabus</a></li>
         <li><a href="achievements (2).html">Achievements</a></li>
@@ -2023,7 +2023,7 @@ body::before{content:"";position:fixed;top:0;left:0;width:100%;height:100%;z-ind
   </div>
   <div class="footer-divider"></div>
   <div class="footer-bottom">
-    <div class="copy">� 2025 <span>Sri Vipassi Dhamma School</span> � All rights reserved</div>
+    <div class="copy">© 2025 <span>Sri Vipassi Dhamma School</span> · All rights reserved</div>
     <div class="links">
       <a href="#">Privacy Policy</a>
       <a href="#">Terms of Use</a>
@@ -2031,7 +2031,7 @@ body::before{content:"";position:fixed;top:0;left:0;width:100%;height:100%;z-ind
     </div>
   </div>
   <div class="dhamma-strip">
-    <span>?</span> Developing Wisdom Through Dhamma <span>?</span> Sri Lanka <span>?</span>
+    <span>☸</span> Developing Wisdom Through Dhamma <span>☸</span> Sri Lanka <span>☸</span>
   </div>
 </div>
 
@@ -2085,10 +2085,5 @@ firebase.auth().onAuthStateChanged(u => {
 });
 </script>
 </script>
-  
-  
-  <script src="auth-gate.js"></script>
-  <script src="auth-system.js"></script>
-  <script src="nav-gate.js"></script>
 </body>
 </html>
