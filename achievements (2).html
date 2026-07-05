@@ -16,6 +16,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Noto+Sans+Sinhala:wght@400;600;700&family=Cormorant+Garamond:wght@400;500;600&family=Lora:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="footer-mobile.css">
 <link rel="stylesheet" href="auth-modal.css">
+ <script src="auth-gate.js"></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   html { scroll-behavior: smooth; }
@@ -3920,7 +3921,7 @@
     document.addEventListener('keydown',function(e){if(e.key!=='Escape')return;if(categoryModal.classList.contains('show'))closeCategoryModal();else if(yearModal.classList.contains('show'))closeYearModal();else if(placeModal.classList.contains('show'))closePlaceModal();else if(uploadModal.classList.contains('show'))closeUploadModal();else if(pwdModal.classList.contains('show'))closePwdModal();else if(achModal.classList.contains('show'))closeAchModal();});
   </script>
   
-  <script src="auth-gate.js"></script>
+ 
   <script src="auth-system.js"></script>
   <script src="nav-gate.js"></script>
 </body>
