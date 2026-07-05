@@ -27,18 +27,19 @@ const PASSWORD_RESET_ACTION_CODE_SETTINGS = {
 const SCHOOL_REGISTRATION_CODE = 'vipassi_@';
 
 /* ═══ Firebase init (only if not already initialized) ═══ */
-if (!firebase.apps.length) {
+if (!firebase.apps.find(a => a.name === 'authApp')) {
   firebase.initializeApp({
     apiKey:            "AIzaSyAWpPP3OevjIRAsoGIjOJTofV6l2jgyhNI",
     authDomain:        "signin-f9656.firebaseapp.com",
     projectId:         "signin-f9656",
     storageBucket:     "signin-f9656.firebasestorage.app",
     messagingSenderId: "1074665165821",
-    appId:             "1:1074665165821:web:91ef329a0472fa138e7f94"
-  });
+    appId:             "1:1074665165821:web:91ef3290a0472fa138e7f94"
+  }, 'authApp');
 }
-const auth = firebase.auth();
-const db   = firebase.firestore();
+const authApp = firebase.app('authApp');
+const auth = authApp.auth();
+const authDb   = authApp.firestore();
 const googleProvider = new firebase.auth.GoogleAuthProvider();
 googleProvider.addScope('email');
 googleProvider.addScope('profile');
@@ -344,7 +345,7 @@ async function doSignIn() {
 
     // Belt-and-braces: also check the resolved Firebase Auth account's role
     try {
-      const snap = await db.collection('users').doc(result.user.uid).get();
+      const snap = await authDb.collection('users').doc(result.user.uid).get();
       if (snap.exists) {
         const role = snap.data().role;
         if (role === 'student' || role === 'teacher') {
@@ -390,7 +391,7 @@ async function doGoogle() {
       }
 
       // (2) Firestore role lookup
-      const snap = await db.collection('users').doc(result.user.uid).get();
+      const snap = await authDb.collection('users').doc(result.user.uid).get();
       if (snap.exists) {
         const role = snap.data().role;
         if (role === 'student' || role === 'teacher') {
@@ -423,7 +424,7 @@ async function doSignOut() {
   let shouldReload = false;
   try {
     if (auth.currentUser) {
-      const snap = await db.collection('users').doc(auth.currentUser.uid).get();
+      const snap = await authDb.collection('users').doc(auth.currentUser.uid).get();
       if (snap.exists) {
         const role = snap.data().role;
         if (role === 'student' || role === 'teacher') shouldReload = true;
@@ -483,7 +484,7 @@ async function forgotPwForName() {
       const m = data.matches[i];
       if (!m.uid) continue;
       try {
-        const snap = await db.collection('users').doc(m.uid).get();
+        const snap = await authDb.collection('users').doc(m.uid).get();
         if (snap.exists) {
           const fd = snap.data();
           const em = fd.email || m.email;
@@ -505,7 +506,7 @@ async function forgotPwForName() {
 async function saveBasicUser(user) {
   // Used only for Google sign-in or fallback — full role data is added by signup forms
   try {
-    const ref = db.collection("users").doc(user.uid);
+    const ref = authDb.collection("users").doc(user.uid);
     const snap = await ref.get();
     if (!snap.exists) {
       await ref.set({
@@ -579,7 +580,7 @@ async function doSignUpStudent() {
       console.warn('Could not fetch last_promotion, using calendar year:', e);
     }
 
-    await db.collection('users').doc(uid).set({
+    await authDb.collection('users').doc(uid).set({
       uid, role: 'student',
       displayName:  data.name,
       email:        data.email,
@@ -624,7 +625,7 @@ async function doSignUpStudent() {
       btn.disabled = false; btn.classList.remove('loading');
       return;
     }
-    await db.collection('users').doc(uid).update({ photoURL: ascJson.photoUrl });
+    await authDb.collection('users').doc(uid).update({ photoURL: ascJson.photoUrl });
 
     okMsg('stErr', '✓ Welcome to Sri Vipassi Dhamma School!');
 
@@ -688,7 +689,7 @@ async function doSignUpTeacher() {
     await cred.user.updateProfile({ displayName: data.name });
     const uid = cred.user.uid;
 
-    await db.collection('users').doc(uid).set({
+    await authDb.collection('users').doc(uid).set({
       uid, role: 'teacher',
       displayName:    data.name,
       email:          data.email,
@@ -730,7 +731,7 @@ async function doSignUpTeacher() {
       btn.disabled = false; btn.classList.remove('loading');
       return;
     }
-    await db.collection('users').doc(uid).update({ photoURL: ascJson.photoUrl });
+    await authDb.collection('users').doc(uid).update({ photoURL: ascJson.photoUrl });
 
     okMsg('tcErr', '✓ Welcome — your teacher account is ready.');
 
@@ -862,7 +863,7 @@ async function scanFaceLogin() {
       let email    = result.match.email || '';
       let displayName = result.match.name;
       try {
-        const snap = await db.collection('users').doc(result.match.uid).get();
+        const snap = await authDb.collection('users').doc(result.match.uid).get();
         if (snap.exists) {
           const fd = snap.data();
           if (fd.role)         role  = fd.role;
@@ -932,7 +933,7 @@ auth.onAuthStateChanged(async u => {
     // Look up role + full user data from Firestore
     let role = 'unknown', grade = null, userData = null;
     try {
-      const snap = await db.collection('users').doc(u.uid).get();
+      const snap = await authDb.collection('users').doc(u.uid).get();
       if (snap.exists) {
         userData = snap.data();
         role  = userData.role  || role;
@@ -1075,7 +1076,7 @@ async function checkAndPromoteStudent(user, userData) {
   const currentGrade = userData.grade || 1;
   const newGrade = currentGrade + advance;
 
-  const ref = db.collection('users').doc(user.uid);
+  const ref = authDb.collection('users').doc(user.uid);
 
   if (newGrade > 12) {
     // ═══ NOW ALUMNI — they've finished Grade 12 ═══
@@ -1220,7 +1221,7 @@ async function submitReupload() {
   errMsg('ruErr', '');
 
   try {
-    const snap = await db.collection('users').doc(user.uid).get();
+    const snap = await authDb.collection('users').doc(user.uid).get();
     const u = snap.data();
     if (!u) throw new Error('User data missing.');
 
@@ -1242,7 +1243,7 @@ async function submitReupload() {
     if (json.error) throw new Error(json.error);
 
     // 2. Update Firestore
-    await db.collection('users').doc(user.uid).update({
+    await authDb.collection('users').doc(user.uid).update({
       hasFace: true,
       faceDescriptor: reuploadFace.descriptor,
       photoURL: json.photoUrl || '',
@@ -1313,7 +1314,7 @@ async function openEditProfile() {
   // (in case they made edits while face-signed-in).
   let data = null;
   try {
-    const snap = await db.collection('users').doc(userUid).get();
+    const snap = await authDb.collection('users').doc(userUid).get();
     if (snap.exists) data = snap.data();
   } catch (e) {
     console.warn('Firestore read failed (rules may need to allow public GET):', e);
@@ -1422,7 +1423,7 @@ async function saveProfileEdits() {
   try {
     // Get current data so we know the role + can detect name change
     if (!isFace) {
-      const snap = await db.collection('users').doc(userUid).get();
+      const snap = await authDb.collection('users').doc(userUid).get();
       if (!snap.exists) throw new Error('User data missing.');
       const cur = snap.data();
       curRole = cur.role;
@@ -1433,7 +1434,7 @@ async function saveProfileEdits() {
       // (face session may be stale — e.g. created before the Firestore
       // refresh code was deployed). Firestore reads are public.
       try {
-        const snap = await db.collection('users').doc(userUid).get();
+        const snap = await authDb.collection('users').doc(userUid).get();
         if (snap.exists) {
           const cur = snap.data();
           if (cur.role) curRole = cur.role;
@@ -1535,7 +1536,7 @@ async function saveProfileEdits() {
       }
     } else {
       // ── FULL FIREBASE AUTH USER: write to Firestore (and mirror to Apps Script) ──
-      const ref = db.collection('users').doc(userUid);
+      const ref = authDb.collection('users').doc(userUid);
       await ref.update(updates);
 
       // Mirror to Apps Script so the data is available for future face edits
@@ -1620,7 +1621,7 @@ async function openManualReupload() {
 
   let userData;
   try {
-    const snap = await db.collection('users').doc(user.uid).get();
+    const snap = await authDb.collection('users').doc(user.uid).get();
     userData = snap.data();
   } catch (e) { return; }
 
@@ -1698,7 +1699,7 @@ async function doSchoolSignIn() {
       const m = data.matches[i];
       if (!m.uid) continue;
       try {
-        const snap = await db.collection('users').doc(m.uid).get();
+        const snap = await authDb.collection('users').doc(m.uid).get();
         if (snap.exists) {
           const fd = snap.data();
           validMatches.push({
@@ -1791,7 +1792,7 @@ async function doSignUpNormal() {
     const uid = cred.user.uid;
 
     // 2. Save to Firestore
-    await db.collection('users').doc(uid).set({
+    await authDb.collection('users').doc(uid).set({
       uid:         uid,
       role:        'normal',
       displayName: name,
@@ -1865,7 +1866,7 @@ async function doMigrate() {
     signedInUser = cred.user;
 
     // 2. Look up the user's data in Firestore to confirm role + get admission
-    const snap = await db.collection('users').doc(signedInUser.uid).get();
+    const snap = await authDb.collection('users').doc(signedInUser.uid).get();
     if (!snap.exists) {
       await auth.signOut();
       throw new Error('User profile not found in Firestore. You may need to delete and re-sign-up.');

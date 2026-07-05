@@ -6,8 +6,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>About | Sri Vipassi Dhamma School</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=Cinzel:wght@400;600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
-
+<script src="auth-gate.js"></script>
 <style>
+  
   @media(max-width:768px){
   #boxPage1, #boxPage2{
     overflow-y:auto !important;
@@ -2441,7 +2442,7 @@ select.am-input{appearance:none;-webkit-appearance:none;background-image:url("da
   <div class="brand">Sri Vipassi Dhamma School</div>
   <div class="nav-links" style="margin-left: 80px;">
     <a href="index.html">Home</a>
-    <a href="Daily Attendance.html">Daily Attendance</a>
+     <a href="Daily Attendance.html" data-role-gate="student,teacher" style="display:none;">Daily Attendance</a>
     <a href="About.html" class="active">About</a>
     <a href="galery.html">Gallery</a>
     <a href="achievements (2).html">Achievements</a>
@@ -3859,6 +3860,7 @@ function syncThemeIcons(){
 <script src="face-utils.js"></script>
 <script src="auth-system.js"></script>
 <script src="auth-gate.js"></script>
+<script src="nav-gate.js"></script>
 
 <script>
 if(!firebase.apps.length){
@@ -3871,11 +3873,14 @@ if(!firebase.apps.length){
     appId:"1:1074665165821:web:91ef329a0472fa138e7f94"
   });
 }
-const auth=firebase.auth();
-const db=firebase.firestore();
-const googleProvider=new firebase.auth.GoogleAuthProvider();
-googleProvider.addScope('email');
-googleProvider.addScope('profile');
+const aboutAuthApp = firebase.apps.find(a => a.name === 'authApp') || (firebase.apps.length ? firebase.app() : null);
+const auth = aboutAuthApp ? aboutAuthApp.auth() : null;
+const db = aboutAuthApp ? aboutAuthApp.firestore() : null;
+const googleProvider = auth ? new firebase.auth.GoogleAuthProvider() : null;
+if (googleProvider) {
+  googleProvider.addScope('email');
+  googleProvider.addScope('profile');
+}
 
 async function saveUser(user,extra={}){
   try{

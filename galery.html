@@ -10,8 +10,8 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <script src="face-utils.js"></script>
-<script src="auth-system.js"></script>
-<script src="auth-gate.js"></script>
+
+
 <link rel="stylesheet" href="auth-modal.css">
   <style>
     *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
@@ -1810,7 +1810,7 @@ body.ta .login-btn .lang-ta { display:inline !important; }
   <div class="brand">Sri Vipassi Dhamma School</div>
   <div class="nav-links" style="margin-left: 40px;">
     <a href="index.html">Home</a>
-    <a href="Daily Attendance.html">Daily Attendance</a>
+    <a href="Daily Attendance.html" data-role-gate="student,teacher" style="display:none;">Daily Attendance</a>
     <a href="About.html">About</a>
     <a href="galery.html" class="active">Gallery</a>
     <a href="achievements (2).html">Achievements</a>
@@ -1839,7 +1839,7 @@ body.ta .login-btn .lang-ta { display:inline !important; }
   </div>
   <div class="mobile-nav-links">
     <a href="index.html" onclick="closeMobileMenu()">Home</a>
-    <a href="Daily Attendance.html" onclick="closeMobileMenu()">Daily Attendance</a>
+    <a href="Daily Attendance.html" data-role-gate="student,teacher" style="display:none;" onclick="closeMobileMenu()">Daily Attendance</a>
     <a href="About.html" onclick="closeMobileMenu()">About</a>
     <a href="galery.html" onclick="closeMobileMenu()">Gallery</a>
     <a href="achievements (2).html" onclick="closeMobileMenu()">Achievements</a>
@@ -2788,7 +2788,7 @@ setLang('en');
       <h4>Quick Links</h4>
       <ul>
         <li><a href="index.html">Home</a></li><li><a href="About.html">About Us</a></li>
-        <li><a href="Daily Attendance.html">Daily Attendance</a></li><li><a href="galery.html">Gallery</a></li>
+        <li><a href="Daily Attendance.html" data-role-gate="student,teacher" style="display:none;">Daily Attendance</a></li><li><a href="galery.html">Gallery</a></li>
         <li><a href="Subject.html">Syllabus</a></li><li><a href="achievements (2).html">Achievements</a></li>
       </ul>
     </div>
@@ -2824,5 +2824,10 @@ setLang('en');
   <div class="dhamma-strip"><span>☸</span> Developing Wisdom Through Dhamma <span>☸</span> Sri Lanka <span>☸</span></div>
 </div>
 
+  
+  
+  <script src="auth-gate.js"></script>
+  <script src="auth-system.js"></script>
+  <script src="nav-gate.js"></script>
 </body>
 </html>

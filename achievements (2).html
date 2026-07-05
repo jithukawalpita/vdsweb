@@ -2852,7 +2852,7 @@
     <div class="brand">Sri Vipassi Dhamma School</div>
     <div class="nav-links">
       <a href="index.html">Home</a>
-      <a href="Daily Attendance.html">Daily Attendance</a>
+      <a href="Daily Attendance.html" data-role-gate="student,teacher" style="display:none;">Daily Attendance</a>
       <a href="About.html">About</a>
       <a href="galery.html">Gallery</a>
       <a href="achievements (2).html" class="active">Achievements</a>
@@ -2883,7 +2883,7 @@
     </div>
     <div class="mobile-nav-links">
       <a href="index.html" onclick="closeMobileMenu()">Home</a>
-      <a href="Daily Attendance.html" onclick="closeMobileMenu()">Daily Attendance</a>
+      <a href="Daily Attendance.html" data-role-gate="student,teacher" style="display:none;" onclick="closeMobileMenu()">Daily Attendance</a>
       <a href="About.html" onclick="closeMobileMenu()">About</a>
       <a href="galery.html" onclick="closeMobileMenu()">Gallery</a>
       <a href="achievements (2).html" onclick="closeMobileMenu()">Achievements</a>
@@ -3569,7 +3569,7 @@
         <ul>
           <li><a href="index.html">Home</a></li>
           <li><a href="About.html">About Us</a></li>
-          <li><a href="Daily Attendance.html">Daily Attendance</a></li>
+          <li><a href="Daily Attendance.html" data-role-gate="student,teacher" style="display:none;">Daily Attendance</a></li>
           <li><a href="galery.html">Gallery</a></li>
           <li><a href="Subject.html">Syllabus</a></li>
           <li><a href="achievements (2).html">Achievements</a></li>
@@ -3648,9 +3648,9 @@
 
   <!-- ===== Auth system (shared with all pages) ===== -->
   <script src="face-utils.js"></script>
-  <script src="auth-system.js"></script>
-<script src="auth-gate.js"></script>
-  <script src="auth-gate.js"></script>
+  
+
+  
 
   <!-- ===== Update login button on auth state ===== -->
   <script>
@@ -3919,5 +3919,9 @@
     catNext.addEventListener('click',function(){goToPage(currentCategoryPage+1);});
     document.addEventListener('keydown',function(e){if(e.key!=='Escape')return;if(categoryModal.classList.contains('show'))closeCategoryModal();else if(yearModal.classList.contains('show'))closeYearModal();else if(placeModal.classList.contains('show'))closePlaceModal();else if(uploadModal.classList.contains('show'))closeUploadModal();else if(pwdModal.classList.contains('show'))closePwdModal();else if(achModal.classList.contains('show'))closeAchModal();});
   </script>
+  
+  <script src="auth-gate.js"></script>
+  <script src="auth-system.js"></script>
+  <script src="nav-gate.js"></script>
 </body>
 </html>
