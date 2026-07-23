@@ -8,6 +8,11 @@
 
 <!-- For Google Search result icon -->
 <link rel="shortcut icon" href="logo.png">
+<!-- Load Firebase SDKs early so other scripts can safely use `firebase` -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
 <script src="auth-gate.js"></script>
 <script src="nav-gate.js"></script>
 
@@ -17,9 +22,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Sri Vipassi Dhamma School</title>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <script src="face-utils.js"></script>
 <script src="auth-system.js"></script>
 <link rel="stylesheet" href="auth-modal.css">
@@ -2060,32 +2062,42 @@ function closeMobileMenu(){const s=document.getElementById('mobileSidebar'),o=do
 </script>
 
 <script>
-if (!firebase.apps.length) {
-  firebase.initializeApp({
-    apiKey:"AIzaSyAWpPP3OevjIRAsoGIjOJTofV6l2jgyhNI",
-    authDomain:"signin-f9656.firebaseapp.com",
-    projectId:"signin-f9656",
-    storageBucket:"signin-f9656.firebasestorage.app",
-    messagingSenderId:"1074665165821",
-    appId:"1:1074665165821:web:91ef329a0472fa138e7f94"
-  });
-}
+(function(){
+  const authApp = firebase.apps.find(a => a.name === 'authApp');
+  const defaultApp = firebase.apps.length ? firebase.app() : null;
+  const app = authApp || defaultApp;
+  if (!app) {
+    firebase.initializeApp({
+      apiKey:"AIzaSyAWpPP3OevjIRAsoGIjOJTofV6l2jgyhNI",
+      authDomain:"signin-f9656.firebaseapp.com",
+      projectId:"signin-f9656",
+      storageBucket:"signin-f9656.firebasestorage.app",
+      messagingSenderId:"1074665165821",
+      appId:"1:1074665165821:web:91ef329a0472fa138e7f94"
+    });
+  }
 
-firebase.auth().onAuthStateChanged(u => {
-  const btn  = document.getElementById('loginBtn');
-  const mbtn = document.getElementById('mobileLoginBtn');
-  [btn, mbtn].filter(Boolean).forEach(b => {
-    if (u) {
-      const first = (u.displayName || u.email || 'User').split(/[ @]/)[0];
-      b.textContent = first;
-      b.classList.add('logged-in');
-    } else {
-      b.textContent = 'Login';
-      b.classList.remove('logged-in');
-    }
+  const auth = (firebase.apps.find(a => a.name === 'authApp')
+    ? firebase.app('authApp').auth()
+    : firebase.auth());
+
+  if (!auth) return;
+
+  auth.onAuthStateChanged(u => {
+    const btn  = document.getElementById('loginBtn');
+    const mbtn = document.getElementById('mobileLoginBtn');
+    [btn, mbtn].filter(Boolean).forEach(b => {
+      if (u) {
+        const first = (u.displayName || u.email || 'User').split(/[ @]/)[0];
+        b.textContent = first;
+        b.classList.add('logged-in');
+      } else {
+        b.textContent = 'Login';
+        b.classList.remove('logged-in');
+      }
+    });
   });
-});
-</script>
+})();
 </script>
 </body>
 </html>

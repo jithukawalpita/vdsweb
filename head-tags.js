@@ -53,7 +53,7 @@
   // Manifest
   const manifest = document.createElement('link');
   manifest.rel = 'manifest';
-  manifest.href = 'site.webmanifest';
+  manifest.href = '/site.webmanifest';
   document.head.appendChild(manifest);
 
 })();

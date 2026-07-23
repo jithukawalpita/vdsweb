@@ -2643,7 +2643,13 @@ async function uploadImages() {
       if (file.size>10*1024*1024){status.textContent=`❌ ${file.name} — 10MB ට වැඩියි`;continue;}
       status.textContent=`⏳ ${done+1}/${selectedFiles.length} uploading...`;
       const fileData=await new Promise((resolve,reject)=>{const r=new FileReader();r.onload=ev=>resolve(ev.target.result.split(',')[1]);r.onerror=reject;r.readAsDataURL(file);});
-      await fetch(GALLERY_APPS_SCRIPT_URL,{method:'POST',mode:'no-cors',body:JSON.stringify({action:'uploadGallery',fileName:file.name,fileData,mimeType:file.type||'image/jpeg',category,title:titleEN,titleEN,titleTA:titleEN,date})});
+      const uploadResp = await fetch(GALLERY_APPS_SCRIPT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'uploadGallery', fileName: file.name, fileData, mimeType: file.type || 'image/jpeg', category, title: titleEN, date })
+      });
+      if (!uploadResp.ok) throw new Error('Upload failed: ' + uploadResp.status + ' ' + uploadResp.statusText);
+      try { await uploadResp.json(); } catch (e) { console.warn('Upload returned non-JSON/opaque response (possible CORS/no-cors issue)', e); }
       await new Promise(r=>setTimeout(r,3000));
       done++; bar.style.width=`${(done/selectedFiles.length)*100}%`;
       status.textContent=`✅ ${done}/${selectedFiles.length} uploaded!`;

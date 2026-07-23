@@ -3757,9 +3757,15 @@
       });
       var res = await fetch(DRIVE_UPLOAD_URL, {
         method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ secret: DRIVE_SECRET, data: base64, mimeType: file.type || 'image/jpeg', filename: file.name || ('photo_' + Date.now() + '.jpg'), year: currentYear, category: currentCategory })
       });
-      var json = await res.json();
+      if (!res.ok) throw new Error('Drive upload failed: ' + res.status + ' ' + res.statusText);
+      try {
+        var json = await res.json();
+      } catch (e) {
+        throw new Error('Drive upload returned non-JSON response (possible CORS or server error)');
+      }
       if (json.error) throw new Error(json.error);
       if (!json.url) throw new Error('Upload succeeded but no URL returned.');
       return { url: json.url, fileId: json.fileId };

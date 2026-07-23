@@ -1,7 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-   <script src="auth-gate.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script>
+    if (!firebase.apps.length) {
+      firebase.initializeApp({
+        apiKey:            "AIzaSyAWpPP3OevjIRAsoGIjOJTofV6l2jgyhNI",
+        authDomain:        "signin-f9656.firebaseapp.com",
+        projectId:         "signin-f9656",
+        storageBucket:      "signin-f9656.firebasestorage.app",
+        messagingSenderId: "1074665165821",
+        appId:              "1:1074665165821:web:91ef329a0472fa138e7f94"
+      });
+    }
+  </script>
+  <script src="auth-gate.js"></script>
   <script src="head-tags.js"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
@@ -637,7 +652,7 @@
 const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbx9ys4NG6fYGcjHs-gEE9nNVsmQQRfajzcDEEsBB-Rm_m3G89lyetMT4h4CJu1__1H2/exec';
 const EXAM_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxzon556gtIb0L9I2ODWGNJCKTACJVAAo5VNGAOeopXAIytbRn0QD0s11sh6u5uPHcj7w/exec';
 
-const BULK_ATTENDANCE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzXUvGCqcITkeK-qaAGh8JmRpYunisWGS5ZnfZn4IZI-kz4ZRP6q8_svokffiSp6RaY/exec';
+const BULK_ATTENDANCE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyBha0u3UACZrW2U_K2i4iOuLLIat3R58ZALoSDcIk1cdAQjnXPTHRTPLOyvrChCkbc/exec';
 const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 
 let _bulkAttendanceCache = null;
@@ -659,12 +674,13 @@ function loadBulkAttendanceData_(forceRefresh) {
       settled = true;
       delete window[callbackName];
       document.getElementById(callbackName + '-script')?.remove();
+      console.log('[bulk-attendance] JSONP callback received for', callbackName, 'data:', data);
       if (data && data.ok) {
         _bulkAttendanceCache = data.data;
         console.log('[bulk-attendance] loaded — files read:', data.filesRead,
           data.filesSkipped && data.filesSkipped.length ? 'skipped: ' + JSON.stringify(data.filesSkipped) : '');
       } else {
-        console.warn('[bulk-attendance] load failed:', data && data.error);
+        console.warn('[bulk-attendance] load failed or not ok. full payload:', data && data.error ? data.error : data);
         _bulkAttendanceCache = null;
       }
       resolve(_bulkAttendanceCache);
@@ -678,16 +694,17 @@ function loadBulkAttendanceData_(forceRefresh) {
     script.onerror = () => {
       if (settled) return;
       settled = true;
-      console.warn('[bulk-attendance] script tag failed to load (network error or blocked)');
+      console.warn('[bulk-attendance] script tag failed to load (network error or blocked). script.src=', script.src);
       resolve(null);
     };
     document.head.appendChild(script);
     setTimeout(() => {
       if (settled) return;
       settled = true;
-      console.warn('[bulk-attendance] timed out waiting for response (20s)');
+      console.warn('[bulk-attendance] timed out waiting for response (20s). script.src=', script.src);
+      // keep the script tag for inspection in DOM for debugging
       resolve(null);
-    }, 20000);
+    }, 60000);
   });
   return _bulkAttendanceLoadingPromise;
 }
@@ -735,6 +752,7 @@ let ATTENDANCE_DATA = {};
 let rosterLoadingPromise = null;
 let currentStudent = null;
 let currentStudentKey = null;
+let _matchSource = null; // 'roster' or 'bulk-fallback' — for grade debugging
 
 function loadRosterAndAttendance() {
   if (rosterLoadingPromise) return rosterLoadingPromise;
@@ -828,9 +846,15 @@ async function verifyAccess() {
   await loadRosterAndAttendance();
 
   let match = findStudentByName(code);
-  if (!match) match = await findStudentInBulkData_(code); // roster fallback
+  if (match) {
+    _matchSource = 'roster';
+  } else {
+    match = await findStudentInBulkData_(code); // roster fallback
+    if (match) _matchSource = 'bulk-fallback';
+  }
 
   if (match) {
+    console.log("[grade-debug] matched via:", _matchSource, "raw student object:", match.student);
     alertDiv.innerHTML = `<div class="alert alert-success">✅ Welcome, ${match.student.name}! Loading your attendance...</div>`;
     setTimeout(() => autoLoginFromStudent(match.key, match.student), 700);
   } else {
@@ -884,6 +908,26 @@ function findStudentByUid_(uid) {
     if (candidateUid && String(candidateUid).trim() === String(uid).trim()) {
       return { key: s.id, student: s };
     }
+  }
+  return null;
+}
+
+function findStudentByAdmissionNo_(admissionNo) {
+  if (!admissionNo) return null;
+  const q = String(admissionNo).trim();
+  for (const s of ROSTER.students) {
+    const a = s.admissionNo || s.admission || s.adm || s.admNo;
+    if (a && String(a).trim() === q) return { key: s.id, student: s };
+  }
+  return null;
+}
+
+function findStudentByEmail_(email) {
+  if (!email) return null;
+  const q = (email || '').trim().toLowerCase();
+  for (const s of ROSTER.students) {
+    const se = (s.email || s.emailAddress || s.guardianEmail || '').trim().toLowerCase();
+    if (se && se === q) return { key: s.id, student: s };
   }
   return null;
 }
@@ -954,6 +998,7 @@ function tryFirebaseAutoLogin(attempts) {
           await loadRosterAndAttendance();
 
           let match = findStudentByUid_(user.uid);
+          if (match) _matchSource = 'roster-uid';
 
           let nameForFallback = user.displayName || "";
           if (!match) {
@@ -962,14 +1007,17 @@ function tryFirebaseAutoLogin(attempts) {
               if (snap.exists && snap.data().displayName) nameForFallback = snap.data().displayName;
             } catch (e) { /* Firestore profile optional */ }
             match = findStudentByName(nameForFallback) || findStudentByName((user.email || "").split("@")[0]);
+            if (match) _matchSource = 'roster-name';
           }
 
           if (!match) {
             match = await findStudentInBulkData_(nameForFallback)
                  || await findStudentInBulkData_((user.email || "").split("@")[0]);
+            if (match) _matchSource = 'bulk-fallback';
           }
 
           if (match) {
+            console.log("[grade-debug] auto-login matched via:", _matchSource, "raw student object:", match.student);
             autoLoginFromStudent(match.key, match.student);
             resolve({ matched: true, signedIn: true });
           } else {
@@ -983,7 +1031,6 @@ function tryFirebaseAutoLogin(attempts) {
     attempt(attempts);
   });
 }
-
 async function initPortal() {
   if (checkExistingSession()) return;
 
@@ -992,12 +1039,16 @@ async function initPortal() {
     document.getElementById("sessionCheckContainer").style.display = "none";
     return; // dashboard already shown by autoLoginFromStudent
   }
-
-  // Not signed in, or signed in without a linked student/teacher record —
-  // this page is only ever reached via the nav link, which is already
-  // hidden for anyone who doesn't qualify, so a direct/leftover visit
-  // here just gets sent back to the homepage instead of a placeholder.
-  window.location.href = "index.html";
+  // Not signed in or no linked record — show login UI instead of redirecting
+  // so users can manually verify access by entering their full name.
+  try {
+    document.getElementById("sessionCheckContainer").style.display = "none";
+    document.getElementById("loginContainer").style.display = "block";
+  } catch (e) {
+    // Fallback to homepage if critical elements are missing
+    console.warn('initPortal: could not show login container:', e);
+    window.location.href = "index.html";
+  }
 }
 
 function logout() {
@@ -1114,6 +1165,16 @@ function updateGradeDisplay() {
   const year = document.getElementById("filterYear").value;
   const grade = getDisplayGrade(currentStudent, year);
   document.getElementById("filterGradeDisplay").textContent = grade ? ("Grade " + grade) : "— (no record for " + year + ")";
+
+  console.log("[grade-debug]", {
+    source: _matchSource,
+    studentName: currentStudent && currentStudent.name,
+    rawStudentGrade: currentStudent && currentStudent.grade,
+    yearRecords: currentStudent && currentStudent.yearRecords,
+    selectedYear: year,
+    resolvedGrade: grade
+  });
+
   return grade;
 }
 
@@ -1341,31 +1402,12 @@ window.onFilterChange = onFilterChange;
 window.exportMyCSV = exportMyCSV;
 window.verifyAccess = verifyAccess;
 window.logout = logout;
-
-
-
-initPortal();
 </script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-
 <script src="face-utils.js"></script>
-
 
 <script src="nav-gate.js"></script>
 
 <script>
-if (!firebase.apps.length) {
-  firebase.initializeApp({
-    apiKey:            "AIzaSyAWpPP3OevjIRAsoGIjOJTofV6l2jgyhNI",
-    authDomain:        "signin-f9656.firebaseapp.com",
-    projectId:         "signin-f9656",
-    storageBucket:      "signin-f9656.firebasestorage.app",
-    messagingSenderId: "1074665165821",
-    appId:              "1:1074665165821:web:91ef329a0472fa138e7f94"
-  });
-}
 const pageAuth = firebase.auth();
 const pageDb   = firebase.firestore();
 const pageGoogleProvider = new firebase.auth.GoogleAuthProvider();
@@ -1518,6 +1560,13 @@ function closeMobileMenu(){
   
   
  
+</script>
   <script src="auth-system.js"></script>
+  <script>
+    // Call initPortal after Firebase and auth UI are ready
+    if (typeof initPortal === 'function') {
+      try { initPortal(); } catch (e) { console.warn('initPortal failed:', e); }
+    }
+  </script>
 </body>
 </html>
