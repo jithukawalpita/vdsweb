@@ -1068,13 +1068,37 @@ async function checkAndPromoteStudent(user, userData) {
 
   if (!lastPromoYear) return; // No promotion ever recorded yet
 
-  const userLast = userData.lastPromotionYear || 0;
+  // If lastPromotionYear was never set (old account created before this
+  // field existed), do NOT default to 0 — that causes a huge false
+  // "advance" that wrongly jumps the student straight to alumni.
+  // Instead, treat it as "already caught up as of this year" and just
+  // backfill the field silently, without promoting anyone.
+  if (userData.lastPromotionYear == null) {
+    try {
+      await authDb.collection('users').doc(user.uid).update({
+        lastPromotionYear: lastPromoYear
+      });
+    } catch (e) {
+      console.warn('Could not backfill lastPromotionYear:', e);
+    }
+    return; // skip promotion this time — they're now caught up
+  }
+
+  const userLast = userData.lastPromotionYear;
   if (userLast >= lastPromoYear) return; // Already caught up
 
   // How many promotions have they missed? Usually 1; could be more if absent.
   const advance = lastPromoYear - userLast;
+  // Safety cap — a student should never jump more than 1 grade level
+  // per login under normal circumstances. If advance is absurdly large
+  // (data corruption, clock issues, etc.), clamp it instead of nuking
+  // their grade straight to alumni.
+  if (advance > 12) {
+    console.warn('Suspiciously large promotion advance (' + advance + ') for uid ' + user.uid + ' — clamping to 1.');
+  }
   const currentGrade = userData.grade || 1;
-  const newGrade = currentGrade + advance;
+  const safeAdvance = Math.min(advance, 12);
+  const newGrade = currentGrade + safeAdvance;
 
   const ref = authDb.collection('users').doc(user.uid);
 

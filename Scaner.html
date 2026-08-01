@@ -464,22 +464,7 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #050203; f
 </head>
 <body>
 
-<!-- ═══════════════ PASSWORD GATE ═══════════════ -->
-<div class="gate" id="gate">
-  <div class="gate-card">
-    <div class="gate-wheel">☸</div>
-    <div class="gate-title">Attendance Scanner</div>
-    <div class="gate-sub">Teachers Only</div>
-    <div class="gate-divider"><span>Enter Access Code</span></div>
-    <input class="gate-input" id="gatePass" type="password" placeholder="Access code" autocomplete="off">
-    <button class="gate-btn" id="gateBtn" onclick="checkGate()">Unlock Scanner</button>
-    <div class="gate-err" id="gateErr"></div>
-    <div class="gate-hint">
-      You must be a logged-in teacher and enter the access code shared with staff.
-    </div>
-    <a href="index.html" class="gate-back">← Back to website</a>
-  </div>
-</div>
+<!-- Teacher gate removed — scanner opens directly -->
 
 
 <!-- ═══════════════ SCANNER ═══════════════ -->
@@ -651,8 +636,7 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #050203; f
 
 <script>
 /* ═══════════════ CONFIG ═══════════════ */
-const TEACHER_ACCESS_CODE = 'vipassi teachers@';
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx9ys4NG6fYGcjHs-gEE9nNVsmQQRfajzcDEEsBB-Rm_m3G89lyetMT4h4CJu1__1H2/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyNwu56O1pFz7gQQrh0fxkrm-fMm8ki1gtq7ITCcHr4ESMKpNQJTTwdWhOWvoHbUS26/exec';
 
 const FIREBASE_CONFIG = {
   apiKey:            "AIzaSyAWpPP3OevjIRAsoGIjOJTofV6l2jgyhNI",
@@ -668,25 +652,11 @@ const auth = firebase.auth();
 const db   = firebase.firestore();
 
 
-/* ═══════════════ GATE LOGIC ═══════════════ */
-async function checkGate() {
-  const pass = document.getElementById('gatePass').value;
-  const err  = document.getElementById('gateErr');
-  const btn  = document.getElementById('gateBtn');
-  err.textContent = '';
-
-  if (pass !== TEACHER_ACCESS_CODE) {
-    err.textContent = '⚠ Incorrect access code.';
-    return;
-  }
-
-  btn.disabled = true; btn.textContent = 'Verifying teacher…';
-
-  // Check we are a logged-in teacher (either Firebase auth OR face-login session)
+/* ═══════════════ GATE LOGIC (kept only for the greeting name) ═══════════════ */
+async function verifyTeacher() {
   let isTeacher = false;
   let teacherName = '';
 
-  // 1. Firebase auth
   const fbUser = await new Promise(res => {
     const unsub = auth.onAuthStateChanged(u => { unsub(); res(u); });
   });
@@ -701,7 +671,6 @@ async function checkGate() {
     } catch (e) { console.warn('Firestore lookup failed:', e); }
   }
 
-  // 2. Face-login session (localStorage)
   if (!isTeacher) {
     const fl = localStorage.getItem('svFaceUser');
     if (fl) {
@@ -715,22 +684,23 @@ async function checkGate() {
     }
   }
 
-  if (!isTeacher) {
-    err.innerHTML = '⚠ You must be signed in as a teacher.<br><a href="index.html#login" style="color:#c9a84c">Go sign in →</a>';
-    btn.disabled = false; btn.textContent = 'Unlock Scanner';
-    return;
-  }
-
-  // All good — open scanner
-  document.getElementById('gate').style.display = 'none';
-  document.getElementById('scanner').classList.add('on');
-  initScanner(teacherName);
+  return { isTeacher, teacherName };
 }
 
-// Enter to submit
-document.getElementById('gatePass').addEventListener('keydown', e => {
-  if (e.key === 'Enter') checkGate();
-});
+// Scanner opens directly — no gate, no sign-in check.
+function autoCheckTeacher() {
+  document.getElementById('scanner').classList.add('on');
+
+  verifyTeacher()
+    .then(({ teacherName }) => initScanner(teacherName || 'Teacher'))
+    .catch(() => initScanner('Teacher'));
+}
+
+if (document.readyState === 'loading') {
+  window.addEventListener('DOMContentLoaded', autoCheckTeacher);
+} else {
+  autoCheckTeacher();
+}
 
 
 /* ═══════════════ SCANNER ═══════════════ */
@@ -739,11 +709,11 @@ let scanRunning = false;
 let lastDetection = 0;
 let frameCount = 0;
 let fpsTimer = 0;
-const markedToday = new Set();   // UIDs marked in this session
-const prefectsSet = new Set();   // UIDs of students currently assigned as prefects
-const flowerMarked = new Set();  // UIDs with flower offering marked in this session
-let dayFlowerNames = new Set();  // lowercased names with a flower ALREADY marked for the selected date (from get_flowers)
-/* ═══════════════ PREFECTS LOADER ═══════════════ */
+const markedToday = new Set();
+const prefectsSet = new Set();
+const flowerMarked = new Set();
+let dayFlowerNames = new Set();
+
 async function loadPrefects() {
   try {
     const res = await appsScriptPost({ action: 'list_prefects' });
@@ -756,14 +726,6 @@ async function loadPrefects() {
   }
 }
 
-/* ═══════════════ DAY FLOWER STATUS LOADER ═══════════════
-   Reuses the same get_flowers endpoint the dashboard's Flower Marks
-   page already relies on (see dashboard.html's ensureFlowerData()).
-   That endpoint returns { ok:true, flowers:{ students:{ 'YYYY-MM-DD':
-   ['Name One','Name Two',...] } } } — keyed by STUDENT NAME, not uid.
-   So matching here is done on lowercased/trimmed name, same as the
-   dashboard's studentProvidedFlower() does.
-*/
 async function loadDayFlowerStatus() {
   try {
     const iso = getSelectedDate();
@@ -777,16 +739,13 @@ async function loadDayFlowerStatus() {
   }
 }
 
-/* ═══════════════ DATE + MODE ═══════════════ */
-let currentMode = 'scan'; // 'scan' or 'manual'
+let currentMode = 'scan';
 
-// Returns the selected date as YYYY-MM-DD, or today if no selection
 function getSelectedDate() {
   const sel = document.getElementById('dateSelect');
   if (!sel || !sel.value) {
-    // Fallback to today (if today is a Sunday) or nearest past Sunday
     const today = new Date();
-    const offset = today.getDay(); // 0 if Sunday
+    const offset = today.getDay();
     const sun = new Date(today.getTime() - offset * 86400000);
     return sun.toISOString().substring(0, 10);
   }
@@ -801,11 +760,8 @@ function getSpecialEvent() {
   return el.textContent.trim();
 }
 
-
-
-/* ═══════════════ SPECIAL EVENT CREATOR ═══════════════ */
 let activeSpecialEvent = '';
-let _editingEventName  = '';   // original name being edited
+let _editingEventName  = '';
 let _eventsListOpen    = false;
 
 function toggleEventCreator() {
@@ -845,7 +801,6 @@ async function addSpecialEvent() {
     return;
   }
 
-  // True prefects-only = ONLY prefects ticked, nothing else
   const isPrefectsOnly = includePrefects && grades.length === 0 && !includeTeachers;
 
   const btn = document.getElementById('eventAddBtn');
@@ -856,10 +811,10 @@ async function addSpecialEvent() {
     const res = await appsScriptPost({
       action:          'add_special_event',
       eventName,
-      grades:          grades,                // send what teacher actually ticked
+      grades:          grades,
       includeTeachers: includeTeachers,
-      includePrefects: includePrefects,       // new flag (backend reads this)
-      prefectsOnly:    isPrefectsOnly,        // legacy flag — backend back-compat
+      includePrefects: includePrefects,
+      prefectsOnly:    isPrefectsOnly,
       date:            getSelectedDate()
     });
 
@@ -906,7 +861,6 @@ function updateSpecialEventBanner() {
   }
 }
 
-/* ═══════════════ CURRENT EVENTS LIST ═══════════════ */
 function toggleEventsList() {
   const body  = document.getElementById('eventsListBody');
   const arrow = document.getElementById('eventsListArrow');
@@ -938,7 +892,7 @@ async function loadEventsList() {
       return;
     }
 
-   listEl.innerHTML = events.map(ev => {
+    listEl.innerHTML = events.map(ev => {
       const safeName = escapeHtml(ev.name).replace(/'/g, "\\'");
       const isActive = activeSpecialEvent === ev.name;
       return `
@@ -965,27 +919,26 @@ async function loadEventsList() {
     msgEl.style.display = 'block';
   }
 }
+
 function setActiveEvent(name) {
   if (activeSpecialEvent === name) {
-    // Clicking active event again → deactivate
     clearActiveEvent();
-    loadEventsList(); // refresh button states
+    loadEventsList();
     return;
   }
   activeSpecialEvent = name;
   document.getElementById('activeEventName').textContent = name;
   document.getElementById('eventActiveRow').style.display = 'flex';
   updateSpecialEventBanner();
-  loadEventsList(); // refresh button states to show new active
+  loadEventsList();
 
-  // Show a brief status message
   document.getElementById('eventStatus').textContent =
     '▶ Now marking attendance for: ' + name;
 
-  // Scroll down so teacher sees the student list
   const listEl = document.getElementById('manualList');
   if (listEl) setTimeout(() => listEl.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
 }
+
 function openEditModal(originalName) {
   _editingEventName = originalName;
   document.getElementById('evEditInput').value = originalName;
@@ -1013,8 +966,7 @@ async function confirmEditEvent() {
     });
     if (!res.ok) throw new Error(res.error || 'Rename failed');
     document.getElementById('evEditModal').style.display = 'none';
-    // Update active event label if it was the renamed one
-   if (activeSpecialEvent === _editingEventName) {
+    if (activeSpecialEvent === _editingEventName) {
       activeSpecialEvent = newName;
       document.getElementById('activeEventName').textContent = newName;
       updateSpecialEventBanner();
@@ -1043,14 +995,6 @@ async function deleteEvent(name, btn) {
   }
 }
 
-/* ═══════════════ SHARED FETCH HELPER (fixes CORS) ═══════════════ */
-
-// Safely parse an Apps Script response. If the deployment is stale,
-// deleted, or misconfigured, Google often returns an HTML error/login
-// page instead of JSON — res.json() throws a cryptic "Unexpected
-// token '<'" in that case. This gives a clear, actionable message
-// instead, surfaced in the toast UI so it's obvious it's a deployment
-// problem and not a code bug.
 async function parseAppsScriptResponse(res) {
   if (!res.ok) {
     throw new Error(
@@ -1072,8 +1016,6 @@ async function parseAppsScriptResponse(res) {
 async function appsScriptPost(payload) {
   const res = await fetch(APPS_SCRIPT_URL, {
     method:  'POST',
-    // Do NOT set Content-Type to application/json —
-    // Google Apps Script requires no custom headers to avoid CORS preflight
     body: JSON.stringify(payload)
   });
   return parseAppsScriptResponse(res);
@@ -1083,7 +1025,7 @@ async function appsScriptGet(queryString) {
   const res = await fetch(APPS_SCRIPT_URL + '?' + queryString);
   return parseAppsScriptResponse(res);
 }
-// Populate the date selector with last 104 Sundays (2 years back) grouped by year
+
 function populateDateSelector() {
   const sel = document.getElementById('dateSelect');
   if (!sel) return;
@@ -1093,7 +1035,6 @@ function populateDateSelector() {
   const offset = today.getDay();
   const mostRecentSunday = new Date(today.getTime() - offset * 86400000);
 
-  // Build all Sundays then group into <optgroup>s by year
   const sundaysByYear = {};
   for (let i = 0; i < 104; i++) {
     const d = new Date(mostRecentSunday.getTime() - i * 7 * 86400000);
@@ -1124,12 +1065,12 @@ function populateDateSelector() {
     sel.appendChild(og);
   });
 
-  // Default to the most recent Sunday
   const firstOptGroup = sel.querySelector('optgroup');
   if (firstOptGroup && firstOptGroup.children.length) {
     sel.value = firstOptGroup.children[0].value;
   }
 }
+
 async function onDateChange() {
   const date = getSelectedDate();
   const status = document.getElementById('statusBar');
@@ -1138,7 +1079,6 @@ async function onDateChange() {
   flowerMarked.clear();
   dayFlowerNames.clear();
   document.getElementById('stMarked').textContent = '0';
-  // If we're in manual mode, re-render to show fresh state for the new date
   if (currentMode === 'manual') {
     await loadDayFlowerStatus();
     renderManualList();
@@ -1154,14 +1094,12 @@ async function setMode(mode) {
 
   if (mode === 'manual') {
     populateGradeFilter();
-    await loadPrefects();          // pull current prefect roster
-    await loadDayFlowerStatus();   // pull which names already have a flower marked for this date
+    await loadPrefects();
+    await loadDayFlowerStatus();
     renderManualList();
     updateSpecialEventBanner();
-    // Stop scanning loop in manual mode
     scanRunning = false;
   } else {
-    // Resume scanning
     if (knownFaces.length && !scanRunning) {
       scanRunning = true;
       scanLoop();
@@ -1172,9 +1110,7 @@ async function setMode(mode) {
 function populateGradeFilter() {
   const sel = document.getElementById('gradeFilter');
   if (!sel) return;
-  // Clear everything after the first two fixed options (All Students, Teachers)
   while (sel.options.length > 2) sel.remove(2);
-  // Always show all 11 grades regardless of knownFaces
   for (let g = 1; g <= 12; g++) {
     const opt = document.createElement('option');
     opt.value = 'g' + g;
@@ -1208,7 +1144,6 @@ function renderManualList() {
     return;
   }
 
-  // Compose the rows
   const rows = people.map(p => {
     const initials = (p.name || '?').split(/\s+/).map(w => w.charAt(0)).slice(0, 2).join('').toUpperCase();
     const photoHtml = p.photoURL
@@ -1216,7 +1151,6 @@ function renderManualList() {
       : initials;
     const subtitle = p.role === 'teacher' ? 'Teacher' : 'Grade ' + (p.grade || '?');
 
-    // ★ Prefect button — students only
     const isPrefect = prefectsSet.has(p.uid);
     const prefectBtn = (p.role === 'student')
       ? '<button class="manual-mark-btn prefect ' + (isPrefect ? 'active' : '') + '"' +
@@ -1225,15 +1159,12 @@ function renderManualList() {
         (isPrefect ? '★' : '☆') +
         '</button>'
       : '';
-     // ★ Flower offering button — for everyone (students + teachers).
-      // Reflects either a toggle made this session OR an offering
-      // already saved for this date (matched by name, since get_flowers
-      // is keyed by student name rather than uid).
-      const isFlower = flowerMarked.has(p.uid) ||
-        dayFlowerNames.has((p.name || '').trim().toLowerCase());
-const flowerBtn = '<button class="manual-mark-btn flower ' + (isFlower ? 'active' : '') + '"' +
-  ' title="' + (isFlower ? 'Remove flower offering' : 'Mark flower offering') + '"' +
-  ' onclick="toggleFlower(\'' + p.uid + '\', this)">🌸</button>';
+
+    const isFlower = flowerMarked.has(p.uid) ||
+      dayFlowerNames.has((p.name || '').trim().toLowerCase());
+    const flowerBtn = '<button class="manual-mark-btn flower ' + (isFlower ? 'active' : '') + '"' +
+      ' title="' + (isFlower ? 'Remove flower offering' : 'Mark flower offering') + '"' +
+      ' onclick="toggleFlower(\'' + p.uid + '\', this)">🌸</button>';
 
     return '' +
       '<div class="manual-row" data-uid="' + p.uid + '">' +
@@ -1243,10 +1174,10 @@ const flowerBtn = '<button class="manual-mark-btn flower ' + (isFlower ? 'active
           '<div class="manual-sub">' + subtitle + '</div>' +
         '</div>' +
         '<div class="manual-actions">' +
-  flowerBtn +
-  '<button class="manual-mark-btn present" onclick="manualMark(\'' + p.uid + '\', \'present\')">✓ Present</button>' +
-  '<button class="manual-mark-btn absent"  onclick="manualMark(\'' + p.uid + '\', \'absent\')">✗ Absent</button>' +
-  prefectBtn +
+          flowerBtn +
+          '<button class="manual-mark-btn present" onclick="manualMark(\'' + p.uid + '\', \'present\')">✓ Present</button>' +
+          '<button class="manual-mark-btn absent"  onclick="manualMark(\'' + p.uid + '\', \'absent\')">✗ Absent</button>' +
+          prefectBtn +
         '</div>' +
       '</div>';
   }).join('');
@@ -1268,7 +1199,6 @@ async function manualMark(uid, status) {
   const person = knownFaces.find(p => p.uid === uid);
   if (!person) return;
 
-  // Disable both buttons for this row while saving
   const row = document.querySelector('.manual-row[data-uid="' + uid + '"]');
   if (row) row.querySelectorAll('.manual-mark-btn').forEach(b => b.disabled = true);
 
@@ -1292,10 +1222,8 @@ async function manualMark(uid, status) {
     } else if (json.skipped) {
       showToast({ type: 'warn', name: person.name, sub: '↻ ' + (json.reason || 'Already marked'), photo: person.photoURL });
     } else if (json.ok) {
-      // Highlight the chosen button
       if (row) {
         row.querySelectorAll('.manual-mark-btn').forEach(b => {
-          // Don't strip 'active' off the prefect button
           if (!b.classList.contains('prefect')) b.classList.remove('active');
         });
         const btn = row.querySelector('.manual-mark-btn.' + status);
@@ -1329,7 +1257,6 @@ async function togglePrefect(uid, btn) {
 
   const wasActive = btn.classList.contains('active');
   btn.disabled = true;
-  // Optimistic visual update
   btn.textContent = wasActive ? '☆' : '★';
   btn.classList.toggle('active');
 
@@ -1361,7 +1288,6 @@ async function togglePrefect(uid, btn) {
       });
     }
   } catch (e) {
-    // Roll back the optimistic update
     btn.classList.toggle('active');
     btn.textContent = wasActive ? '★' : '☆';
     showToast({ type: 'err', name: person.name, sub: 'Error: ' + e.message, photo: person.photoURL });
@@ -1369,6 +1295,7 @@ async function togglePrefect(uid, btn) {
     btn.disabled = false;
   }
 }
+
 async function toggleFlower(uid, btn) {
   const person = knownFaces.find(p => p.uid === uid);
   if (!person) return;
@@ -1376,7 +1303,6 @@ async function toggleFlower(uid, btn) {
   const wasActive = btn.classList.contains('active');
   btn.disabled = true;
 
-  // Optimistic visual flip
   btn.classList.toggle('active');
   btn.title = wasActive ? 'Mark flower offering' : 'Remove flower offering';
 
@@ -1391,13 +1317,12 @@ async function toggleFlower(uid, btn) {
     });
 
     if (res.notSunday) {
-      // Roll back
       btn.classList.toggle('active');
       btn.title = wasActive ? 'Remove flower offering' : 'Mark flower offering';
       showToast({ type: 'warn', name: person.name,
         sub: '📅 ' + (res.error || 'Selected date is not a Sunday'), photo: person.photoURL });
     } else if (res.ok) {
-    const nameKey = (person.name || '').trim().toLowerCase();
+      const nameKey = (person.name || '').trim().toLowerCase();
       if (res.flowerMarked) {
         flowerMarked.add(uid);
         dayFlowerNames.add(nameKey);
@@ -1418,7 +1343,6 @@ async function toggleFlower(uid, btn) {
       throw new Error(res.error || 'Toggle failed');
     }
   } catch (e) {
-    // Roll back the optimistic update
     btn.classList.toggle('active');
     btn.title = wasActive ? 'Remove flower offering' : 'Mark flower offering';
     showToast({ type: 'err', name: person.name,
@@ -1427,17 +1351,16 @@ async function toggleFlower(uid, btn) {
     btn.disabled = false;
   }
 }
+
 async function initScanner(teacherName) {
   const status = document.getElementById('statusBar');
   const mask = document.getElementById('loadMask');
   const loadText = document.getElementById('loadText');
 
-  // Populate the Sunday-date selector immediately (doesn't depend on anything async)
   populateDateSelector();
 
   try {
     loadText.textContent = 'Loading face models (~7MB) — can take 10-30 seconds on first load…';
-    // Pulse the message so the user knows it's still working
     let pulseDots = 0;
     const pulseTimer = setInterval(() => {
       pulseDots = (pulseDots + 1) % 4;
@@ -1453,7 +1376,6 @@ async function initScanner(teacherName) {
     const video = document.getElementById('camVideo');
     await SVFace.startCamera(video);
 
-    // Set up overlay canvas size
     const overlay = document.getElementById('camOverlay');
     overlay.width  = video.videoWidth;
     overlay.height = video.videoHeight;
@@ -1473,8 +1395,6 @@ async function initScanner(teacherName) {
 }
 
 async function loadFaces() {
-  // Pull all face descriptors from the Apps Script backend — this is the
-  // source of truth for everyone registered via register_student/teacher.
   const res = await fetch(APPS_SCRIPT_URL + '?action=descriptors');
 
   if (!res.ok) {
@@ -1522,7 +1442,6 @@ async function scanLoop() {
   if (!scanRunning) return;
   frameCount++;
 
-  // Only scan every ~600ms to keep CPU sane
   const now = Date.now();
   if (now - lastDetection > 600) {
     lastDetection = now;
@@ -1554,13 +1473,11 @@ async function processFrame() {
     const box = det.detection.box;
     const match = SVFace.matchFace(det.descriptor, knownFaces);
 
-    // Draw box
     const isMatch = !!match.match;
     ctx.strokeStyle = isMatch ? 'rgba(120,200,80,0.95)' : 'rgba(220,170,80,0.7)';
     ctx.lineWidth = 3;
     ctx.strokeRect(box.x, box.y, box.width, box.height);
 
-    // Label
     const label = isMatch
       ? match.match.name + ' (' + match.distance.toFixed(2) + ')'
       : 'Unknown';
@@ -1578,8 +1495,8 @@ async function processFrame() {
 }
 
 async function handleMatch(person) {
-  if (markedToday.has(person.uid)) return; // Already marked in this session
-  markedToday.add(person.uid); // Optimistic — back-end de-dupes 30-min window anyway
+  if (markedToday.has(person.uid)) return;
+  markedToday.add(person.uid);
   document.getElementById('stMarked').textContent = markedToday.size;
 
   showToast({
@@ -1597,20 +1514,19 @@ async function handleMatch(person) {
         uid:    person.uid,
         role:   person.role,
         grade:  person.grade,
-        date:   getSelectedDate(),    // selected Sunday (YYYY-MM-DD)
+        date:   getSelectedDate(),
         status: 'present'
       })
     });
     const json = await parseAppsScriptResponse(res);
     if (json.notSunday) {
-      // Today isn't Sunday — school is Sunday-only, so we can't mark attendance.
       showToast({
         type: 'warn',
         name:  person.name,
         sub:   '📅 ' + (json.error || 'Today is not Sunday — attendance not recorded'),
         photo: person.photoURL
       });
-      markedToday.delete(person.uid); // Allow re-scan on Sunday
+      markedToday.delete(person.uid);
     } else if (json.skipped) {
       showToast({
         type: 'warn',
@@ -1635,7 +1551,7 @@ async function handleMatch(person) {
       sub:   '⚠ ' + e.message,
       photo: person.photoURL
     });
-    markedToday.delete(person.uid); // Allow retry
+    markedToday.delete(person.uid);
   }
 }
 
@@ -1651,7 +1567,6 @@ function showToast({ type, name, sub, photo }) {
     </div>
   `;
   stack.appendChild(el);
-  // Keep at most 4 toasts
   while (stack.children.length > 4) stack.removeChild(stack.firstChild);
   setTimeout(() => { el.style.opacity = '0'; el.style.transition = 'opacity .4s'; }, 5400);
   setTimeout(() => { if (el.parentNode) el.parentNode.removeChild(el); }, 5900);
