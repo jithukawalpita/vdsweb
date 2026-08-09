@@ -2537,7 +2537,7 @@ document.addEventListener('DOMContentLoaded', function() {
    Everything below starts EMPTY and is filled in by loadLiveData()
    once the Apps Script responds — there is no hardcoded snapshot.
    ════════════════════════════════════════════════════════════════ */
-const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbw3Cp93L2j9ubssvcOnzV-1XLjXnNSCO5pDpYX2ZQCHmWuvqK1WEN_ZnR-vAbgzClvFVA/exec';
+const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbx0qNM10fUWtpq2wA9ct8tfr1PPtreC24cF7Rw4D14ORIIu3b2M6bji7umpmgiBNukYLw/exec';
 
 /* ── Exam Results — separate Apps Script project/Web App ──
    PASTE YOUR DEPLOYED WEB APP URL HERE: */
@@ -2659,11 +2659,14 @@ const lastSun=prevSunday(today);
 
 /* ─── Aggregator ─── */
 function dateISO(d){ return `${d.y}-${String(d.m+1).padStart(2,'0')}-${String(d.d).padStart(2,'0')}`; }
-
+function normGrade(g) {
+  return String(g || '').replace(/^grade\s*/i, '').trim();
+}
 function getRosterCount(type, gradeFilter){
   const list = ROSTER[type] || [];
   if(type==='students' && gradeFilter){
-    return list.filter(r=>r.grade===gradeFilter).length;
+    const gf = normGrade(gradeFilter);
+    return list.filter(r=>normGrade(r.grade)===gf).length;
   }
   return list.length;
 }
@@ -2679,10 +2682,11 @@ function aggregateForDate(type, iso, gradeFilter){
   if(presentIds.length === 0 && (!dayData[type].absentIds || dayData[type].absentIds.length === 0)){
     return { total, present:0, absent:0, noData:true };
   }
-  if(type==='students' && gradeFilter){
+ if(type==='students' && gradeFilter){
+    const gf = normGrade(gradeFilter);
     presentIds = presentIds.filter(id => {
       const s = ROSTER.students.find(r=>r.id===id);
-      return s && s.grade===gradeFilter;
+      return s && normGrade(s.grade)===gf;
     });
   }
   const present = presentIds.length;
@@ -2744,11 +2748,11 @@ function renderDashboard(){
         const allPresentIds = (dayData && dayData[type] && dayData[type].presentIds) ? dayData[type].presentIds : [];
         const roster = ROSTER[type] || [];
         const gradeRosterAll = (type==='students' && gradeFilter)
-          ? roster.filter(r => r.grade === gradeFilter) : roster;
+          ? roster.filter(r => normGrade(r.grade) === normGrade(gradeFilter)) : roster;
 
         // Present: IDs that are in presentIds
         const presentFiltered = (type==='students' && gradeFilter)
-          ? allPresentIds.filter(id => { const s=ROSTER.students.find(r=>r.id===id); return s && s.grade===gradeFilter; })
+          ? allPresentIds.filter(id => { const gf=normGrade(gradeFilter); const s=ROSTER.students.find(r=>r.id===id); return s && normGrade(s.grade)===gf; })
           : allPresentIds;
         const presentPeople = presentFiltered.map(id => {
           const r = gradeRosterAll.find(x => x.id === id);
@@ -2803,8 +2807,8 @@ function renderDashboard(){
     } else {
       // students or prefects — compute gender split from ROSTER gender field
       const roster = ROSTER[type] || [];
-      const gradeRoster = (type==='students' && gradeFilter)
-        ? roster.filter(r => r.grade === gradeFilter)
+    const gradeRoster = (type==='students' && gradeFilter)
+        ? roster.filter(r => normGrade(r.grade) === normGrade(gradeFilter))
         : roster;
 
       const totalBoys  = gradeRoster.filter(r => r.gender === 'male').length;
@@ -2815,10 +2819,11 @@ function renderDashboard(){
         // Get present IDs for this date
         const dayData = ATTENDANCE_DATA[iso];
         let presentIds = (dayData && dayData[type] && dayData[type].presentIds) ? dayData[type].presentIds : [];
-        if (type === 'students' && gradeFilter) {
+      if (type === 'students' && gradeFilter) {
+          const gf = normGrade(gradeFilter);
           presentIds = presentIds.filter(id => {
             const s = ROSTER.students.find(r => r.id === id);
-            return s && s.grade === gradeFilter;
+            return s && normGrade(s.grade) === gf;
           });
         }
         // Map present IDs to gender
