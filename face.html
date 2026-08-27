@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Face Registration · Sri Vipassi Dhamma School</title>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+<!-- face-utils.js must be loaded BEFORE this page's inline script runs.
+     Point this at wherever face-utils.js lives on your site. -->
+<script src="face-utils.js"></script>
+<style>
+  :root{
+    --gold:#d4af37; --gold-dark:#b8941f;
+    --bg:#1a0606; --panel:#220808;
+    --cream:#e8d5a0; --cream-light:#f5e6c8;
+    --muted:#a89060; --error:#e57373; --success:#4caf50;
+    --border:rgba(212,175,55,0.35); --field:rgba(255,255,255,0.06);
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; font-family:Inter,sans-serif;
+    background:radial-gradient(circle at 50% -10%, #2a0a0a 0%, var(--bg) 55%);
+    color:var(--cream); min-height:100vh;
+    display:flex; align-items:center; justify-content:center; padding:32px 16px;
+  }
+  .card{
+    background:var(--panel); border:1px solid var(--border); border-radius:16px;
+    padding:36px 32px; max-width:460px; width:100%;
+    box-shadow:0 24px 64px rgba(0,0,0,0.6);
+  }
+  .eyebrow{ text-align:center; font-size:11px; letter-spacing:3px; color:var(--gold); font-weight:600; margin-bottom:6px; }
+  h1{ text-align:center; font-size:22px; font-weight:700; color:var(--cream-light); margin:0 0 4px; }
+  .sub{ text-align:center; font-size:12px; color:var(--muted); margin-bottom:22px; }
+
+  /* Mode toggle */
+  .mode-toggle{ display:flex; gap:8px; margin-bottom:22px; }
+  .mode-toggle button{
+    flex:1; padding:10px; font-size:11px; letter-spacing:1px; text-transform:uppercase;
+    background:var(--field); color:var(--muted); border:1px solid var(--border);
+    border-radius:8px; cursor:pointer; font-weight:700;
+  }
+  .mode-toggle button.on{ background:linear-gradient(135deg,var(--gold),var(--gold-dark)); color:#1a0606; }
+
+  label{ display:block; font-size:11px; color:var(--muted); margin-bottom:5px; letter-spacing:.5px; }
+  input{
+    width:100%; padding:12px 14px; background:var(--field); border:1px solid var(--border);
+    border-radius:10px; font-size:14px; color:var(--cream-light); margin-bottom:10px;
+    outline:none; font-family:inherit;
+  }
+  input::placeholder{ color:#7a6242; }
+  input:focus{ border-color:var(--gold); }
+
+  #results{ max-height:180px; overflow-y:auto; margin-bottom:14px; border-radius:10px; }
+  .result-item{
+    padding:10px 14px; background:var(--field); border:1px solid var(--border); border-radius:10px;
+    margin-bottom:8px; cursor:pointer; font-size:13px; display:flex; justify-content:space-between;
+  }
+  .result-item:hover{ border-color:var(--gold); }
+  .result-item span{ color:var(--muted); font-size:11px; }
+
+  #selected-card{
+    display:none; background:var(--field); border:1px solid var(--gold); border-radius:10px;
+    padding:12px 14px; margin-bottom:18px; font-size:13px;
+  }
+  #selected-card .name{ color:var(--cream-light); font-weight:700; }
+  #selected-card .meta{ color:var(--muted); font-size:11px; margin-top:2px; }
+  #selected-card button{
+    margin-top:8px; width:auto; padding:6px 12px; font-size:10px;
+    background:transparent; border:1px solid var(--border); color:var(--gold);
+  }
+
+  .cam-wrap{
+    position:relative; width:100%; aspect-ratio:4/3; background:#000; border-radius:12px;
+    overflow:hidden; border:1px solid var(--border); margin-bottom:14px; display:none;
+  }
+  video, #ruPreview{ width:100%; height:100%; object-fit:cover; display:block; }
+  #ruPreview{ display:none; }
+
+  .am-err{ color:var(--error); font-size:12px; min-height:16px; margin-bottom:8px; text-align:center; line-height:1.4; }
+  .am-err.am-ok{ color:var(--success); }
+
+  button{
+    width:100%; padding:14px; background:linear-gradient(135deg,var(--gold),var(--gold-dark));
+    color:#1a0606; border:none; border-radius:10px; font-size:12px; font-weight:700; letter-spacing:2px;
+    cursor:pointer; text-transform:uppercase; margin-bottom:10px;
+  }
+  button.secondary{ background:transparent; color:var(--gold); border:1px solid var(--border); }
+  button:disabled{ opacity:.6; cursor:not-allowed; }
+  .btn-row{ display:flex; gap:10px; }
+  .btn-row button{ margin-bottom:0; }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="eyebrow">SRI VIPASSI DHAMMA SCHOOL</div>
+  <h1>Face Registration</h1>
+  <div class="sub">Step 2 of 2 — Link a face for attendance</div>
+
+  <div class="mode-toggle">
+    <button id="modeSelfBtn" class="on" onclick="setMode('self')">It's me</button>
+    <button id="modeStaffBtn" onclick="setMode('staff')">Staff: find by name</button>
+  </div>
+
+  <!-- STAFF MODE: search by name -->
+  <div id="search-block" style="display:none">
+    <label for="search">Find student by name</label>
+    <input id="search" type="text" placeholder="Start typing a name…">
+    <div id="results"></div>
+  </div>
+
+  <!-- SELF MODE: uses signed-in session -->
+  <div id="self-block" style="display:none">
+    <div class="am-err" id="selfErr" style="margin-bottom:0"></div>
+  </div>
+
+  <div id="selected-card">
+    <div class="name" id="sel-name"></div>
+    <div class="meta" id="sel-meta"></div>
+    <button class="secondary" onclick="clearSelection()">Change student</button>
+  </div>
+
+  <div id="err" class="am-err"></div>
+
+  <div class="cam-wrap" id="cam-wrap">
+    <video id="ruVideo" autoplay playsinline></video>
+    <img id="ruPreview">
+  </div>
+
+  <div id="cam-controls" style="display:none">
+    <button id="ruCamBtn" onclick="startFaceCapture()">Enable Camera</button>
+    <div class="btn-row" id="capture-controls" style="display:none">
+      <button class="secondary" id="ruSwitchBtn" onclick="switchCamera()" style="display:none" title="Switch camera">⟳ Switch Camera</button>
+      <button class="secondary" id="ruRetakeBtn" onclick="retakeFace()" style="display:none">Retake</button>
+      <button id="ruSnapBtn" onclick="snapFace()" disabled>Capture Photo</button>
+    </div>
+    <button id="ruBtn" onclick="saveFace()" style="display:none">Save & Finish</button>
+  </div>
+  <div id="hint" style="text-align:center;font-size:11px;color:var(--muted);min-height:14px"></div>
+</div>
+
+<script>
+/* ═══ Same config values as auth.js — keep these in sync with the main site ═══ */
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzaO1YQO3R2HqU5s4YqqT0YfBYZcdnEjcOhUvLx-XTMpXuXRui3TJnhaeMoItS08oJB/exec';
+
+if (!firebase.apps.find(a => a.name === 'authApp')) {
+  firebase.initializeApp({
+    apiKey:            "AIzaSyAWpPP3OevjIRAsoGIjOJTofV6l2jgyhNI",
+    authDomain:        "signin-f9656.firebaseapp.com",
+    projectId:         "signin-f9656",
+    storageBucket:     "signin-f9656.firebasestorage.app",
+    messagingSenderId: "1074665165821",
+    appId:             "1:1074665165821:web:91ef3290a0472fa138e7f94"
+  }, 'authApp');
+}
+const authApp = firebase.app('authApp');
+const auth   = authApp.auth();
+const authDb = authApp.firestore();
+
+let mode = 'self';
+let selectedStudent = null; // { uid, data }
+let reuploadFace = null;    // { jpeg, descriptor }
+let currentStream = null;
+let videoDevices = [];
+let currentDeviceIndex = 0;
+
+function errMsg(id, m){ const el=document.getElementById(id); if(el){ el.textContent=m; el.className='am-err'; } }
+function okMsg(id, m){ const el=document.getElementById(id); if(el){ el.textContent=m; el.className='am-err am-ok'; } }
+
+/* ═══ Mode toggle ═══ */
+function setMode(m) {
+  mode = m;
+  document.getElementById('modeSelfBtn').classList.toggle('on', m === 'self');
+  document.getElementById('modeStaffBtn').classList.toggle('on', m === 'staff');
+  clearSelection();
+  if (m === 'self') {
+    document.getElementById('search-block').style.display = 'none';
+    document.getElementById('self-block').style.display = 'block';
+    trySelfSelect();
+  } else {
+    document.getElementById('self-block').style.display = 'none';
+    document.getElementById('search-block').style.display = 'block';
+  }
+}
+
+/* ═══ SELF MODE: pull the signed-in user's own record ═══ */
+async function trySelfSelect() {
+  const params = new URLSearchParams(window.location.search);
+  const uidParam = params.get('uid');
+
+  const user = auth.currentUser || await new Promise(res => {
+    const unsub = auth.onAuthStateChanged(u => { unsub(); res(u); });
+  });
+
+  const uid = (user && user.uid) || uidParam;
+  if (!uid) {
+    errMsg('selfErr', '⚠ You are not signed in. Please sign up first, or switch to Staff mode.');
+    return;
+  }
+  try {
+    const doc = await authDb.collection('users').doc(uid).get();
+    if (!doc.exists) { errMsg('selfErr', '⚠ No account record found for this login.'); return; }
+    selectStudent(uid, doc.data());
+  } catch (e) {
+    errMsg('selfErr', '⚠ Could not load your record: ' + e.message);
+  }
+}
+
+/* ═══ STAFF MODE: search by name via Apps Script lookup_name ═══ */
+const searchInput = document.getElementById('search');
+const resultsEl = document.getElementById('results');
+let searchTimer = null;
+
+searchInput.addEventListener('input', function(){
+  clearTimeout(searchTimer);
+  const term = searchInput.value.trim();
+  resultsEl.innerHTML = '';
+  if (term.length < 2) return;
+  searchTimer = setTimeout(function(){ runSearch(term); }, 300);
+});
+
+async function runSearch(term) {
+  errMsg('err', '');
+  try {
+    const res = await fetch(APPS_SCRIPT_URL + '?action=lookup_name&name=' + encodeURIComponent(term));
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    if (!data.matches || data.matches.length === 0) {
+      resultsEl.innerHTML = '<div class="result-item" style="cursor:default">No matching students</div>';
+      return;
+    }
+    // Cross-check against Firestore, same as doSchoolSignIn — Firestore is the source of truth.
+    const valid = [];
+    for (const m of data.matches) {
+      if (!m.uid) continue;
+      try {
+        const snap = await authDb.collection('users').doc(m.uid).get();
+        const role = snap.exists ? snap.data().role : null;
+        if (role === 'student' || role === 'teacher') valid.push({ uid: m.uid, data: snap.data() });
+      } catch (e) { console.warn('Firestore check failed for', m.uid, e); }
+    }
+    renderResults(valid.slice(0, 8));
+  } catch (e) {
+    errMsg('err', '⚠ Search failed: ' + e.message);
+  }
+}
+
+function renderResults(matches) {
+  resultsEl.innerHTML = '';
+  if (matches.length === 0) {
+    resultsEl.innerHTML = '<div class="result-item" style="cursor:default">No matching students</div>';
+    return;
+  }
+  matches.forEach(function(m){
+    const row = document.createElement('div');
+    row.className = 'result-item';
+    const metaBits = m.data.role === 'teacher'
+      ? [m.data.subject || 'Teacher']
+      : [m.data.admissionNo || ''];
+    if (m.data.hasFace) metaBits.push('face saved');
+    row.innerHTML = '<span style="color:var(--cream-light)">' + m.data.displayName + '</span>' +
+      '<span>' + metaBits.filter(Boolean).join(' · ') + '</span>';
+    row.onclick = function(){ selectStudent(m.uid, m.data); };
+    resultsEl.appendChild(row);
+  });
+}
+
+/* ═══ Common selection handling ═══ */
+function selectStudent(uid, data) {
+  selectedStudent = { uid, data };
+  document.getElementById('selected-card').style.display = 'block';
+  document.getElementById('sel-name').textContent = data.displayName;
+  const roleLine = data.role === 'teacher'
+    ? 'Teacher · ' + (data.subject || '')
+    : (data.admissionNo || '') + ' · Grade ' + (data.grade || '?');
+  document.getElementById('sel-meta').textContent =
+    roleLine + (data.hasFace ? ' · already has a face on file (will be replaced)' : '');
+  document.getElementById('cam-controls').style.display = 'block';
+  errMsg('err', '');
+}
+
+function clearSelection() {
+  selectedStudent = null;
+  stopCam();
+  document.getElementById('selected-card').style.display = 'none';
+  document.getElementById('cam-controls').style.display = 'none';
+  document.getElementById('cam-wrap').style.display = 'none';
+  searchInput.value = '';
+  resultsEl.innerHTML = '';
+  errMsg('err', '');
+}
+
+/* ═══ Camera management — manual getUserMedia so we can pick a device.
+   SVFace is still used for models + descriptor + photo capture, which
+   work on any live <video>, regardless of how its stream was obtained. ═══ */
+function stopCam() {
+  if (currentStream) {
+    currentStream.getTracks().forEach(t => t.stop());
+    currentStream = null;
+  }
+  const v = document.getElementById('ruVideo');
+  if (v) v.srcObject = null;
+}
+
+async function openCameraStream(deviceId) {
+  if (currentStream) {
+    currentStream.getTracks().forEach(t => t.stop());
+    currentStream = null;
+  }
+  const constraints = {
+    video: deviceId ? { deviceId: { exact: deviceId } } : { facingMode: 'user' },
+    audio: false
+  };
+  const stream = await navigator.mediaDevices.getUserMedia(constraints);
+  currentStream = stream;
+  const video = document.getElementById('ruVideo');
+  video.srcObject = stream;
+  await video.play();
+
+  // Refresh the device list — labels are only populated once permission
+  // has been granted, so this only works meaningfully after the first
+  // successful getUserMedia call.
+  try {
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    videoDevices = devices.filter(d => d.kind === 'videoinput');
+    const switchBtn = document.getElementById('ruSwitchBtn');
+    if (switchBtn) switchBtn.style.display = videoDevices.length > 1 ? 'inline-block' : 'none';
+    // Keep currentDeviceIndex in sync with whichever device is actually active
+    if (deviceId) {
+      const idx = videoDevices.findIndex(d => d.deviceId === deviceId);
+      if (idx >= 0) currentDeviceIndex = idx;
+    }
+  } catch (e) {
+    console.warn('Could not enumerate camera devices:', e);
+  }
+}
+
+async function switchCamera() {
+  if (videoDevices.length < 2) return;
+  const hint = document.getElementById('hint');
+  currentDeviceIndex = (currentDeviceIndex + 1) % videoDevices.length;
+  const next = videoDevices[currentDeviceIndex];
+  try {
+    hint.textContent = 'Switching camera…';
+    await openCameraStream(next.deviceId);
+    hint.textContent = 'Look straight at the camera. Click "Capture" when ready.';
+  } catch (e) {
+    errMsg('err', '⚠ Could not switch camera: ' + e.message);
+  }
+}
+
+async function startFaceCapture() {
+  const video   = document.getElementById('ruVideo');
+  const preview = document.getElementById('ruPreview');
+  const camBtn  = document.getElementById('ruCamBtn');
+  const snap    = document.getElementById('ruSnapBtn');
+  const retake  = document.getElementById('ruRetakeBtn');
+  const hint    = document.getElementById('hint');
+
+  if (!window.SVFace) { errMsg('err', '⚠ face-utils.js (SVFace) is not loaded on this page.'); return; }
+
+  try {
+    hint.textContent = 'Loading face recognition models…';
+    await SVFace.loadModels();
+    hint.textContent = 'Starting camera…';
+    const deviceId = videoDevices[currentDeviceIndex] ? videoDevices[currentDeviceIndex].deviceId : null;
+    await openCameraStream(deviceId);
+    document.getElementById('cam-wrap').style.display = 'block';
+    video.style.display = 'block';
+    preview.style.display = 'none';
+    camBtn.style.display = 'none';
+    document.getElementById('capture-controls').style.display = 'flex';
+    snap.disabled = false;
+    retake.style.display = 'none';
+    hint.textContent = 'Look straight at the camera. Click "Capture" when ready.';
+  } catch (e) {
+    errMsg('err', '⚠ Camera unavailable: ' + e.message);
+  }
+}
+
+async function snapFace() {
+  const video   = document.getElementById('ruVideo');
+  const preview = document.getElementById('ruPreview');
+  const snap    = document.getElementById('ruSnapBtn');
+  const retake  = document.getElementById('ruRetakeBtn');
+  const hint    = document.getElementById('hint');
+
+  hint.textContent = 'Hold still — taking 3 samples for accuracy…';
+  snap.disabled = true;
+
+  const descriptor = await SVFace.computeRobustDescriptor(video, 3);
+  if (!descriptor) {
+    hint.textContent = '⚠ No face detected — try again with better lighting and a clear front-facing view.';
+    snap.disabled = false;
+    return;
+  }
+
+  const jpeg = SVFace.captureJpeg(video, 0.85);
+  stopCam();
+  preview.src = jpeg;
+  preview.style.display = 'block';
+  video.style.display = 'none';
+
+  snap.style.display = 'none';
+  retake.style.display = 'inline-block';
+  document.getElementById('ruBtn').style.display = 'block';
+  hint.textContent = '✓ Face captured (3-sample average). You can retake if needed.';
+
+  reuploadFace = { jpeg, descriptor: SVFace.descriptorToArray(descriptor) };
+}
+
+function retakeFace() {
+  reuploadFace = null;
+  document.getElementById('ruPreview').style.display = 'none';
+  document.getElementById('ruBtn').style.display = 'none';
+  document.getElementById('ruRetakeBtn').style.display = 'none';
+  document.getElementById('ruSnapBtn').style.display = 'inline-block';
+  startFaceCapture();
+}
+
+/* ═══ Save: always writes via Apps Script (works with or without auth);
+   also tries a direct Firestore update, which only succeeds in "self" mode
+   (Firestore rules require request.auth.uid === the student's own uid). ═══ */
+async function saveFace() {
+  const btn  = document.getElementById('ruBtn');
+  if (!selectedStudent || !reuploadFace) { errMsg('err', '⚠ Select a student and capture a photo first.'); return; }
+
+  btn.disabled = true; btn.textContent = 'Saving…';
+  errMsg('err', '');
+
+  const u = selectedStudent.data;
+  try {
+    const res = await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify({
+        action: 'update_student_photo',
+        uid:    selectedStudent.uid,
+        name:   u.displayName,
+        email:  u.email,
+        role:   u.role,
+        grade:  u.role === 'teacher' ? null : u.grade,
+        photoBase64: reuploadFace.jpeg,
+        descriptor:  reuploadFace.descriptor
+      })
+    });
+    const json = await res.json();
+    if (json.error) throw new Error(json.error);
+
+    // Try to keep Firestore in sync too — best-effort, non-fatal if it fails.
+    try {
+      await authDb.collection('users').doc(selectedStudent.uid).update({
+        hasFace: true,
+        faceDescriptor: reuploadFace.descriptor,
+        photoURL: json.photoUrl || '',
+        needsPhotoReupload: false
+      });
+    } catch (fsErr) {
+      console.warn('Firestore update skipped (likely permission — expected in staff mode):', fsErr);
+    }
+
+    okMsg('err', '✓ Face registered for ' + u.displayName + '.');
+    btn.textContent = 'Saved';
+  } catch (e) {
+    errMsg('err', '⚠ Could not save: ' + e.message);
+    btn.disabled = false;
+    btn.textContent = 'Save & Finish';
+  }
+}
+
+/* ═══ Init: default to self mode, auto-select if uid is in the URL ═══ */
+setMode('self');
+</script>
+</body>
+</html>

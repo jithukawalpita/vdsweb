@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sign Up · Sri Vipassi Dhamma School</title>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+<style>
+  :root{
+    --gold:#d4af37; --gold-dark:#b8941f;
+    --bg:#0d0303; --panel:#1a0606; --panel-2:#220808;
+    --cream:#e8d5a0; --cream-light:#f5e6c8;
+    --muted:#a89060; --error:#e57373; --success:#4caf50;
+    --border:rgba(212,175,55,0.35); --field:rgba(255,255,255,0.06);
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; font-family:Inter,sans-serif;
+    background:radial-gradient(circle at 50% -10%, #2a0a0a 0%, var(--bg) 55%);
+    color:var(--cream); min-height:100vh;
+    display:flex; flex-direction:column; align-items:center; padding:48px 16px 32px;
+  }
+
+  /* ─── Hero ─── */
+  .logo{
+    width:120px; height:120px; border-radius:50%;
+    background:radial-gradient(circle, #f5c542 0%, #d4af37 55%, #8a6d1a 100%);
+    box-shadow:0 0 40px rgba(212,175,55,0.45);
+    display:flex; align-items:center; justify-content:center;
+    font-size:48px; margin-bottom:20px;
+  }
+  h1.site-title{ font-size:26px; font-weight:700; color:var(--cream-light); margin:0 0 4px; text-align:center; }
+  .site-sub{ font-size:12px; letter-spacing:3px; color:var(--muted); text-transform:uppercase; margin-bottom:28px; }
+
+  /* ─── Card ─── */
+  .card{
+    background:var(--panel); border:1px solid var(--border); border-radius:16px;
+    max-width:460px; width:100%;
+    box-shadow:0 24px 64px rgba(0,0,0,0.6);
+    overflow:hidden;
+  }
+  .card-header{
+    background:linear-gradient(135deg, #5c1414, #3a0a0a);
+    border-bottom:1px solid var(--border);
+    padding:16px 24px;
+    font-size:11px; letter-spacing:2px; color:var(--gold); font-weight:700; text-transform:uppercase;
+    display:flex; align-items:center; gap:8px;
+  }
+  .card-body{ padding:28px 28px 24px; }
+
+  .back-link{
+    color:var(--gold); font-size:12px; text-decoration:none; cursor:pointer;
+    display:inline-block; margin-bottom:16px; font-weight:600;
+  }
+  .back-link:hover{ text-decoration:underline; }
+
+  .step-title{ font-size:19px; font-weight:700; color:var(--cream-light); margin:0 0 20px; }
+
+  /* ─── Role picker ─── */
+  .role-prompt{ text-align:center; font-size:14px; color:var(--muted); margin-bottom:20px; }
+  .role-grid{ display:flex; gap:14px; }
+  .role-card{
+    flex:1; background:var(--panel-2); border:1px solid var(--border); border-radius:12px;
+    padding:22px 12px; text-align:center; cursor:pointer;
+  }
+  .role-card:hover{ border-color:var(--gold); background:rgba(212,175,55,0.06); }
+  .role-emoji{ font-size:30px; margin-bottom:10px; }
+  .role-name{ font-weight:700; color:var(--cream-light); font-size:14px; margin-bottom:4px; }
+  .role-desc{ font-size:11px; color:var(--muted); }
+
+  /* ─── Form fields ─── */
+  label{ display:block; font-size:11px; color:var(--muted); margin-bottom:6px; letter-spacing:1px; text-transform:uppercase; }
+  label .opt{ text-transform:none; letter-spacing:0; font-weight:400; color:#7a6242; }
+  input, select, textarea{
+    width:100%; padding:13px 15px; background:var(--field); border:1px solid var(--border);
+    border-radius:10px; font-size:14px; color:var(--cream-light); margin-bottom:16px;
+    outline:none; font-family:inherit; resize:vertical;
+  }
+  input::placeholder, textarea::placeholder{ color:#7a6242; }
+  input:focus, select:focus, textarea:focus{ border-color:var(--gold); }
+  select{ appearance:none; cursor:pointer; }
+  select option{ background:#1a0606; color:var(--cream-light); }
+
+  .am-err{ color:var(--error); font-size:12px; min-height:16px; margin-bottom:10px; text-align:center; line-height:1.4; }
+  .am-err.am-ok{ color:var(--success); }
+
+  button.submit-btn{
+    width:100%; padding:14px; background:linear-gradient(135deg,var(--gold),var(--gold-dark));
+    color:#1a0606; border:none; border-radius:10px; font-size:12px; font-weight:700; letter-spacing:2px;
+    cursor:pointer; text-transform:uppercase; margin-top:6px;
+  }
+  button.submit-btn:disabled{ opacity:.6; cursor:not-allowed; }
+  button.submit-btn.loading{ opacity:.7; cursor:wait; }
+
+  .foot-note{
+    max-width:460px; text-align:center; font-size:12px; color:var(--muted);
+    line-height:1.6; margin-top:22px;
+  }
+</style>
+</head>
+<body>
+
+<div class="logo"><img src="logo.png" alt="Sri Vipassi Dhamma School Logo" width="120"></div>
+<h1 class="site-title">Sri Vipassi Dhamma School</h1>
+<div class="site-sub">Sign Up</div>
+
+<div class="card">
+  <div class="card-header">☸ SRI VIPASSI DHAMMA SCHOOL — SIGN UP</div>
+  <div class="card-body">
+
+    <!-- ═══ STEP 1: ROLE PICKER ═══ -->
+    <div id="step-role">
+      <div class="role-prompt">I am a…</div>
+      <div class="role-grid">
+        <div class="role-card" onclick="pickRole('student')">
+          <div class="role-emoji">🎒</div>
+          <div class="role-name">Student</div>
+          <div class="role-desc">Dhamma school student</div>
+        </div>
+        <div class="role-card" onclick="pickRole('teacher')">
+          <div class="role-emoji">📖</div>
+          <div class="role-name">Teacher</div>
+          <div class="role-desc">Dhamma school teacher</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ STEP 2a: STUDENT FORM ═══ -->
+    <div id="step-student" style="display:none">
+      <a class="back-link" onclick="backToRolePick()">← Choose different role</a>
+      <div class="step-title">Student Registration</div>
+
+      <label for="stName">Full name *</label>
+      <input id="stName" type="text" placeholder="Your full name">
+
+      <label for="stEmail">Email <span class="opt">(optional)</span></label>
+      <input id="stEmail" type="email" placeholder="you@email.com — not required">
+
+      <label for="stPass">Password *</label>
+      <input id="stPass" type="password" placeholder="Min. 6 characters">
+
+      <label for="stAdmission">Admission number *</label>
+      <input id="stAdmission" type="text" placeholder="e.g. SVDS-2025-042">
+
+      <label for="stGrade">Current grade *</label>
+      <select id="stGrade">
+        <option value="" disabled selected>— Select grade —</option>
+        <option value="1">Grade 1</option>
+        <option value="2">Grade 2</option>
+        <option value="3">Grade 3</option>
+        <option value="4">Grade 4</option>
+        <option value="5">Grade 5</option>
+        <option value="6">Grade 6</option>
+        <option value="7">Grade 7</option>
+        <option value="8">Grade 8</option>
+        <option value="9">Grade 9</option>
+        <option value="10">Grade 10</option>
+        <option value="11">Grade 11</option>
+        <option value="12">Grade 12</option>
+      </select>
+
+      <label for="stContact">Contact number *</label>
+      <input id="stContact" type="tel" placeholder="07X XXX XXXX">
+
+      <label for="stDOB">Date of birth *</label>
+      <input id="stDOB" type="date">
+
+      <label for="stGuardName">Parent / Guardian's name *</label>
+      <input id="stGuardName" type="text" placeholder="Mother / Father / Guardian">
+
+      <label for="stGuardPhone">Parent / Guardian's phone *</label>
+      <input id="stGuardPhone" type="tel" placeholder="07X XXX XXXX">
+
+      <label for="stGuardEmail">Parent / Guardian's email <span class="opt">(optional)</span></label>
+      <input id="stGuardEmail" type="email" placeholder="guardian@email.com">
+
+      <label for="stAddress">Home address *</label>
+      <textarea id="stAddress" rows="2" placeholder="Street, City, Postal code"></textarea>
+
+      <div id="stErr" class="am-err"></div>
+      <button class="submit-btn" id="stBtn" onclick="doSignUpStudent()">Create Account & Continue</button>
+    </div>
+
+    <!-- ═══ STEP 2b: TEACHER FORM ═══ -->
+    <div id="step-teacher" style="display:none">
+      <a class="back-link" onclick="backToRolePick()">← Choose different role</a>
+      <div class="step-title">Teacher Registration</div>
+
+      <label for="tcName">Full name *</label>
+      <input id="tcName" type="text" placeholder="Your full name">
+
+      <label for="tcEmail">Email <span class="opt">(optional)</span></label>
+      <input id="tcEmail" type="email" placeholder="you@email.com — not required">
+
+      <label for="tcPass">Password *</label>
+      <input id="tcPass" type="password" placeholder="Min. 6 characters">
+
+      <label for="tcPhone">Phone number *</label>
+      <input id="tcPhone" type="tel" placeholder="07X XXX XXXX">
+
+      <label for="tcSubject">Subject *</label>
+      <input id="tcSubject" type="text" placeholder="e.g. Dhamma, Pali, History">
+
+      <label for="tcContact">Alternate contact *</label>
+      <input id="tcContact" type="tel" placeholder="07X XXX XXXX">
+
+      <label for="tcGrade">Grade taught *</label>
+      <input id="tcGrade" type="text" placeholder="e.g. Grade 5">
+
+      <label for="tcMedium">Medium of instruction *</label>
+      <input id="tcMedium" type="text" placeholder="e.g. Sinhala">
+
+      <label for="tcDOB">Date of birth *</label>
+      <input id="tcDOB" type="date">
+
+      <label for="tcGender">Gender *</label>
+      <select id="tcGender">
+        <option value="" disabled selected>— Select —</option>
+        <option value="male">Male</option>
+        <option value="female">Female</option>
+        <option value="other">Other</option>
+      </select>
+
+      <label for="tcJoinDate">Joining date *</label>
+      <input id="tcJoinDate" type="date">
+
+      <label for="tcAddress">Home address *</label>
+      <textarea id="tcAddress" rows="2" placeholder="Street, City, Postal code"></textarea>
+
+      <div id="tcErr" class="am-err"></div>
+      <button class="submit-btn" id="tcBtn" onclick="doSignUpTeacher()">Create Account & Continue</button>
+    </div>
+
+  </div>
+</div>
+
+<div class="foot-note">
+  This is a sign-up-only page — email is optional, no school code needed.
+  Your face photo and details are added to the school's attendance spreadsheet automatically.
+</div>
+
+<script>
+/* ═══ Same config values as auth.js — keep these in sync with the main site ═══ */
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzaO1YQO3R2HqU5s4YqqT0YfBYZcdnEjcOhUvLx-XTMpXuXRui3TJnhaeMoItS08oJB/exec';
+
+if (!firebase.apps.find(a => a.name === 'authApp')) {
+  firebase.initializeApp({
+    apiKey:            "AIzaSyAWpPP3OevjIRAsoGIjOJTofV6l2jgyhNI",
+    authDomain:        "signin-f9656.firebaseapp.com",
+    projectId:         "signin-f9656",
+    storageBucket:     "signin-f9656.firebasestorage.app",
+    messagingSenderId: "1074665165821",
+    appId:             "1:1074665165821:web:91ef3290a0472fa138e7f94"
+  }, 'authApp');
+}
+const authApp = firebase.app('authApp');
+const auth   = authApp.auth();
+const authDb = authApp.firestore();
+
+function fErr(c) {
+  return ({
+    "auth/email-already-in-use":"⚠ That email (or admission/phone number) is already registered.",
+    "auth/invalid-email":      "Please enter a valid email.",
+    "auth/weak-password":      "Password must be at least 6 characters.",
+    "auth/network-request-failed":"Network error. Check your connection.",
+    "auth/too-many-requests":  "Too many attempts — try again later."
+  })[c] || ("Something went wrong. (" + c + ")");
+}
+function errMsg(id, m){ const el=document.getElementById(id); if(el){ el.textContent=m; el.className='am-err'; } }
+function okMsg(id, m){ const el=document.getElementById(id); if(el){ el.textContent=m; el.className='am-err am-ok'; } }
+
+/* ═══ Role picker navigation ═══ */
+function pickRole(role) {
+  document.getElementById('step-role').style.display = 'none';
+  document.getElementById('step-student').style.display = role === 'student' ? 'block' : 'none';
+  document.getElementById('step-teacher').style.display = role === 'teacher' ? 'block' : 'none';
+}
+function backToRolePick() {
+  document.getElementById('step-student').style.display = 'none';
+  document.getElementById('step-teacher').style.display = 'none';
+  document.getElementById('step-role').style.display = 'block';
+}
+
+/* Firebase Auth needs a unique login handle even when the person leaves
+   email blank. If they didn't give one, we build an internal placeholder
+   from the admission number / phone number — invisible to the user, and
+   sign-in later still works via the name+password lookup flow. */
+function slug(s) {
+  return (s || '').toString().toLowerCase().replace(/[^a-z0-9]/g, '');
+}
+
+/* ═══ STUDENT SIGN-UP ═══ */
+async function doSignUpStudent() {
+  const get = id => document.getElementById(id).value.trim();
+  const data = {
+    name:        get('stName'),
+    email:       get('stEmail'),
+    password:    document.getElementById('stPass').value,
+    admission:   get('stAdmission'),
+    grade:       get('stGrade'),
+    contact:     get('stContact'),
+    dob:         get('stDOB'),
+    guardName:   get('stGuardName'),
+    guardPhone:  get('stGuardPhone'),
+    guardEmail:  get('stGuardEmail'),
+    address:     get('stAddress')
+  };
+
+  const required = ['name','password','admission','grade','contact','dob','guardName','guardPhone','address'];
+  for (const f of required) {
+    if (!data[f]) return errMsg('stErr', 'Please fill in all required fields (*).');
+  }
+  if (data.password.length < 6) return errMsg('stErr', 'Password must be at least 6 characters.');
+
+  const loginEmail = data.email || (slug(data.admission) + '@svd-student.internal');
+
+  const btn = document.getElementById('stBtn');
+  btn.disabled = true; btn.classList.add('loading');
+  errMsg('stErr', '');
+
+  try {
+    const cred = await auth.createUserWithEmailAndPassword(loginEmail, data.password);
+    await cred.user.updateProfile({ displayName: data.name });
+    const uid = cred.user.uid;
+
+    let currentPromoYear = new Date().getFullYear();
+    try {
+      const pyRes = await fetch(APPS_SCRIPT_URL + '?action=last_promotion');
+      const pyJson = await pyRes.json();
+      if (pyJson.year) currentPromoYear = pyJson.year;
+    } catch (e) { console.warn('Could not fetch last_promotion, using calendar year:', e); }
+
+    await authDb.collection('users').doc(uid).set({
+      uid, role: 'student',
+      displayName:  data.name,
+      email:        loginEmail,
+      hasContactEmail: !!data.email,
+      admissionNo:  data.admission,
+      contactNo:    data.contact,
+      grade:        parseInt(data.grade, 10),
+      dob:          data.dob,
+      guardianName: data.guardName,
+      guardianPhone:data.guardPhone,
+      guardianEmail:data.guardEmail || '',
+      homeAddress:  data.address,
+      faceDescriptor: [],
+      hasFace:      false,
+      needsPhotoReupload: false,
+      lastPromotionYear: currentPromoYear,
+      createdAt:    firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    okMsg('stErr', '✓ Account created. Redirecting to face registration…');
+    setTimeout(function(){
+      window.location.href = 'face-register.html?uid=' + encodeURIComponent(uid) +
+        '&name=' + encodeURIComponent(data.name);
+    }, 1200);
+
+  } catch (e) {
+    errMsg('stErr', e.code ? fErr(e.code) : (e.message || 'Sign-up failed.'));
+    btn.disabled = false; btn.classList.remove('loading');
+  }
+}
+
+/* ═══ TEACHER SIGN-UP ═══ */
+async function doSignUpTeacher() {
+  const get = id => document.getElementById(id).value.trim();
+  const data = {
+    name:      get('tcName'),
+    email:     get('tcEmail'),
+    password:  document.getElementById('tcPass').value,
+    phone:     get('tcPhone'),
+    subject:   get('tcSubject'),
+    contact:   get('tcContact'),
+    grade:     get('tcGrade'),
+    medium:    get('tcMedium'),
+    dob:       get('tcDOB'),
+    gender:    get('tcGender'),
+    joinDate:  get('tcJoinDate'),
+    address:   get('tcAddress')
+  };
+
+  const required = ['name','password','phone','subject','contact','grade','medium','dob','gender','joinDate','address'];
+  for (const f of required) {
+    if (!data[f]) return errMsg('tcErr', 'Please fill in all required fields (*).');
+  }
+  if (data.password.length < 6) return errMsg('tcErr', 'Password must be at least 6 characters.');
+
+  const loginEmail = data.email || (slug(data.phone) + '@svd-teacher.internal');
+
+  const btn = document.getElementById('tcBtn');
+  btn.disabled = true; btn.classList.add('loading');
+  errMsg('tcErr', '');
+
+  try {
+    const cred = await auth.createUserWithEmailAndPassword(loginEmail, data.password);
+    await cred.user.updateProfile({ displayName: data.name });
+    const uid = cred.user.uid;
+
+    await authDb.collection('users').doc(uid).set({
+      uid, role: 'teacher',
+      displayName:    data.name,
+      email:          loginEmail,
+      hasContactEmail: !!data.email,
+      phoneNo:        data.phone,
+      contactNo:      data.contact,
+      homeAddress:    data.address,
+      teachingGrade:  data.grade,
+      subject:        data.subject,
+      medium:         data.medium,
+      dob:            data.dob,
+      gender:         data.gender,
+      joiningDate:    data.joinDate,
+      faceDescriptor: [],
+      hasFace:        false,
+      createdAt:      firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    okMsg('tcErr', '✓ Account created. Redirecting to face registration…');
+    setTimeout(function(){
+      window.location.href = 'face-register.html?uid=' + encodeURIComponent(uid) +
+        '&name=' + encodeURIComponent(data.name);
+    }, 1200);
+
+  } catch (e) {
+    errMsg('tcErr', e.code ? fErr(e.code) : (e.message || 'Sign-up failed.'));
+    btn.disabled = false; btn.classList.remove('loading');
+  }
+}
+</script>
+</body>
+</html>
