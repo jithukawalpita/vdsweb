@@ -10,7 +10,7 @@
    ═══════════════════════════════════════════════════════════════════ */
 
 /* ═══ CONFIG — set this to your Apps Script Web App URL ═══ */
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbweXkIy9S1M39mJcrA7Lr-B2L6MMBTYIzrVAIug63GLMk4EkWj8HI813xake9pf8DCy/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzaO1YQO3R2HqU5s4YqqT0YfBYZcdnEjcOhUvLx-XTMpXuXRui3TJnhaeMoItS08oJB/exec';
 const PASSWORD_RESET_PAGE = (window.location.protocol === 'http:' || window.location.protocol === 'https:')
   ? window.location.origin + '/reset-password.html'
   : 'https://signin-f9656.firebaseapp.com/reset-password.html';
