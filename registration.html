@@ -167,6 +167,14 @@
       <label for="stDOB">Date of birth *</label>
       <input id="stDOB" type="date">
 
+      <label for="stGender">Gender *</label>
+      <select id="stGender">
+        <option value="" disabled selected>— Select —</option>
+        <option value="male">Male</option>
+        <option value="female">Female</option>
+        <option value="other">Other</option>
+      </select>
+
       <label for="stGuardName">Parent / Guardian's name *</label>
       <input id="stGuardName" type="text" placeholder="Mother / Father / Guardian">
 
@@ -203,7 +211,7 @@
       <label for="tcSubject">Subject *</label>
       <input id="tcSubject" type="text" placeholder="e.g. Dhamma, Pali, History">
 
-      <label for="tcContact">Alternate contact *</label>
+      <label for="tcContact">Alternate contact <span class="opt">(optional)</span></label>
       <input id="tcContact" type="tel" placeholder="07X XXX XXXX">
 
       <label for="tcGrade">Grade taught *</label>
@@ -302,13 +310,14 @@ async function doSignUpStudent() {
     grade:       get('stGrade'),
     contact:     get('stContact'),
     dob:         get('stDOB'),
+    gender:      get('stGender'),
     guardName:   get('stGuardName'),
     guardPhone:  get('stGuardPhone'),
     guardEmail:  get('stGuardEmail'),
     address:     get('stAddress')
   };
 
-  const required = ['name','password','admission','grade','contact','dob','guardName','guardPhone','address'];
+  const required = ['name','password','admission','grade','contact','dob','gender','guardName','guardPhone','address'];
   for (const f of required) {
     if (!data[f]) return errMsg('stErr', 'Please fill in all required fields (*).');
   }
@@ -341,6 +350,7 @@ async function doSignUpStudent() {
       contactNo:    data.contact,
       grade:        parseInt(data.grade, 10),
       dob:          data.dob,
+      gender:       data.gender,
       guardianName: data.guardName,
       guardianPhone:data.guardPhone,
       guardianEmail:data.guardEmail || '',
@@ -382,7 +392,7 @@ async function doSignUpTeacher() {
     address:   get('tcAddress')
   };
 
-  const required = ['name','password','phone','subject','contact','grade','medium','dob','gender','joinDate','address'];
+  const required = ['name','password','phone','subject','grade','medium','dob','gender','joinDate','address'];
   for (const f of required) {
     if (!data[f]) return errMsg('tcErr', 'Please fill in all required fields (*).');
   }
