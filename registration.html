@@ -121,6 +121,39 @@
     display:flex; align-items:center; justify-content:center; cursor:pointer;
   }
 
+  /* Flash / torch toggle — only shown when the active camera supports it */
+  .cam-flash-btn{
+    position:absolute; top:12px; left:12px; z-index:10001;
+    width:36px; height:36px; border-radius:50%;
+    background:rgba(0,0,0,0.55); color:#ffd54a;
+    border:1px solid rgba(255,255,255,0.35); font-size:16px; line-height:1;
+    display:none; align-items:center; justify-content:center; cursor:pointer;
+  }
+  .cam-flash-btn.on{ background:#ffd54a; color:#1a0606; }
+
+  /* Fullscreen shutter row: switch camera · big capture button · retake,
+     shown centered near the bottom only while the camera view is fullscreen */
+  .cam-fs-shutter-row{
+    position:absolute; left:0; right:0; bottom:28px; z-index:10001;
+    display:none; align-items:center; justify-content:center; gap:28px;
+    padding-bottom:env(safe-area-inset-bottom);
+  }
+  .cam-wrap.fullscreen .cam-fs-shutter-row{ display:flex; }
+  .cam-icon-btn{
+    width:46px; height:46px; border-radius:50%;
+    background:rgba(0,0,0,0.55); color:#fff;
+    border:1px solid rgba(255,255,255,0.35); font-size:18px;
+    align-items:center; justify-content:center; cursor:pointer;
+    display:none;
+  }
+  .cam-shutter-btn{
+    width:72px; height:72px; border-radius:50%;
+    background:#fff; border:4px solid rgba(255,255,255,0.4);
+    box-shadow:0 0 0 2px rgba(0,0,0,0.35) inset;
+    cursor:pointer; padding:0; display:none;
+  }
+  .cam-shutter-btn:active{ transform:scale(0.93); }
+
   .btn-row{ display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px; }
   .btn-row button{
     flex:1; min-width:110px; padding:11px 8px; font-size:11px; letter-spacing:1px;
@@ -275,6 +308,12 @@
         <div class="cam-wrap" id="scanCamWrap">
           <video id="scanVideo" autoplay playsinline></video>
           <button class="cam-fs-btn" id="camFsBtn" onclick="toggleCamFullscreen()" title="Toggle fullscreen" style="display:none">⛶</button>
+          <button class="cam-flash-btn" id="camFlashBtn" onclick="toggleCamFlash()" title="Toggle flash" style="display:none">⚡</button>
+          <div class="cam-fs-shutter-row">
+            <button class="cam-icon-btn" id="camFsSwitchBtn" onclick="switchScanCamera()" title="Switch camera" style="display:none">⟳</button>
+            <button class="cam-shutter-btn" id="camFsCaptureBtn" onclick="captureScanPhoto()" title="Capture photo" style="display:none"></button>
+            <button class="cam-icon-btn" id="camFsRetakeBtn" onclick="retakeScanPhoto()" title="Retake" style="display:none">↺</button>
+          </div>
         </div>
         <div class="btn-row" id="scan-cam-controls">
           <button class="secondary" id="scanCamBtn" onclick="startScanCamera()">Enable Camera</button>
@@ -532,6 +571,8 @@ let scanSource = 'upload';
 let scanStream = null;
 let scanVideoDevices = [];
 let scanDeviceIndex = 0;
+let camFlashSupported = false;
+let camFlashOn = false;
 
 const GRADE_OPTIONS_HTML = `
   <option value="" disabled selected>— Select grade —</option>
@@ -594,6 +635,20 @@ function toggleCamFullscreen() {
   setCamFullscreen(!wrap.classList.contains('fullscreen'));
 }
 
+async function toggleCamFlash() {
+  if (!scanStream || !camFlashSupported) return;
+  const track = scanStream.getVideoTracks()[0];
+  if (!track) return;
+  const next = !camFlashOn;
+  try {
+    await track.applyConstraints({ advanced: [{ torch: next }] });
+    camFlashOn = next;
+    document.getElementById('camFlashBtn').classList.toggle('on', camFlashOn);
+  } catch (e) {
+    errMsg('scanErr', '⚠ Could not toggle flash on this device.');
+  }
+}
+
 function stopScanCamera() {
   if (scanStream) {
     scanStream.getTracks().forEach(t => t.stop());
@@ -606,6 +661,13 @@ function stopScanCamera() {
   document.getElementById('scanRetakeBtn').style.display = 'none';
   document.getElementById('scanSwitchBtn').style.display = 'none';
   document.getElementById('camFsBtn').style.display = 'none';
+  document.getElementById('camFsCaptureBtn').style.display = 'none';
+  document.getElementById('camFsRetakeBtn').style.display = 'none';
+  document.getElementById('camFsSwitchBtn').style.display = 'none';
+  document.getElementById('camFlashBtn').style.display = 'none';
+  document.getElementById('camFlashBtn').classList.remove('on');
+  camFlashOn = false;
+  camFlashSupported = false;
   setCamFullscreen(false);
 }
 
@@ -628,7 +690,9 @@ async function openScanCameraStream(deviceId) {
   try {
     const devices = await navigator.mediaDevices.enumerateDevices();
     scanVideoDevices = devices.filter(d => d.kind === 'videoinput');
-    document.getElementById('scanSwitchBtn').style.display = scanVideoDevices.length > 1 ? 'inline-block' : 'none';
+    const showSwitch = scanVideoDevices.length > 1 ? 'inline-block' : 'none';
+    document.getElementById('scanSwitchBtn').style.display = showSwitch;
+    document.getElementById('camFsSwitchBtn').style.display = scanVideoDevices.length > 1 ? 'flex' : 'none';
     if (deviceId) {
       const idx = scanVideoDevices.findIndex(d => d.deviceId === deviceId);
       if (idx >= 0) scanDeviceIndex = idx;
@@ -636,6 +700,22 @@ async function openScanCameraStream(deviceId) {
   } catch (e) {
     console.warn('Could not enumerate camera devices:', e);
   }
+
+  // Check whether this camera's track supports a torch (flash) — only
+  // some rear cameras on some devices/browsers do. Reset flash state
+  // whenever the stream (and therefore the track) changes.
+  camFlashOn = false;
+  camFlashSupported = false;
+  const flashBtn = document.getElementById('camFlashBtn');
+  flashBtn.classList.remove('on');
+  try {
+    const track = stream.getVideoTracks()[0];
+    const caps = track && track.getCapabilities ? track.getCapabilities() : {};
+    camFlashSupported = !!caps.torch;
+  } catch (e) {
+    camFlashSupported = false;
+  }
+  flashBtn.style.display = camFlashSupported ? 'flex' : 'none';
 }
 
 async function startScanCamera() {
@@ -648,6 +728,8 @@ async function startScanCamera() {
     document.getElementById('scanRetakeBtn').style.display = 'none';
     document.getElementById('scanPreview').style.display = 'none';
     document.getElementById('camFsBtn').style.display = 'flex';
+    document.getElementById('camFsCaptureBtn').style.display = 'block';
+    document.getElementById('camFsRetakeBtn').style.display = 'none';
   } catch (e) {
     errMsg('scanErr', '⚠ Camera unavailable: ' + e.message);
   }
@@ -683,6 +765,10 @@ function captureScanPhoto() {
   document.getElementById('scanRetakeBtn').style.display = 'inline-block';
   document.getElementById('scanSwitchBtn').style.display = 'none';
   document.getElementById('camFsBtn').style.display = 'none';
+  document.getElementById('camFsCaptureBtn').style.display = 'none';
+  document.getElementById('camFsRetakeBtn').style.display = 'none';
+  document.getElementById('camFsSwitchBtn').style.display = 'none';
+  document.getElementById('camFlashBtn').style.display = 'none';
   setCamFullscreen(false);
   stopScanCameraTracksOnly();
 }
