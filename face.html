@@ -237,10 +237,10 @@ async function trySelfSelect() {
    Grade filtering is applied client-side against the Firestore-verified
    results, so it works correctly regardless of whether the Apps Script
    endpoint itself understands a grade parameter. When a grade is picked
-   with no name typed, we query broadly (single-letter passes over common
-   name starts) purely so there's something to filter — if your backend
-   exposes a real "list by grade" action, swap runSearch's fetch to call
-   that instead for a cleaner, non-hacky lookup. ═══ */
+   with no name typed, we sweep every two-letter combination (since the
+   backend rejects queries under 2 characters) purely so there's something
+   to filter — if your backend exposes a real "list by grade" action, swap
+   runSearch's fetch to call that instead for a much faster, cleaner lookup. ═══ */
 const searchInput = document.getElementById('search');
 const gradeFilter = document.getElementById('gradeFilter');
 const resultsEl = document.getElementById('results');
@@ -253,6 +253,10 @@ searchInput.addEventListener('input', function(){
 
 gradeFilter.addEventListener('change', function(){
   clearTimeout(searchTimer);
+  const term = searchInput.value.trim();
+  if (term.length < 2 && gradeFilter.value) {
+    resultsEl.innerHTML = '<div class="result-item" style="cursor:default">Loading grade list…</div>';
+  }
   scheduleSearch();
 });
 
@@ -274,19 +278,25 @@ async function runSearch(term, grade) {
     if (term.length >= 2) {
       matches = await fetchMatches(term);
     } else if (grade) {
-      // No name typed — try to fetch everyone in one shot first, in case
-      // the backend treats an empty/blank name as "match all".
+      // No name typed — the backend requires at least 2 characters, so we
+      // sweep every two-letter combination (aa, ab, ac … zz — 676 total),
+      // which covers every possible name start. Run with limited
+      // concurrency so it doesn't hammer the Apps Script endpoint. Any
+      // individual failed request is skipped silently.
       const seen = new Set();
       const tryAdd = (batch) => { for (const m of batch) if (m.uid && !seen.has(m.uid)) { seen.add(m.uid); matches.push(m); } };
 
-      try { tryAdd(await fetchMatches('')); } catch (e) { /* backend may reject empty name — that's fine */ }
+      const letters = 'abcdefghijklmnopqrstuvwxyz'.split('');
+      const pairs = [];
+      for (const a of letters) for (const b of letters) pairs.push(a + b);
 
-      // If that didn't give us a full picture, sweep every letter so no
-      // student is missed regardless of how their name starts.
-      if (matches.length < 300) {
-        for (const letter of 'abcdefghijklmnopqrstuvwxyz') {
-          tryAdd(await fetchMatches(letter));
-        }
+      const CONCURRENCY = 15;
+      for (let i = 0; i < pairs.length; i += CONCURRENCY) {
+        const chunk = pairs.slice(i, i + CONCURRENCY);
+        const results = await Promise.all(chunk.map(function(p){
+          return fetchMatches(p).catch(function(){ return []; });
+        }));
+        results.forEach(tryAdd);
       }
     }
 
