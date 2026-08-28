@@ -51,6 +51,14 @@
   }
   input::placeholder{ color:#7a6242; }
   input:focus{ border-color:var(--gold); }
+  select{
+    width:100%; padding:12px 14px; background:var(--field); border:1px solid var(--border);
+    border-radius:10px; font-size:14px; color:var(--cream-light); margin-bottom:10px;
+    outline:none; font-family:inherit; appearance:none;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23a89060'><path d='M7 10l5 5 5-5z'/></svg>");
+    background-repeat:no-repeat; background-position:right 12px center; background-size:16px;
+  }
+  select:focus{ border-color:var(--gold); }
 
   #results{ max-height:180px; overflow-y:auto; margin-bottom:14px; border-radius:10px; }
   .result-item{
@@ -104,10 +112,27 @@
     <button id="modeStaffBtn" onclick="setMode('staff')">Staff: find by name</button>
   </div>
 
-  <!-- STAFF MODE: search by name -->
+  <!-- STAFF MODE: search by name and/or grade -->
   <div id="search-block" style="display:none">
     <label for="search">Find student by name</label>
     <input id="search" type="text" placeholder="Start typing a name…">
+    <label for="gradeFilter">Or browse by grade</label>
+    <select id="gradeFilter">
+      <option value="">All grades</option>
+      <option value="1">Grade 1</option>
+      <option value="2">Grade 2</option>
+      <option value="3">Grade 3</option>
+      <option value="4">Grade 4</option>
+      <option value="5">Grade 5</option>
+      <option value="6">Grade 6</option>
+      <option value="7">Grade 7</option>
+      <option value="8">Grade 8</option>
+      <option value="9">Grade 9</option>
+      <option value="10">Grade 10</option>
+      <option value="11">Grade 11</option>
+      <option value="12">Grade 12</option>
+      <option value="teacher">Teachers</option>
+    </select>
     <div id="results"></div>
   </div>
 
@@ -208,32 +233,66 @@ async function trySelfSelect() {
   }
 }
 
-/* ═══ STAFF MODE: search by name via Apps Script lookup_name ═══ */
+/* ═══ STAFF MODE: search by name and/or grade via Apps Script lookup_name ═══
+   Grade filtering is applied client-side against the Firestore-verified
+   results, so it works correctly regardless of whether the Apps Script
+   endpoint itself understands a grade parameter. When a grade is picked
+   with no name typed, we query broadly (single-letter passes over common
+   name starts) purely so there's something to filter — if your backend
+   exposes a real "list by grade" action, swap runSearch's fetch to call
+   that instead for a cleaner, non-hacky lookup. ═══ */
 const searchInput = document.getElementById('search');
+const gradeFilter = document.getElementById('gradeFilter');
 const resultsEl = document.getElementById('results');
 let searchTimer = null;
 
 searchInput.addEventListener('input', function(){
   clearTimeout(searchTimer);
-  const term = searchInput.value.trim();
-  resultsEl.innerHTML = '';
-  if (term.length < 2) return;
-  searchTimer = setTimeout(function(){ runSearch(term); }, 300);
+  scheduleSearch();
 });
 
-async function runSearch(term) {
+gradeFilter.addEventListener('change', function(){
+  clearTimeout(searchTimer);
+  scheduleSearch();
+});
+
+function scheduleSearch() {
+  const term = searchInput.value.trim();
+  const grade = gradeFilter.value;
+  resultsEl.innerHTML = '';
+  if (term.length < 2 && !grade) return;
+  searchTimer = setTimeout(function(){ runSearch(term, grade); }, 300);
+}
+
+async function runSearch(term, grade) {
   errMsg('err', '');
+  resultsEl.innerHTML = '<div class="result-item" style="cursor:default">Searching…</div>';
   try {
-    const res = await fetch(APPS_SCRIPT_URL + '?action=lookup_name&name=' + encodeURIComponent(term));
-    const data = await res.json();
-    if (data.error) throw new Error(data.error);
-    if (!data.matches || data.matches.length === 0) {
-      resultsEl.innerHTML = '<div class="result-item" style="cursor:default">No matching students</div>';
-      return;
+    const browsingByGradeOnly = term.length < 2 && !!grade;
+    let matches = [];
+
+    if (term.length >= 2) {
+      matches = await fetchMatches(term);
+    } else if (grade) {
+      // No name typed — try to fetch everyone in one shot first, in case
+      // the backend treats an empty/blank name as "match all".
+      const seen = new Set();
+      const tryAdd = (batch) => { for (const m of batch) if (m.uid && !seen.has(m.uid)) { seen.add(m.uid); matches.push(m); } };
+
+      try { tryAdd(await fetchMatches('')); } catch (e) { /* backend may reject empty name — that's fine */ }
+
+      // If that didn't give us a full picture, sweep every letter so no
+      // student is missed regardless of how their name starts.
+      if (matches.length < 300) {
+        for (const letter of 'abcdefghijklmnopqrstuvwxyz') {
+          tryAdd(await fetchMatches(letter));
+        }
+      }
     }
+
     // Cross-check against Firestore, same as doSchoolSignIn — Firestore is the source of truth.
-    const valid = [];
-    for (const m of data.matches) {
+    let valid = [];
+    for (const m of matches) {
       if (!m.uid) continue;
       try {
         const snap = await authDb.collection('users').doc(m.uid).get();
@@ -241,16 +300,38 @@ async function runSearch(term) {
         if (role === 'student' || role === 'teacher') valid.push({ uid: m.uid, data: snap.data() });
       } catch (e) { console.warn('Firestore check failed for', m.uid, e); }
     }
-    renderResults(valid.slice(0, 8));
+
+    // Apply the grade filter (compare as strings so "5" matches 5 or "5").
+    if (grade) {
+      valid = valid.filter(function(v){
+        if (grade === 'teacher') return v.data.role === 'teacher';
+        return v.data.role === 'student' && String(v.data.grade) === grade;
+      });
+    }
+
+    // Sort alphabetically when browsing a whole grade, for easy scanning.
+    if (browsingByGradeOnly) {
+      valid.sort(function(a, b){ return (a.data.displayName || '').localeCompare(b.data.displayName || ''); });
+    }
+
+    // Show everyone when browsing a grade; cap to top matches for a live name search.
+    renderResults(browsingByGradeOnly ? valid : valid.slice(0, 8));
   } catch (e) {
     errMsg('err', '⚠ Search failed: ' + e.message);
   }
 }
 
+async function fetchMatches(name) {
+  const res = await fetch(APPS_SCRIPT_URL + '?action=lookup_name&name=' + encodeURIComponent(name));
+  const data = await res.json();
+  if (data.error) throw new Error(data.error);
+  return data.matches || [];
+}
+
 function renderResults(matches) {
   resultsEl.innerHTML = '';
   if (matches.length === 0) {
-    resultsEl.innerHTML = '<div class="result-item" style="cursor:default">No matching students</div>';
+    resultsEl.innerHTML = '<div class="result-item" style="cursor:default">No students found</div>';
     return;
   }
   matches.forEach(function(m){
@@ -258,7 +339,7 @@ function renderResults(matches) {
     row.className = 'result-item';
     const metaBits = m.data.role === 'teacher'
       ? [m.data.subject || 'Teacher']
-      : [m.data.admissionNo || ''];
+      : [m.data.admissionNo || '', m.data.grade ? ('Grade ' + m.data.grade) : ''];
     if (m.data.hasFace) metaBits.push('face saved');
     row.innerHTML = '<span style="color:var(--cream-light)">' + m.data.displayName + '</span>' +
       '<span>' + metaBits.filter(Boolean).join(' · ') + '</span>';
@@ -288,6 +369,7 @@ function clearSelection() {
   document.getElementById('cam-controls').style.display = 'none';
   document.getElementById('cam-wrap').style.display = 'none';
   searchInput.value = '';
+  gradeFilter.value = '';
   resultsEl.innerHTML = '';
   errMsg('err', '');
 }
