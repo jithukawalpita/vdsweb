@@ -7,9 +7,8 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.0.4/dist/tesseract.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/mammoth@1.6.0/mammoth.browser.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
 <style>
   :root{
     --gold:#d4af37; --gold-dark:#b8941f;
@@ -144,6 +143,48 @@
     max-width:460px; text-align:center; font-size:12px; color:var(--muted);
     line-height:1.6; margin-top:22px;
   }
+
+  /* ─── Batch (multi-page PDF) registration ─── */
+  .batch-bar{
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    background:var(--panel-2); border:1px solid var(--border); border-radius:10px;
+    padding:12px 14px; margin-bottom:10px; flex-wrap:wrap;
+  }
+  .batch-bar-info{ font-size:12px; color:var(--muted); line-height:1.4; }
+  .batch-bar-info strong{ color:var(--cream-light); }
+  .batch-actions-top{ display:flex; gap:8px; }
+  .batch-actions-top button{
+    padding:9px 14px; font-size:11px; letter-spacing:.5px; text-transform:uppercase;
+    border-radius:8px; font-weight:700; cursor:pointer; border:none;
+  }
+  .batch-register-all{ background:linear-gradient(135deg,var(--gold),var(--gold-dark)); color:#1a0606; }
+  .batch-register-all:disabled{ opacity:.55; cursor:not-allowed; }
+  .batch-progress{ font-size:12px; color:var(--gold); margin-bottom:14px; min-height:14px; text-align:center; }
+
+  .batch-entry{
+    background:var(--panel-2); border:1px solid var(--border); border-radius:12px;
+    margin-bottom:16px; overflow:hidden;
+  }
+  .batch-entry-header{
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    padding:12px 16px; background:rgba(212,175,55,0.06); cursor:pointer;
+  }
+  .batch-entry-title{ font-weight:700; font-size:13px; color:var(--cream-light); }
+  .batch-entry-sub{ font-size:11px; color:var(--muted); margin-top:2px; }
+  .status-badge{
+    font-size:10px; font-weight:700; letter-spacing:1px; text-transform:uppercase;
+    padding:4px 9px; border-radius:20px; white-space:nowrap; flex-shrink:0;
+  }
+  .status-badge.pending{ background:rgba(255,255,255,0.08); color:var(--muted); }
+  .status-badge.registering{ background:rgba(212,175,55,0.2); color:var(--gold); }
+  .status-badge.done{ background:rgba(76,175,80,0.18); color:var(--success); }
+  .status-badge.error{ background:rgba(229,115,115,0.18); color:var(--error); }
+  .batch-entry-body{ padding:16px 18px 18px; }
+  .batch-entry-body.collapsed{ display:none; }
+  .batch-face-link{
+    display:inline-block; margin-top:8px; font-size:12px; color:var(--gold); font-weight:700; text-decoration:none;
+  }
+  .batch-face-link:hover{ text-decoration:underline; }
 </style>
 </head>
 <body>
@@ -188,10 +229,13 @@
 
       <div class="scan-note">
         Upload the filled "DATA FORM FOR SDB" as a <strong>photo, PDF, or Word document</strong> — or
-        take a photo directly. For scanned/photographed pages, use good lighting and keep letters
-        inside the boxes readable; for typed Word/PDF files the text is read directly and will be far
-        more accurate. This runs on-device, so please <strong>check every field carefully</strong>
-        after it fills in.
+        take a photo directly. An AI model reads the form directly (handwriting, boxes, Sinhala text
+        and all), so lighting and framing matter far less than with old-style OCR — but please
+        <strong>check every field carefully</strong> after it fills in, since it can still misread things.
+        <br><br>
+        <strong>Multi-page PDF?</strong> If you upload a PDF with more than one page, each page is
+        treated as a separate person's filled form — you'll get one editable form per page, and can
+        register each person one at a time or all together.
       </div>
 
       <div class="mode-toggle" style="margin-bottom:14px">
@@ -224,16 +268,35 @@
 
       <button class="submit-btn" id="scanBtn" onclick="runOcrAndFill()" disabled>Extract Data</button>
 
-      <details class="scan-raw" id="scanRawWrap" style="display:none">
-        <summary>View raw scanned text (for manual cross-checking)</summary>
-        <pre id="scanRawText"></pre>
-      </details>
-
       <details class="scan-raw" id="scanDebugWrap" style="display:none">
-        <summary>⚙ View extracted field values (debug — share this if something's wrong)</summary>
+        <summary>⚙ View what the AI extracted (debug — share this if something's wrong)</summary>
         <pre id="scanDebugText"></pre>
       </details>
     </div>
+
+    <!-- ═══ STEP: BATCH RESULTS (multi-page PDF scan) ═══ -->
+    <div id="step-batch" style="display:none">
+      <a class="back-link" onclick="backFromBatch()">← Back to scan</a>
+      <div class="step-title">Multiple Forms Found</div>
+      <div class="scan-note">
+        This PDF had <strong id="batchPageCount">0</strong> page(s) — each was read as a separate
+        <strong id="batchRoleLabel">student</strong> form by the AI. Please check every entry below
+        carefully, then register each person one at a time, or use "Register All" to create every
+        account in one go. You'll stay on this page as each account is created.
+      </div>
+
+      <div class="batch-bar">
+        <div class="batch-bar-info"><strong id="batchDoneCount">0</strong> of <strong id="batchTotalCount">0</strong> registered</div>
+        <div class="batch-actions-top">
+          <button class="batch-register-all" id="batchRegisterAllBtn" onclick="registerAllEntries()">Register All</button>
+        </div>
+      </div>
+      <div class="batch-progress" id="batchProgress"></div>
+
+      <div id="batch-list"></div>
+    </div>
+
+    <!-- ═══ STEP 2a: STUDENT FORM ═══ -->
     <div id="step-student" style="display:none">
       <a class="back-link" onclick="backToRolePick()">← Choose different role</a>
       <div class="step-title">Student Registration</div>
@@ -247,8 +310,8 @@
       <label for="stAdmission">Admission number *</label>
       <input id="stAdmission" type="text" placeholder="e.g. SVDS-2025-042" oninput="updateStudentPassword()">
 
-      <label for="stPass">Password <span class="opt">(auto-generated — first name + admission no.)</span></label>
-      <input id="stPass" type="text" readonly placeholder="Fill in name & admission number above">
+      <label for="stPass">Password <span class="opt">(auto-filled — edit if the name split above looks wrong)</span></label>
+      <input id="stPass" type="text" placeholder="Fill in name & admission number above">
       <div class="scan-note" style="margin-top:-10px">This is your login password — please remember it.</div>
 
       <label for="stGrade">Current grade *</label>
@@ -312,8 +375,8 @@
       <label for="tcPhone">Phone number *</label>
       <input id="tcPhone" type="tel" placeholder="07X XXX XXXX" oninput="updateTeacherPassword()">
 
-      <label for="tcPass">Password <span class="opt">(auto-generated — first name + phone no.)</span></label>
-      <input id="tcPass" type="text" readonly placeholder="Fill in name & phone number above">
+      <label for="tcPass">Password <span class="opt">(auto-filled — edit if the name split above looks wrong)</span></label>
+      <input id="tcPass" type="text" placeholder="Fill in name & phone number above">
       <div class="scan-note" style="margin-top:-10px">This is your login password — please remember it.</div>
 
       <label for="tcSubject">Subject *</label>
@@ -357,18 +420,17 @@
   Your face photo and details are added to the school's attendance spreadsheet automatically.
 </div>
 <div style="text-align:center;font-size:9px;color:#5a4020;margin-top:10px;letter-spacing:1px">
-  build: scan-v12-ocr-method-tracking
+  build: scan-v14-batch-pdf
 </div>
 
 <script>
 /* ═══ Same config values as auth.js — keep these in sync with the main site ═══ */
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzaO1YQO3R2HqU5s4YqqT0YfBYZcdnEjcOhUvLx-XTMpXuXRui3TJnhaeMoItS08oJB/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbywlBNLDT4fQTa3ZPcUnegE5C2ydJJ19yHoeJ4bN2fMmRZ0Ys7XfgR0dS8JDuT7oKup/exec';
 
-/* ═══ Standalone OCR service — a SEPARATE Apps Script project/deployment
-   from APPS_SCRIPT_URL above. See ocr-service-standalone.gs for setup.
-   Paste your deployed Web App URL here once it's ready. Leave it as the
-   placeholder and the scan feature just falls back to Tesseract. ═══ */
-const OCR_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwHgr24gDraIHLCQ2_gs5JderqonFo_GRJurMRr_oU_80mlvO6EKuHvRioaYGSEEzd8/exec';
+/* ═══ AI extraction runs through the SAME Apps Script backend as
+   APPS_SCRIPT_URL above (action: 'ai_extract') — it proxies to the Gemini
+   API server-side so your Gemini API key never reaches the browser.
+   See ai-extract-addon.gs for the code to add to that project. ═══ */
 
 if (!firebase.apps.find(a => a.name === 'authApp')) {
   firebase.initializeApp({
@@ -383,6 +445,11 @@ if (!firebase.apps.find(a => a.name === 'authApp')) {
 const authApp = firebase.app('authApp');
 const auth   = authApp.auth();
 const authDb = authApp.firestore();
+
+/* pdf.js needs a worker script — point it at the matching build on jsDelivr. */
+if (window.pdfjsLib) {
+  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
+}
 
 function fErr(c) {
   return ({
@@ -401,6 +468,7 @@ function pickRole(role) {
   stopScanCamera();
   document.getElementById('step-role').style.display = 'none';
   document.getElementById('step-scan').style.display = 'none';
+  document.getElementById('step-batch').style.display = 'none';
   document.getElementById('step-student').style.display = role === 'student' ? 'block' : 'none';
   document.getElementById('step-teacher').style.display = role === 'teacher' ? 'block' : 'none';
 }
@@ -409,6 +477,7 @@ function backToRolePick() {
   document.getElementById('step-student').style.display = 'none';
   document.getElementById('step-teacher').style.display = 'none';
   document.getElementById('step-scan').style.display = 'none';
+  document.getElementById('step-batch').style.display = 'none';
   document.getElementById('step-role').style.display = 'block';
 }
 function goToScan() {
@@ -417,10 +486,22 @@ function goToScan() {
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   SCAN FILLED PAPER FORM — on-device OCR (Tesseract.js) + best-effort
-   field extraction. Handwriting-in-boxes is genuinely hard to OCR
-   reliably, so every extracted value lands in an editable field and
-   the person is told to double-check before submitting.
+   SCAN FILLED PAPER FORM — AI-based extraction.
+   Instead of doing pixel-level OCR + heuristic field-matching in the
+   browser, the file (image or PDF) is sent to a small server-side proxy
+   (same APPS_SCRIPT_URL, action 'ai_extract') which asks Gemini to read the form directly
+   and return the fields as JSON. For Word docs, the text is pulled out
+   client-side with mammoth.js first (Gemini's inline_data doesn't take .docx directly)
+   and sent as plain text instead of a file.
+
+   A PDF with MORE THAN ONE PAGE is treated as a stack of separately-filled
+   forms: each page is rasterized to an image with pdf.js and sent through
+   the same AI extraction call individually, and the results are shown as
+   a batch of editable forms (one per page) that can be registered one at
+   a time or all at once.
+
+   Every extracted value still lands in an editable field — always
+   double-check before submitting.
    ═══════════════════════════════════════════════════════════════════ */
 let scanRole = 'student';
 let scanInput = null; // { kind: 'image'|'pdf'|'docx', source: File|Blob }
@@ -428,6 +509,20 @@ let scanSource = 'upload';
 let scanStream = null;
 let scanVideoDevices = [];
 let scanDeviceIndex = 0;
+
+const GRADE_OPTIONS_HTML = `
+  <option value="" disabled selected>— Select grade —</option>
+  ${[1,2,3,4,5,6,7,8,9,10,11,12].map(g => `<option value="${g}">Grade ${g}</option>`).join('')}
+`;
+const GENDER_OPTIONS_HTML = `
+  <option value="" disabled selected>— Select —</option>
+  <option value="male">Male</option>
+  <option value="female">Female</option>
+  <option value="other">Other</option>
+`;
+
+/* One entry per page of a multi-page PDF batch: { idx, role, status, uid?, errorMsg? } */
+let batchEntries = [];
 
 function setScanRole(role) {
   scanRole = role;
@@ -598,7 +693,7 @@ document.getElementById('scanFile').addEventListener('change', function(e) {
     preview.style.display = 'block';
   } else if (kind === 'pdf') {
     scanInput = { kind: 'pdf', source: file };
-    fileInfo.textContent = '📄 ' + file.name + ' — PDF selected. Text will be read directly if the PDF is typed, or scanned if it\'s a photographed page.';
+    fileInfo.textContent = '📄 ' + file.name + ' — PDF selected. The AI reads it directly, typed or scanned. Multi-page PDFs are read one page at a time.';
     fileInfo.style.display = 'block';
   } else if (kind === 'docx') {
     if (file.name.toLowerCase().endsWith('.doc') && !file.name.toLowerCase().endsWith('.docx')) {
@@ -608,527 +703,125 @@ document.getElementById('scanFile').addEventListener('change', function(e) {
       return;
     }
     scanInput = { kind: 'docx', source: file };
-    fileInfo.textContent = '📝 ' + file.name + ' — Word document selected. Text will be read directly (most accurate option).';
+    fileInfo.textContent = '📝 ' + file.name + ' — Word document selected.';
     fileInfo.style.display = 'block';
   }
   btn.disabled = false;
 });
 
-// Page-wide box pitch, computed once per scan by computeGlobalPitch()
-// below and used by every call to reconstructLineText(). A per-ROW
-// estimate is unreliable for short or punctuation-heavy rows (e.g. a
-// home address has few characters and lots of narrow punctuation, which
-// can skew a local median enough to miss real word gaps) — but the box
-// grid's pitch is physically identical everywhere on this form, so
-// measuring it once across ALL rows and reusing that everywhere is far
-// more stable.
-let GLOBAL_BOX_PITCH = null;
-
-// Looks at every row's character spacing across the whole page and finds
-// the single most common pitch value (the "mode", not the median) — since
-// the box grid is mechanically uniform, the ordinary letter-to-letter
-// pitch will vastly outnumber the wider "space" gaps, and rounding
-// smooths out tiny floating-point/OCR jitter between measurements.
-function computeGlobalPitch(lines) {
-  const pitches = [];
-  lines.forEach(function(line) {
-    if (!line.words || line.words.length < 2) return;
-    const words = line.words.slice().sort((a, b) => a.bbox.x0 - b.bbox.x0);
-    for (let i = 1; i < words.length; i++) {
-      pitches.push(words[i].bbox.x0 - words[i - 1].bbox.x0);
-    }
+/* ═══ Helpers to prep a file for the AI extraction request ═══ */
+function fileToBase64(fileOrBlob) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result.split(',')[1]); // strip data: prefix
+    reader.onerror = () => reject(new Error('Could not read file'));
+    reader.readAsDataURL(fileOrBlob);
   });
-  if (!pitches.length) { GLOBAL_BOX_PITCH = null; return; }
-  const freq = {};
-  let mode = null, maxCount = 0;
-  pitches.forEach(function(p) {
-    const key = Math.round(p);
-    freq[key] = (freq[key] || 0) + 1;
-    if (freq[key] > maxCount) { maxCount = freq[key]; mode = key; }
-  });
-  GLOBAL_BOX_PITCH = mode;
 }
 
-// Reconstructs a line of text using per-character x-positions, so letters
-// that were read one-per-box (common with grid forms) get regrouped into
-// actual words based on spacing, instead of losing it or over-splitting it.
-// Uses the page-wide GLOBAL_BOX_PITCH when available (see above); falls
-// back to this row's own median pitch only if no page-wide value could be
-// computed (e.g. a very short/sparse document).
-function reconstructLineText(line) {
-  if (!line.words || !line.words.length) return (line.text || '').trim();
-  const words = line.words.slice().sort((a, b) => a.bbox.x0 - b.bbox.x0);
-  if (words.length === 1) return (words[0].text || '').trim();
+async function extractDocxText(file) {
+  const buf = await file.arrayBuffer();
+  const result = await mammoth.extractRawText({ arrayBuffer: buf });
+  return (result.value || '').trim();
+}
 
-  let basePitch = GLOBAL_BOX_PITCH;
-  if (!basePitch) {
-    const pitches = [];
-    for (let i = 1; i < words.length; i++) {
-      pitches.push(words[i].bbox.x0 - words[i - 1].bbox.x0);
-    }
-    const sortedPitches = pitches.slice().sort((a, b) => a - b);
-    basePitch = sortedPitches[Math.floor(sortedPitches.length / 2)] || 1;
+/* ═══ Calls the server-side AI extraction proxy (see ai-extract-addon.gs).
+   Gemini occasionally returns a transient 503 "model overloaded" error under
+   high demand — this retries that specific case a few times with backoff
+   before giving up, since it usually succeeds a few seconds later.
+   Returns the parsed `fields` object from the model, or throws. ═══ */
+function isRetryableAiError(message) {
+  return /\b503\b|UNAVAILABLE|overloaded|high demand/i.test(message || '');
+}
+
+function friendlyAiError(message) {
+  if (isRetryableAiError(message)) {
+    return 'The AI model is currently overloaded (Gemini is seeing high demand). This is usually temporary — please wait a minute and try again.';
   }
-
-  let out = words[0].text;
-  for (let i = 1; i < words.length; i++) {
-    const pitch = words[i].bbox.x0 - words[i - 1].bbox.x0;
-    out += (basePitch > 0 && pitch > basePitch * 1.6) ? ' ' : '';
-    out += words[i].text;
-  }
-  return out.trim();
+  return message;
 }
 
-function normLabel(s) {
-  return (s || '').toUpperCase().replace(/[^A-Z]/g, '');
-}
+async function callAiExtract(payload, opts) {
+  opts = opts || {};
+  const maxRetries = opts.maxRetries != null ? opts.maxRetries : 3;
+  const onRetry = opts.onRetry || function(){};
+  let lastErr;
 
-// All label keyword-sets used anywhere in extraction — used to detect
-// "this line is the START of the next field" so multi-row values (e.g.
-// School & Grade or Home Address wrapping onto a second box row) don't
-// get swallowed past their actual boundary.
-const ALL_LABEL_KEYWORD_SETS = [
-  ['FULLNAME'], ['NAMEWITHINITIALS'], ['HOMEADDRESS'], ['PHONENUMBER'],
-  ['EMAIL'], ['ADDMITIONNO'], ['ADMISSIONNO'], ['SCHOOLGRADE'], ['GENDER'],
-  ['BIRTHDAY'], ['MOTHERFATHERORGUARDIANSNAME'], ['CONTACTNUMBER'],
-  ['PARENT', 'GUARDIANINFORMATION'], ['DECLARATION'], ['PERSONALINFORMATIONS'],
-  ['POSITION']
-];
-function isLabelLine(text) {
-  const norm = normLabel(text);
-  return ALL_LABEL_KEYWORD_SETS.some(set => set.every(k => norm.includes(k)));
-}
-
-// Some fields (like Birthday, whose answer only needs 8 short boxes) put
-// the answer boxes on the SAME physical row as the label, right after the
-// label's "( Sinhala translation )" — unlike most fields, where the label
-// sits alone on its own row and the boxes are on the row(s) below.
-// This splits a line's word list at the LAST ')' character (which always
-// closes the translation) and reconstructs the label part and the
-// trailing part SEPARATELY, so the trailing value's own internal spacing
-// isn't skewed by mixing it into the same pitch calibration as the label
-// text.
-function splitInlineValue(line) {
-  if (!line.words || !line.words.length) return null;
-  let lastParenIdx = -1;
-  for (let i = 0; i < line.words.length; i++) {
-    if (line.words[i].text.indexOf(')') !== -1) lastParenIdx = i;
-  }
-  if (lastParenIdx === -1 || lastParenIdx >= line.words.length - 1) return null;
-  const valueWords = line.words.slice(lastParenIdx + 1);
-  const value = reconstructLineText({ words: valueWords });
-  return value && /[A-Za-z0-9]/.test(value) ? value : null;
-}
-
-// Finds the line whose text contains all the given label keywords. First
-// checks whether the value was written on the SAME row as the label
-// (see splitInlineValue above); if not, falls back to reading forward and
-// merging the following row(s) into the value, stopping at either the
-// next known label/section line or a line cap — most fields on this form
-// put the label alone on its own row, with the handwritten boxes directly
-// below it (occasionally spanning a second row, e.g. a long school name
-// that wraps, with the grade number tacked on after it).
-function extractField(lines, keywords, maxLines) {
-  maxLines = maxLines || 2;
-  for (let i = 0; i < lines.length - 1; i++) {
-    const norm = normLabel(lines[i].text);
-    if (keywords.every(k => norm.includes(k))) {
-      const inline = splitInlineValue(lines[i]);
-      if (inline) return inline;
-
-      const collected = [];
-      for (let j = i + 1; j < lines.length && collected.length < maxLines; j++) {
-        if (isLabelLine(lines[j].text)) break;
-        const v = reconstructLineText(lines[j]);
-        if (v) collected.push(v);
-      }
-      const value = collected.join(' ').trim();
-      // Accept the value if it has any real content — letters OR digits.
-      // (A previous version only accepted letters, so purely-numeric
-      // fields like admission number, phone, and date of birth were
-      // silently discarded even when correctly found.)
-      if (value && /[A-Za-z0-9]/.test(value)) return value;
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      const res = await fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        body: JSON.stringify(payload)
+      });
+      const json = await res.json();
+      if (json.error) throw new Error(json.error);
+      if (!json.fields) throw new Error('AI extraction returned no fields.');
+      return json;
+    } catch (e) {
+      lastErr = e;
+      if (!isRetryableAiError(e.message) || attempt === maxRetries) throw e;
+      const waitMs = 2000 * Math.pow(2, attempt); // 2s, 4s, 8s…
+      onRetry(attempt + 1, maxRetries, waitMs);
+      await new Promise(r => setTimeout(r, waitMs));
     }
   }
-  return '';
-}
-
-function guessGender(fullText) {
-  const upper = fullText.toUpperCase();
-  const maleIdx = upper.indexOf('MALE');
-  const femaleIdx = upper.indexOf('FEMALE');
-  // crude heuristic: an 'X' mark near the MALE/FEMALE word in the raw text
-  const nearX = (idx) => idx >= 0 && /X/.test(upper.slice(Math.max(0, idx - 6), idx + 10));
-  if (nearX(femaleIdx)) return 'female';
-  if (nearX(maleIdx)) return 'male';
-  return '';
+  throw lastErr;
 }
 
 function digitsOnly(s) { return (s || '').replace(/\D/g, ''); }
 
-// Best-effort DOB parser — the paper form is just a row of boxes with no
-// visible format, so this assumes DDMMYYYY (common locally) when exactly
-// 8 digits were recognized. Always double-check this field.
-function guessDobIso(raw) {
-  const d = digitsOnly(raw);
-  if (d.length !== 8) return '';
-  const dd = d.slice(0, 2), mm = d.slice(2, 4), yyyy = d.slice(4, 8);
-  if (+mm < 1 || +mm > 12 || +dd < 1 || +dd > 31) return '';
-  return yyyy + '-' + mm + '-' + dd;
-}
-
-function guessGradeNumber(raw) {
-  // "SCHOOL & GRADE" is one combined field where the grade number comes
-  // AFTER the school's name — so take the last digit run, not the first
-  // (the first digits found could belong to the school name/address).
-  const matches = (raw || '').match(/\d{1,2}/g);
-  if (!matches || !matches.length) return '';
-  const n = parseInt(matches[matches.length - 1], 10);
-  return (n >= 1 && n <= 12) ? String(n) : '';
-}
-
-// The form's raw ALL-CAPS box text reads awkwardly once copied into a
-// normal form field, so names/addresses are shown in Title Case instead.
-// Commas count as a word boundary too (not just spaces) since this form's
-// addresses often have no space after a comma, e.g. "ROAD,MAHA UDUWA".
-function toTitleCase(s) {
-  return (s || '').toLowerCase().replace(/(^|[\s'\-,])\p{L}/gu, c => c.toUpperCase());
-}
-
-/* ═══ Guardian name field — three rows (Mother / Father / Or Guardian)
-   share one box, and the printed row label sits on the SAME row as the
-   handwritten name, sometimes glued on with no space at all. This strips
-   the known label word by counting letters rather than relying on
-   spacing, then formats whichever rows were actually filled in as
-   "Mother - Name , Father - Name". ═══ */
-const GUARDIAN_ROW_LABELS = [
-  { role: 'Mother',   token: 'MOTHER' },
-  { role: 'Father',   token: 'FATHER' },
-  { role: 'Guardian', token: 'ORGUARDIAN' },
-  { role: 'Guardian', token: 'GUARDIAN' }
-];
-
-function stripGuardianRowLabel(rawLine) {
-  const norm = normLabel(rawLine);
-  for (const row of GUARDIAN_ROW_LABELS) {
-    if (norm.startsWith(row.token)) {
-      // Walk the ORIGINAL string (real spacing intact) far enough to skip
-      // the same number of letters as the matched label token, regardless
-      // of whether a space separated the label from the name.
-      let letterCount = 0, cut = rawLine.length;
-      for (let i = 0; i < rawLine.length; i++) {
-        if (/[A-Za-z]/.test(rawLine[i])) letterCount++;
-        if (letterCount === row.token.length) { cut = i + 1; break; }
-      }
-      const rest = rawLine.slice(cut).replace(/^[\s,.-]+/, '').trim();
-      return { role: row.role, rest };
+/* Runs one AI extraction call for a single page/photo/text blob and
+   surfaces the result in the debug panel. Shared by the single-form flow
+   and the per-page batch flow below. */
+async function extractOnePage(payloadExtra) {
+  const payload = Object.assign({ action: 'ai_extract', role: scanRole }, payloadExtra);
+  const result = await callAiExtract(payload, {
+    onRetry: (attempt, max, waitMs) => {
+      const el = document.getElementById('scanProgress');
+      if (el) el.textContent = `AI is busy (high demand) — retrying ${attempt}/${max} in ${Math.round(waitMs / 1000)}s…`;
     }
-  }
-  return null;
-}
-
-function extractGuardianName(lines) {
-  const found = {}; // role -> name, first match per role wins
-  for (let i = 0; i < lines.length - 1; i++) {
-    const norm = normLabel(lines[i].text);
-    if (!['MOTHERFATHERORGUARDIANSNAME'].every(k => norm.includes(k))) continue;
-    for (let j = i + 1; j < lines.length && j <= i + 4; j++) {
-      if (isLabelLine(lines[j].text)) break;
-      const raw = reconstructLineText(lines[j]);
-      if (!raw) continue;
-      const stripped = stripGuardianRowLabel(raw);
-      if (stripped && stripped.rest && !found[stripped.role]) {
-        found[stripped.role] = stripped.rest;
-      }
-    }
-    break;
-  }
-  const order = ['Mother', 'Father', 'Guardian'];
-  return order
-    .filter(role => found[role])
-    .map(role => role + ' - ' + toTitleCase(found[role]))
-    .join(' , ');
-}
-
-if (window.pdfjsLib) {
-  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
-}
-
-// Groups PDF text items into lines by y-position, then orders by x.
-// IMPORTANT: this box-grid form's underlying PDF text layer has NO space
-// characters between words at all — the visual gap is just empty table
-// cells with no text object in them. So position data (bbox per item) is
-// kept and fed through the same width-based gap reconstruction used for
-// OCR'd images, instead of naively joining every item with one space.
-function pdfTextItemsToLines(items) {
-  const rows = [];
-  const yTolerance = 4;
-  items.forEach(function(it) {
-    const y = it.transform[5];
-    let row = rows.find(r => Math.abs(r.y - y) <= yTolerance);
-    if (!row) { row = { y, items: [] }; rows.push(row); }
-    row.items.push(it);
   });
-  rows.sort((a, b) => b.y - a.y); // top of page first
-  return rows.map(function(row) {
-    row.items.sort((a, b) => a.transform[4] - b.transform[4]);
-    const words = row.items
-      .filter(it => it.str && it.str.trim().length > 0)
-      .map(function(it) {
-        const x0 = it.transform[4];
-        // pdf.js gives item.width in the same user-space units as transform;
-        // fall back to a rough estimate from string length if it's missing.
-        const w = (typeof it.width === 'number' && it.width > 0) ? it.width : (it.str.length * 6);
-        return { text: it.str, bbox: { x0: x0, x1: x0 + w, y0: 0, y1: 1 } };
-      });
-    return { text: words.map(w => w.text).join(''), words: words };
-  }).filter(l => l.words.length > 0);
+  const f = result.fields || {};
+  document.getElementById('scanDebugText').textContent = JSON.stringify(f, null, 2);
+  document.getElementById('scanDebugWrap').style.display = 'block';
+  return f;
 }
 
-// Box-grid forms confuse Tesseract badly: the thin gray border lines get
-// misread as stray characters (brackets, T's, l's) mixed in with the real
-// ink, producing garbage output. This does two passes to deal with that:
-//
-// 1. Binarize — convert every pixel to pure black or white based on a
-//    darkness threshold, so genuinely dark ink/print survives while
-//    lighter gray anti-aliasing gets wiped out.
-// 2. Remove long straight lines — a box border is a long, continuous,
-//    perfectly straight run of black pixels; a character stroke is short
-//    and irregular. Scanning every row and column for runs of black
-//    pixels longer than a "this can't possibly be one letter" threshold
-//    and erasing just those runs targets the grid specifically, without
-//    touching the actual handwriting/print.
-//
-// Accepts a File/Blob (from upload or camera) OR an existing canvas
-// (from a rasterized PDF page) and always returns a canvas.
-// ═══════════════════════════════════════════════════════════════════════
-// GOOGLE CLOUD VISION OCR (preferred) — calls the Apps Script backend's
-// new 'ocr_extract' action (see apps-script-vision-ocr-addon.gs). This is
-// dramatically more reliable than Tesseract for this box-grid form,
-// because Cloud Vision explicitly reports where each space/line-break is
-// instead of us having to guess it from pixel geometry — and it doesn't
-// confuse thin divider lines with letters the way Tesseract does.
-//
-// Converts Cloud Vision's block→paragraph→word→symbol structure into the
-// SAME {text, words:[{text, bbox:{x0,x1,y0,y1}}]} line format already
-// used everywhere else in this file, so extractField/splitInlineValue/
-// computeGlobalPitch/reconstructLineText all keep working unchanged.
-// ═══════════════════════════════════════════════════════════════════════
-async function fileToBase64(file) {
-  const buf = await file.arrayBuffer();
-  let binary = '';
-  const bytes = new Uint8Array(buf);
-  const chunk = 0x8000;
-  for (let i = 0; i < bytes.length; i += chunk) {
-    binary += String.fromCharCode.apply(null, bytes.subarray(i, i + chunk));
-  }
-  return btoa(binary);
-}
+/* Fills the single (non-batch) student/teacher form from one page's
+   extracted fields — this is the original single-form scan behaviour. */
+function fillSingleForm(f) {
+  document.getElementById('scanProgress').textContent = '✓ Done — filling in the form. Please review every field.';
+  pickRole(scanRole);
 
-function visionResponseToLines(visionResponse) {
-  const lines = [];
-  let currentWords = [];
-
-  function flushLine() {
-    if (currentWords.length > 0) {
-      lines.push({ text: currentWords.map(w => w.text).join(' '), words: currentWords });
-    }
-    currentWords = [];
-  }
-
-  const pages = (visionResponse.fullTextAnnotation && visionResponse.fullTextAnnotation.pages) || [];
-  pages.forEach(function(page) {
-    (page.blocks || []).forEach(function(block) {
-      (block.paragraphs || []).forEach(function(para) {
-        (para.words || []).forEach(function(word) {
-          const symbols = word.symbols || [];
-          const wordText = symbols.map(s => s.text).join('');
-          const verts = (word.boundingBox && (word.boundingBox.vertices || word.boundingBox.normalizedVertices)) || [];
-          const xs = verts.map(v => v.x || 0);
-          const ys = verts.map(v => v.y || 0);
-          const x0 = xs.length ? Math.min.apply(null, xs) : 0;
-          const x1 = xs.length ? Math.max.apply(null, xs) : 1;
-          const y0 = ys.length ? Math.min.apply(null, ys) : 0;
-          const y1 = ys.length ? Math.max.apply(null, ys) : 1;
-          if (wordText) currentWords.push({ text: wordText, bbox: { x0, x1, y0, y1 } });
-
-          const lastSym = symbols[symbols.length - 1];
-          const brk = lastSym && lastSym.property && lastSym.property.detectedBreak && lastSym.property.detectedBreak.type;
-          if (brk === 'LINE_BREAK' || brk === 'EOL_SURE_SPACE') flushLine();
-        });
-        flushLine(); // always break at paragraph end too, to be safe
-      });
-    });
-  });
-  return { lines: lines.filter(l => l.text.trim().length > 0), fullText: lines.map(l => l.text).join('\n') };
-}
-
-// Returns { lines, fullText } on success, or null if Cloud Vision isn't
-// set up yet / failed — callers should fall back to Tesseract in that case.
-async function tryCloudVisionOcr(imageSource, progress) {
-  if (!OCR_SCRIPT_URL || OCR_SCRIPT_URL.indexOf('PASTE_YOUR') === 0) {
-    return null; // not configured yet — silently fall back to Tesseract
-  }
-  try {
-    progress.textContent = 'Uploading to Cloud Vision…';
-    let blob = imageSource;
-    if (imageSource instanceof HTMLCanvasElement) {
-      blob = await new Promise(resolve => imageSource.toBlob(resolve, 'image/jpeg', 0.9));
-    }
-    const base64 = await fileToBase64(blob);
-
-    const res = await fetch(OCR_SCRIPT_URL, {
-      method: 'POST',
-      body: JSON.stringify({ action: 'ocr_extract', imageBase64: base64 })
-    });
-    const json = await res.json();
-    if (json.error) {
-      console.warn('Cloud Vision OCR unavailable, falling back to Tesseract:', json.error);
-      return null;
-    }
-    if (!json.vision || !json.vision.fullTextAnnotation) {
-      console.warn('Cloud Vision returned no text, falling back to Tesseract.');
-      return null;
-    }
-    progress.textContent = 'Reading form with Cloud Vision…';
-    return visionResponseToLines(json.vision);
-  } catch (e) {
-    console.warn('Cloud Vision OCR request failed, falling back to Tesseract:', e);
-    return null;
-  }
-}
-
-
-// Box-grid forms confuse Tesseract badly: the thin gray border lines get
-// misread as stray characters (brackets, T's, l's) mixed in with the real
-// ink, producing garbage output. This does two passes to deal with that:
-//
-// 1. Binarize — convert every pixel to pure black or white based on a
-//    darkness threshold, so genuinely dark ink/print survives while
-//    lighter gray anti-aliasing gets wiped out.
-// 2. Remove long straight lines — a box border is a long, continuous,
-//    perfectly straight run of black pixels; a character stroke is short
-//    and irregular. Scanning every row and column for runs of black
-//    pixels longer than a "this can't possibly be one letter" threshold
-//    and erasing just those runs targets the grid specifically, without
-//    touching the actual handwriting/print.
-//
-// This is used as a FALLBACK when Cloud Vision OCR isn't available/fails
-// (see tryCloudVisionOcr above, which is tried first and is much more
-// reliable on this kind of form). Accepts a File/Blob (from upload or
-// camera) OR an existing canvas (from a rasterized PDF page) and always
-// returns a canvas.
-async function binarizeForOcr(source) {
-  let img;
-  if (source instanceof HTMLCanvasElement) {
-    img = source;
+  if (scanRole === 'student') {
+    if (f.name)          document.getElementById('stName').value = f.name;
+    if (f.address)       document.getElementById('stAddress').value = f.address;
+    if (f.phone)          document.getElementById('stContact').value = digitsOnly(f.phone) || f.phone;
+    if (f.email)         document.getElementById('stEmail').value = String(f.email).toLowerCase().trim();
+    if (f.admission)     document.getElementById('stAdmission').value = f.admission;
+    if (f.grade)         document.getElementById('stGrade').value = String(f.grade).replace(/\D/g, '');
+    if (f.dob)           document.getElementById('stDOB').value = f.dob;
+    if (f.gender)        document.getElementById('stGender').value = f.gender;
+    if (f.guardianName)  document.getElementById('stGuardName').value = f.guardianName;
+    if (f.guardianPhone) document.getElementById('stGuardPhone').value = digitsOnly(f.guardianPhone) || f.guardianPhone;
+    if (f.guardianEmail) document.getElementById('stGuardEmail').value = String(f.guardianEmail).toLowerCase().trim();
+    updateStudentPassword();
+    okMsg('stErr', '✓ Auto-filled by AI from the scanned form — please check every field before submitting.');
   } else {
-    img = await new Promise((resolve, reject) => {
-      const el = new Image();
-      el.onload = () => resolve(el);
-      el.onerror = () => reject(new Error('Could not load image for preprocessing'));
-      el.src = URL.createObjectURL(source);
-    });
+    if (f.name)      document.getElementById('tcName').value = f.name;
+    if (f.address)   document.getElementById('tcAddress').value = f.address;
+    if (f.phone)     document.getElementById('tcPhone').value = digitsOnly(f.phone) || f.phone;
+    if (f.email)     document.getElementById('tcEmail').value = String(f.email).toLowerCase().trim();
+    if (f.subject)   document.getElementById('tcSubject').value = f.subject;
+    if (f.altContact) document.getElementById('tcContact').value = digitsOnly(f.altContact) || f.altContact;
+    if (f.grade)     document.getElementById('tcGrade').value = f.grade;
+    if (f.medium)    document.getElementById('tcMedium').value = f.medium;
+    if (f.dob)       document.getElementById('tcDOB').value = f.dob;
+    if (f.gender)    document.getElementById('tcGender').value = f.gender;
+    if (f.joinDate)  document.getElementById('tcJoinDate').value = f.joinDate;
+    updateTeacherPassword();
+    okMsg('tcErr', '✓ Auto-filled by AI from the scanned form — please check every field before submitting.');
   }
-  const width = img.width || img.naturalWidth;
-  const height = img.height || img.naturalHeight;
-  const canvas = document.createElement('canvas');
-  canvas.width = width;
-  canvas.height = height;
-  const ctx = canvas.getContext('2d');
-  ctx.drawImage(img, 0, 0, width, height);
-
-  const imageData = ctx.getImageData(0, 0, width, height);
-  const data = imageData.data;
-  const THRESHOLD = 150; // 0 (black) – 255 (white); tuned for dark ink vs. light gray grid lines
-  for (let i = 0; i < data.length; i += 4) {
-    const luminance = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
-    const v = luminance < THRESHOLD ? 0 : 255;
-    data[i] = v; data[i + 1] = v; data[i + 2] = v;
-  }
-
-  // A run longer than this can't be a single character stroke — it's a
-  // box border. Scaled to image size so this works across resolutions.
-  const minLineRun = Math.max(18, Math.round(Math.min(width, height) * 0.018));
-  const isBlack = (x, y) => data[(y * width + x) * 4] === 0;
-  const setWhite = (x, y) => {
-    const idx = (y * width + x) * 4;
-    data[idx] = data[idx + 1] = data[idx + 2] = 255;
-  };
-
-  for (let y = 0; y < height; y++) {
-    let runStart = -1;
-    for (let x = 0; x <= width; x++) {
-      const black = x < width && isBlack(x, y);
-      if (black) {
-        if (runStart === -1) runStart = x;
-      } else if (runStart !== -1) {
-        if (x - runStart >= minLineRun) {
-          for (let xx = runStart; xx < x; xx++) setWhite(xx, y);
-        }
-        runStart = -1;
-      }
-    }
-  }
-  for (let x = 0; x < width; x++) {
-    let runStart = -1;
-    for (let y = 0; y <= height; y++) {
-      const black = y < height && isBlack(x, y);
-      if (black) {
-        if (runStart === -1) runStart = y;
-      } else if (runStart !== -1) {
-        if (y - runStart >= minLineRun) {
-          for (let yy = runStart; yy < y; yy++) setWhite(x, yy);
-        }
-        runStart = -1;
-      }
-    }
-  }
-
-  ctx.putImageData(imageData, 0, 0);
-  return canvas;
-}
-
-async function extractFromPdf(file, progress) {
-  progress.textContent = 'Opening PDF…';
-  const buf = await file.arrayBuffer();
-  const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
-  const page = await pdf.getPage(1);
-
-  progress.textContent = 'Checking for embedded text…';
-  const content = await page.getTextContent();
-  const meaningfulItems = content.items.filter(it => it.str && it.str.trim().length > 0);
-
-  if (meaningfulItems.length > 8) {
-    // Typed/fillable PDF — read the text layer directly, no OCR needed.
-    const lines = pdfTextItemsToLines(meaningfulItems);
-    return { lines, fullText: lines.map(l => l.text).join('\n'), viaOcr: false };
-  }
-
-  // Sparse or empty text layer — likely a scanned/photographed page.
-  // Rasterize it and fall through to the same OCR path as images (Cloud
-  // Vision first, Tesseract as fallback — see the caller in
-  // runOcrAndFill). Returned as-is, NOT pre-binarized: Cloud Vision does
-  // better with a clean render, and binarization only happens if this
-  // falls back to Tesseract.
-  progress.textContent = 'No typed text found — rendering page for OCR…';
-  const viewport = page.getViewport({ scale: 2.0 });
-  const canvas = document.createElement('canvas');
-  canvas.width = viewport.width;
-  canvas.height = viewport.height;
-  await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
-  return { canvas, viaOcr: true };
-}
-
-async function extractFromDocx(file) {
-  const buf = await file.arrayBuffer();
-  const result = await mammoth.extractRawText({ arrayBuffer: buf });
-  const lines = (result.value || '')
-    .split('\n')
-    .map(t => t.trim())
-    .filter(t => t.length > 0)
-    .map(t => ({ text: t, words: [] }));
-  return { lines, fullText: lines.map(l => l.text).join('\n') };
 }
 
 async function runOcrAndFill() {
@@ -1137,165 +830,375 @@ async function runOcrAndFill() {
   const progress = document.getElementById('scanProgress');
   btn.disabled = true;
   errMsg('scanErr', '');
-  progress.textContent = 'Starting…';
+  progress.textContent = 'Reading form with AI…';
 
   try {
-    let lines = [];
-    let fullText = '';
-    let ocrMethod = 'n/a'; // reported in the debug panel so it's never ambiguous which path ran
+    if (scanInput.kind === 'pdf') {
+      // Figure out how many pages this PDF has. A multi-page PDF is treated
+      // as one filled form per page — each page gets its own AI extraction
+      // call and its own editable form on the batch screen.
+      progress.textContent = 'Checking PDF…';
+      const buf = await scanInput.source.arrayBuffer();
+      const pdfDoc = await pdfjsLib.getDocument({ data: buf }).promise;
 
-    if (scanInput.kind === 'docx') {
+      if (pdfDoc.numPages > 1) {
+        await runBatchPdfExtract(pdfDoc);
+        return;
+      }
+
+      // Single-page PDF: keep the original behaviour — send the whole file
+      // to the AI, which reads it directly (typed or scanned).
+      progress.textContent = 'Uploading PDF to AI…';
+      const fields = await extractOnePage({ kind: 'pdf', fileBase64: await fileToBase64(scanInput.source) });
+      fillSingleForm(fields);
+
+    } else if (scanInput.kind === 'docx') {
       progress.textContent = 'Reading Word document…';
-      const r = await extractFromDocx(scanInput.source);
-      lines = r.lines;
-      fullText = r.fullText;
-      ocrMethod = 'docx-text-extraction';
+      const text = await extractDocxText(scanInput.source);
+      if (!text) throw new Error('Could not find any text in that Word document.');
+      const fields = await extractOnePage({ kind: 'text', text });
+      fillSingleForm(fields);
 
-    } else if (scanInput.kind === 'pdf') {
-      const r = await extractFromPdf(scanInput.source, progress);
-      if (r.viaOcr) {
-        const viaVision = await tryCloudVisionOcr(r.canvas, progress);
-        if (viaVision) {
-          lines = viaVision.lines;
-          fullText = viaVision.fullText;
-          ocrMethod = 'cloud-vision (pdf page)';
-        } else {
-          progress.textContent = 'Preparing page image…';
-          const preprocessed = await binarizeForOcr(r.canvas);
-          progress.textContent = 'Loading OCR engine…';
-          const result = await Tesseract.recognize(preprocessed, 'eng', {
-            logger: m => {
-              if (m.status === 'recognizing text') {
-                progress.textContent = 'Reading form… ' + Math.round((m.progress || 0) * 100) + '%';
-              } else if (m.status) {
-                progress.textContent = m.status.charAt(0).toUpperCase() + m.status.slice(1) + '…';
-              }
-            }
-          });
-          fullText = result.data.text || '';
-          lines = result.data.lines || [];
-          ocrMethod = 'tesseract (pdf page fallback)';
-        }
-      } else {
-        lines = r.lines;
-        fullText = r.fullText;
-        ocrMethod = 'pdf-text-layer';
-      }
-
-    } else {
-      // image, from upload or live camera capture — try Cloud Vision
-      // first (see tryCloudVisionOcr above), fall back to Tesseract.
-      const viaVision = await tryCloudVisionOcr(scanInput.source, progress);
-      if (viaVision) {
-        lines = viaVision.lines;
-        fullText = viaVision.fullText;
-        ocrMethod = 'cloud-vision (image)';
-      } else {
-        progress.textContent = 'Preparing image…';
-        const preprocessed = await binarizeForOcr(scanInput.source);
-        progress.textContent = 'Loading OCR engine…';
-        const result = await Tesseract.recognize(preprocessed, 'eng', {
-          logger: m => {
-            if (m.status === 'recognizing text') {
-              progress.textContent = 'Reading form… ' + Math.round((m.progress || 0) * 100) + '%';
-            } else if (m.status) {
-              progress.textContent = m.status.charAt(0).toUpperCase() + m.status.slice(1) + '…';
-            }
-          }
-        });
-        fullText = result.data.text || '';
-        lines = result.data.lines || [];
-        ocrMethod = 'tesseract (image fallback)';
-      }
-    }
-
-    // Calibrate box-grid spacing ONCE from the whole page (see
-    // computeGlobalPitch above) before any field extraction runs, so every
-    // field — including short/punctuation-heavy ones like addresses —
-    // uses the same reliable pitch reference instead of its own row.
-    computeGlobalPitch(lines);
-
-    document.getElementById('scanRawText').textContent = fullText.trim() || '(no text recognized)';
-    document.getElementById('scanRawWrap').style.display = 'block';
-
-    const extracted = {
-      name:        extractField(lines, ['FULLNAME']),
-      address:     extractField(lines, ['HOMEADDRESS']),
-      phone:       extractField(lines, ['PHONENUMBER']),
-      email:       extractField(lines, ['EMAIL']),
-      admission:   extractField(lines, ['ADDMITIONNO']) || extractField(lines, ['ADMISSIONNO']),
-      gradeRaw:    extractField(lines, ['SCHOOLGRADE']),
-      dobRaw:      extractField(lines, ['BIRTHDAY']),
-      guardName:   extractGuardianName(lines),
-      guardPhone:  extractField(lines, ['CONTACTNUMBER']),
-      guardEmail:  '',
-      gender:      guessGender(fullText)
-    };
-    // The guardian EMAIL label repeats the word "EMAIL" used for the
-    // applicant's own email — take the second EMAIL match if present.
-    const emailMatches = [];
-    for (let i = 0; i < lines.length - 1; i++) {
-      if (normLabel(lines[i].text) === 'EMAIL') {
-        const v = reconstructLineText(lines[i + 1]);
-        if (v) emailMatches.push(v.trim());
-      }
-    }
-    if (emailMatches.length >= 1) extracted.email = extracted.email || emailMatches[0];
-    if (emailMatches.length >= 2) extracted.guardEmail = emailMatches[1];
-
-    // Debug dump — this is the actual data the parser produced, BEFORE any
-    // title-casing/digit-cleanup/date-guessing runs on it. If a field is
-    // wrong on the form, check here first: if it's already wrong here, the
-    // problem is in field-matching (which label a line got attached to);
-    // if it's right here but wrong on the form, the problem is in the
-    // formatting step that runs afterward.
-    document.getElementById('scanDebugText').textContent = JSON.stringify({
-      ocrMethod: ocrMethod,
-      extractedFields: extracted,
-      derivedGrade: guessGradeNumber(extracted.gradeRaw),
-      derivedDob: guessDobIso(extracted.dobRaw),
-      rawLinesInReadOrder: lines.map(l => reconstructLineText(l))
-    }, null, 2);
-    document.getElementById('scanDebugWrap').style.display = 'block';
-
-    progress.textContent = '✓ Done — filling in the form. Please review every field.';
-
-    pickRole(scanRole);
-
-    if (scanRole === 'student') {
-      if (extracted.name)      document.getElementById('stName').value = toTitleCase(extracted.name);
-      if (extracted.address)   document.getElementById('stAddress').value = toTitleCase(extracted.address);
-      if (extracted.phone)     document.getElementById('stContact').value = digitsOnly(extracted.phone) || extracted.phone;
-      if (extracted.email)     document.getElementById('stEmail').value = extracted.email.toLowerCase().replace(/\s+/g,'');
-      if (extracted.admission) document.getElementById('stAdmission').value = extracted.admission;
-      const gradeNum = guessGradeNumber(extracted.gradeRaw);
-      if (gradeNum) document.getElementById('stGrade').value = gradeNum;
-      const dobIso = guessDobIso(extracted.dobRaw);
-      if (dobIso) document.getElementById('stDOB').value = dobIso;
-      if (extracted.gender) document.getElementById('stGender').value = extracted.gender;
-      if (extracted.guardName)  document.getElementById('stGuardName').value = extracted.guardName;
-      if (extracted.guardPhone) document.getElementById('stGuardPhone').value = digitsOnly(extracted.guardPhone) || extracted.guardPhone;
-      if (extracted.guardEmail) document.getElementById('stGuardEmail').value = extracted.guardEmail.toLowerCase().replace(/\s+/g,'');
-      updateStudentPassword();
-      okMsg('stErr', '✓ Auto-filled from scanned form — please check every field before submitting.');
-    } else {
-      if (extracted.name)    document.getElementById('tcName').value = toTitleCase(extracted.name);
-      if (extracted.address) document.getElementById('tcAddress').value = toTitleCase(extracted.address);
-      if (extracted.phone)   document.getElementById('tcPhone').value = digitsOnly(extracted.phone) || extracted.phone;
-      if (extracted.email)   document.getElementById('tcEmail').value = extracted.email.toLowerCase().replace(/\s+/g,'');
-      const dobIso = guessDobIso(extracted.dobRaw);
-      if (dobIso) document.getElementById('tcDOB').value = dobIso;
-      if (extracted.gender) document.getElementById('tcGender').value = extracted.gender;
-      if (extracted.gradeRaw) document.getElementById('tcGrade').value = extracted.gradeRaw;
-      updateTeacherPassword();
-      okMsg('tcErr', '✓ Auto-filled from scanned form — please check every field before submitting.');
+    } else { // image, from upload or camera capture
+      progress.textContent = 'Uploading photo to AI…';
+      const fields = await extractOnePage({
+        kind: 'image',
+        mimeType: (scanInput.source.type) || 'image/jpeg',
+        fileBase64: await fileToBase64(scanInput.source)
+      });
+      fillSingleForm(fields);
     }
 
   } catch (e) {
-    errMsg('scanErr', '⚠ Could not read the form: ' + e.message);
+    errMsg('scanErr', '⚠ Could not read the form: ' + friendlyAiError(e.message));
   } finally {
     btn.disabled = false;
   }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   BATCH FLOW — multi-page PDF: rasterize each page with pdf.js, run AI
+   extraction on each page image individually, then show one editable
+   form per page with the option to register each one separately or
+   register the whole batch in one go.
+   ═══════════════════════════════════════════════════════════════════ */
+async function runBatchPdfExtract(pdfDoc) {
+  const progress = document.getElementById('scanProgress');
+  const total = pdfDoc.numPages;
+  const pages = [];
+
+  for (let i = 1; i <= total; i++) {
+    progress.textContent = `Reading page ${i} of ${total} with AI…`;
+    try {
+      const page = await pdfDoc.getPage(i);
+      const viewport = page.getViewport({ scale: 2 }); // higher res helps the AI read handwriting
+      const canvas = document.createElement('canvas');
+      canvas.width = viewport.width;
+      canvas.height = viewport.height;
+      await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
+      const blob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', 0.92));
+      const fileBase64 = await fileToBase64(blob);
+      const fields = await extractOnePage({ kind: 'image', mimeType: 'image/jpeg', fileBase64 });
+      pages.push({ pageNum: i, fields });
+    } catch (e) {
+      pages.push({ pageNum: i, fields: { _extractError: friendlyAiError(e.message) } });
+    }
+  }
+
+  progress.textContent = `✓ Read ${total} page(s) — review each form below.`;
+  showBatchForm(scanRole, pages);
+}
+
+function showBatchForm(role, pages) {
+  document.getElementById('step-role').style.display = 'none';
+  document.getElementById('step-scan').style.display = 'none';
+  document.getElementById('step-student').style.display = 'none';
+  document.getElementById('step-teacher').style.display = 'none';
+  document.getElementById('step-batch').style.display = 'block';
+
+  document.getElementById('batchPageCount').textContent = pages.length;
+  document.getElementById('batchRoleLabel').textContent = role;
+  document.getElementById('batchTotalCount').textContent = pages.length;
+  document.getElementById('batchDoneCount').textContent = '0';
+  document.getElementById('batchProgress').textContent = '';
+  document.getElementById('batchRegisterAllBtn').disabled = false;
+
+  const list = document.getElementById('batch-list');
+  list.innerHTML = '';
+  batchEntries = [];
+
+  pages.forEach((p, idx) => {
+    batchEntries.push({ idx, role, status: 'pending' });
+    const block = buildBatchEntryBlock(idx, role, `Page ${p.pageNum}`);
+    list.appendChild(block);
+    fillEntryFields(idx, role, p.fields || {});
+    if (p.fields && p.fields._extractError) {
+      errMsg(`e${idx}-err`, '⚠ AI could not read this page: ' + p.fields._extractError);
+    }
+  });
+}
+
+function backFromBatch() {
+  document.getElementById('step-batch').style.display = 'none';
+  document.getElementById('step-scan').style.display = 'block';
+  document.getElementById('scanBtn').disabled = true;
+  errMsg('scanErr', '');
+  document.getElementById('scanProgress').textContent = '';
+}
+
+function toggleBatchEntry(idx) {
+  const body = document.getElementById(`e${idx}-body`);
+  if (body) body.classList.toggle('collapsed');
+}
+
+function studentFieldsHTML(idx) {
+  return `
+    <label for="e${idx}-name">Full name *</label>
+    <input id="e${idx}-name" type="text" placeholder="Full name" oninput="updateBatchPassword(${idx},'student')">
+
+    <label for="e${idx}-email">Email <span class="opt">(optional)</span></label>
+    <input id="e${idx}-email" type="email" placeholder="you@email.com — not required">
+
+    <label for="e${idx}-admission">Admission number *</label>
+    <input id="e${idx}-admission" type="text" placeholder="e.g. SVDS-2025-042" oninput="updateBatchPassword(${idx},'student')">
+
+    <label for="e${idx}-pass">Password <span class="opt">(auto-filled — edit if the name split looks wrong)</span></label>
+    <input id="e${idx}-pass" type="text">
+    <div class="scan-note" style="margin-top:-10px">This will be their login password.</div>
+
+    <label for="e${idx}-grade">Current grade *</label>
+    <select id="e${idx}-grade">${GRADE_OPTIONS_HTML}</select>
+
+    <label for="e${idx}-contact">Contact number *</label>
+    <input id="e${idx}-contact" type="tel" placeholder="07X XXX XXXX">
+
+    <label for="e${idx}-dob">Date of birth *</label>
+    <input id="e${idx}-dob" type="date">
+
+    <label for="e${idx}-gender">Gender *</label>
+    <select id="e${idx}-gender">${GENDER_OPTIONS_HTML}</select>
+
+    <label for="e${idx}-guardName">Parent / Guardian's name *</label>
+    <input id="e${idx}-guardName" type="text" placeholder="Mother / Father / Guardian">
+
+    <label for="e${idx}-guardPhone">Parent / Guardian's phone *</label>
+    <input id="e${idx}-guardPhone" type="tel" placeholder="07X XXX XXXX">
+
+    <label for="e${idx}-guardEmail">Parent / Guardian's email <span class="opt">(optional)</span></label>
+    <input id="e${idx}-guardEmail" type="email" placeholder="guardian@email.com">
+
+    <label for="e${idx}-address">Home address *</label>
+    <textarea id="e${idx}-address" rows="2" placeholder="Street, City, Postal code"></textarea>
+  `;
+}
+
+function teacherFieldsHTML(idx) {
+  return `
+    <label for="e${idx}-name">Full name *</label>
+    <input id="e${idx}-name" type="text" placeholder="Full name" oninput="updateBatchPassword(${idx},'teacher')">
+
+    <label for="e${idx}-email">Email <span class="opt">(optional)</span></label>
+    <input id="e${idx}-email" type="email" placeholder="you@email.com — not required">
+
+    <label for="e${idx}-phone">Phone number *</label>
+    <input id="e${idx}-phone" type="tel" placeholder="07X XXX XXXX" oninput="updateBatchPassword(${idx},'teacher')">
+
+    <label for="e${idx}-pass">Password <span class="opt">(auto-filled — edit if the name split looks wrong)</span></label>
+    <input id="e${idx}-pass" type="text">
+    <div class="scan-note" style="margin-top:-10px">This will be their login password.</div>
+
+    <label for="e${idx}-subject">Subject *</label>
+    <input id="e${idx}-subject" type="text" placeholder="e.g. Dhamma, Pali, History">
+
+    <label for="e${idx}-altContact">Alternate contact <span class="opt">(optional)</span></label>
+    <input id="e${idx}-altContact" type="tel" placeholder="07X XXX XXXX">
+
+    <label for="e${idx}-grade">Grade taught *</label>
+    <input id="e${idx}-grade" type="text" placeholder="e.g. Grade 5">
+
+    <label for="e${idx}-medium">Medium of instruction *</label>
+    <input id="e${idx}-medium" type="text" placeholder="e.g. Sinhala">
+
+    <label for="e${idx}-dob">Date of birth *</label>
+    <input id="e${idx}-dob" type="date">
+
+    <label for="e${idx}-gender">Gender *</label>
+    <select id="e${idx}-gender">${GENDER_OPTIONS_HTML}</select>
+
+    <label for="e${idx}-joinDate">Joining date *</label>
+    <input id="e${idx}-joinDate" type="date">
+
+    <label for="e${idx}-address">Home address *</label>
+    <textarea id="e${idx}-address" rows="2" placeholder="Street, City, Postal code"></textarea>
+  `;
+}
+
+function buildBatchEntryBlock(idx, role, pageLabel) {
+  const wrap = document.createElement('div');
+  wrap.className = 'batch-entry';
+  wrap.id = `batch-entry-${idx}`;
+  wrap.innerHTML = `
+    <div class="batch-entry-header" onclick="toggleBatchEntry(${idx})">
+      <div>
+        <div class="batch-entry-title">${pageLabel} <span id="e${idx}-nameTag"></span></div>
+        <div class="batch-entry-sub">${role === 'student' ? 'Student' : 'Teacher'} form</div>
+      </div>
+      <span class="status-badge pending" id="e${idx}-status">Pending</span>
+    </div>
+    <div class="batch-entry-body" id="e${idx}-body">
+      ${role === 'student' ? studentFieldsHTML(idx) : teacherFieldsHTML(idx)}
+      <div class="am-err" id="e${idx}-err"></div>
+      <button class="submit-btn" id="e${idx}-btn" onclick="registerBatchEntry(${idx})">Register This Entry</button>
+    </div>
+  `;
+  return wrap;
+}
+
+function fillEntryFields(idx, role, f) {
+  const set = (id, v) => { const el = document.getElementById(id); if (el && v !== undefined && v !== null && v !== '') el.value = v; };
+  if (role === 'student') {
+    set(`e${idx}-name`, f.name);
+    set(`e${idx}-email`, f.email ? String(f.email).toLowerCase().trim() : '');
+    set(`e${idx}-admission`, f.admission);
+    set(`e${idx}-grade`, f.grade ? String(f.grade).replace(/\D/g, '') : '');
+    set(`e${idx}-contact`, digitsOnly(f.phone) || f.phone);
+    set(`e${idx}-dob`, f.dob);
+    set(`e${idx}-gender`, f.gender);
+    set(`e${idx}-guardName`, f.guardianName);
+    set(`e${idx}-guardPhone`, digitsOnly(f.guardianPhone) || f.guardianPhone);
+    set(`e${idx}-guardEmail`, f.guardianEmail ? String(f.guardianEmail).toLowerCase().trim() : '');
+    set(`e${idx}-address`, f.address);
+  } else {
+    set(`e${idx}-name`, f.name);
+    set(`e${idx}-email`, f.email ? String(f.email).toLowerCase().trim() : '');
+    set(`e${idx}-phone`, digitsOnly(f.phone) || f.phone);
+    set(`e${idx}-subject`, f.subject);
+    set(`e${idx}-altContact`, digitsOnly(f.altContact) || f.altContact);
+    set(`e${idx}-grade`, f.grade);
+    set(`e${idx}-medium`, f.medium);
+    set(`e${idx}-dob`, f.dob);
+    set(`e${idx}-gender`, f.gender);
+    set(`e${idx}-joinDate`, f.joinDate);
+    set(`e${idx}-address`, f.address);
+  }
+  updateBatchPassword(idx, role);
+}
+
+function updateBatchPassword(idx, role) {
+  const nameEl = document.getElementById(`e${idx}-name`);
+  const name = nameEl ? nameEl.value : '';
+  const idFieldEl = role === 'student' ? document.getElementById(`e${idx}-admission`) : document.getElementById(`e${idx}-phone`);
+  const idValue = idFieldEl ? idFieldEl.value : '';
+  const passEl = document.getElementById(`e${idx}-pass`);
+  if (passEl) passEl.value = makeSimplePassword(firstName(name), idValue);
+  const tag = document.getElementById(`e${idx}-nameTag`);
+  if (tag) tag.textContent = name ? '— ' + name : '';
+}
+
+function gatherEntryData(idx, role) {
+  const get = id => { const el = document.getElementById(id); return el ? el.value.trim() : ''; };
+  if (role === 'student') {
+    const data = {
+      name: get(`e${idx}-name`), email: get(`e${idx}-email`), admission: get(`e${idx}-admission`),
+      grade: get(`e${idx}-grade`), contact: get(`e${idx}-contact`), dob: get(`e${idx}-dob`),
+      gender: get(`e${idx}-gender`), guardName: get(`e${idx}-guardName`), guardPhone: get(`e${idx}-guardPhone`),
+      guardEmail: get(`e${idx}-guardEmail`), address: get(`e${idx}-address`)
+    };
+    const required = ['name','admission','grade','contact','dob','gender','guardName','guardPhone','address'];
+    const missing = required.filter(f => !data[f]);
+    // Respect a hand-corrected password; only fall back to auto-generating
+    // one if the field was left blank.
+    data.password = get(`e${idx}-pass`) || makeSimplePassword(firstName(data.name), data.admission);
+    return { data, missing };
+  } else {
+    const data = {
+      name: get(`e${idx}-name`), email: get(`e${idx}-email`), phone: get(`e${idx}-phone`),
+      subject: get(`e${idx}-subject`), contact: get(`e${idx}-altContact`), grade: get(`e${idx}-grade`),
+      medium: get(`e${idx}-medium`), dob: get(`e${idx}-dob`), gender: get(`e${idx}-gender`),
+      joinDate: get(`e${idx}-joinDate`), address: get(`e${idx}-address`)
+    };
+    const required = ['name','phone','subject','grade','medium','dob','gender','joinDate','address'];
+    const missing = required.filter(f => !data[f]);
+    data.password = get(`e${idx}-pass`) || makeSimplePassword(firstName(data.name), data.phone);
+    return { data, missing };
+  }
+}
+
+function setEntryStatus(idx, status) {
+  const badge = document.getElementById(`e${idx}-status`);
+  if (!badge) return;
+  badge.className = 'status-badge ' + status;
+  badge.textContent = status === 'pending' ? 'Pending'
+    : status === 'registering' ? 'Registering…'
+    : status === 'done' ? 'Registered ✓'
+    : 'Failed';
+}
+
+function updateBatchCounts() {
+  const done = batchEntries.filter(e => e.status === 'done').length;
+  const doneEl = document.getElementById('batchDoneCount');
+  if (doneEl) doneEl.textContent = done;
+  const btn = document.getElementById('batchRegisterAllBtn');
+  if (btn) btn.disabled = done === batchEntries.length;
+}
+
+async function registerBatchEntry(idx) {
+  const entry = batchEntries[idx];
+  if (!entry || entry.status === 'done') return;
+
+  const { data, missing } = gatherEntryData(idx, entry.role);
+  const errId = `e${idx}-err`;
+  if (missing.length) {
+    errMsg(errId, '⚠ Please fill in all required fields (*).');
+    return;
+  }
+
+  setEntryStatus(idx, 'registering');
+  const btn = document.getElementById(`e${idx}-btn`);
+  btn.disabled = true;
+  errMsg(errId, '');
+
+  try {
+    const uid = entry.role === 'student'
+      ? await registerStudentAccount(data)
+      : await registerTeacherAccount(data);
+
+    entry.status = 'done';
+    entry.uid = uid;
+    setEntryStatus(idx, 'done');
+    okMsg(errId, '✓ Registered. Password: "' + data.password + '" — please save it.');
+
+    btn.style.display = 'none';
+    updateBatchCounts();
+
+  } catch (e) {
+    entry.status = 'error';
+    entry.errorMsg = e.code ? fErr(e.code) : (e.message || 'Sign-up failed.');
+    setEntryStatus(idx, 'error');
+    errMsg(errId, '⚠ ' + entry.errorMsg);
+    btn.disabled = false;
+  }
+}
+
+async function registerAllEntries() {
+  const btn = document.getElementById('batchRegisterAllBtn');
+  const progress = document.getElementById('batchProgress');
+  btn.disabled = true;
+
+  const todo = batchEntries.filter(e => e.status !== 'done');
+  let ok = 0, fail = 0;
+
+  for (let i = 0; i < todo.length; i++) {
+    const idx = todo[i].idx;
+    progress.textContent = `Registering entry ${i + 1} of ${todo.length}…`;
+    await registerBatchEntry(idx);
+    if (batchEntries[idx].status === 'done') ok++; else fail++;
+  }
+
+  progress.textContent = fail === 0
+    ? `✓ All ${ok} entr${ok === 1 ? 'y' : 'ies'} registered.`
+    : `✓ ${ok} registered, ⚠ ${fail} failed — fix and retry those below.`;
+  btn.disabled = batchEntries.every(e => e.status === 'done');
 }
 
 /* Firebase Auth needs a unique login handle even when the person leaves
@@ -1306,10 +1209,21 @@ function slug(s) {
   return (s || '').toString().toLowerCase().replace(/[^a-z0-9]/g, '');
 }
 
-// Takes just the first word of a full name (e.g. "Jithuka Perera" → "Jithuka"),
-// since using the whole name in the password makes it needlessly long.
+// Picks the personal/given name out of a full name for use in the password.
+// Sri Lankan names are commonly written as:
+//   [ancestral/family "-ge" name]  [given/first name]  [middle name(s)]  [surname]
+// e.g. "Walpitage Jithuka Mindiya Walpita" → the actual first name is
+// "Jithuka", not "Walpitage" (family prefix) or "Walpita" (surname).
+// If the first word looks like that kind of "-ge" family name, use the
+// word right after it; otherwise just use the first word as-is. This is a
+// heuristic, not a guarantee — that's why the password field stays editable.
 function firstName(fullName) {
-  return (fullName || '').trim().split(/\s+/)[0] || '';
+  const parts = (fullName || '').trim().split(/\s+/).filter(Boolean);
+  if (!parts.length) return '';
+  if (parts.length > 1 && /ge$/i.test(parts[0]) && parts[0].length > 4) {
+    return parts[1];
+  }
+  return parts[0];
 }
 
 /* ═══ Auto-generated password: lowercase name (letters only, no spaces)
@@ -1337,7 +1251,78 @@ function updateTeacherPassword() {
   document.getElementById('tcPass').value = makeSimplePassword(firstName(name), phone);
 }
 
-/* ═══ STUDENT SIGN-UP ═══ */
+/* ═══ Core account-creation logic — shared by the single-form flow and
+   the multi-page batch flow. Returns the new user's uid, or throws. ═══ */
+async function registerStudentAccount(data) {
+  if (data.password.length < 6) throw new Error('Name + admission number is too short to build a password — please double-check both.');
+
+  const loginEmail = data.email || (slug(data.admission) + '@svd-student.internal');
+  const cred = await auth.createUserWithEmailAndPassword(loginEmail, data.password);
+  await cred.user.updateProfile({ displayName: data.name });
+  const uid = cred.user.uid;
+
+  let currentPromoYear = new Date().getFullYear();
+  try {
+    const pyRes = await fetch(APPS_SCRIPT_URL + '?action=last_promotion');
+    const pyJson = await pyRes.json();
+    if (pyJson.year) currentPromoYear = pyJson.year;
+  } catch (e) { console.warn('Could not fetch last_promotion, using calendar year:', e); }
+
+  await authDb.collection('users').doc(uid).set({
+    uid, role: 'student',
+    displayName:  data.name,
+    email:        loginEmail,
+    hasContactEmail: !!data.email,
+    admissionNo:  data.admission,
+    contactNo:    data.contact,
+    grade:        parseInt(data.grade, 10),
+    dob:          data.dob,
+    gender:       data.gender,
+    guardianName: data.guardName,
+    guardianPhone:data.guardPhone,
+    guardianEmail:data.guardEmail || '',
+    homeAddress:  data.address,
+    faceDescriptor: [],
+    hasFace:      false,
+    needsPhotoReupload: false,
+    lastPromotionYear: currentPromoYear,
+    createdAt:    firebase.firestore.FieldValue.serverTimestamp()
+  });
+
+  return uid;
+}
+
+async function registerTeacherAccount(data) {
+  if (data.password.length < 6) throw new Error('Name + phone number is too short to build a password — please double-check both.');
+
+  const loginEmail = data.email || (slug(data.phone) + '@svd-teacher.internal');
+  const cred = await auth.createUserWithEmailAndPassword(loginEmail, data.password);
+  await cred.user.updateProfile({ displayName: data.name });
+  const uid = cred.user.uid;
+
+  await authDb.collection('users').doc(uid).set({
+    uid, role: 'teacher',
+    displayName:    data.name,
+    email:          loginEmail,
+    hasContactEmail: !!data.email,
+    phoneNo:        data.phone,
+    contactNo:      data.contact,
+    homeAddress:    data.address,
+    teachingGrade:  data.grade,
+    subject:        data.subject,
+    medium:         data.medium,
+    dob:            data.dob,
+    gender:         data.gender,
+    joiningDate:    data.joinDate,
+    faceDescriptor: [],
+    hasFace:        false,
+    createdAt:      firebase.firestore.FieldValue.serverTimestamp()
+  });
+
+  return uid;
+}
+
+/* ═══ STUDENT SIGN-UP (single-form flow) ═══ */
 async function doSignUpStudent() {
   const get = id => document.getElementById(id).value.trim();
   const data = {
@@ -1359,56 +1344,24 @@ async function doSignUpStudent() {
     if (!data[f]) return errMsg('stErr', 'Please fill in all required fields (*).');
   }
 
-  // Recompute (not just read the display field) so this is correct even
-  // if the name/admission were filled by OCR or a password manager and
-  // never fired an input event.
-  data.password = makeSimplePassword(firstName(data.name), data.admission);
-  document.getElementById('stPass').value = data.password;
-  if (data.password.length < 6) return errMsg('stErr', 'Name + admission number is too short to build a password — please double-check both.');
-
-  const loginEmail = data.email || (slug(data.admission) + '@svd-student.internal');
+  // Use whatever is currently in the password field — it's auto-filled as
+  // you type the name/admission number, but staff can hand-correct it first
+  // (e.g. when the automatic first-name guess picks the wrong word), and
+  // that correction should be respected rather than overwritten here.
+  let passField = document.getElementById('stPass');
+  if (!passField.value) passField.value = makeSimplePassword(firstName(data.name), data.admission);
+  data.password = passField.value.trim();
 
   const btn = document.getElementById('stBtn');
   btn.disabled = true; btn.classList.add('loading');
   errMsg('stErr', '');
 
   try {
-    const cred = await auth.createUserWithEmailAndPassword(loginEmail, data.password);
-    await cred.user.updateProfile({ displayName: data.name });
-    const uid = cred.user.uid;
-
-    let currentPromoYear = new Date().getFullYear();
-    try {
-      const pyRes = await fetch(APPS_SCRIPT_URL + '?action=last_promotion');
-      const pyJson = await pyRes.json();
-      if (pyJson.year) currentPromoYear = pyJson.year;
-    } catch (e) { console.warn('Could not fetch last_promotion, using calendar year:', e); }
-
-    await authDb.collection('users').doc(uid).set({
-      uid, role: 'student',
-      displayName:  data.name,
-      email:        loginEmail,
-      hasContactEmail: !!data.email,
-      admissionNo:  data.admission,
-      contactNo:    data.contact,
-      grade:        parseInt(data.grade, 10),
-      dob:          data.dob,
-      gender:       data.gender,
-      guardianName: data.guardName,
-      guardianPhone:data.guardPhone,
-      guardianEmail:data.guardEmail || '',
-      homeAddress:  data.address,
-      faceDescriptor: [],
-      hasFace:      false,
-      needsPhotoReupload: false,
-      lastPromotionYear: currentPromoYear,
-      createdAt:    firebase.firestore.FieldValue.serverTimestamp()
-    });
-
-    okMsg('stErr', '✓ Account created. Your password is "' + data.password + '" — please remember it. Redirecting to face registration…');
+    await registerStudentAccount(data);
+    okMsg('stErr', '✓ Account created for ' + data.name + '. Password: "' + data.password + '" — please remember it. Returning to the main page…');
     setTimeout(function(){
-      window.location.href = 'face-register.html?uid=' + encodeURIComponent(uid) +
-        '&name=' + encodeURIComponent(data.name);
+      resetStudentForm();
+      backToRolePick();
     }, 2500);
 
   } catch (e) {
@@ -1417,7 +1370,19 @@ async function doSignUpStudent() {
   }
 }
 
-/* ═══ TEACHER SIGN-UP ═══ */
+function resetStudentForm() {
+  ['stName','stEmail','stAdmission','stPass','stContact','stGuardName','stGuardPhone','stGuardEmail','stAddress'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  document.getElementById('stGrade').selectedIndex = 0;
+  document.getElementById('stGender').selectedIndex = 0;
+  document.getElementById('stDOB').value = '';
+  const btn = document.getElementById('stBtn');
+  btn.disabled = false; btn.classList.remove('loading');
+  errMsg('stErr', '');
+}
+
+/* ═══ TEACHER SIGN-UP (single-form flow) ═══ */
 async function doSignUpTeacher() {
   const get = id => document.getElementById(id).value.trim();
   const data = {
@@ -1439,53 +1404,41 @@ async function doSignUpTeacher() {
     if (!data[f]) return errMsg('tcErr', 'Please fill in all required fields (*).');
   }
 
-  // Recompute (not just read the display field) so this is correct even
-  // if the name/phone were filled by OCR or a password manager and never
-  // fired an input event.
-  data.password = makeSimplePassword(firstName(data.name), data.phone);
-  document.getElementById('tcPass').value = data.password;
-  if (data.password.length < 6) return errMsg('tcErr', 'Name + phone number is too short to build a password — please double-check both.');
-
-  const loginEmail = data.email || (slug(data.phone) + '@svd-teacher.internal');
+  // Use whatever is currently in the password field — it's auto-filled as
+  // you type the name/phone number, but staff can hand-correct it first
+  // (e.g. when the automatic first-name guess picks the wrong word), and
+  // that correction should be respected rather than overwritten here.
+  let tcPassField = document.getElementById('tcPass');
+  if (!tcPassField.value) tcPassField.value = makeSimplePassword(firstName(data.name), data.phone);
+  data.password = tcPassField.value.trim();
 
   const btn = document.getElementById('tcBtn');
   btn.disabled = true; btn.classList.add('loading');
   errMsg('tcErr', '');
 
   try {
-    const cred = await auth.createUserWithEmailAndPassword(loginEmail, data.password);
-    await cred.user.updateProfile({ displayName: data.name });
-    const uid = cred.user.uid;
-
-    await authDb.collection('users').doc(uid).set({
-      uid, role: 'teacher',
-      displayName:    data.name,
-      email:          loginEmail,
-      hasContactEmail: !!data.email,
-      phoneNo:        data.phone,
-      contactNo:      data.contact,
-      homeAddress:    data.address,
-      teachingGrade:  data.grade,
-      subject:        data.subject,
-      medium:         data.medium,
-      dob:            data.dob,
-      gender:         data.gender,
-      joiningDate:    data.joinDate,
-      faceDescriptor: [],
-      hasFace:        false,
-      createdAt:      firebase.firestore.FieldValue.serverTimestamp()
-    });
-
-    okMsg('tcErr', '✓ Account created. Your password is "' + data.password + '" — please remember it. Redirecting to face registration…');
+    await registerTeacherAccount(data);
+    okMsg('tcErr', '✓ Account created for ' + data.name + '. Password: "' + data.password + '" — please remember it. Returning to the main page…');
     setTimeout(function(){
-      window.location.href = 'face-register.html?uid=' + encodeURIComponent(uid) +
-        '&name=' + encodeURIComponent(data.name);
+      resetTeacherForm();
+      backToRolePick();
     }, 2500);
 
   } catch (e) {
     errMsg('tcErr', e.code ? fErr(e.code) : (e.message || 'Sign-up failed.'));
     btn.disabled = false; btn.classList.remove('loading');
   }
+}
+
+function resetTeacherForm() {
+  ['tcName','tcEmail','tcPhone','tcPass','tcSubject','tcContact','tcGrade','tcMedium','tcJoinDate','tcAddress'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  document.getElementById('tcGender').selectedIndex = 0;
+  document.getElementById('tcDOB').value = '';
+  const btn = document.getElementById('tcBtn');
+  btn.disabled = false; btn.classList.remove('loading');
+  errMsg('tcErr', '');
 }
 </script>
 </body>
