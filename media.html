@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Video Meetings — Vipassi Media</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #14151A;
+    --panel: #1B1D24;
+    --panel-raised: #22242D;
+    --line: #2C2F3A;
+    --text: #EDEEF0;
+    --text-muted: #8B8D98;
+    --accent: #FF5A36;
+    --font-display: 'Space Grotesk', system-ui, sans-serif;
+    --font-body: 'Inter', system-ui, sans-serif;
+    --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    padding: 40px 20px 60px;
+  }
+  .wrap { max-width: 1000px; margin: 0 auto; }
+
+  .eyebrow {
+    display: flex; align-items: center; gap: 10px;
+    font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.12em;
+    color: var(--text-muted); margin-bottom: 18px;
+  }
+  .tally {
+    width: 9px; height: 9px; border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 0 3px rgba(255,90,54,0.18);
+    animation: pulse 1.8s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 3px rgba(255,90,54,0.18); }
+    50% { box-shadow: 0 0 0 6px rgba(255,90,54,0.28); }
+  }
+  @media (prefers-reduced-motion: reduce) { .tally { animation: none; } }
+
+  .brand-row {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 28px;
+  }
+  .brand-row img {
+    height: 36px;
+    width: auto;
+    display: block;
+  }
+  .brand-row .brand-name {
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+  }
+
+  h1 {
+    font-family: var(--font-display);
+    font-size: clamp(28px, 4vw, 42px);
+    line-height: 1.15;
+    margin: 0 0 14px;
+  }
+  .sub {
+    color: var(--text-muted);
+    font-size: 16px;
+    line-height: 1.6;
+    max-width: 640px;
+    margin: 0 0 30px;
+  }
+
+  .actions { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 36px; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    border: 1px solid var(--line);
+    background: var(--panel-raised);
+    color: var(--text);
+    padding: 12px 22px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 15px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: transform 0.08s ease, border-color 0.15s ease;
+  }
+  .btn:hover { border-color: #454857; }
+  .btn:active { transform: scale(0.97); }
+  .btn-primary { background: var(--accent); border-color: var(--accent); color: #17110D; }
+  .btn-primary:hover { background: #ff6d4c; border-color: #ff6d4c; }
+
+  .frame-shell {
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    overflow: hidden;
+    background: var(--panel);
+  }
+  .frame-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--line);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+  iframe {
+    width: 100%;
+    height: 640px;
+    border: none;
+    display: block;
+    background: #0C0D10;
+  }
+
+  .fallback-note {
+    margin-top: 16px;
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+  .fallback-note a { color: var(--accent); }
+
+  @media (max-width: 600px) {
+    iframe { height: 520px; }
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="brand-row">
+      <img src="logo.png" alt="Vipassi Media logo" onerror="this.style.display='none'" />
+      <span class="brand-name">Vipassi Media</span>
+    </div>
+
+    <div class="eyebrow">
+      <span class="tally"></span>
+      <span>LIVE VIDEO MEETINGS</span>
+    </div>
+
+    <h1>Start or join a video call.</h1>
+    <p class="sub">
+      Peer-to-peer video conferencing with an AI producer that takes notes for you —
+      right here on our site. Enter a room code below to jump straight in, or open it
+      in its own tab for the full-screen experience.
+    </p>
+
+    <div class="actions">
+      <a class="btn btn-primary" href="https://meet.srivipassi.com" target="_blank" rel="noopener">
+        Open in full screen ↗
+      </a>
+    </div>
+
+    <div class="frame-shell">
+      <div class="frame-header">
+        <span>meet.srivipassi.com</span>
+        <span>encrypted • peer-to-peer</span>
+      </div>
+      <iframe
+        src="https://meet.srivipassi.com"
+        allow="camera; microphone; display-capture; autoplay"
+        loading="lazy"
+        title="Video conferencing"
+      ></iframe>
+    </div>
+
+    <p class="fallback-note">
+      If your camera or microphone doesn't prompt for permission inside the box above,
+      use "Open in full screen" instead — some browsers restrict camera access inside
+      embedded frames. <a href="https://meet.srivipassi.com" target="_blank" rel="noopener">meet.srivipassi.com</a>
+    </p>
+  </div>
+</body>
+</html>
