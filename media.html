@@ -1,152 +1,471 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Video Meetings — Vipassi Media</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --bg: #14151A;
-    --panel: #1B1D24;
-    --panel-raised: #22242D;
-    --line: #2C2F3A;
-    --text: #EDEEF0;
-    --text-muted: #8B8D98;
-    --accent: #FF5A36;
-    --font-display: 'Space Grotesk', system-ui, sans-serif;
-    --font-body: 'Inter', system-ui, sans-serif;
-    --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
-  }
-  * { box-sizing: border-box; }
-  body {
-    margin: 0;
-    background: var(--bg);
-    color: var(--text);
-    font-family: var(--font-body);
-    padding: 40px 20px 60px;
-  }
-  .wrap { max-width: 1000px; margin: 0 auto; }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vipassi Media | Sri Vipassi Dhamma School</title>
+  <link rel="icon" type="image/png" href="logo.png">
+  <link rel="shortcut icon" href="logo.png">
+  <link rel="apple-touch-icon" href="logo.png">
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script src="auth-gate.js"></script>
+  <script src="nav-gate.js"></script>
+  <script src="head-tags.js"></script>
+  <link rel="stylesheet" href="auth-modal.css">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --gold: #c9a84c;
+      --gold-soft: #f0d080;
+      --maroon: #7a1010;
+      --dark: #0a0404;
+      --soft: rgba(245, 222, 179, 0.55);
+      --panel: rgba(24, 17, 10, 0.72);
+      --panel-strong: rgba(16, 8, 8, 0.88);
+      --line: rgba(201, 168, 76, 0.18);
+      --text: #f5deb3;
+      --muted: rgba(245, 222, 179, 0.65);
+      --text-faint: rgba(245, 222, 179, 0.35);
+    }
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      color: var(--text);
+      background: var(--dark);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+    body::before {
+      content: "";
+      position: fixed;
+      inset: -10% -5% -15% -5%;
+      background:
+        radial-gradient(circle at 20% 20%, rgba(255,255,255,0.18), transparent 22%),
+        radial-gradient(circle at 80% 12%, rgba(168, 41, 30, 0.22), transparent 26%),
+        radial-gradient(circle at 50% 80%, rgba(80, 20, 10, 0.18), transparent 28%),
+        url('ai.png') center/cover no-repeat;
+      opacity: 1;
+      filter: contrast(1.18) brightness(0.72) saturate(1.35);
+      z-index: -2;
+      pointer-events: none;
+      transform: scale(1.08);
+    }
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background:
+        linear-gradient(180deg, rgba(6, 3, 1, 0.52) 0%, rgba(4, 3, 2, 0.74) 100%),
+        radial-gradient(circle at 50% 15%, rgba(201,168,76,0.12), transparent 26%),
+        radial-gradient(circle at 50% 100%, rgba(120,30,15,0.28), transparent 40%),
+        rgba(2, 8, 4, 0.82);
+      z-index: -1;
+      pointer-events: none;
+    }
+    .nav {
+      background: linear-gradient(90deg,#5a0808 0%,#8b1212 40%,#7a0e0e 70%,#5a0808 100%);
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      border-bottom: 2px solid #c9a84c;
+      position: relative;
+      z-index: 100;
+      box-shadow: 0 2px 20px rgba(0,0,0,0.6);
+    }
+    .nav > img { border-radius: 50%; position: relative; z-index: 2; filter: drop-shadow(0 0 4px rgba(255,225,140,0.7)) drop-shadow(0 0 10px rgba(255,200,90,0.5)) drop-shadow(0 0 18px rgba(255,170,50,0.3)); margin-right: 10px; flex-shrink: 0; }
+    .brand { color: #f5deb3; font-size: 13px; font-weight: 700; letter-spacing: .5px; text-shadow: 0 1px 3px rgba(0,0,0,0.5); }
+    .nav-links { display: flex; flex-wrap: wrap; flex: 1; margin-left: 80px; }
+    .nav-links a { color: rgba(245,222,179,0.88); font-size: 11.5px; padding: 14px 10px; text-decoration: none; border-bottom: 2px solid transparent; transition: all .2s; white-space: nowrap; }
+    .nav-links a:hover, .nav-links a.active { color: #ffe066; border-bottom-color: #ffe066; background: rgba(255,255,255,0.05); }
+    .lang-row { display: flex; gap: 5px; align-items: center; padding: 6px 0; margin-left: auto; }
+    .lb { background: rgba(255,255,255,0.08); color: #f5deb3; border: 1px solid rgba(255,255,255,0.2); padding: 4px 10px; border-radius: 3px; font-size: 10.5px; cursor: pointer; transition: all .2s; }
+    .lb:hover { background: rgba(255,255,255,0.15); }
+    .lb.on { background: linear-gradient(135deg,#c9a84c,#a07810); color: #1a0800; border-color: #c9a84c; font-weight: 700; }
+    .login-btn { background: linear-gradient(135deg,#c9a84c,#a07810); color: #1a0800; border: none; padding: 5px 16px; border-radius: 3px; font-size: 10.5px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; cursor: pointer; margin-left: 8px; transition: all .2s; box-shadow: 0 2px 8px rgba(201,168,76,0.25); }
+    .login-btn:hover { background: linear-gradient(135deg,#e0b95c,#b88a20); box-shadow: 0 4px 14px rgba(201,168,76,0.4); }
+    .hamburger { display: none; }
+    .mobile-sidebar, .mobile-overlay { display: none; }
 
-  .eyebrow {
-    display: flex; align-items: center; gap: 10px;
-    font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.12em;
-    color: var(--text-muted); margin-bottom: 18px;
-  }
-  .tally {
-    width: 9px; height: 9px; border-radius: 50%;
-    background: var(--accent);
-    box-shadow: 0 0 0 3px rgba(255,90,54,0.18);
-    animation: pulse 1.8s ease-in-out infinite;
-  }
-  @keyframes pulse {
-    0%, 100% { box-shadow: 0 0 0 3px rgba(255,90,54,0.18); }
-    50% { box-shadow: 0 0 0 6px rgba(255,90,54,0.28); }
-  }
-  @media (prefers-reduced-motion: reduce) { .tally { animation: none; } }
+    .media-page {
+      width: min(1100px, calc(100% - 32px));
+      margin: 48px auto 36px;
+      padding: 32px 20px 12px;
+      border: 1px solid rgba(201,168,76,0.25);
+      background:
+        linear-gradient(135deg, rgba(24,16,10,0.78), rgba(10,7,5,0.72)),
+        rgba(11, 8, 7, 0.64);
+      box-shadow:
+        0 0 0 1px rgba(201,168,76,0.15),
+        0 18px 45px rgba(0,0,0,0.45),
+        0 0 30px rgba(201,168,76,0.12),
+        inset 0 0 28px rgba(201,168,76,0.05);
+      border-radius: 22px;
+      backdrop-filter: blur(12px);
+      position: relative;
+    }
+    .media-page::before {
+      content: "";
+      position: absolute;
+      inset: 12px;
+      border-radius: 18px;
+      border: 1px solid rgba(201,168,76,0.12);
+      pointer-events: none;
+    }
+    .brand-row {
+      display: flex; align-items: center; gap: 18px;
+      margin-bottom: 20px;
+      padding-bottom: 22px;
+      border-bottom: 1px solid rgba(201,168,76,0.18);
+    }
+    .logo-frame {
+      width: 62px; height: 62px; border-radius: 18px;
+      background: linear-gradient(160deg, rgba(201,168,76,0.1), rgba(15,8,6,0.96));
+      border: 1px solid rgba(201,168,76,0.2);
+      display: flex; align-items: center; justify-content: center;
+      overflow: hidden;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.32);
+    }
+    .logo-frame img { width: 72%; height: auto; display: block; }
+    .brand-text { display: flex; flex-direction: column; gap: 4px; }
+    .brand-name {
+      font-size: clamp(22px, 4vw, 32px);
+      font-weight: 700;
+      color: #f8e4a9;
+      letter-spacing: 0.04em;
+    }
+    .brand-tagline {
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(245,222,179,0.72);
+    }
+    .eyebrow {
+      display: inline-flex; align-items: center; gap: 10px;
+      margin: 8px 0 18px;
+      color: rgba(245,222,179,0.72);
+      font-size: 12px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      font-family: 'IBM Plex Mono', monospace;
+    }
+    .tally {
+      width: 9px; height: 9px; border-radius: 50%;
+      background: #ff5a36; box-shadow: 0 0 0 3px rgba(255,90,54,0.18);
+      animation: pulse 1.8s ease-in-out infinite;
+    }
+    @keyframes pulse { 0%,100% { box-shadow: 0 0 0 3px rgba(255,90,54,0.18); } 50% { box-shadow: 0 0 0 6px rgba(255,90,54,0.28); } }
+    h1 {
+      margin: 0 0 12px;
+      font-size: clamp(28px, 5vw, 46px);
+      line-height: 1.15;
+      color: #f9edc7;
+    }
+    .sub {
+      color: rgba(245,222,179,0.75);
+      margin: 0 0 26px;
+      font-size: 16px;
+      line-height: 1.7;
+      max-width: 680px;
+    }
+    .actions { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 32px; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      border-radius: 10px;
+      text-decoration: none;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.12s ease, border-color 0.15s ease;
+      padding: 12px 22px;
+      font-size: 15px;
+      border: 1px solid rgba(201,168,76,0.22);
+      background: rgba(201,168,76,0.08);
+      color: var(--text);
+    }
+    .btn:hover { border-color: rgba(201,168,76,0.5); }
+    .btn:active { transform: scale(0.97); }
+    .btn-primary { background: linear-gradient(135deg, #d5a545, #b57d1e); color: #1b1004; }
+    .btn-primary:hover { filter: brightness(1.04); }
+    .frame-shell {
+      border: 1px solid rgba(201,168,76,0.18); border-radius: 16px; overflow: hidden; background: rgba(17, 11, 8, 0.76);
+    }
+    .frame-header {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 12px; padding: 12px 16px; border-bottom: 1px solid rgba(201,168,76,0.18);
+      font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: rgba(245,222,179,0.7);
+      background: rgba(30, 20, 10, 0.42);
+    }
+    iframe {
+      width: 100%; display: block; height: 640px; border: 0; background: #111;
+    }
+    .fallback-note {
+      margin-top: 18px; color: rgba(245,222,179,0.68); font-size: 13px; line-height: 1.7;
+    }
+    .fallback-note a { color: #f3c668; }
 
-  .brand-row {
-    display: flex; align-items: center; gap: 12px;
-    margin-bottom: 28px;
-  }
-  .brand-row img {
-    height: 36px;
-    width: auto;
-    display: block;
-  }
-  .brand-row .brand-name {
-    font-family: var(--font-display);
-    font-size: 18px;
-    font-weight: 700;
-    letter-spacing: 0.01em;
-  }
+    .footer-wrap {
+      background: linear-gradient(180deg,rgba(5,3,0,1) 0%,rgba(8,4,1,1) 30%,rgba(10,6,2,1) 60%,rgba(4,2,0,1) 100%);
+      border-top: 1px solid rgba(153,101,21,0.35);
+      font-family:'Segoe UI',Arial,sans-serif;
+      color:rgba(245,222,179,0.75);
+      position: relative;
+      overflow: hidden;
+      width: 100%;
+      max-width: 100%;
+      box-sizing: border-box;
+      margin-top: auto;
+    }
+    .footer-wrap *{box-sizing:border-box;margin:0;padding:0}
+    .footer-wrap::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent 0%,rgba(153,101,21,0.6) 20%,rgba(201,168,76,0.85) 50%,rgba(153,101,21,0.6) 80%,transparent 100%)}
+    .footer-top{display:grid;grid-template-columns:repeat(4,1fr);gap:32px;padding:52px 48px 40px;max-width:1200px;margin:0 auto}
+    .footer-col{min-width:0}
+    .brand-col{text-align:left}
+    .brand-col .brand-name{font-size:14px;font-weight:700;color:rgba(201,168,76,0.9);letter-spacing:0.4px;margin-bottom:5px;line-height:1.3}
+    .brand-col .brand-pali{font-size:10px;letter-spacing:1.8px;text-transform:uppercase;color:rgba(153,101,21,0.7);margin-bottom:14px}
+    .brand-col p{font-size:12px;line-height:1.7;color:rgba(245,222,179,0.45);margin-bottom:18px}
+    .social-row{display:flex;gap:8px;flex-wrap:wrap}
+    .soc-btn{width:32px;height:32px;border-radius:50%;border:1px solid rgba(153,101,21,0.35);background:rgba(153,101,21,0.08);display:flex;align-items:center;justify-content:center;color:rgba(201,168,76,0.7);cursor:pointer;transition:all 0.25s;text-decoration:none;flex-shrink:0}
+    .soc-btn svg{width:13px;height:13px;fill:currentColor}
+    .soc-btn:hover{background:rgba(153,101,21,0.22);border-color:rgba(201,168,76,0.55);color:rgba(201,168,76,0.95);transform:translateY(-2px)}
+    .footer-col h4{font-size:10px;letter-spacing:2.2px;text-transform:uppercase;color:rgba(153,101,21,0.85);margin-bottom:18px;font-weight:700;position:relative;padding-bottom:10px}
+    .footer-col h4::after{content:'';position:absolute;bottom:0;left:0;width:24px;height:1px;background:rgba(153,101,21,0.5)}
+    .footer-col ul{list-style:none}
+    .footer-col ul li{margin-bottom:10px}
+    .footer-col ul li a{font-size:12.5px;color:rgba(245,222,179,0.42);text-decoration:none;letter-spacing:0.2px;transition:color 0.2s;display:flex;align-items:center;gap:6px}
+    .footer-col ul li a::before{content:'>';color:rgba(153,101,21,0.5);font-size:14px;line-height:1}
+    .footer-col ul li a:hover{color:rgba(201,168,76,0.85)}
+    .contact-item{display:flex;gap:10px;margin-bottom:12px;align-items:flex-start}
+    .contact-icon{width:28px;height:28px;border-radius:6px;background:rgba(153,101,21,0.1);border:1px solid rgba(153,101,21,0.25);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:rgba(201,168,76,0.85);transition:all 0.2s}
+    .contact-icon svg{width:13px;height:13px;fill:currentColor}
+    .contact-item:hover .contact-icon{background:rgba(153,101,21,0.2);border-color:rgba(201,168,76,0.45)}
+    .contact-txt{font-size:11px;line-height:1.55;color:rgba(245,222,179,0.45);word-break:break-word;min-width:0}
+    .contact-txt strong{display:block;font-size:9px;letter-spacing:1.4px;text-transform:uppercase;color:rgba(153,101,21,0.75);margin-bottom:2px;font-weight:700}
+    .footer-divider{max-width:1200px;margin:0 auto;height:1px;background:linear-gradient(90deg,transparent 0%,rgba(153,101,21,0.25) 20%,rgba(153,101,21,0.45) 50%,rgba(153,101,21,0.25) 80%,transparent 100%)}
+    .footer-bottom{max-width:1200px;margin:0 auto;padding:18px 48px 22px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+    .footer-bottom .copy{font-size:11px;color:rgba(245,222,179,0.3);letter-spacing:0.5px}
+    .footer-bottom .copy span{color:rgba(153,101,21,0.7)}
+    .footer-bottom .links{display:flex;gap:20px;flex-wrap:wrap}
+    .footer-bottom .links a{font-size:10.5px;color:rgba(245,222,179,0.28);text-decoration:none;letter-spacing:0.5px;transition:color 0.2s}
+    .footer-bottom .links a:hover{color:rgba(153,101,21,0.85)}
+    .dhamma-strip{background:rgba(153,101,21,0.06);border-top:1px solid rgba(153,101,21,0.12);text-align:center;padding:12px;font-size:10.5px;letter-spacing:3px;text-transform:uppercase;color:rgba(153,101,21,0.4)}
+    .dhamma-strip span{color:rgba(153,101,21,0.6);margin:0 10px}
 
-  h1 {
-    font-family: var(--font-display);
-    font-size: clamp(28px, 4vw, 42px);
-    line-height: 1.15;
-    margin: 0 0 14px;
-  }
-  .sub {
-    color: var(--text-muted);
-    font-size: 16px;
-    line-height: 1.6;
-    max-width: 640px;
-    margin: 0 0 30px;
-  }
-
-  .actions { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 36px; }
-  .btn {
-    display: inline-flex; align-items: center; gap: 8px;
-    border: 1px solid var(--line);
-    background: var(--panel-raised);
-    color: var(--text);
-    padding: 12px 22px;
-    border-radius: 8px;
-    font-weight: 600;
-    font-size: 15px;
-    text-decoration: none;
-    cursor: pointer;
-    transition: transform 0.08s ease, border-color 0.15s ease;
-  }
-  .btn:hover { border-color: #454857; }
-  .btn:active { transform: scale(0.97); }
-  .btn-primary { background: var(--accent); border-color: var(--accent); color: #17110D; }
-  .btn-primary:hover { background: #ff6d4c; border-color: #ff6d4c; }
-
-  .frame-shell {
-    border: 1px solid var(--line);
-    border-radius: 14px;
-    overflow: hidden;
-    background: var(--panel);
-  }
-  .frame-header {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 12px 16px;
-    border-bottom: 1px solid var(--line);
-    font-family: var(--font-mono);
-    font-size: 12px;
-    color: var(--text-muted);
-  }
-  iframe {
-    width: 100%;
-    height: 640px;
-    border: none;
-    display: block;
-    background: #0C0D10;
-  }
-
-  .fallback-note {
-    margin-top: 16px;
-    font-size: 13px;
-    color: var(--text-muted);
-    line-height: 1.6;
-  }
-  .fallback-note a { color: var(--accent); }
-
-  @media (max-width: 600px) {
-    iframe { height: 520px; }
-  }
-</style>
+    @media (max-width: 768px) {
+      .nav { padding: 0 12px; min-height: 54px; }
+      .nav-links, .lang-row { display: none; }
+      .hamburger { display: flex; align-items: center; gap: 6px; cursor: pointer; padding: 8px 10px; margin-left: auto; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); border-radius: 20px; }
+      .hamburger .dot { display: block; width: 13px; height: 13px; border-radius: 50%; }
+      .hamburger .dot.red { background: #ff5f57; }
+      .hamburger .dot.yellow { background: #ffbd2e; }
+      .hamburger .dot.green { background: #28c840; }
+      .mobile-sidebar { display: block; position: fixed; top: 0; left: -280px; width: 280px; height: 100vh; background: linear-gradient(180deg,#1a0808 0%,#2a0a0a 100%); z-index: 500; transition: left 0.3s ease; box-shadow: 2px 0 10px rgba(0,0,0,0.5); overflow-y: auto; }
+      .mobile-sidebar.open { left: 0; }
+      .mobile-sidebar-header { background: linear-gradient(90deg,#5a0808,#8b1212); padding: 1rem; display: flex; align-items: center; justify-content: space-between; }
+      .mobile-close { background: none; border: none; color: #c9a84c; font-size: 18px; cursor: pointer; }
+      .mobile-nav-links { padding: 1rem 0; }
+      .mobile-nav-links a { display: block; color: #f5deb3; padding: 12px 1.5rem; text-decoration: none; border-bottom: 1px solid rgba(201,168,76,0.1); }
+      .mobile-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 400; }
+      .mobile-overlay.open { display: block; }
+      .media-page { margin-top: 22px; width: min(100% - 18px, 1100px); padding: 24px 14px 10px; }
+      iframe { height: 520px; }
+      .frame-header { flex-direction: column; align-items: flex-start; }
+      .footer-top{grid-template-columns:1fr;gap:26px;padding:32px 22px 22px;text-align:center}
+      .brand-col{padding-bottom:14px}
+      .footer-col h4{display:inline-block}
+      .footer-col h4::after{left:50%;transform:translateX(-50%)}
+      .footer-col ul li a{justify-content:center}
+      .contact-item{display:inline-flex;max-width:240px;width:auto;margin:0 auto 12px;text-align:left;align-items:center}
+      .footer-bottom{flex-direction:column;align-items:center;text-align:center;gap:12px;padding:18px 22px 20px}
+      .footer-bottom .links{justify-content:center;gap:14px}
+      .dhamma-strip{font-size:9px;letter-spacing:1.8px;padding:11px 12px;line-height:1.6}
+      .dhamma-strip span{margin:0 6px}
+      .social-row{justify-content:center}
+    }
+  </style>
 </head>
 <body>
-  <div class="wrap">
+  <nav class="nav">
+    <img src="logo.png" width="28" height="28" alt="logo" style="margin-right:10px;flex-shrink:0">
+    <div class="brand">Sri Vipassi Dhamma School</div>
+    <div class="nav-links" style="margin-left: 80px;">
+      <a href="index.html">Home</a>
+      <a href="daily-attendance.html" data-role-gate="student,teacher" style="display:none;">Daily Attendance</a>
+      <a href="About.html">About</a>
+      <a href="galery.html">Gallery</a>
+      <a href="achievements (2).html">Achievements</a>
+      <a href="daily-quotes.html">Daily Quotes</a>
+      <a href="Contact.html">Contact us</a>
+      <a href="projects.html">Projects</a>
+      <a href="Subject.html">Syllabus</a>
+    </div>
+    <div class="lang-row">
+      <button class="lb on">EN</button>
+      <button class="lb">සිං</button>
+      <button class="lb">தமிழ்</button>
+      <button class="login-btn" id="loginBtn" onclick="openAuth('signin')">Login</button>
+    </div>
+    <button class="hamburger" onclick="toggleMobileMenu()" aria-label="Open menu">
+      <span class="dot red"></span>
+      <span class="dot yellow"></span>
+      <span class="dot green"></span>
+    </button>
+  </nav>
+
+  <div class="mobile-overlay" id="mobileOverlay" onclick="closeMobileMenu()"></div>
+  <div class="mobile-sidebar" id="mobileSidebar">
+    <div class="mobile-sidebar-header">
+      <div class="brand">Sri Vipassi Dhamma School</div>
+      <button class="mobile-close" onclick="closeMobileMenu()">×</button>
+    </div>
+    <div class="mobile-nav-links">
+      <a href="index.html" onclick="closeMobileMenu()">Home</a>
+      <a href="daily-attendance.html" data-role-gate="student,teacher" style="display:none;" onclick="closeMobileMenu()">Daily Attendance</a>
+      <a href="About.html" onclick="closeMobileMenu()">About</a>
+      <a href="galery.html" onclick="closeMobileMenu()">Gallery</a>
+      <a href="achievements (2).html" onclick="closeMobileMenu()">Achievements</a>
+      <a href="daily-quotes.html" onclick="closeMobileMenu()">Daily Quotes</a>
+      <a href="Contact.html" onclick="closeMobileMenu()">Contact us</a>
+      <a href="projects.html" onclick="closeMobileMenu()">Projects</a>
+      <a href="Subject.html" onclick="closeMobileMenu()">Syllabus</a>
+    </div>
+    <div class="mobile-lang-row">
+      <div style="display:flex;gap:5px;align-items:center;">
+        <button class="lb on">EN</button>
+        <button class="lb">සිං</button>
+        <button class="lb">தமிழ்</button>
+      </div>
+      <button class="login-btn" id="mobileLoginBtn" onclick="openAuth('signin');closeMobileMenu()">Login</button>
+    </div>
+  </div>
+
+  <div class="auth-overlay" id="authOverlay" onclick="overlayClick(event)">
+    <div class="auth-modal">
+      <div class="am-head">
+        <span class="am-wheel">☸</span>
+        <span class="am-brand">Sri Vipassi Dhamma School</span>
+        <button class="am-close" onclick="closeAuth()">✕</button>
+      </div>
+
+      <div class="am-tabs">
+        <button class="am-tab on" id="tabSI" onclick="switchTab('si')">Sign In</button>
+        <button class="am-tab" id="tabSU" onclick="switchTab('su')">Sign Up</button>
+        <button class="am-tab" id="tabFC" onclick="switchTab('fc')">Face Sign-In</button>
+      </div>
+
+      <div class="am-body" id="panSI">
+        <div class="am-signin-section">
+          <div class="am-section-label">🎒 Student / Teacher Sign-In</div>
+          <div class="am-field"><label class="am-label">Your Name</label><input class="am-input" id="siNm" type="text" placeholder="Any part of your full name"></div>
+          <div class="am-field"><label class="am-label">Password</label><input class="am-input" id="siNmPass" type="password" placeholder="Password"></div>
+          <button class="am-btn" id="siNmBtn" onclick="doSchoolSignIn()">Sign In</button>
+          <div class="am-err" id="siNmErr"></div>
+          <div class="am-forgot"><a href="#" onclick="forgotPwForName();return false">Forgot password?</a></div>
+          <div class="am-migration-link">Existing account that won't sign in by name?<a href="#" onclick="openMigration();return false">Click to migrate →</a></div>
+        </div>
+        <div class="am-divider"><span>OR</span></div>
+        <div class="am-signin-section am-guest-section">
+          <div class="am-section-label">👤 Guest Sign-In</div>
+          <p class="am-guest-note">For community visitors only. Students &amp; teachers must use the section above.</p>
+          <div class="am-field"><label class="am-label">Email</label><input class="am-input" id="siEmail" type="email" placeholder="you@email.com"></div>
+          <div class="am-field"><label class="am-label">Password</label><input class="am-input" id="siPass" type="password" placeholder="Password"></div>
+          <div class="am-forgot"><a href="#" onclick="forgotPw();return false">Forgot password?</a></div>
+          <button class="am-btn" id="siBtn" onclick="doSignIn()">Sign In as Guest</button>
+          <div class="am-err" id="siErr"></div>
+          <div class="am-divider am-divider-small"><span>OR</span></div>
+          <div class="am-socials">
+            <button class="am-soc google" onclick="doGoogle()">
+              <svg width="15" height="15" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+              Continue with Google
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="am-body" id="panSU" style="display:none">
+        <div id="suStep1">
+          <div class="am-role-prompt">I am a…</div>
+          <div class="am-role-grid am-role-grid-3">
+            <button class="am-role-card" onclick="pickRole('student')"><div class="am-role-ico">🎒</div><div class="am-role-title">Student</div><div class="am-role-sub">Sign up as a Dhamma school student</div></button>
+            <button class="am-role-card" onclick="pickRole('teacher')"><div class="am-role-ico">👨‍🏫</div><div class="am-role-title">Teacher</div><div class="am-role-sub">Sign up as a Dhamma school teacher</div></button>
+            <button class="am-role-card" onclick="pickRole('normal')"><div class="am-role-ico">👤</div><div class="am-role-title">Visitor</div><div class="am-role-sub">Community member — no school code needed</div></button>
+          </div>
+        </div>
+        <div id="suStudent" style="display:none">
+          <button class="am-back" onclick="backToRolePick()">← Choose different role</button>
+          <div class="am-section-label">Student Registration</div>
+          <div class="am-field am-reg-code"><label class="am-label">🔒 School Registration Code *</label><input class="am-input" id="stRegCode" type="password" placeholder="Required to register as a student"></div>
+          <div class="am-field"><label class="am-label">Full Name *</label><input class="am-input" id="stName" type="text" placeholder="Your full name"></div>
+          <div class="am-field"><label class="am-label">Email *</label><input class="am-input" id="stEmail" type="email" placeholder="you@email.com"></div>
+          <div class="am-field"><label class="am-label">Password *</label><input class="am-input" id="stPass" type="password" placeholder="Min. 6 characters"></div>
+          <button class="am-btn" id="stBtn" onclick="doSignUpStudent()">Create Student Account</button>
+          <div class="am-err" id="stErr"></div>
+        </div>
+        <div id="suTeacher" style="display:none">
+          <button class="am-back" onclick="backToRolePick()">← Choose different role</button>
+          <div class="am-section-label">Teacher Registration</div>
+          <div class="am-field am-reg-code"><label class="am-label">🔒 School Registration Code *</label><input class="am-input" id="tcRegCode" type="password" placeholder="Required to register as a teacher"></div>
+          <div class="am-field"><label class="am-label">Full Name *</label><input class="am-input" id="tcName" type="text" placeholder="Your full name"></div>
+          <div class="am-field"><label class="am-label">Email *</label><input class="am-input" id="tcEmail" type="email" placeholder="you@email.com"></div>
+          <div class="am-field"><label class="am-label">Password *</label><input class="am-input" id="tcPass" type="password" placeholder="Min. 6 characters"></div>
+          <button class="am-btn" id="tcBtn" onclick="doSignUpTeacher()">Create Teacher Account</button>
+          <div class="am-err" id="tcErr"></div>
+        </div>
+        <div id="suNormal" style="display:none">
+          <button class="am-back" onclick="backToRolePick()">← Choose different role</button>
+          <div class="am-section-label">Visitor Registration</div>
+          <div class="am-field"><label class="am-label">Full Name *</label><input class="am-input" id="nmName" type="text" placeholder="Your full name"></div>
+          <div class="am-field"><label class="am-label">Email *</label><input class="am-input" id="nmEmail" type="email" placeholder="you@email.com"></div>
+          <div class="am-field"><label class="am-label">Password *</label><input class="am-input" id="nmPass" type="password" placeholder="Min. 6 characters"></div>
+          <button class="am-btn" id="nmBtn" onclick="doSignUpNormal()">Create Visitor Account</button>
+          <div class="am-err" id="nmErr"></div>
+        </div>
+      </div>
+
+      <div class="am-body" id="panFC" style="display:none">
+        <div class="am-section-label">Sign in with your face</div>
+        <div class="am-face-stage am-fc-stage" id="fcStage"><video id="fcVideo" autoplay playsinline muted></video><div class="am-face-overlay" id="fcOverlay">Click "Open Camera" to begin</div></div>
+        <div class="am-face-btns"><button type="button" class="am-face-btn" id="fcCamBtn" onclick="startFaceLogin()">Open Camera</button><button type="button" class="am-face-btn alt" id="fcScanBtn" onclick="scanFaceLogin()" disabled>Scan &amp; Sign In</button></div>
+        <div class="am-face-hint" id="fcHint">Face sign-in works after registered with a photo.</div>
+        <div class="am-err" id="fcErr"></div>
+      </div>
+
+      <div class="am-body am-loggedin" id="panLI" style="display:none">
+        <div class="am-avatar" id="lgAvatar">☸</div>
+        <div class="am-lg-name" id="lgName">Welcome!</div>
+        <div class="am-lg-email" id="lgEmail"></div>
+        <div class="am-lg-role" id="lgRole"></div>
+        <button class="am-btn" id="lgEditBtn" onclick="openEditProfile()">Edit Profile</button>
+        <button class="am-btn am-btn-ghost" id="lgScannerBtn" style="display:none;margin-top:10px" onclick="window.location.href='Scaner.html'">Open Attendance Scanner</button>
+        <button class="am-btn am-btn-ghost" style="margin-top:10px" onclick="doSignOut()">Sign Out</button>
+      </div>
+
+      <div class="am-body" id="panRU" style="display:none"><div class="am-section-label">Annual Re-registration</div><button class="am-btn" onclick="doSignOut()">Sign Out</button></div>
+    </div>
+  </div>
+
+  <main class="media-page">
     <div class="brand-row">
-      <img src="logo.png" alt="Vipassi Media logo" onerror="this.style.display='none'" />
-      <span class="brand-name">Vipassi Media</span>
+      <div class="logo-frame">
+        <img src="logo.png" alt="Vipassi Media logo" onerror="this.parentElement.style.display='none'" />
+      </div>
+      <div class="brand-text">
+        <span class="brand-name">Vipassi Media</span>
+        <span class="brand-tagline">Video &amp; Communications</span>
+      </div>
     </div>
 
     <div class="eyebrow">
       <span class="tally"></span>
-      <span>LIVE VIDEO MEETINGS</span>
+      <span>Live video meetings</span>
     </div>
 
     <h1>Start or join a video call.</h1>
     <p class="sub">
-      Peer-to-peer video conferencing with an AI producer that takes notes for you —
-      right here on our site. Enter a room code below to jump straight in, or open it
-      in its own tab for the full-screen experience.
+      Peer-to-peer video conferencing for the school community. Open a room below to join instantly,
+      or launch it in its own tab for the full-screen experience.
     </p>
 
     <div class="actions">
@@ -169,10 +488,91 @@
     </div>
 
     <p class="fallback-note">
-      If your camera or microphone doesn't prompt for permission inside the box above,
-      use "Open in full screen" instead — some browsers restrict camera access inside
-      embedded frames. <a href="https://meet.srivipassi.com" target="_blank" rel="noopener">meet.srivipassi.com</a>
+      If your camera or microphone does not prompt for permission inside the box above,
+      use “Open in full screen” instead — some browsers restrict camera access inside embedded frames.
+      <a href="https://meet.srivipassi.com" target="_blank" rel="noopener">meet.srivipassi.com</a>
     </p>
+  </main>
+
+  <div class="footer-wrap">
+    <div class="footer-top">
+      <div class="brand-col footer-col">
+        <div class="brand-name">Sri Vipassi Dhamma School</div>
+        <div class="brand-pali">Kande Viharaya · Horana</div>
+        <p>Nurturing wisdom, compassion, and the noble Dhamma — guiding Sri Lanka toward a virtuous society.</p>
+        <div class="social-row">
+          <a class="soc-btn" title="Facebook" href="https://web.facebook.com/srivipassi/?_rdc=1&_rdr#"><svg viewBox="0 0 24 24"><path d="M22 12c0-5.52-4.48-10-10-10S2 6.48 2 12c0 4.84 3.44 8.87 8 9.8V15H8v-3h2V9.5C10 7.57 11.57 6 13.5 6H16v3h-2c-.55 0-1 .45-1 1v2h3v3h-3v6.95c5.05-.5 9-4.76 9-9.95z"/></svg></a>
+          <a class="soc-btn" title="YouTube" href="#"><svg viewBox="0 0 24 24"><path d="M23.5 6.2c-.3-1-1.1-1.8-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6c-1 .3-1.8 1.1-2.1 2.1C0 8.1 0 12 0 12s0 3.9.5 5.8c.3 1 1.1 1.8 2.1 2.1 1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6c1-.3 1.8-1.1 2.1-2.1.5-1.9.5-5.8.5-5.8s0-3.9-.5-5.8zM9.6 15.6V8.4l6.3 3.6-6.3 3.6z"/></svg></a>
+          <a class="soc-btn" title="WhatsApp" href="https://api.whatsapp.com/send?phone=%2B94777980889"><svg viewBox="0 0 24 24"><path d="M17.5 14.4c-.3-.1-1.7-.8-2-.9-.3-.1-.5-.1-.7.1-.2.3-.7.9-.9 1.1-.2.2-.3.2-.6.1-.9-.4-1.7-.9-2.5-1.7-.7-.7-1.2-1.5-1.7-2.4-.1-.3 0-.4.1-.6.1-.1.3-.3.4-.5.1-.2.2-.3.3-.5.1-.2 0-.4 0-.5-.1-.1-.7-1.6-.9-2.2-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-1 1-1.6 2.4-1.6 3.9.1 1.7.9 3.3 1.6 4.4 1.4 2.1 3.1 3.7 5.4 4.6 1 .4 1.8.7 2.4.9.7.2 1.4.2 2 .1.6-.1 1.7-.7 1.9-1.4.2-.7.2-1.3.2-1.4-.1-.1-.3-.2-.6-.4l.3.1zM12 2C6.5 2 2 6.5 2 12c0 1.7.5 3.4 1.3 4.9L2 22l5.3-1.4c1.4.8 3 1.2 4.7 1.2 5.5 0 10-4.5 10-10S17.5 2 12 2z"/></svg></a>
+          <a class="soc-btn" title="Instagram" href="#"><svg viewBox="0 0 24 24"><path d="M12 2.16c3.2 0 3.58 0 4.85.07 3.25.15 4.77 1.69 4.92 4.92.06 1.27.07 1.65.07 4.85s0 3.58-.07 4.85c-.15 3.23-1.66 4.77-4.92 4.92-1.27.06-1.64.07-4.85.07s-3.58 0-4.85-.07c-3.26-.15-4.77-1.7-4.92-4.92-.06-1.27-.07-1.64-.07-4.85s0-3.58.07-4.85C2.5 3.92 4.01 2.38 7.15 2.23 8.42 2.18 8.8 2.16 12 2.16zM12 0C8.74 0 8.33.01 7.05.07 2.7.27.27 2.69.07 7.05.01 8.33 0 8.74 0 12s.01 3.67.07 4.95c.2 4.36 2.62 6.78 6.98 6.98C8.33 23.99 8.74 24 12 24s3.67-.01 4.95-.07c4.35-.2 6.78-2.62 6.98-6.98.06-1.28.07-1.69.07-4.95s-.01-3.67-.07-4.95c-.2-4.35-2.62-6.78-6.98-6.98C15.67.01 15.26 0 12 0zm0 5.84a6.16 6.16 0 100 12.32 6.16 6.16 0 000-12.32zm0 10.16a4 4 0 110-8 4 4 0 010 8zm6.41-11.85a1.44 1.44 0 100 2.88 1.44 1.44 0 000-2.88z"/></svg></a>
+        </div>
+      </div>
+      <div class="footer-col">
+        <h4>Quick Links</h4>
+        <ul>
+          <li><a href="index.html">Home</a></li>
+          <li><a href="About.html">About Us</a></li>
+          <li><a href="daily-attendance.html" data-role-gate="student,teacher" style="display:none;">Daily Attendance</a></li>
+          <li><a href="galery.html">Gallery</a></li>
+          <li><a href="Subject.html">Syllabus</a></li>
+          <li><a href="achievements (2).html">Achievements</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Programs</h4>
+        <ul>
+          <li><a href="projects.html">Dhamma Projects</a></li>
+          <li><a href="daily-quotes.html">Daily Quotes</a></li>
+          <li><a href="#">Welfare Unit</a></li>
+          <li><a href="media.html">Vipassi Media</a></li>
+          <li><a href="Contact.html">Contact Us</a></li>
+        </ul>
+      </div>
+      <div class="footer-col contact-col">
+        <h4>Contact</h4>
+        <div class="contact-item">
+          <div class="contact-icon"><svg viewBox="0 0 24 24"><path d="M12 2C7.58 2 4 5.58 4 10c0 5.25 7 12 8 12s8-6.75 8-12c0-4.42-3.58-8-8-8zm0 11a3 3 0 110-6 3 3 0 010 6z"/></svg></div>
+          <div class="contact-txt"><strong>Location</strong>Kananwila, Horana<br>Sri Lanka 12418</div>
+        </div>
+        <div class="contact-item">
+          <div class="contact-icon"><svg viewBox="0 0 24 24"><path d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56a.977.977 0 00-1.01.24l-1.57 1.97c-2.83-1.35-5.48-3.9-6.89-6.83l1.95-1.66c.27-.27.35-.65.24-1A11.36 11.36 0 018.62 4c0-.55-.45-1-1-1H4.19C3.65 3 3 3.24 3 4c0 9.16 7.83 17 17 17 .72 0 1-.63 1-1.18v-3.43c0-.55-.45-1-1-1z"/></svg></div>
+          <div class="contact-txt"><strong>Phone</strong>077 798 0889</div>
+        </div>
+        <div class="contact-item">
+          <div class="contact-icon"><svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg></div>
+          <div class="contact-txt"><strong>Email</strong>srivipassidhamma<br>school@gmail.com</div>
+        </div>
+      </div>
+    </div>
+    <div class="footer-divider"></div>
+    <div class="footer-bottom">
+      <div class="copy">© 2025 <span>Sri Vipassi Dhamma School</span> · All rights reserved</div>
+      <div class="links">
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Use</a>
+        <a href="#">Sitemap</a>
+      </div>
+    </div>
+    <div class="dhamma-strip">
+      <span>☸</span> Developing Wisdom Through Dhamma <span>☸</span> Sri Lanka <span>☸</span>
+    </div>
   </div>
+
+  <script>
+    function toggleMobileMenu() {
+      const sidebar = document.getElementById('mobileSidebar');
+      const overlay = document.getElementById('mobileOverlay');
+      const button = document.querySelector('.hamburger');
+      const open = sidebar.classList.toggle('open');
+      overlay.classList.toggle('open', open);
+      button.classList.toggle('open', open);
+    }
+    function closeMobileMenu() {
+      document.getElementById('mobileSidebar').classList.remove('open');
+      document.getElementById('mobileOverlay').classList.remove('open');
+      document.querySelector('.hamburger').classList.remove('open');
+    }
+  </script>
+  <script src="auth-system.js"></script>
 </body>
 </html>
