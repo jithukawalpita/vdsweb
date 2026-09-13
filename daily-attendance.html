@@ -17,526 +17,305 @@
     }
   </script>
   <script src="auth-gate.js"></script>
+  <script src="nav-gate.js"></script>
   <script src="head-tags.js"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-  <title>Sri Vipassi Dhamma School | Student History Access</title>
+  <title>Sri Vipassi Dhamma School | Student Records Assistant</title>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
-    
 .login-btn{background:linear-gradient(135deg,#c9a84c,#a07810);color:#1a0800;border:none;padding:5px 16px;border-radius:3px;font-size:10.5px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;margin-left:8px;transition:all .2s;box-shadow:0 2px 8px rgba(201,168,76,0.25)}
 .login-btn:hover{background:linear-gradient(135deg,#e0b95c,#b88a20);box-shadow:0 4px 14px rgba(201,168,76,0.4)}
 .login-btn.logged-in{background:rgba(201,168,76,0.12);color:#c9a84c;border:1px solid rgba(201,168,76,0.35)}
-.auth-overlay{display:none;position:fixed;inset:0;z-index:1000;background:rgba(4,2,4,0.92);backdrop-filter:blur(8px);align-items:center;justify-content:center}
-.auth-overlay.open{display:flex}
-.auth-modal{background:linear-gradient(160deg,#110808 0%,#1a0a0a 60%,#0d0d0a 100%);border:1px solid rgba(201,168,76,0.28);border-radius:8px;width:100%;max-width:420px;margin:1rem;box-shadow:0 0 80px rgba(0,0,0,0.95);animation:mIn .3s ease both;overflow:hidden;max-height:92vh;overflow-y:auto}
-@keyframes mIn{from{opacity:0;transform:translateY(-20px) scale(0.96)}to{opacity:1;transform:none}}
-.am-head{background:linear-gradient(90deg,#5a0808,#7a0e0e,#5a0808);border-bottom:1px solid rgba(201,168,76,0.3);padding:1rem 1.4rem;display:flex;align-items:center;gap:10px;position:relative}
-.am-wheel{font-size:1.3rem;filter:drop-shadow(0 0 7px rgba(201,168,76,0.6))}
-.am-brand{font-size:10px;letter-spacing:2px;color:#c9a84c;text-transform:uppercase;flex:1}
-.am-close{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:rgba(245,222,179,0.45);font-size:14px;cursor:pointer;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:all .2s}
-.am-close:hover{background:rgba(255,255,255,0.1);color:#f5deb3}
-.am-tabs{display:flex;border-bottom:1px solid rgba(201,168,76,0.1)}
-.am-tab{flex:1;padding:11px;background:none;border:none;color:rgba(245,222,179,0.4);font-size:9.5px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;border-bottom:2px solid transparent;transition:all .2s}
-.am-tab.on{color:#c9a84c;border-bottom-color:#c9a84c;background:rgba(201,168,76,0.04)}
-.am-tab:hover:not(.on){color:rgba(245,222,179,0.65)}
-.am-body{padding:1.4rem}
-.am-field{margin-bottom:.9rem}
-.am-label{display:block;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:#c9a84c;margin-bottom:5px}
-.am-input{width:100%;background:rgba(255,255,255,0.04);border:1px solid rgba(201,168,76,0.18);border-radius:3px;padding:9px 13px;color:#f5deb3;font-size:0.87rem;outline:none;transition:border-color .2s}
-.am-input:focus{border-color:rgba(201,168,76,0.5);background:rgba(201,168,76,0.03)}
-.am-input::placeholder{color:rgba(245,222,179,0.18)}
-.am-forgot{text-align:right;margin-top:-3px;margin-bottom:.8rem}
-.am-forgot a{font-size:0.75rem;color:rgba(201,168,76,0.55);text-decoration:none}
-.am-forgot a:hover{color:#c9a84c}
-.am-btn{width:100%;padding:11px;background:linear-gradient(135deg,#c9a84c,#a07810);border:none;border-radius:3px;color:#1a0800;font-weight:700;font-size:10.5px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all .2s}
-.am-btn:hover{background:linear-gradient(135deg,#e0b95c,#b88a20);box-shadow:0 4px 18px rgba(201,168,76,0.28)}
-.am-btn:disabled{opacity:.5;cursor:not-allowed}
-.am-err{margin-top:.65rem;font-size:.77rem;color:#e05555;min-height:1rem;text-align:center}
-.am-ok{color:#6dbf6d!important}
-.am-div{display:flex;align-items:center;gap:10px;margin:1rem 0;color:rgba(245,222,179,0.22);font-size:.72rem}
-.am-div::before,.am-div::after{content:'';flex:1;height:1px;background:rgba(201,168,76,0.1)}
-.am-socials{display:grid;grid-template-columns:1fr;gap:8px;margin-bottom:.4rem}
-.am-soc{padding:9px 6px;background:rgba(255,255,255,0.04);border:1px solid rgba(201,168,76,0.14);border-radius:3px;color:rgba(245,222,179,0.7);font-size:.78rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:all .2s;white-space:nowrap}
-.am-soc:hover{background:rgba(255,255,255,0.09);border-color:rgba(201,168,76,0.3);color:#f5deb3}
-.am-soc.google:hover{border-color:rgba(234,67,53,0.5)}
-.am-loggedin{text-align:center;padding:2rem 1.4rem}
-.am-avatar{width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,rgba(201,168,76,0.2),rgba(90,8,8,0.5));border:2px solid rgba(201,168,76,0.4);display:flex;align-items:center;justify-content:center;font-size:1.8rem;margin:0 auto .8rem}
-.am-lg-name{font-size:1.3rem;color:#fff;margin-bottom:.25rem}
-.am-lg-email{font-size:.76rem;color:rgba(201,168,76,0.55);letter-spacing:.8px;margin-bottom:1.4rem}
 
-    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-    :root {
-      --bg: #fefaf2;
-      --card: #ffffff;
-      --golden: #c9a03d;
-      --golden-light: #f5e9cb;
-      --deep-forest: #2c5f6e;
-      --forest-light: rgba(44,95,110,0.08);
-      --text: #2a3b3c;
-      --text-soft: #6b7a5e;
-      --border: #f0e6d6;
-      --shadow: 0 15px 35px rgba(0,0,0,0.05), 0 2px 6px rgba(0,0,0,0.02);
-    }
-    
-
-    body {
-      font-family: 'Inter', system-ui, sans-serif;
-      color: var(--text);
-      min-height: 100vh;
-      overflow-x: hidden;
-      background: #000;
-    }
-
-    /* ========== NAV FROM HOMEPAGE ========== */
-    .nav {
-      background: linear-gradient(90deg,#5a0808 0%,#8b1212 40%,#7a0e0e 70%,#5a0808 100%);
-      padding: 0 24px;
-      display: flex;
-      align-items: center;
-      border-bottom: 2px solid #c9a84c;
-      position: relative;
-      z-index: 100;
-      box-shadow: 0 2px 20px rgba(0,0,0,0.6);
-    }
-    .nav-logo { display:flex; align-items:center; gap:10px; padding:8px 0; margin-right:20px; }
-    .brand { color:#f5deb3; font-size:13px; font-weight:700; letter-spacing:.5px; text-shadow:0 1px 3px rgba(0,0,0,0.5); }
-    .nav-links { display:flex; flex-wrap:wrap; flex:1; }
-    .nav-links a {
-      color:rgba(245,222,179,0.88); font-size:11.5px; padding:14px 10px;
-      text-decoration:none; border-bottom:2px solid transparent; transition:all .2s; white-space:nowrap;
-    }
-    .nav-links a:hover { color:#ffe066; border-bottom-color:#ffe066; background:rgba(255,255,255,0.05); }
-    .lang-row { display:flex; gap:5px; align-items:center; padding:6px 0; margin-left:auto; }
-    .lb {
-      background:rgba(255,255,255,0.08); color:#f5deb3; border:1px solid rgba(255,255,255,0.2);
-      padding:4px 10px; border-radius:3px; font-size:10.5px; cursor:pointer; transition:all .2s;
-    }
-    .lb:hover { background:rgba(255,255,255,0.15); }
-    .lb.on { background:linear-gradient(135deg,#c9a84c,#a07810); color:#1a0800; border-color:#c9a84c; font-weight:700; }
-    .dropdown { position:relative; }
-    .dropdown-menu {
-      display:none; position:absolute; top:100%; right:0; background:#8b1212;
-      border:1px solid #c9a84c; border-top:none; z-index:200; min-width:120px;
-    }
-    .dropdown-menu a { display:block; color:#f5deb3; font-size:11px; padding:8px 14px; text-decoration:none; }
-    .dropdown-menu a:hover { background:rgba(201,168,76,0.15); color:#ffe066; }
-    .dropdown:hover .dropdown-menu { display:block; }
-
-    /* ========== HAMBURGER MENU ========== */
-    .hamburger {
-  display: none;
-  align-items: center;
-  gap: 6px;
-  cursor: pointer;
-  padding: 8px 10px;
-  margin-left: auto;
-  background: rgba(255,255,255,0.08);
-  border: 1px solid rgba(255,255,255,0.15);
-  border-radius: 20px;
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --bg: #fefaf2; --card: #ffffff; --golden: #c9a03d; --golden-light: #f5e9cb;
+  --deep-forest: #2c5f6e; --forest-light: rgba(44,95,110,0.08);
+  --text: #2a3b3c; --text-soft: #6b7a5e; --border: #f0e6d6;
+  --shadow: 0 15px 35px rgba(0,0,0,0.05), 0 2px 6px rgba(0,0,0,0.02);
 }
+body { font-family: 'Inter', system-ui, sans-serif; color: var(--text); min-height: 100vh; overflow-x: hidden; background: #000; }
 
-.hamburger .dot {
-  display: block;
-  width: 13px;
-  height: 13px;
-  border-radius: 50%;
-  transition: transform 0.2s, filter 0.2s;
-}
+/* ========== NAV ========== */
+.nav { background: linear-gradient(90deg,#5a0808 0%,#8b1212 40%,#7a0e0e 70%,#5a0808 100%); padding: 0 24px; display: flex; align-items: center; border-bottom: 2px solid #c9a84c; position: relative; z-index: 100; box-shadow: 0 2px 20px rgba(0,0,0,0.6); }
+.nav-logo { display:flex; align-items:center; gap:10px; padding:8px 0; margin-right:20px; }
+.brand { color:#f5deb3; font-size:13px; font-weight:700; letter-spacing:.5px; text-shadow:0 1px 3px rgba(0,0,0,0.5); }
+.nav-links { display:flex; flex-wrap:wrap; flex:1; }
+.nav-links a { color:rgba(245,222,179,0.88); font-size:11.5px; padding:14px 10px; text-decoration:none; border-bottom:2px solid transparent; transition:all .2s; white-space:nowrap; }
+.nav-links a:hover { color:#ffe066; border-bottom-color:#ffe066; background:rgba(255,255,255,0.05); }
+.lang-row { display:flex; gap:5px; align-items:center; padding:6px 0; margin-left:auto; }
+.lb { background:rgba(255,255,255,0.08); color:#f5deb3; border:1px solid rgba(255,255,255,0.2); padding:4px 10px; border-radius:3px; font-size:10.5px; cursor:pointer; transition:all .2s; }
+.lb:hover { background:rgba(255,255,255,0.15); }
+.lb.on { background:linear-gradient(135deg,#c9a84c,#a07810); color:#1a0800; border-color:#c9a84c; font-weight:700; }
 
+/* ========== HAMBURGER ========== */
+.hamburger { display: none; align-items: center; gap: 6px; cursor: pointer; padding: 8px 10px; margin-left: auto; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); border-radius: 20px; }
+.hamburger .dot { display: block; width: 13px; height: 13px; border-radius: 50%; transition: transform 0.2s, filter 0.2s; }
 .hamburger .dot.red    { background: #ff5f57; }
 .hamburger .dot.yellow { background: #ffbd2e; }
 .hamburger .dot.green  { background: #28c840; }
-
 .hamburger:hover .dot { filter: brightness(1.15); }
-.hamburger:hover .dot.red    { transform: scale(1.15); }
-.hamburger:hover .dot.yellow { transform: scale(1.15) translateX(0); }
-.hamburger:hover .dot.green  { transform: scale(1.15); }
-
-/* Remove the open-state transforms since we no longer have bars */
 .hamburger.open .dot { opacity: 0.6; }
 
-    /* ========== MOBILE SIDEBAR ========== */
-    .mobile-sidebar { position:fixed; top:0; left:-280px; width:280px; height:100vh; background:linear-gradient(180deg,#1a0808 0%,#2a0a0a 100%); z-index:500; transition:left 0.3s ease; box-shadow:2px 0 10px rgba(0,0,0,0.5); overflow-y:auto; }
-    .mobile-sidebar.open { left:0; }
-    .mobile-sidebar-header { background:linear-gradient(90deg,#5a0808,#8b1212); padding:1rem; display:flex; align-items:center; justify-content:space-between; }
-    .mobile-sidebar-header .brand { color:#f5deb3; font-size:14px; font-weight:700; }
-    .mobile-close { background:none; border:none; color:#c9a84c; font-size:18px; cursor:pointer; }
-    .mobile-nav-links { padding:1rem 0; }
-    .mobile-nav-links a { display:block; color:#f5deb3; padding:12px 1.5rem; text-decoration:none; border-bottom:1px solid rgba(201,168,76,0.1); transition:all 0.2s; }
-    .mobile-nav-links a:hover { background:rgba(201,168,76,0.1); color:#ffe066; }
-    .mobile-lang-row {
-  padding: 0.8rem 1rem;
-  border-top: 1px solid rgba(201,168,76,0.1);
+/* ========== MOBILE SIDEBAR ========== */
+.mobile-sidebar { position:fixed; top:0; left:-280px; width:280px; height:100vh; background:linear-gradient(180deg,#1a0808 0%,#2a0a0a 100%); z-index:500; transition:left 0.3s ease; box-shadow:2px 0 10px rgba(0,0,0,0.5); overflow-y:auto; }
+.mobile-sidebar.open { left:0; }
+.mobile-sidebar-header { background:linear-gradient(90deg,#5a0808,#8b1212); padding:1rem; display:flex; align-items:center; justify-content:space-between; }
+.mobile-sidebar-header .brand { color:#f5deb3; font-size:14px; font-weight:700; }
+.mobile-close { background:none; border:none; color:#c9a84c; font-size:18px; cursor:pointer; }
+.mobile-nav-links { padding:1rem 0; }
+.mobile-nav-links a { display:block; color:#f5deb3; padding:12px 1.5rem; text-decoration:none; border-bottom:1px solid rgba(201,168,76,0.1); transition:all 0.2s; }
+.mobile-nav-links a:hover { background:rgba(201,168,76,0.1); color:#ffe066; }
+.mobile-lang-row { padding: 0.8rem 1rem; border-top: 1px solid rgba(201,168,76,0.1); display: flex; flex-direction: column; gap: 10px; width: 100%; box-sizing: border-box; }
+.mobile-lang-row .login-btn { display: block !important; width: 30%; padding: 6px 1px !important; font-size: 10px !important; letter-spacing: 2px; border-radius: 3px; background: linear-gradient(135deg, #c9a84c, #a07810); color: #1a0800 !important; font-weight: 700; text-transform: uppercase; border: 0.1px solid rgba(201,168,76,0.5) !important; box-shadow: 0 2px 12px rgba(201,168,76,0.25); transition: all 0.25s; text-align: center; cursor: pointer; margin-left: 0; }
+
+/* ========== OVERLAY ========== */
+.mobile-overlay { display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); z-index:400; }
+.mobile-overlay.open { display:block; }
+
+@media(max-width:768px) {
+  .nav-links, .lang-row { display:none; }
+  .hamburger { display:flex; }
+  .strip { flex-direction:column; gap:20px; padding:16px 16px; }
+  .side-card { flex-direction:column; gap:8px; }
+  .si { flex:none; width:100%; padding:12px 16px; border-radius:8px; }
+  .tagline-bar { flex-direction:column; gap:8px; padding:16px 12px; font-size:9px; }
+  .tagline-bar .tmark { font-size:14px; }
+  .tagline-bar .ttext { font-size:9px; }
+}
+
+/* ========== BACKGROUND ========== */
+.page-bg { position: fixed; inset: 0; z-index: 0; background-image: url('class.jpg'); background-size: cover; background-repeat: no-repeat; background-position: center center; background-attachment: fixed; opacity: 0.35; filter: sepia(0.8) saturate(1.3) hue-rotate(330deg) brightness(0.5); }
+#particles { position: fixed; inset: 0; pointer-events: none; z-index: 1; }
+
+.page-content { position: relative; z-index: 10; padding: 1.2rem; height: calc(100vh - 52px); display: flex; }
+
+.main-card {
+  max-width: 100%;
+  width: 100%;
+  margin: 0;
+  flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  width: 100%;
-  box-sizing: border-box;
-}
-
-.mobile-lang-row .login-btn {
-  display: block !important;
-  width: 30%;
-  padding: 6px 1px !important;
-  font-size: 10px !important;
-  letter-spacing: 2px;
-  border-radius: 3px;
-  background: linear-gradient(135deg, #c9a84c, #a07810);
-  color: #1a0800 !important;
-  font-weight: 700;
-  text-transform: uppercase;
-  border: 0.1px solid rgba(201,168,76,0.5) !important;
-  box-shadow: 0 2px 12px rgba(201,168,76,0.25);
-  transition: all 0.25s;
-  text-align: center;
-  cursor: pointer;
-  margin-left: 0;
-}
-
-.mobile-lang-row .login-btn:hover {
-  background: linear-gradient(135deg, #e0b95c, #b88a20) !important;
-  box-shadow: 0 4px 18px rgba(201,168,76,0.4);
-  transform: translateY(-1px);
-}
-
-.mobile-lang-row .login-btn.logged-in {
-  background: rgba(201,168,76,0.12) !important;
-  color: #c9a84c !important;
-  border: 0.1px solid rgba(201,168,76,0.35) !important;
-}
-
-
-    /* ========== OVERLAY ========== */
-    .mobile-overlay { display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); z-index:400; }
-    .mobile-overlay.open { display:block; }
-
-    /* ========== RESPONSIVE ========== */
-    @media(max-width:768px) {
-      .nav-links, .lang-row { display:none; }
-      .hamburger { display:flex; }
-      .strip { flex-direction:column; gap:20px; padding:16px 16px; }
-      .side-card { flex-direction:column; gap:8px; }
-      .si { flex:none; width:100%; padding:12px 16px; border-radius:8px; }
-      .tagline-bar { flex-direction:column; gap:8px; padding:16px 12px; font-size:9px; }
-      .tagline-bar .tmark { font-size:14px; }
-      .tagline-bar .ttext { font-size:9px; }
-    }
-
-    /* ========== BACKGROUND ========== */
- .page-bg {
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  background-image: url('class.jpg');
-  background-size: cover;
-  background-repeat: no-repeat;
-  background-position: center center;
-  background-attachment: fixed;
-  opacity: 0.35;
-  filter: sepia(0.8) saturate(1.3) hue-rotate(330deg) brightness(0.5);
-}
-    #particles {
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      z-index: 1;
-    }
-
-    /* ========== MAIN CONTENT WRAPPER ========== */
-    .page-content {
-      position: relative;
-      z-index: 10;
-      padding: 2.5rem 1.2rem 3rem;
-    }
-
-    /* ========== PORTAL CARDS ========== */
-    .main-card {
-  max-width: 500px;
-  margin: 0 auto;
-  background: linear-gradient(135deg, rgba(30,10,10,0.92), rgba(20,8,8,0.88));
-  border-radius: 32px;
-  border: 1px solid rgba(201,168,76,0.25);
-  box-shadow: 0 20px 60px rgba(0,0,0,0.7), 0 0 0 1px rgba(201,168,76,0.1);
+  background: linear-gradient(120deg, rgba(234,252,255,0.55) 0%, rgba(244,240,255,0.55) 22%, rgba(255,240,250,0.55) 44%, rgba(255,252,235,0.55) 66%, rgba(234,255,244,0.55) 88%, rgba(234,252,255,0.55) 100%);
+  background-size: 280% 280%;
+  animation: holoDrift 16s ease-in-out infinite;
+  backdrop-filter: blur(18px);
+  border-radius: 28px;
+  border: 1px solid rgba(255,255,255,0.45);
+  box-shadow: 0 20px 60px rgba(80,90,180,0.18), 0 0 0 1px rgba(255,255,255,0.3) inset, 0 0 40px rgba(255,180,240,0.1);
   padding: 0;
   overflow: hidden;
-  backdrop-filter: blur(12px);
 }
-
-.mac-bar {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  padding: 14px 18px;
-  
-  border-bottom: 1px solid rgba(201,168,76,0.15);
+@keyframes holoDrift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
 }
-.mac-bar span {
-  width: 13px; height: 13px;
-  border-radius: 50%;
-  display: inline-block;
-}
+.mac-bar span { width: 13px; height: 13px; border-radius: 50%; display: inline-block; }
 .mac-bar .d-red    { background: #ff5f57; box-shadow: 0 0 4px rgba(255,95,87,0.5); }
 .mac-bar .d-yellow { background: #ffbd2e; box-shadow: 0 0 4px rgba(255,189,46,0.5); }
 .mac-bar .d-green  { background: #28c840; box-shadow: 0 0 4px rgba(40,200,64,0.5); }
+.mac-bar { display: flex; align-items: center; gap: 7px; padding: 14px 18px; border-bottom: 1px solid rgba(120,140,255,0.15); flex-shrink: 0; }
+.mac-inner { padding: 1.2rem 1.6rem 1.4rem; flex: 1; display: flex; flex-direction: column; min-height: 0; }
 
-.mac-inner {
-  padding: 2rem;
+.chat-header { display:flex; align-items:center; gap:.8rem; margin-bottom:1rem; flex-wrap:wrap; flex-shrink: 0; }
+.chat-header h1 {
+  font-family:'Cormorant Garamond',serif;
+  font-weight:800;
+  font-size:1.6rem;
+  color:#0a0a0a;
 }
-    .full-card { max-width: 1300px; }
+.chat-header p { font-size:.72rem; color:#1e3a8a; font-weight:600; letter-spacing:.3px; }
+.chat-header-actions { margin-left:auto; display:flex; gap:8px; }
+.icon-btn { background:rgba(255,255,255,0.7); border:1px solid rgba(120,140,255,0.35); color:#3730a3; font-size:.68rem; letter-spacing:.5px; text-transform:uppercase; padding:7px 12px; border-radius:40px; cursor:pointer; transition:.2s; font-weight:700; }
+.icon-btn:hover { background:#fff; border-color:#7c3aed; box-shadow: 0 2px 10px rgba(124,58,237,0.2); }
 
-    .header {
-      display: flex;
-      align-items: center;
-      gap: 1.2rem;
-      margin-bottom: 1.8rem;
-      flex-wrap: wrap;
-      border-bottom: 2px solid var(--border);
-      padding-bottom: 1rem;
-    }
-    .brand-inner h1 {
-  font-family: 'Cormorant Garamond', serif;
-  font-weight: 600; font-size: 1.6rem;
-  color: #f5e6a0;  /* plain light yellow */
+.year-row { display:flex; align-items:center; gap:8px; margin-bottom:1rem; font-size:.75rem; color:#3f3f5f; font-weight:600; flex-shrink: 0; }
+.year-row select { background:rgba(255,255,255,0.8); border:1px solid rgba(120,140,255,0.35); color:#312e81; border-radius:20px; padding:5px 12px; font-size:.75rem; font-weight:700; }
+
+.chat-window {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  background: rgba(255,255,255,0.25);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.55);
+  border-radius: 22px;
+  padding: 1rem;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 1rem;
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.5) inset, 0 12px 32px rgba(120,140,255,0.12);
 }
-.brand-inner p { font-size: 0.75rem; color: #7ed8a0; } /* plain light green */
+.bubble { max-width:85%; padding:10px 14px; border-radius:16px; font-size:.85rem; line-height:1.5; white-space:pre-wrap; position: relative; z-index: 1; }
+.bubble.user { align-self:flex-end; background:linear-gradient(135deg,#7fd8ff,#a78bfa); color:#1a1035; border-bottom-right-radius:4px; box-shadow: 0 4px 14px rgba(140,150,255,0.35); }
+.bubble.assistant { align-self:flex-start; background:rgba(255,255,255,0.68); backdrop-filter: blur(6px); color:#2a2a3d; border:1px solid rgba(255,255,255,0.8); border-bottom-left-radius:4px; box-shadow: 0 4px 14px rgba(120,140,255,0.12); }
+.bubble.assistant.error { border-color:#e0556b; color:#8a1f33; background:rgba(255,240,243,0.92); }
+.bubble.loading { opacity:.7; font-style:italic; }
 
-    /* Login Form */
-    .login-box {
-  background: linear-gradient(135deg, rgba(50,18,5,0.6), rgba(30,10,5,0.5));
-  border-radius: 16px;
-  border: 1px solid rgba(201,168,76,0.15);
-  padding: 2rem 1.8rem;
-  text-align: center;
+.chat-input-row { display:flex; gap:8px; flex-shrink: 0; }
+.chat-input-row input { flex:1; background:rgba(255,255,255,0.7); border:1px solid rgba(120,140,255,0.3); border-radius:40px; padding:11px 16px; color:#2a2a45; font-size:.85rem; outline:none; }
+.chat-input-row input:focus { border-color:#7c3aed; background:#fff; }
+.chat-input-row input::placeholder { color:rgba(60,60,90,0.4); }
+.chat-input-row button { background:linear-gradient(135deg,#0891b2,#7c3aed); border:none; border-radius:40px; padding:0 22px; color:#fff; font-weight:700; font-size:.8rem; cursor:pointer; }
+.chat-input-row button:disabled { opacity:.5; cursor:not-allowed; }
+
+.hint-line { font-size:.68rem; color:rgba(50,50,80,0.5); margin-top:.6rem; text-align:center; flex-shrink: 0; }
+
+/* ---------- Graphical report card ---------- */
+.report-card {
+  align-self: stretch;
+  background: rgba(255,255,255,0.4);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,0.85);
+  border-radius: 20px;
+  padding: 1.1rem 1.2rem;
+  box-shadow: 0 8px 24px rgba(120,140,255,0.15);
+  position: relative;
+  z-index: 1;
 }
-    .login-icon { font-size: 3rem; margin-bottom: 1rem; }
-    .login-box h2 { font-family: 'Cormorant Garamond', serif; color: #7ed8a0; margin-bottom: 0.5rem; }
-    .login-box p.sub { font-size: 0.75rem; color: var(--text-soft); margin-bottom: 1.5rem; }
-    .input-group { margin-bottom: 1.2rem; text-align: left; }
-    .input-group label { font-size: 0.75rem; font-weight: 600; color: var(--text-soft); display: block; margin-bottom: 6px; }
-    .input-group input {
-      width: 100%; padding: 12px 16px; border: 1px solid var(--border);
-      border-radius: 60px; font-size: 0.9rem; font-family: inherit; outline: none; transition: 0.2s;
-    }
-    .input-group input:focus { border-color: var(--golden); box-shadow: 0 0 0 3px rgba(201,160,61,0.15); }
-    .btn { padding: 10px 24px; border-radius: 40px; border: none; font-weight: 600; font-family: inherit; cursor: pointer; transition: 0.2s; font-size: 0.85rem; }
-    .btn-gold { background: var(--golden); color: #28200d; width: 100%; }
-    .btn-gold:hover { background: #b8902e; }
-    .btn-ghost { background: white; border: 1px solid #e2d6c2; color: var(--text); }
-    .alert { padding: 10px 14px; border-radius: 60px; margin-bottom: 1rem; font-size: 0.8rem; font-weight: 500; }
-    .alert-error { background: #ffe9e7; border-left: 4px solid #e57373; color: #c62828; }
-    .alert-success { background: #e4f3e2; border-left: 4px solid #81c784; color: #2e7d32; }
-    .alert-info { background: #e6f1fb; border-left: 4px solid #85b7eb; color: #185fa5; }
-    .hidden { display: none; }
-    .conn-badge {
-      margin-left: auto; background: var(--forest-light); padding: 6px 16px;
-      border-radius: 60px; font-size: 0.7rem; font-weight: 500; display: flex; align-items: center; gap: 8px;
-    }
-    .dot { width: 9px; height: 9px; border-radius: 50%; }
-    .dot.green { background: #2c9b6e; box-shadow: 0 0 0 2px #d3f0e2; }
+.report-head { display:flex; align-items:center; gap:.7rem; margin-bottom:1rem; flex-wrap:wrap; }
+.report-name {
+  font-family:'Cormorant Garamond',serif; font-weight:700; font-size:1.5rem;
+  background:linear-gradient(90deg,#0891b2,#7c3aed,#db2777,#f59e0b,#0891b2);
+  background-size:200% auto; -webkit-background-clip:text; background-clip:text; color:transparent;
+  animation: reportShimmer 6s linear infinite;
+}
+@keyframes reportShimmer { to { background-position: 200% center; } }
+.report-badge { background:linear-gradient(135deg,#fbbf24,#f59e0b); color:#4a2c00; font-weight:800; font-size:.7rem; padding:4px 12px; border-radius:20px; letter-spacing:.4px; box-shadow: 0 2px 8px rgba(245,158,11,0.3); white-space: nowrap; }
+.report-grid { display:flex; flex-wrap:wrap; gap: 1.4rem; align-items:center; margin-bottom: .3rem; }
+.donut-wrap { position: relative; width: 96px; height: 96px; flex-shrink:0; }
+.donut-chart { width:100%; height:100%; border-radius:50%; }
+.donut-center { position:absolute; inset:12px; background:#fff; border-radius:50%; display:flex; flex-direction:column; align-items:center; justify-content:center; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.04); }
+.donut-center b { font-size:1.05rem; color:#1e293b; }
+.donut-center span { font-size:.58rem; color:#64748b; text-transform:uppercase; letter-spacing:.4px; }
+.attendance-legend { display:flex; flex-direction:column; gap:6px; font-size:.78rem; color:#334155; }
+.legend-item { display:flex; align-items:center; gap:8px; }
+.legend-dot { width:10px; height:10px; border-radius:3px; flex-shrink:0; }
+.report-section-title { font-size:.68rem; text-transform:uppercase; letter-spacing:1.1px; color:#6d28d9; font-weight:800; margin: 1rem 0 .5rem; }
+.flower-row { display:flex; flex-wrap:wrap; gap:6px; }
+.flower-icon { width:26px; height:26px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:14px; background:rgba(0,0,0,0.05); }
+.flower-icon.given { background: radial-gradient(circle, #fbcfe8, #f9a8d4); }
+.flower-icon.missing { filter: grayscale(1); opacity:.35; }
+.exam-cards { display:flex; flex-wrap:wrap; gap:10px; }
+.exam-card { background: linear-gradient(135deg, rgba(224,242,254,0.85), rgba(243,232,255,0.85)); border:1px solid rgba(120,140,255,0.25); border-radius:14px; padding:.7rem .9rem; min-width:110px; }
+.exam-card .exam-name { font-size:.63rem; text-transform:uppercase; letter-spacing:.5px; color:#5b21b6; font-weight:800; margin-bottom:2px; }
+.exam-card .exam-marks { font-size:1.3rem; font-weight:800; color:#1e293b; }
+.exam-card .exam-meta { font-size:.66rem; color:#475569; }
+.report-empty { font-size:.78rem; color:#64748b; font-style: italic; }
 
-    /* History page styles */
-    .controls {
-      display: flex; gap: 1rem; flex-wrap: wrap; align-items: flex-end;
-      margin-bottom: 1.5rem; background: white; padding: 1rem 1.3rem;
-      border-radius: 28px; border: 1px solid var(--border);
-    }
-    .ctrl-group { display: flex; flex-direction: column; gap: 5px; flex: 1; min-width: 140px; }
-    .ctrl-group label { font-size: 0.7rem; font-weight: 600; color: var(--text-soft); text-transform: uppercase; letter-spacing: 0.8px; }
-    select, input[type="date"] {
-      padding: 9px 14px; border: 1px solid var(--border); border-radius: 28px;
-      background: var(--bg); font-size: 0.85rem; font-family: inherit; outline: none; cursor: pointer;
-    }
-    .stats-row { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
-    .stat-card {
-      background: white; border: 1px solid var(--border); border-radius: 24px;
-      padding: 0.8rem 1.2rem; flex: 1; min-width: 100px; text-align: center;
-    }
-    .stat-card .num { font-size: 1.8rem; font-weight: 700; color: var(--deep-forest); }
-    .stat-card .label { font-size: 0.68rem; color: var(--text-soft); }
-    .section-label {
-      font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1.5px;
-      color: var(--golden); background: #fbf5e8; padding: 0.3rem 1rem;
-      border-radius: 40px; width: fit-content; margin-bottom: 1rem;
-    }
-    .history-wrap { overflow-x: auto; margin-top: 0.5rem; border-radius: 24px; background: white; padding: 0.5rem 0; }
-    table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
-    th { background: #fbf5e8; padding: 12px 10px; text-align: left; font-weight: 600; color: var(--text-soft); white-space: nowrap; }
-    td { padding: 10px 10px; border-top: 1px solid var(--border); }
-    tr:hover td { background: #fdf9f3; }
-    .student-name { font-weight: 600; color: var(--deep-forest); }
-    .grade-badge { background: #fcf0df; padding: 2px 10px; border-radius: 40px; font-size: 0.7rem; display: inline-block; }
-    .status-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
-    .status-dot.present { background: #4caf50; }
-    .status-dot.absent { background: #ef5350; }
-    .status-dot.unmarked { background: #bdbdbd; }
-    .empty-state { text-align: center; padding: 3rem 1rem; background: white; border-radius: 28px; border: 1px dashed var(--border); color: var(--text-soft); }
-    .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid #e6dbc9; border-top-color: var(--golden); border-radius: 50%; animation: spin 0.6s linear infinite; margin-right: 6px; vertical-align: middle; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .welcome-user {
-      background: var(--golden-light); padding: 4px 12px; border-radius: 40px;
-      font-size: 0.75rem; font-weight: 500; color: var(--deep-forest);
-      margin-left: auto; display: flex; align-items: center; gap: 8px;
-    }
-    .student-view-badge { background: #e8f5e9; color: #2e7d32; padding: 4px 12px; border-radius: 40px; font-size: 0.7rem; font-weight: 500; }
-    .trends-grid { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
-    .trend-card {
-      flex: 1; min-width: 260px; background: white; border: 1px solid var(--border);
-      border-radius: 24px; padding: 1.1rem 1.3rem;
-    }
-    .trend-card h4 { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-soft); margin-bottom: 0.8rem; }
-    .trend-pie-row { display: flex; align-items: center; gap: 1rem; }
-    .trend-pie-svg { width: 110px; height: 110px; flex-shrink: 0; }
-    .trend-legend { flex: 1; display: flex; flex-direction: column; gap: 6px; }
-    .trend-legend-item { display: flex; align-items: center; gap: 8px; font-size: 0.78rem; color: var(--text); }
-    .trend-legend-dot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
-    .trend-legend-item b { margin-left: auto; color: var(--deep-forest); }
-    .trend-graph-wrap { position: relative; width: 100%; height: 150px; }
-    .trend-graph-wrap svg { width: 100%; height: 100%; display: block; }
-    .trend-empty { text-align: center; color: var(--text-soft); font-size: 0.78rem; font-style: italic; padding: 1.5rem 0; }
-    .marks-row {
-      display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
-      background: white; border: 1px solid var(--border); border-radius: 22px;
-      padding: 14px 20px; margin-bottom: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.04);
-    }
-    .marks-row-exam { font-weight: 700; color: var(--deep-forest); min-width: 100px; font-size: 0.88rem; }
-    .marks-pills { display: flex; gap: 10px; flex-wrap: wrap; }
-    .marks-pill {
-      background: var(--golden); color: #28200d; border-radius: 9999px;
-      padding: 6px 14px; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.8px;
-      display: flex; align-items: center; gap: 6px; text-transform: uppercase; white-space: nowrap;
-    }
-    .marks-pill.not-entered { background: #e6e2d8; color: #6b7a5e; }
-    .marks-pill b { font-weight: 800; font-size: 0.78rem; text-transform: none; letter-spacing: normal; }
-    .marks-avg { margin-left: auto; font-weight: 700; color: var(--text); font-size: 0.85rem; }
-    .grade-display {
-      padding: 9px 16px; border: 1px solid var(--border); border-radius: 28px;
-      background: var(--bg); font-size: 0.85rem; font-weight: 700; color: var(--deep-forest);
-      text-align: center; min-width: 90px; white-space: nowrap;
-    }
-    .two-col-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; }
-    .panel-card {
-      background: white; border: 1px solid var(--border); border-radius: 24px;
-      padding: 1.3rem; min-height: 220px;
-    }
-    .panel-title {
-      font-family: 'Cormorant Garamond', serif; font-size: 1.3rem; color: var(--deep-forest);
-      margin-bottom: 0.9rem; text-align: center; border-bottom: 1px solid var(--border); padding-bottom: 0.6rem;
-    }
-    .term-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1.5rem; }
-    .term-card {
-      background: white; border: 1px solid var(--border); border-radius: 20px;
-      padding: 1.2rem; min-height: 150px;
-    }
-    .term-card-title {
-      font-family: 'Cormorant Garamond', serif; font-size: 1.05rem; color: var(--deep-forest);
-      margin-bottom: 0.7rem; text-align: center; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem;
-    }
-    @media (max-width: 900px) {
-      .two-col-grid { grid-template-columns: 1fr; }
-      .term-grid { grid-template-columns: 1fr 1fr; }
-    }
-    .strip {
-      background: linear-gradient(90deg,#4a0606,#7a1010,#8b1212,#7a1010,#4a0606);
-      display: flex; justify-content: space-between; gap: 20px;
-      border-top: 2px solid #c9a84c; border-bottom: 1px solid rgba(201,168,76,0.2);
-      padding: 20px 32px;
-      position: relative; z-index: 10;
-    }
-    .side-card { display: flex; flex-direction: column; gap: 10px; flex: 1; }
-    .si {
-      display: flex; align-items: center; gap: 12px; padding: 16px 20px; border-radius: 12px;
-      background: rgba(201,168,76,0.05); border: 1px solid rgba(201,168,76,0.2);
-      flex: 1; justify-content: center; transition: all 0.3s ease; cursor: default;
-      backdrop-filter: blur(5px);
-    }
-    .si:hover { background: rgba(201,168,76,0.1); border-color: #c9a84c; transform: translateY(-3px) scale(1.02); box-shadow: 0 8px 20px rgba(0,0,0,0.3); }
-    .sicon {
-      width: 38px; height: 38px; border-radius: 50%; background: rgba(201,168,76,0.1);
-      border: 1px solid rgba(201,168,76,0.4); display: flex; align-items: center;
-      justify-content: center; font-size: 16px; flex-shrink: 0; transition: all 0.3s ease;
-    }
-    .si:hover .sicon { background: rgba(201,168,76,0.2); border-color: #c9a84c; transform: scale(1.1); }
-    .stxt { color: #f5deb3; font-size: 11px; line-height: 1.5; }
-    .stxt strong { color: #c9a84c; display: block; font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 2px; }
-    .tagline-bar {
-      background: #050505; text-align: center; padding: 20px 32px;
-      border-top: 1px solid rgba(201,168,76,0.1);
-      display: flex; align-items: center; justify-content: center; gap: 16px;
-      position: relative; z-index: 10;
-    }
-    .tagline-bar .tmark { color: #c9a84c; font-size: 18px; }
-    .tagline-bar .ttext { color: rgba(255,255,255,0.45); font-size: 11.5px; letter-spacing: 2px; text-transform: uppercase; }
-    .tagline-bar .ttext span { color: #c9a84c; }
+/* ---------- Dark theme variant (black / gray) ---------- */
+body.dark-theme .main-card {
+  background: linear-gradient(120deg, rgba(10,10,10,0.6) 0%, rgba(23,23,23,0.6) 25%, rgba(35,35,35,0.6) 50%, rgba(23,23,23,0.6) 75%, rgba(10,10,10,0.6) 100%);
+  background-size: 280% 280%;
+  backdrop-filter: blur(18px);
+  border-color: rgba(255,255,255,0.1);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.05) inset, 0 0 40px rgba(0,0,0,0.4);
+}
+body.dark-theme .mac-bar { border-bottom-color: rgba(255,255,255,0.1); }
+body.dark-theme .chat-header h1 {
+  color:#f5f5f5;
+}
+body.dark-theme .chat-header p { color:#93c5fd; }
+body.dark-theme .icon-btn { background:rgba(255,255,255,0.06); border-color:rgba(255,255,255,0.18); color:#d4d4d4; }
+body.dark-theme .icon-btn:hover { background:rgba(255,255,255,0.12); border-color:#c9a84c; }
+body.dark-theme .year-row { color:#d4d4d4; }
+body.dark-theme .year-row select { background:rgba(255,255,255,0.06); border-color:rgba(255,255,255,0.18); color:#e5e5e5; }
+body.dark-theme .chat-window { background:rgba(255,255,255,0.03); border-color:rgba(255,255,255,0.12); box-shadow: 0 0 0 1px rgba(255,255,255,0.08) inset, 0 12px 32px rgba(0,0,0,0.55); }
+body.dark-theme .bubble.assistant { background:rgba(38,38,38,0.6); color:#e5e5e5; border-color:rgba(255,255,255,0.14); }
+body.dark-theme .bubble.user { background:linear-gradient(135deg,#525252,#262626); color:#fff; box-shadow: 0 4px 14px rgba(0,0,0,0.5); }
+body.dark-theme .bubble.assistant.error { border-color:#f87171; color:#fecaca; background:rgba(50,20,20,0.7); }
+body.dark-theme .chat-input-row input { background:rgba(255,255,255,0.06); border-color:rgba(255,255,255,0.18); color:#e5e5e5; }
+body.dark-theme .chat-input-row input:focus { border-color:#c9a84c; background:rgba(255,255,255,0.09); }
+body.dark-theme .chat-input-row input::placeholder { color:rgba(255,255,255,0.3); }
+body.dark-theme .chat-input-row button { background:linear-gradient(135deg,#404040,#171717); color:#fff; border:1px solid rgba(255,255,255,0.16); }
+body.dark-theme .hint-line { color:rgba(255,255,255,0.35); }
+body.dark-theme .report-card { background:rgba(255,255,255,0.04); border-color:rgba(255,255,255,0.14); box-shadow: 0 8px 24px rgba(0,0,0,0.45); }
+body.dark-theme .report-name { background:linear-gradient(90deg,#f5f5f5,#a3a3a3,#e5e5e5,#c9a84c,#f5f5f5); background-size:200% auto; -webkit-background-clip:text; background-clip:text; color:transparent; }
+body.dark-theme .report-badge { background:linear-gradient(135deg,#c9a84c,#a07810); color:#1a0800; }
+body.dark-theme .donut-center { background:#171717; box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08); }
+body.dark-theme .donut-center b { color:#f5f5f5; }
+body.dark-theme .donut-center span { color:#a3a3a3; }
+body.dark-theme .attendance-legend { color:#d4d4d4; }
+body.dark-theme .report-section-title { color:#c9a84c; }
+body.dark-theme .flower-icon { background: rgba(255,255,255,0.06); }
+body.dark-theme .exam-card { background: linear-gradient(135deg, rgba(64,64,64,0.5), rgba(23,23,23,0.5)); border-color:rgba(255,255,255,0.16); }
+body.dark-theme .exam-card .exam-name { color:#c9a84c; }
+body.dark-theme .exam-card .exam-marks { color:#f5f5f5; }
+body.dark-theme .exam-card .exam-meta { color:#a3a3a3; }
+body.dark-theme .report-empty { color:#737373; }
 
-    /* ========== FOOTER STYLES ========== */
-    .footer-wrap {
-      background: linear-gradient(180deg,rgba(5,3,0,1) 0%,rgba(8,4,1,1) 30%,rgba(10,6,2,1) 60%,rgba(4,2,0,1) 100%);
-      border-top: 1px solid rgba(153,101,21,0.35);
-      font-family:'Segoe UI',Arial,sans-serif;
-      color:rgba(245,222,179,0.75);
-      position: relative;
-      overflow: hidden;
-      width: 100%;
-      max-width: 100%;
-      box-sizing: border-box;
-      margin-top: auto;
-    }
-    .footer-wrap *{box-sizing:border-box;margin:0;padding:0}
-    .footer-wrap::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent 0%,rgba(153,101,21,0.6) 20%,rgba(201,168,76,0.85) 50%,rgba(153,101,21,0.6) 80%,transparent 100%)}
-    .footer-top{display:grid;grid-template-columns:repeat(4,1fr);gap:32px;padding:52px 48px 40px;max-width:1200px;margin:0 auto}
-    .footer-col{min-width:0}
-    .brand-col{text-align:left}
-    .brand-col .brand-name{font-size:14px;font-weight:700;color:rgba(201,168,76,0.9);letter-spacing:0.4px;margin-bottom:5px;line-height:1.3}
-    .brand-col .brand-pali{font-size:10px;letter-spacing:1.8px;text-transform:uppercase;color:rgba(153,101,21,0.7);margin-bottom:14px}
-    .brand-col p{font-size:12px;line-height:1.7;color:rgba(245,222,179,0.45);margin-bottom:18px}
-    .social-row{display:flex;gap:8px;flex-wrap:wrap}
-    .soc-btn{width:32px;height:32px;border-radius:50%;border:1px solid rgba(153,101,21,0.35);background:rgba(153,101,21,0.08);display:flex;align-items:center;justify-content:center;color:rgba(201,168,76,0.7);cursor:pointer;transition:all 0.25s;text-decoration:none;flex-shrink:0}
-    .soc-btn svg{width:13px;height:13px;fill:currentColor}
-    .soc-btn:hover{background:rgba(153,101,21,0.22);border-color:rgba(201,168,76,0.55);color:rgba(201,168,76,0.95);transform:translateY(-2px)}
-    .footer-col h4{font-size:10px;letter-spacing:2.2px;text-transform:uppercase;color:rgba(153,101,21,0.85);margin-bottom:18px;font-weight:700;position:relative;padding-bottom:10px}
-    .footer-col h4::after{content:'';position:absolute;bottom:0;left:0;width:24px;height:1px;background:rgba(153,101,21,0.5)}
-    .footer-col ul{list-style:none}
-    .footer-col ul li{margin-bottom:10px}
-    .footer-col ul li a{font-size:12.5px;color:rgba(245,222,179,0.42);text-decoration:none;letter-spacing:0.2px;transition:color 0.2s;display:flex;align-items:center;gap:6px}
-    .footer-col ul li a::before{content:'>';color:rgba(153,101,21,0.5);font-size:14px;line-height:1}
-    .footer-col ul li a:hover{color:rgba(201,168,76,0.85)}
-    .contact-item{display:flex;gap:10px;margin-bottom:12px;align-items:flex-start}
-    .contact-icon{width:28px;height:28px;border-radius:6px;background:rgba(153,101,21,0.1);border:1px solid rgba(153,101,21,0.25);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:rgba(201,168,76,0.85);transition:all 0.2s}
-    .contact-icon svg{width:13px;height:13px;fill:currentColor}
-    .contact-item:hover .contact-icon{background:rgba(153,101,21,0.2);border-color:rgba(201,168,76,0.45)}
-    .contact-txt{font-size:11px;line-height:1.55;color:rgba(245,222,179,0.45);word-break:break-word;min-width:0}
-    .contact-txt strong{display:block;font-size:9px;letter-spacing:1.4px;text-transform:uppercase;color:rgba(153,101,21,0.75);margin-bottom:2px;font-weight:700}
-    .footer-divider{max-width:1200px;margin:0 auto;height:1px;background:linear-gradient(90deg,transparent 0%,rgba(153,101,21,0.25) 20%,rgba(153,101,21,0.45) 50%,rgba(153,101,21,0.25) 80%,transparent 100%)}
-    .footer-bottom{max-width:1200px;margin:0 auto;padding:18px 48px 22px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
-    .footer-bottom .copy{font-size:11px;color:rgba(245,222,179,0.3);letter-spacing:0.5px}
-    .footer-bottom .copy span{color:rgba(153,101,21,0.7)}
-    .footer-bottom .links{display:flex;gap:20px;flex-wrap:wrap}
-    .footer-bottom .links a{font-size:10.5px;color:rgba(245,222,179,0.28);text-decoration:none;letter-spacing:0.5px;transition:color 0.2s}
-    .footer-bottom .links a:hover{color:rgba(153,101,21,0.85)}
-    .dhamma-strip{background:rgba(153,101,21,0.06);border-top:1px solid rgba(153,101,21,0.12);text-align:center;padding:12px;font-size:10.5px;letter-spacing:3px;text-transform:uppercase;color:rgba(153,101,21,0.4)}
-    .dhamma-strip span{color:rgba(153,101,21,0.6);margin:0 10px}
+.spinner { display: inline-block; width: 12px; height: 12px; border: 2px solid rgba(245,222,179,0.25); border-top-color: var(--golden); border-radius: 50%; animation: spin 0.6s linear infinite; margin-right: 6px; vertical-align: middle; }
+@keyframes spin { to { transform: rotate(360deg); } }
 
-    @media (max-width: 700px) {
-      .main-card { padding: 1.2rem; }
-      th, td { font-size: 0.7rem; padding: 6px 4px; }
-      .si { padding: 12px 16px; }
-      .hero-content { padding: 0 20px; }
-      .footer-top{grid-template-columns:1fr;gap:26px;padding:32px 22px 22px;text-align:center}
-      .brand-col{padding-bottom:14px}
-      .footer-col h4{display:inline-block}
-      .footer-col h4::after{left:50%;transform:translateX(-50%)}
-      .footer-col ul li a{justify-content:center}
-      .contact-item{display:inline-flex;max-width:240px;width:auto;margin:0 auto 12px;text-align:left;align-items:center}
-      .footer-bottom{flex-direction:column;align-items:center;text-align:center;gap:12px;padding:18px 22px 20px}
-      .footer-bottom .links{justify-content:center;gap:14px}
-      .dhamma-strip{font-size:9px;letter-spacing:1.8px;padding:11px 12px;line-height:1.6}
-      .dhamma-strip span{margin:0 6px}
-      .social-row{justify-content:center}
-    }
+.strip { background: linear-gradient(90deg,#4a0606,#7a1010,#8b1212,#7a1010,#4a0606); display: flex; justify-content: space-between; gap: 20px; border-top: 2px solid #c9a84c; border-bottom: 1px solid rgba(201,168,76,0.2); padding: 20px 32px; position: relative; z-index: 10; }
+.side-card { display: flex; flex-direction: column; gap: 10px; flex: 1; }
+.si { display: flex; align-items: center; gap: 12px; padding: 16px 20px; border-radius: 12px; background: rgba(201,168,76,0.05); border: 1px solid rgba(201,168,76,0.2); flex: 1; justify-content: center; transition: all 0.3s ease; cursor: default; backdrop-filter: blur(5px); }
+.si:hover { background: rgba(201,168,76,0.1); border-color: #c9a84c; transform: translateY(-3px) scale(1.02); box-shadow: 0 8px 20px rgba(0,0,0,0.3); }
+.sicon { width: 38px; height: 38px; border-radius: 50%; background: rgba(201,168,76,0.1); border: 1px solid rgba(201,168,76,0.4); display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; transition: all 0.3s ease; }
+.si:hover .sicon { background: rgba(201,168,76,0.2); border-color: #c9a84c; transform: scale(1.1); }
+.stxt { color: #f5deb3; font-size: 11px; line-height: 1.5; }
+.stxt strong { color: #c9a84c; display: block; font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 2px; }
+.tagline-bar { background: #050505; text-align: center; padding: 20px 32px; border-top: 1px solid rgba(201,168,76,0.1); display: flex; align-items: center; justify-content: center; gap: 16px; position: relative; z-index: 10; }
+.tagline-bar .tmark { color: #c9a84c; font-size: 18px; }
+.tagline-bar .ttext { color: rgba(255,255,255,0.45); font-size: 11.5px; letter-spacing: 2px; text-transform: uppercase; }
+.tagline-bar .ttext span { color: #c9a84c; }
+
+/* ========== FOOTER ========== */
+.footer-wrap { background: linear-gradient(180deg,rgba(5,3,0,1) 0%,rgba(8,4,1,1) 30%,rgba(10,6,2,1) 60%,rgba(4,2,0,1) 100%); border-top: 1px solid rgba(153,101,21,0.35); font-family:'Segoe UI',Arial,sans-serif; color:rgba(245,222,179,0.75); position: relative; overflow: hidden; width: 100%; max-width: 100%; box-sizing: border-box; margin-top: auto; }
+.footer-wrap *{box-sizing:border-box;margin:0;padding:0}
+.footer-wrap::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent 0%,rgba(153,101,21,0.6) 20%,rgba(201,168,76,0.85) 50%,rgba(153,101,21,0.6) 80%,transparent 100%)}
+.footer-top{display:grid;grid-template-columns:repeat(4,1fr);gap:32px;padding:52px 48px 40px;max-width:1200px;margin:0 auto}
+.footer-col{min-width:0}
+.brand-col{text-align:left}
+.brand-col .brand-name{font-size:14px;font-weight:700;color:rgba(201,168,76,0.9);letter-spacing:0.4px;margin-bottom:5px;line-height:1.3}
+.brand-col .brand-pali{font-size:10px;letter-spacing:1.8px;text-transform:uppercase;color:rgba(153,101,21,0.7);margin-bottom:14px}
+.brand-col p{font-size:12px;line-height:1.7;color:rgba(245,222,179,0.45);margin-bottom:18px}
+.social-row{display:flex;gap:8px;flex-wrap:wrap}
+.soc-btn{width:32px;height:32px;border-radius:50%;border:1px solid rgba(153,101,21,0.35);background:rgba(153,101,21,0.08);display:flex;align-items:center;justify-content:center;color:rgba(201,168,76,0.7);cursor:pointer;transition:all 0.25s;text-decoration:none;flex-shrink:0}
+.soc-btn svg{width:13px;height:13px;fill:currentColor}
+.soc-btn:hover{background:rgba(153,101,21,0.22);border-color:rgba(201,168,76,0.55);color:rgba(201,168,76,0.95);transform:translateY(-2px)}
+.footer-col h4{font-size:10px;letter-spacing:2.2px;text-transform:uppercase;color:rgba(153,101,21,0.85);margin-bottom:18px;font-weight:700;position:relative;padding-bottom:10px}
+.footer-col h4::after{content:'';position:absolute;bottom:0;left:0;width:24px;height:1px;background:rgba(153,101,21,0.5)}
+.footer-col ul{list-style:none}
+.footer-col ul li{margin-bottom:10px}
+.footer-col ul li a{font-size:12.5px;color:rgba(245,222,179,0.42);text-decoration:none;letter-spacing:0.2px;transition:color 0.2s;display:flex;align-items:center;gap:6px}
+.footer-col ul li a::before{content:'>';color:rgba(153,101,21,0.5);font-size:14px;line-height:1}
+.footer-col ul li a:hover{color:rgba(201,168,76,0.85)}
+.contact-item{display:flex;gap:10px;margin-bottom:12px;align-items:flex-start}
+.contact-icon{width:28px;height:28px;border-radius:6px;background:rgba(153,101,21,0.1);border:1px solid rgba(153,101,21,0.25);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:rgba(201,168,76,0.85);transition:all 0.2s}
+.contact-icon svg{width:13px;height:13px;fill:currentColor}
+.contact-item:hover .contact-icon{background:rgba(153,101,21,0.2);border-color:rgba(201,168,76,0.45)}
+.contact-txt{font-size:11px;line-height:1.55;color:rgba(245,222,179,0.45);word-break:break-word;min-width:0}
+.contact-txt strong{display:block;font-size:9px;letter-spacing:1.4px;text-transform:uppercase;color:rgba(153,101,21,0.75);margin-bottom:2px;font-weight:700}
+.footer-divider{max-width:1200px;margin:0 auto;height:1px;background:linear-gradient(90deg,transparent 0%,rgba(153,101,21,0.25) 20%,rgba(153,101,21,0.45) 50%,rgba(153,101,21,0.25) 80%,transparent 100%)}
+.footer-bottom{max-width:1200px;margin:0 auto;padding:18px 48px 22px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.footer-bottom .copy{font-size:11px;color:rgba(245,222,179,0.3);letter-spacing:0.5px}
+.footer-bottom .copy span{color:rgba(153,101,21,0.7)}
+.footer-bottom .links{display:flex;gap:20px;flex-wrap:wrap}
+.footer-bottom .links a{font-size:10.5px;color:rgba(245,222,179,0.28);text-decoration:none;letter-spacing:0.5px;transition:color 0.2s}
+.footer-bottom .links a:hover{color:rgba(153,101,21,0.85)}
+.dhamma-strip{background:rgba(153,101,21,0.06);border-top:1px solid rgba(153,101,21,0.12);text-align:center;padding:12px;font-size:10.5px;letter-spacing:3px;text-transform:uppercase;color:rgba(153,101,21,0.4)}
+.dhamma-strip span{color:rgba(153,101,21,0.6);margin:0 10px}
+
+@media (max-width: 700px) {
+  .main-card { padding: 0; }
+  .footer-top{grid-template-columns:1fr;gap:26px;padding:32px 22px 22px;text-align:center}
+  .brand-col{padding-bottom:14px}
+  .footer-col h4{display:inline-block}
+  .footer-col h4::after{left:50%;transform:translateX(-50%)}
+  .footer-col ul li a{justify-content:center}
+  .contact-item{display:inline-flex;max-width:240px;width:auto;margin:0 auto 12px;text-align:left;align-items:center}
+  .footer-bottom{flex-direction:column;align-items:center;text-align:center;gap:12px;padding:18px 22px 20px}
+  .footer-bottom .links{justify-content:center;gap:14px}
+  .dhamma-strip{font-size:9px;letter-spacing:1.8px;padding:11px 12px;line-height:1.6}
+  .dhamma-strip span{margin:0 6px}
+  .social-row{justify-content:center}
+}
   </style>
-  <link rel="stylesheet" href="auth-modal.css">
-  <link rel="stylesheet" href="footer-mobile.css">
 </head>
 <body>
 
@@ -561,7 +340,7 @@
     <button class="lb on">EN</button>
     <button class="lb">සිං</button>
     <button class="lb">தமிழ்</button>
-    <button class="login-btn" id="loginBtn" onclick="openAuth('si')">Login</button>
+    <button class="login-btn" id="loginBtn" onclick="handleLoginBtnClick_()">Login</button>
   </div>
  <button class="hamburger mac-dots" onclick="toggleMobileMenu()" aria-label="Open menu">
   <span class="dot red"></span>
@@ -593,205 +372,159 @@
       <button class="lb">සිං</button>
       <button class="lb">தமிழ்</button>
     </div>
-    <button class="login-btn" id="mobileLoginBtn" onclick="openAuth('si');closeMobileMenu()">Login</button>
+    <button class="login-btn" id="mobileLoginBtn" onclick="handleLoginBtnClick_();closeMobileMenu()">Login</button>
   </div>
 </div>
 
 <div class="page-content">
 
- <div id="loginContainer" class="main-card" style="display:none;">
-  <div class="mac-bar">
-    <span class="d-red"></span>
-    <span class="d-yellow"></span>
-    <span class="d-green"></span>
-  </div>
-  <div class="mac-inner">
-    <div class="header" style="border-bottom: none; justify-content: center;">
-      <div class="brand-inner">
-        <h1>Vipassi Dhamma School</h1>
-        <p>Student Attendance History Portal</p>
-      </div>
+  <div class="main-card">
+    <div class="mac-bar">
+      <span class="d-red"></span><span class="d-yellow"></span><span class="d-green"></span>
     </div>
-    <div class="login-box">
-      <h2>Student Access Portal</h2>
-      <p class="sub">Enter your Full Name to view your attendance, flower marks and term test results</p>
-      <div id="loginAlert"></div>
-      <div class="input-group">
-        <label>🪪 Full Name</label>
-        <input type="text" id="loginCode" placeholder="e.g., Nimal Perera">
-      </div>
-      <button class="btn btn-gold" onclick="verifyAccess()">View My Attendance History</button>
-     <p style="color: var(--text-soft); margin-top: 1.5rem;" class="login-disclaimer">All registered students can access their own records using their full name.</p>
-    </div>
-  </div>
-</div>
-
-  <div id="sessionCheckContainer" class="main-card">
-    <div class="mac-bar"><span class="d-red"></span><span class="d-yellow"></span><span class="d-green"></span></div>
-    <div class="mac-inner" style="text-align:center;padding:3rem 2rem;">
-      <span class="spinner" style="width:22px;height:22px;border-width:3px;"></span>
-      <p style="margin-top:1rem;color:var(--text-soft);font-size:0.85rem;">Checking your session…</p>
-    </div>
-  </div>
-
-  <div id="historyContainer" class="main-card full-card" style="display: none;">
-    <div class="header">
-      <div class="brand-inner">
-        <h1>Vipassi Dhamma School</h1>
-        <p>My Attendance History</p>
-      </div>
-      <div class="conn-badge" id="connBadge">
-        <span class="dot green"></span><span>Connected</span>
-      </div>
-      <div class="welcome-user" id="welcomeUser"></div>
-      <button class="btn btn-ghost" onclick="logout()">🚪 Logout</button>
-    </div>
-
-    <div id="alertBox"></div>
-
-    <div id="studentInfoCard" style="background: linear-gradient(135deg, #fff7ed, #fef4e6); border-radius: 24px; padding: 1rem 1.5rem; margin-bottom: 1.5rem; border: 1px solid #f0e2cf;">
-      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+    <div class="mac-inner">
+      <div class="chat-header">
         <div>
-          <span style="font-size: 0.7rem; color: var(--text-soft);">Welcome,</span>
-          <h3 id="studentNameDisplay" style="font-family: 'Cormorant Garamond', serif; color: var(--deep-forest); margin: 0;">—</h3>
-          <span id="studentGradeDisplay" class="student-view-badge" style="display: inline-block; margin-top: 5px;">—</span>
+          <h1>Vipassi Dhamma School</h1>
+          <p>AI Records Assistant</p>
         </div>
-        <div style="text-align: right;">
-          <span style="font-size: 0.7rem; color: var(--text-soft);">Gender</span>
-          <div id="studentNicDisplay" style="font-weight: 600;">—</div>
+        <div class="chat-header-actions">
+          <button class="icon-btn" id="newStudentBtn" onclick="startNewStudent()">🔁 New Student</button>
+          <button class="icon-btn" id="themeToggleBtn" onclick="toggleTheme()">🌙 Dark</button>
         </div>
       </div>
-    </div>
 
-    <div class="controls">
-      <div class="ctrl-group"><label>🗓️ Year</label><select id="filterYear" onchange="onFilterChange()"></select></div>
-      <div class="ctrl-group"><label>🎓 Grade (auto)</label><div class="grade-display" id="filterGradeDisplay">—</div></div>
-      <div class="ctrl-group"><label>📅 Month</label><select id="filterMonth" onchange="onFilterChange()"></select></div>
-      <div class="ctrl-group"><label>📆 Date</label><select id="filterDate" onchange="onFilterChange()"></select></div>
-      <button class="btn btn-gold" id="syncBtn" onclick="manualSync()"><span id="syncBtnLabel">🔄 Sync Now</span></button>
-      <button class="btn btn-ghost" onclick="exportMyCSV()">📎 Export CSV</button>
-    </div>
+      <div class="year-row">
+        <span>📅 Records year:</span>
+        <select id="yearSelect" onchange="onYearChange()"></select>
+        <span id="activeStudentLabel" style="margin-left:auto;color:#7ed8a0;"></span>
+      </div>
 
-    <div class="two-col-grid">
-      <div class="panel-card">
-        <div class="panel-title">Daily Attendance</div>
-        <div id="attDebugLine" style="font-size:0.62rem;color:var(--text-soft);text-align:center;margin:-0.5rem 0 0.6rem;font-style:italic;"></div>
-        <div id="attendancePanelBody"><div class="empty-state" style="padding:1rem;">Loading…</div></div>
-      </div>
-      <div class="panel-card">
-        <div class="panel-title">Daily Flowers</div>
-        <div id="flowersPanelBody"><div class="empty-state" style="padding:1rem;">Loading…</div></div>
-      </div>
-    </div>
+      <div class="chat-window" id="chatWindow"></div>
 
-    <div class="section-label">📊 Exam Results</div>
-    <div class="term-grid">
-      <div class="term-card">
-        <div class="term-card-title">1st Term</div>
-        <div id="term1Body"><div class="empty-state" style="padding:0.8rem;font-size:0.75rem;">Loading…</div></div>
+      <div class="chat-input-row">
+        <input type="text" id="chatInput" placeholder="Type a student's full name to begin…" onkeydown="if(event.key==='Enter')sendChatMessage()">
+        <button id="sendBtn" onclick="sendChatMessage()">Send</button>
       </div>
-      <div class="term-card">
-        <div class="term-card-title">2nd Term</div>
-        <div id="term2Body"><div class="empty-state" style="padding:0.8rem;font-size:0.75rem;">Loading…</div></div>
-      </div>
-      <div class="term-card">
-        <div class="term-card-title">3rd Term</div>
-        <div id="term3Body"><div class="empty-state" style="padding:0.8rem;font-size:0.75rem;">Loading…</div></div>
-      </div>
-      <div class="term-card">
-        <div class="term-card-title">Other</div>
-        <div id="termOtherBody"><div class="empty-state" style="padding:0.8rem;font-size:0.75rem;">Loading…</div></div>
-      </div>
+      <div class="hint-line">All registered students can look up their own records using their full name. Data comes only from the school's own records, and the assistant is instructed not to invent facts.</div>
     </div>
   </div>
 
 </div>
 
 <script>
-const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbx9ys4NG6fYGcjHs-gEE9nNVsmQQRfajzcDEEsBB-Rm_m3G89lyetMT4h4CJu1__1H2/exec';
-const EXAM_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxzon556gtIb0L9I2ODWGNJCKTACJVAAo5VNGAOeopXAIytbRn0QD0s11sh6u5uPHcj7w/exec';
+/* ============================================================
+   DATA LAYER — reads Google Drive + Sheets DIRECTLY from the browser.
+   No Apps Script involved anywhere in this file.
+   ------------------------------------------------------------
+   REQUIREMENTS for this to work:
+   1. Put a Google API key below (Google Cloud Console → APIs &
+      Services → Credentials → Create API key). Restrict it to the
+      "Google Drive API" and "Google Sheets API" only, and ideally
+      restrict it by HTTP referrer to your site's domain.
+   2. Enable the "Google Drive API" and "Google Sheets API" for that
+      project (APIs & Services → Library).
+   3. Share the "Students", "Teachers", and exam-results root folders
+      in Drive as "Anyone with the link — Viewer". An API key alone
+      cannot read private files; it can only read what's already
+      shared with "anyone with the link".
+   This is still safe: an API key restricted to these two read-only
+   APIs can only ever read whatever is already publicly link-shared —
+   it is nothing like a service account / admin key.
+   ============================================================ */
 
-const BULK_ATTENDANCE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyBha0u3UACZrW2U_K2i4iOuLLIat3R58ZALoSDcIk1cdAQjnXPTHRTPLOyvrChCkbc/exec';
+const GOOGLE_API_KEY = 'AIzaSyDSd1kxsHoBr1GAuFFEc5qcHpWfXOIOy4U';
+const STUDENTS_TEACHERS_ROOT_ID = '1dpyAY3hnNxaLV2QTkrMUqyQ7fn_Ze_Q-';
+const EXAMS_ROOT_ID = '1QVEND4maOeSctNVbFuylbO9vBw6MX6V6';
 const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 
-let _bulkAttendanceCache = null;
-let _bulkAttendanceLoadingPromise = null;
-
-function loadBulkAttendanceData_(forceRefresh) {
-  if (forceRefresh) {
-    _bulkAttendanceCache = null;
-    _bulkAttendanceLoadingPromise = null;
+function checkApiKey_() {
+  if (!GOOGLE_API_KEY || GOOGLE_API_KEY === 'YOUR_GOOGLE_API_KEY_HERE') {
+    throw new Error('No Google API key set. Open the code and set GOOGLE_API_KEY.');
   }
-  if (_bulkAttendanceCache) return Promise.resolve(_bulkAttendanceCache);
-  if (_bulkAttendanceLoadingPromise) return _bulkAttendanceLoadingPromise;
-
-  _bulkAttendanceLoadingPromise = new Promise(resolve => {
-    const callbackName = 'bulkAttCb_' + Date.now() + '_' + Math.floor(Math.random() * 1e6);
-    let settled = false;
-    window[callbackName] = function (data) {
-      if (settled) return;
-      settled = true;
-      delete window[callbackName];
-      document.getElementById(callbackName + '-script')?.remove();
-      console.log('[bulk-attendance] JSONP callback received for', callbackName, 'data:', data);
-      if (data && data.ok) {
-        _bulkAttendanceCache = data.data;
-        console.log('[bulk-attendance] loaded — files read:', data.filesRead,
-          data.filesSkipped && data.filesSkipped.length ? 'skipped: ' + JSON.stringify(data.filesSkipped) : '');
-      } else {
-        console.warn('[bulk-attendance] load failed or not ok. full payload:', data && data.error ? data.error : data);
-        _bulkAttendanceCache = null;
-      }
-      resolve(_bulkAttendanceCache);
-    };
-    const url = forceRefresh
-      ? `${BULK_ATTENDANCE_SCRIPT_URL}?callback=${callbackName}&nocache=1`
-      : `${BULK_ATTENDANCE_SCRIPT_URL}?callback=${callbackName}`;
-    const script = document.createElement('script');
-    script.id = callbackName + '-script';
-    script.src = url;
-    script.onerror = () => {
-      if (settled) return;
-      settled = true;
-      console.warn('[bulk-attendance] script tag failed to load (network error or blocked). script.src=', script.src);
-      resolve(null);
-    };
-    document.head.appendChild(script);
-    setTimeout(() => {
-      if (settled) return;
-      settled = true;
-      console.warn('[bulk-attendance] timed out waiting for response (20s). script.src=', script.src);
-      // keep the script tag for inspection in DOM for debugging
-      resolve(null);
-    }, 60000);
-  });
-  return _bulkAttendanceLoadingPromise;
 }
 
-async function getDirectRecordForMonth_(grade, year, monthIdx, studentName) {
-  const bulk = await loadBulkAttendanceData_();
-  const debugEl = document.getElementById("attDebugLine");
-  if (!bulk) {
-    if (debugEl) debugEl.textContent = 'Bulk attendance data unavailable — using fallback source';
-    return null;
-  }
+/* ---------- Drive: list folder contents (paginated) ---------- */
 
-  const gradeData = bulk[String(grade)];
-  const yearData = gradeData && gradeData[String(year)];
-  const monthData = yearData && yearData[MONTHS[monthIdx]];
-  if (!monthData) {
-    if (debugEl) debugEl.textContent = `No sheet found for Grade ${grade} · ${MONTHS[monthIdx]} ${year}`;
-    return null;
-  }
+async function driveListChildren_(folderId) {
+  checkApiKey_();
+  let files = [];
+  let pageToken = '';
+  do {
+    const q = encodeURIComponent(`'${folderId}' in parents and trashed = false`);
+    let url = `https://www.googleapis.com/drive/v3/files?q=${q}&fields=nextPageToken,files(id,name,mimeType)&pageSize=1000&key=${GOOGLE_API_KEY}`;
+    if (pageToken) url += `&pageToken=${pageToken}`;
+    const resp = await fetch(url);
+    if (!resp.ok) {
+      const t = await resp.text().catch(() => '');
+      throw new Error(`Drive API error ${resp.status}: ${t.slice(0, 200)}`);
+    }
+    const data = await resp.json();
+    files = files.concat(data.files || []);
+    pageToken = data.nextPageToken || '';
+  } while (pageToken);
+  return files;
+}
 
-  const rec = monthData[(studentName || '').trim().toLowerCase()];
-  if (!rec) {
-    if (debugEl) debugEl.textContent = `Student "${studentName}" not found in Grade ${grade} · ${MONTHS[monthIdx]} ${year} sheet`;
-    return null;
-  }
+async function driveFindNamedSubfolder_(parentId, name) {
+  const children = await driveListChildren_(parentId);
+  return children.find(c => c.mimeType === 'application/vnd.google-apps.folder' && c.name === name) || null;
+}
 
-  if (debugEl) debugEl.textContent = `✓ Loaded ${MONTHS[monthIdx]} ${year} for Grade ${grade} (bulk source)`;
-  return rec; // { name, statuses, flowers }
+async function driveCollectSpreadsheetsRecursively_(folderId, results) {
+  const children = await driveListChildren_(folderId);
+  for (const c of children) {
+    if (c.mimeType === 'application/vnd.google-apps.spreadsheet') results.push(c);
+    else if (c.mimeType === 'application/vnd.google-apps.folder') await driveCollectSpreadsheetsRecursively_(c.id, results);
+  }
+}
+
+/* ---------- Sheets: batch-read multiple tabs from one spreadsheet in one call ---------- */
+
+async function sheetsBatchGet_(spreadsheetId, ranges) {
+  checkApiKey_();
+  const params = ranges.map(r => 'ranges=' + encodeURIComponent(r)).join('&');
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values:batchGet?${params}&key=${GOOGLE_API_KEY}`;
+  const resp = await fetch(url);
+  if (!resp.ok) {
+    const t = await resp.text().catch(() => '');
+    throw new Error(`Sheets API error ${resp.status}: ${t.slice(0, 200)}`);
+  }
+  const data = await resp.json();
+  return data.valueRanges || []; // aligned with `ranges`, each { range, values }
+}
+
+// batchGet fails its ENTIRE request if even one requested tab doesn't exist
+// (e.g. asking for "December 2026" when that month hasn't happened yet).
+// So we always check which tabs really exist first, and only ever request those.
+async function sheetsGetTabTitles_(spreadsheetId) {
+  checkApiKey_();
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}?fields=sheets.properties.title&key=${GOOGLE_API_KEY}`;
+  const resp = await fetch(url);
+  if (!resp.ok) {
+    const t = await resp.text().catch(() => '');
+    throw new Error(`Sheets API error ${resp.status}: ${t.slice(0, 200)}`);
+  }
+  const data = await resp.json();
+  return (data.sheets || []).map(s => s.properties && s.properties.title).filter(Boolean);
+}
+
+/* ---------- Parsing helpers (same rules as the spreadsheets themselves) ---------- */
+
+// Matches "2026 Grade 10 Attendance", "Grade 10 - 2026", "G10 2026", etc.
+function parseGradeYearFromName_(name) {
+  const gradeMatch = name.match(/(?:grade|g)\s*[-_ ]?\s*(\d{1,2})/i);
+  const yearMatch = name.match(/(20\d{2})/);
+  if (!gradeMatch || !yearMatch) return null;
+  const grade = parseInt(gradeMatch[1], 10);
+  const year = parseInt(yearMatch[1], 10);
+  if (grade < 1 || grade > 12) return null;
+  return { grade, year };
+}
+
+function parseYearFromName_(name) {
+  const m = name.match(/(20\d{2})/);
+  return m ? parseInt(m[1], 10) : null;
 }
 
 function normalizeDateLabel_(raw) {
@@ -801,52 +534,200 @@ function normalizeDateLabel_(raw) {
   return parseInt(m[1], 10) + '-' + m[2].charAt(0).toUpperCase() + m[2].slice(1, 3).toLowerCase();
 }
 
+// Parses the "Sheet1" roster tab values: row "Name", row "Firebase UID", row "Photo URL".
+function parseRosterValues_(values) {
+  const rowMap = {};
+  (values || []).forEach(row => {
+    const label = String(row[0] || '').trim().toLowerCase();
+    if (label) rowMap[label] = row.slice(1);
+  });
+  const names = rowMap['name'] || [];
+  const uids = rowMap['firebase uid'] || [];
+  const photos = rowMap['photo url'] || [];
+  const people = [];
+  names.forEach((n, i) => {
+    const name = String(n || '').trim();
+    if (!name) return;
+    people.push({ name, uid: String(uids[i] || '').trim() || null, photoUrl: String(photos[i] || '').trim() || null });
+  });
+  return people;
+}
+
+// Parses one monthly attendance tab's values into { nameLower: {name, statuses, flowers} }.
+function parseMonthValues_(values) {
+  if (!values || values.length < 4) return null;
+  const headerRow = values[2] || [];
+  const dateCols = [];
+  for (let c = 3; c < headerRow.length; c++) {
+    const raw = String(headerRow[c] || '').trim();
+    if (!raw || /present count/i.test(raw)) continue;
+    const label = normalizeDateLabel_(raw);
+    if (label) dateCols.push({ colIdx: c, label });
+  }
+  if (!dateCols.length) return null;
+
+  const result = {};
+  for (let r = 3; r < values.length; r++) {
+    const row = values[r];
+    const personName = String(row[1] || '').trim();
+    if (!personName) continue;
+    const statuses = {}, flowers = {};
+    dateCols.forEach(dc => {
+      const cell = row[dc.colIdx];
+      const cellStr = String(cell != null ? cell : '');
+      if (cell === true || cellStr.toUpperCase() === 'TRUE' || cellStr.indexOf('✓') !== -1) statuses[dc.label] = 'present';
+      else if (cellStr.indexOf('✗') !== -1) statuses[dc.label] = 'absent';
+      else statuses[dc.label] = 'unmarked';
+      flowers[dc.label] = cellStr.indexOf('🌸') !== -1;
+    });
+    result[personName.toLowerCase()] = { name: personName, statuses, flowers };
+  }
+  return result;
+}
+
+/* ---------- STUDENTS: roster (grade/year derived from real attendance rows, not Sheet1) ---------- */
+
+async function buildRosterClient_() {
+  const studentsFolder = (await driveFindNamedSubfolder_(STUDENTS_TEACHERS_ROOT_ID, 'Students')) || { id: STUDENTS_TEACHERS_ROOT_ID };
+  const files = [];
+  await driveCollectSpreadsheetsRecursively_(studentsFolder.id, files);
+
+  const byName = {};
+  for (const file of files) {
+    const gy = parseGradeYearFromName_(file.name);
+    if (!gy) continue;
+
+    let titles;
+    try { titles = await sheetsGetTabTitles_(file.id); } catch (e) { continue; }
+    const wantedMonths = MONTHS.filter(m => titles.includes(`${m} ${gy.year}`));
+    const hasSheet1 = titles.includes('Sheet1');
+    const ranges = wantedMonths.map(m => `'${m} ${gy.year}'!A1:Z60`);
+    if (hasSheet1) ranges.push(`'Sheet1'!A1:Z60`);
+    if (!ranges.length) continue;
+
+    let valueRanges;
+    try { valueRanges = await sheetsBatchGet_(file.id, ranges); } catch (e) { continue; }
+
+    const namesThisYear = {};
+    wantedMonths.forEach((m, i) => {
+      const monthData = parseMonthValues_(valueRanges[i] && valueRanges[i].values);
+      if (monthData) Object.keys(monthData).forEach(k => { namesThisYear[k] = monthData[k].name; });
+    });
+
+    const rosterExtras = {};
+    if (hasSheet1) {
+      const sheet1VR = valueRanges[wantedMonths.length];
+      if (sheet1VR && sheet1VR.values) {
+        parseRosterValues_(sheet1VR.values).forEach(r => {
+          const key = r.name.toLowerCase();
+          rosterExtras[key] = r;
+          if (!namesThisYear[key]) namesThisYear[key] = r.name;
+        });
+      }
+    }
+
+    Object.keys(namesThisYear).forEach(key => {
+      const name = namesThisYear[key];
+      if (!byName[key]) byName[key] = { id: key, name, grade: String(gy.grade), uid: null, photoUrl: null, yearRecords: {} };
+      byName[key].yearRecords[gy.year] = String(gy.grade);
+      const years = Object.keys(byName[key].yearRecords).map(Number);
+      byName[key].grade = byName[key].yearRecords[Math.max.apply(null, years)];
+      const extra = rosterExtras[key];
+      if (extra) {
+        if (!byName[key].uid && extra.uid) byName[key].uid = extra.uid;
+        if (!byName[key].photoUrl && extra.photoUrl) byName[key].photoUrl = extra.photoUrl;
+      }
+    });
+  }
+  return Object.keys(byName).map(k => byName[k]);
+}
+
+/* ---------- STUDENTS: bulk attendance + flowers ---------- */
+
+async function buildBulkAttendanceClient_() {
+  const studentsFolder = (await driveFindNamedSubfolder_(STUDENTS_TEACHERS_ROOT_ID, 'Students')) || { id: STUDENTS_TEACHERS_ROOT_ID };
+  const files = [];
+  await driveCollectSpreadsheetsRecursively_(studentsFolder.id, files);
+
+  const data = {};
+  for (const file of files) {
+    const gy = parseGradeYearFromName_(file.name);
+    if (!gy) continue;
+    const grade = String(gy.grade), year = String(gy.year);
+    if (!data[grade]) data[grade] = {};
+    if (!data[grade][year]) data[grade][year] = {};
+
+    let titles;
+    try { titles = await sheetsGetTabTitles_(file.id); } catch (e) { continue; }
+    const wantedMonths = MONTHS.filter(m => titles.includes(`${m} ${year}`));
+    if (!wantedMonths.length) continue;
+    const ranges = wantedMonths.map(m => `'${m} ${year}'!A1:Z60`);
+
+    let valueRanges;
+    try { valueRanges = await sheetsBatchGet_(file.id, ranges); } catch (e) { continue; }
+
+    wantedMonths.forEach((m, i) => {
+      const monthData = parseMonthValues_(valueRanges[i] && valueRanges[i].values);
+      if (monthData) data[grade][year][m] = monthData;
+    });
+  }
+  return data;
+}
+
+/* ---------- In-memory caches + the same external interface the rest of the app expects ---------- */
+
+const ROSTER = { students: [] };
+let rosterLoadingPromise = null;
+
+function loadRosterAndAttendance() {
+  if (rosterLoadingPromise) return rosterLoadingPromise;
+  rosterLoadingPromise = buildRosterClient_()
+    .then(students => { ROSTER.students = students; return true; })
+    .catch(e => { console.error('[roster]', e); return false; });
+  return rosterLoadingPromise;
+}
+
+let _bulkAttendanceCache = null;
+let _bulkAttendanceLoadingPromise = null;
+
+function loadBulkAttendanceData_(forceRefresh) {
+  if (forceRefresh) { _bulkAttendanceCache = null; _bulkAttendanceLoadingPromise = null; }
+  if (_bulkAttendanceCache) return Promise.resolve(_bulkAttendanceCache);
+  if (_bulkAttendanceLoadingPromise) return _bulkAttendanceLoadingPromise;
+  _bulkAttendanceLoadingPromise = buildBulkAttendanceClient_()
+    .then(data => { _bulkAttendanceCache = data; return data; })
+    .catch(e => { console.error('[bulk attendance]', e); _bulkAttendanceCache = null; return null; });
+  return _bulkAttendanceLoadingPromise;
+}
+
+async function getDirectRecordForMonth_(grade, year, monthIdx, studentName) {
+  const bulk = await loadBulkAttendanceData_();
+  if (!bulk) return null;
+  const gradeData = bulk[String(grade)];
+  const yearData = gradeData && gradeData[String(year)];
+  const monthData = yearData && yearData[MONTHS[monthIdx]];
+  if (!monthData) return null;
+  const rec = monthData[(studentName || '').trim().toLowerCase()];
+  return rec || null; // { name, statuses, flowers }
+}
+
 function isoToSheetLabel_(iso) {
   const parts = iso.split('-').map(Number);
   return parts[2] + '-' + MONTHS[parts[1] - 1].substring(0, 3);
 }
 
-const ROSTER = { students: [] };
-let ATTENDANCE_DATA = {};
-let rosterLoadingPromise = null;
-let currentStudent = null;
-let currentStudentKey = null;
-let _matchSource = null; // 'roster' or 'bulk-fallback' — for grade debugging
+function toLocalDateStr(d) {
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+}
 
-function loadRosterAndAttendance() {
-  if (rosterLoadingPromise) return rosterLoadingPromise;
-  rosterLoadingPromise = new Promise(resolve => {
-    const callbackName = 'attendanceCb_' + Date.now() + '_' + Math.floor(Math.random()*1e6);
-    let settled = false;
-    window[callbackName] = function(data) {
-      if (settled) return;
-      settled = true;
-      delete window[callbackName];
-      document.getElementById(callbackName + '-script')?.remove();
-      if (data && !data.error) {
-        if (data.students) ROSTER.students = data.students;
-        if (data.attendance) ATTENDANCE_DATA = data.attendance;
-      }
-      resolve(true);
-    };
-    const script = document.createElement('script');
-    script.id = callbackName + '-script';
-    script.src = `${WEB_APP_URL}?callback=${callbackName}`;
-    script.onerror = () => {
-      if (settled) return;
-      settled = true;
-      document.getElementById(callbackName + '-script')?.remove();
-      resolve(false);
-    };
-    document.head.appendChild(script);
-    setTimeout(() => {
-      if (settled) return;
-      settled = true;
-      document.getElementById(callbackName + '-script')?.remove();
-      resolve(false);
-    }, 45000);
-  });
-  return rosterLoadingPromise;
+function getSundaysInMonth_(year, monthIdx) {
+  const sundays = [];
+  for (let d = 1; d <= 31; d++) {
+    const dt = new Date(year, monthIdx, d);
+    if (dt.getMonth() !== monthIdx) break;
+    if (dt.getDay() === 0) sundays.push(dt);
+  }
+  return sundays;
 }
 
 function calculateGradeInYear(currentGrade, currentYear, targetYear) {
@@ -860,12 +741,10 @@ function calculateGradeInYear(currentGrade, currentYear, targetYear) {
 function getDisplayGrade(student, selectedYear) {
   if (!student) return null;
   if (!selectedYear) return student.grade || null;
-
   const yearRecords = student.yearRecords || {};
   if (yearRecords[selectedYear] !== undefined) {
     return String(yearRecords[selectedYear]).replace(/^grade\s*/i, '').trim();
   }
-
   const currentGrade = parseInt(student.grade, 10);
   const currentYear = new Date().getFullYear();
   const targetYear = parseInt(selectedYear, 10);
@@ -873,122 +752,65 @@ function getDisplayGrade(student, selectedYear) {
   return computed !== null ? String(computed) : null;
 }
 
-function examApiCall(params) {
-  return new Promise((resolve, reject) => {
-    const callbackName = 'examCb_' + Date.now() + '_' + Math.floor(Math.random()*1e6);
-    let settled = false;
-    window[callbackName] = function(data) {
-      if (settled) return;
-      settled = true;
-      delete window[callbackName];
-      document.getElementById(callbackName + '-script')?.remove();
-      resolve(data);
-    };
-    const query = Object.keys(params).map(k => `${k}=${encodeURIComponent(params[k])}`).join('&');
-    const script = document.createElement('script');
-    script.id = callbackName + '-script';
-    script.src = `${EXAM_WEB_APP_URL}?callback=${callbackName}&${query}`;
-    script.onerror = () => { if (!settled) { settled = true; reject(new Error('Failed to reach Term Test results')); } };
-    document.head.appendChild(script);
-    setTimeout(() => { if (!settled) { settled = true; reject(new Error('Term Test request timed out')); } }, 20000);
+/* ---------- Fuzzy, typo-tolerant, order-independent name matching ---------- */
+
+function levenshtein_(a, b) {
+  const m = a.length, n = b.length;
+  if (m === 0) return n;
+  if (n === 0) return m;
+  const dp = new Array(n + 1);
+  for (let j = 0; j <= n; j++) dp[j] = j;
+  for (let i = 1; i <= m; i++) {
+    let prev = dp[0];
+    dp[0] = i;
+    for (let j = 1; j <= n; j++) {
+      const tmp = dp[j];
+      dp[j] = Math.min(dp[j] + 1, dp[j - 1] + 1, prev + (a[i - 1] === b[j - 1] ? 0 : 1));
+      prev = tmp;
+    }
+  }
+  return dp[n];
+}
+
+// 1.0 = identical, ~0.9 = one contains the other, otherwise 1 - (edit distance / longer length).
+function wordSimilarity_(a, b) {
+  if (!a || !b) return 0;
+  if (a === b) return 1;
+  if (a.includes(b) || b.includes(a)) return 0.9;
+  const dist = levenshtein_(a, b);
+  return 1 - dist / Math.max(a.length, b.length);
+}
+
+// Score how well a (possibly partial, possibly misspelled) query matches a full name,
+// regardless of word order, capitalization, or minor spelling differences.
+function nameMatchScore_(nameLower, queryLower) {
+  if (nameLower === queryLower) return 1;
+  if (nameLower.includes(queryLower)) return 0.95;
+  const nameWords = nameLower.split(/\s+/).filter(Boolean);
+  const queryWords = queryLower.split(/\s+/).filter(Boolean);
+  if (!queryWords.length || !nameWords.length) return 0;
+  let total = 0;
+  queryWords.forEach(qw => {
+    let best = 0;
+    nameWords.forEach(nw => { const sim = wordSimilarity_(nw, qw); if (sim > best) best = sim; });
+    total += best;
   });
+  return total / queryWords.length;
 }
 
-async function verifyAccess() {
-  const code = document.getElementById("loginCode").value.trim();
-  const alertDiv = document.getElementById("loginAlert");
-  if (!code) {
-    alertDiv.innerHTML = `<div class="alert alert-error">❌ Please enter your full name</div>`;
-    return;
-  }
-  alertDiv.innerHTML = `<div class="alert alert-info">⏳ Loading student records from Google Drive… this can take up to a minute the first time.</div>`;
-  await loadRosterAndAttendance();
-
-  let match = findStudentByName(code);
-  if (match) {
-    _matchSource = 'roster';
-  } else {
-    match = await findStudentInBulkData_(code); // roster fallback
-    if (match) _matchSource = 'bulk-fallback';
-  }
-
-  if (match) {
-    console.log("[grade-debug] matched via:", _matchSource, "raw student object:", match.student);
-    alertDiv.innerHTML = `<div class="alert alert-success">✅ Welcome, ${match.student.name}! Loading your attendance...</div>`;
-    setTimeout(() => autoLoginFromStudent(match.key, match.student), 700);
-  } else {
-    alertDiv.innerHTML = `<div class="alert alert-error">❌ No student found with "${code}". Please check the spelling of your full name.</div>`;
-  }
-}
-
-const SESSION_MAX_AGE_HOURS = 24 * 30;
-
-function checkExistingSession() {
-  const studentKey = localStorage.getItem("vipassi_student_key");
-  const studentName = localStorage.getItem("vipassi_student_name");
-  const studentGrade = localStorage.getItem("vipassi_student_grade");
-  const authTime = localStorage.getItem("vipassi_auth_time");
-
-  if (studentKey && authTime) {
-    const hoursDiff = (Date.now() - parseInt(authTime)) / (1000 * 60 * 60);
-    if (hoursDiff < SESSION_MAX_AGE_HOURS) {
-      currentStudentKey = studentKey;
-      currentStudent = { id: studentKey, name: studentName, grade: studentGrade };
-      document.getElementById("sessionCheckContainer").style.display = "none";
-      document.getElementById("loginContainer").style.display = "none";
-      document.getElementById("historyContainer").style.display = "block";
-      document.getElementById("studentNameDisplay").innerHTML = studentName || "—";
-      document.getElementById("studentGradeDisplay").innerHTML = studentGrade ? "Grade " + studentGrade : "Grade not set";
-      document.getElementById("studentNicDisplay").innerHTML = "—";
-      document.getElementById("welcomeUser").innerHTML = `🪔 ${studentName}`;
-      initializeHistoryPage();
-      return true;
-    } else { localStorage.clear(); }
-  }
-  return false;
-}
+const NAME_MATCH_THRESHOLD = 0.6; // lower = more forgiving of typos/partial input
 
 function findStudentByName(nameQuery) {
   const q = (nameQuery || "").trim().toLowerCase();
   if (!q) return null;
-  let exact = null, partial = null;
+  let best = null, bestScore = 0;
   for (const s of ROSTER.students) {
     const studentName = (s.name || "").trim().toLowerCase();
-    if (studentName === q) { exact = { key: s.id, student: s }; break; }
-    if (!partial && studentName.includes(q)) partial = { key: s.id, student: s };
+    if (studentName === q) return { key: s.id, student: s };
+    const score = nameMatchScore_(studentName, q);
+    if (score > bestScore) { bestScore = score; best = { key: s.id, student: s }; }
   }
-  return exact || partial;
-}
-
-function findStudentByUid_(uid) {
-  if (!uid) return null;
-  for (const s of ROSTER.students) {
-    const candidateUid = s.uid || s.firebaseUid || s.firebaseUID || s.authUid || s.userId || s.uID;
-    if (candidateUid && String(candidateUid).trim() === String(uid).trim()) {
-      return { key: s.id, student: s };
-    }
-  }
-  return null;
-}
-
-function findStudentByAdmissionNo_(admissionNo) {
-  if (!admissionNo) return null;
-  const q = String(admissionNo).trim();
-  for (const s of ROSTER.students) {
-    const a = s.admissionNo || s.admission || s.adm || s.admNo;
-    if (a && String(a).trim() === q) return { key: s.id, student: s };
-  }
-  return null;
-}
-
-function findStudentByEmail_(email) {
-  if (!email) return null;
-  const q = (email || '').trim().toLowerCase();
-  for (const s of ROSTER.students) {
-    const se = (s.email || s.emailAddress || s.guardianEmail || '').trim().toLowerCase();
-    if (se && se === q) return { key: s.id, student: s };
-  }
-  return null;
+  return bestScore >= NAME_MATCH_THRESHOLD ? best : null;
 }
 
 async function findStudentInBulkData_(nameQuery) {
@@ -997,7 +819,9 @@ async function findStudentInBulkData_(nameQuery) {
   const bulk = await loadBulkAttendanceData_();
   if (!bulk) return null;
 
-  let exact = null, partial = null, bestYear = -1;
+  let exact = null, exactBestYear = -1;
+  let best = null, bestScore = 0, bestScoreYear = -1;
+
   for (const grade of Object.keys(bulk)) {
     for (const year of Object.keys(bulk[grade])) {
       const yearNum = parseInt(year, 10);
@@ -1005,605 +829,399 @@ async function findStudentInBulkData_(nameQuery) {
         const monthData = bulk[grade][year][month];
         for (const nameLower of Object.keys(monthData)) {
           const rec = monthData[nameLower];
-          const candidate = {
-            id: nameLower,
-            name: rec.name,
-            grade: grade,
-            yearRecords: { [year]: grade }
-          };
-          if (nameLower === q && yearNum > bestYear) {
-            exact = { key: nameLower, student: candidate };
-            bestYear = yearNum;
-          } else if (!partial && nameLower.includes(q)) {
-            partial = { key: nameLower, student: candidate };
+          const candidate = { id: nameLower, name: rec.name, grade: grade, yearRecords: { [year]: grade } };
+          if (nameLower === q) {
+            if (yearNum > exactBestYear) { exact = candidate; exactBestYear = yearNum; }
+            continue;
+          }
+          const score = nameMatchScore_(nameLower, q);
+          if (score > bestScore || (score === bestScore && yearNum > bestScoreYear)) {
+            bestScore = score; best = candidate; bestScoreYear = yearNum;
           }
         }
       }
     }
   }
-  return exact || partial;
+
+  if (exact) return { key: exact.id, student: exact };
+  return bestScore >= NAME_MATCH_THRESHOLD ? { key: best.id, student: best } : null;
 }
 
-function autoLoginFromStudent(key, student) {
-  currentStudent = student; currentStudentKey = key;
-  localStorage.setItem("vipassi_student_key", key);
-  localStorage.setItem("vipassi_student_name", student.name);
-  localStorage.setItem("vipassi_student_grade", student.grade || "");
-  localStorage.setItem("vipassi_auth_time", Date.now().toString());
+/* ---------- EXAM RESULTS ---------- */
 
-  document.getElementById("loginContainer").style.display = "none";
-  document.getElementById("historyContainer").style.display = "block";
-  document.getElementById("studentNameDisplay").innerHTML = student.name || "—";
-  document.getElementById("studentGradeDisplay").innerHTML = student.grade ? "Grade " + student.grade : "Grade not set";
-  document.getElementById("studentNicDisplay").innerHTML = student.gender ? (student.gender.charAt(0).toUpperCase() + student.gender.slice(1)) : "—";
-  document.getElementById("welcomeUser").innerHTML = `🪔 ${student.name}`;
-  initializeHistoryPage();
+async function examApiCall(params) {
+  const { grade, year } = params;
+  if (!grade || !year) return { ok: false, error: 'grade and year are required' };
+
+  const gradeFolders = await driveListChildren_(EXAMS_ROOT_ID);
+  const gradeFolder = gradeFolders.find(f => {
+    if (f.mimeType !== 'application/vnd.google-apps.folder') return false;
+    const gy = parseGradeYearFromName_(f.name + ' ' + year); // folders are just named "Grade N"
+    return gy && String(gy.grade) === String(grade);
+  });
+  if (!gradeFolder) return { ok: false, error: 'No exam folder found for grade ' + grade };
+
+  const children = await driveListChildren_(gradeFolder.id);
+  const ssFile = children.find(f => f.mimeType === 'application/vnd.google-apps.spreadsheet' && f.name.trim() === String(year));
+  if (!ssFile) return { ok: false, error: 'No results sheet found for grade ' + grade + ', year ' + year };
+
+  let valueRanges;
+  try { valueRanges = await sheetsBatchGet_(ssFile.id, [`'Results'!A1:Z200`]); }
+  catch (e) { return { ok: false, error: String(e.message || e) }; }
+
+  const values = (valueRanges[0] && valueRanges[0].values) || [];
+  if (values.length < 2) return { ok: true, students: [] };
+
+  const header = values[0].map(h => String(h || '').trim());
+  const avgCol = header.indexOf('Average');
+  const rankCol = header.indexOf('Rank');
+
+  const students = [];
+  for (let r = 1; r < values.length; r++) {
+    const row = values[r];
+    const name = String(row[0] || '').trim();
+    if (!name) continue;
+    const steps = [];
+    ['1st Term', '2nd Term', '3rd Term'].forEach(examName => {
+      const col = header.indexOf(examName);
+      if (col === -1) return;
+      const marks = row[col];
+      if (marks === '' || marks === undefined || marks === null) return;
+      steps.push({ exam: examName, marks, average: avgCol !== -1 ? row[avgCol] : '', rank: rankCol !== -1 ? row[rankCol] : '' });
+    });
+    students.push({ name, steps });
+  }
+  return { ok: true, students };
 }
 
-function tryFirebaseAutoLogin(attempts) {
-  return new Promise(resolve => {
-    function attempt(remaining) {
-      if (!(window.firebase && firebase.apps && firebase.apps.length)) {
-        if (remaining > 0) { setTimeout(() => attempt(remaining - 1), 300); return; }
-        resolve({ matched: false, signedIn: false });
-        return;
-      }
-      let settled = false;
-      firebase.auth().onAuthStateChanged(async (user) => {
-        if (settled) return;
-        settled = true;
-        if (!user) { resolve({ matched: false, signedIn: false }); return; }
-        try {
-          await loadRosterAndAttendance();
+/* ============================================================
+   GATHER A STUDENT'S FULL RECORD SUMMARY FOR A GIVEN YEAR
+   ============================================================ */
+async function gatherStudentSummary(nameQuery, year) {
+  await loadRosterAndAttendance();
+  let match = findStudentByName(nameQuery);
+  let source = 'roster';
+  if (!match) { match = await findStudentInBulkData_(nameQuery); source = 'bulk-fallback'; }
+  if (!match) return null;
 
-          let match = findStudentByUid_(user.uid);
-          if (match) _matchSource = 'roster-uid';
+  const student = match.student;
+  const grade = getDisplayGrade(student, year);
+  const currentYear = new Date().getFullYear();
+  const lastMonthIdx = (parseInt(year, 10) === currentYear) ? new Date().getMonth() : 11;
 
-          let nameForFallback = user.displayName || "";
-          if (!match) {
-            try {
-              const snap = await firebase.firestore().collection("users").doc(user.uid).get();
-              if (snap.exists && snap.data().displayName) nameForFallback = snap.data().displayName;
-            } catch (e) { /* Firestore profile optional */ }
-            match = findStudentByName(nameForFallback) || findStudentByName((user.email || "").split("@")[0]);
-            if (match) _matchSource = 'roster-name';
-          }
-
-          if (!match) {
-            match = await findStudentInBulkData_(nameForFallback)
-                 || await findStudentInBulkData_((user.email || "").split("@")[0]);
-            if (match) _matchSource = 'bulk-fallback';
-          }
-
-          if (match) {
-            console.log("[grade-debug] auto-login matched via:", _matchSource, "raw student object:", match.student);
-            autoLoginFromStudent(match.key, match.student);
-            resolve({ matched: true, signedIn: true });
-          } else {
-            console.warn("[auto-login] Signed in but no student record matched.",
-              "Firebase UID:", user.uid, "displayName:", user.displayName, "email:", user.email);
-            resolve({ matched: false, signedIn: true });
-          }
-        } catch (e) { resolve({ matched: false, signedIn: true }); }
+  const attendance = [];
+  const flowers = [];
+  const bulkOk = !!(await loadBulkAttendanceData_());
+  if (grade && bulkOk) {
+    for (let m = 0; m <= lastMonthIdx; m++) {
+      const rec = await getDirectRecordForMonth_(grade, year, m, student.name);
+      if (!rec) continue;
+      const sundays = getSundaysInMonth_(parseInt(year, 10), m);
+      sundays.forEach(d => {
+        const iso = toLocalDateStr(d);
+        const label = isoToSheetLabel_(iso);
+        const status = rec.statuses ? rec.statuses[label] : undefined;
+        if (status === 'present' || status === 'absent') attendance.push({ date: iso, status });
+        const flowerGiven = rec.flowers ? !!rec.flowers[label] : false;
+        flowers.push({ date: iso, provided: flowerGiven });
       });
     }
-    attempt(attempts);
-  });
-}
-async function initPortal() {
-  if (checkExistingSession()) return;
-
-  const result = await tryFirebaseAutoLogin(60);
-  if (result.matched) {
-    document.getElementById("sessionCheckContainer").style.display = "none";
-    return; // dashboard already shown by autoLoginFromStudent
-  }
-  // Not signed in or no linked record — show login UI instead of redirecting
-  // so users can manually verify access by entering their full name.
-  try {
-    document.getElementById("sessionCheckContainer").style.display = "none";
-    document.getElementById("loginContainer").style.display = "block";
-  } catch (e) {
-    // Fallback to homepage if critical elements are missing
-    console.warn('initPortal: could not show login container:', e);
-    window.location.href = "index.html";
-  }
-}
-
-function logout() {
-  localStorage.clear();
-  currentStudent = null; currentStudentKey = null;
-  window.location.href = "index.html";
-}
-
-function showAlert(msg, type = "success") {
-  const box = document.getElementById("alertBox");
-  if (!box) return;
-  const bgColor = type === "error" ? "#ffe9e7" : type === "info" ? "#e6f1fb" : "#e4f3e2";
-  box.innerHTML = `<div class="alert alert-${type}" style="background:${bgColor}">${msg}</div>`;
-  setTimeout(() => box.innerHTML = "", 4500);
-}
-
-function formatDateForDisplay(dateStr) {
-  if (!dateStr) return "—";
-  const d = new Date(dateStr + "T00:00:00");
-  return d.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", year: "numeric" });
-}
-
-function toLocalDateStr(d) {
-  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
-}
-
-function getSundaysBetween(fromDateStr, toDateStr) {
-  const from = new Date(fromDateStr + "T00:00:00");
-  const to = new Date(toDateStr + "T00:00:00");
-  const sundays = [];
-  let current = new Date(from);
-  while (current.getDay() !== 0) current.setDate(current.getDate() + 1);
-  while (current <= to) { sundays.push(toLocalDateStr(current)); current.setDate(current.getDate() + 7); }
-  return sundays;
-}
-
-function _knownPresentKey() {
-  return "vipassi_known_present_" + (currentStudentKey || "anon");
-}
-function _loadKnownPresent() {
-  try {
-    const raw = localStorage.getItem(_knownPresentKey());
-    return raw ? new Set(JSON.parse(raw)) : new Set();
-  } catch (e) { return new Set(); }
-}
-function _saveKnownPresent(set) {
-  try { localStorage.setItem(_knownPresentKey(), JSON.stringify(Array.from(set))); } catch (e) {}
-}
-
-let _directMonthStatusMap = {};
-let _directMonthFlowerMap = {};
-let _directMonthStatusLoaded = false;
-
-async function loadDirectMonthStatus_(grade) {
-  _directMonthStatusMap = {};
-  _directMonthFlowerMap = {};
-  _directMonthStatusLoaded = false;
-  const debugEl = document.getElementById("attDebugLine");
-
-  const year = document.getElementById("filterYear").value;
-  const monthIdx = parseInt(document.getElementById("filterMonth").value, 10);
-
-  if (!grade || !currentStudent || !currentStudent.name) {
-    if (debugEl) debugEl.textContent = "Waiting for student info…";
-    return;
   }
 
-  const rec = await getDirectRecordForMonth_(grade, year, monthIdx, currentStudent.name);
-  if (rec) {
-    _directMonthStatusMap = rec.statuses || {};
-    _directMonthFlowerMap = rec.flowers || {};
-    _directMonthStatusLoaded = true;
-  }
-}
-
-function myStatusOn(iso) {
-  if (_directMonthStatusLoaded) {
-    const label = isoToSheetLabel_(iso);
-    const direct = _directMonthStatusMap[label];
-    if (direct === "present" || direct === "absent") return direct;
+  let examSteps = [];
+  if (grade) {
+    try {
+      const examData = await examApiCall({ action: 'getCumulativeResults', grade, year });
+      if (examData && !examData.error && examData.students) {
+        const rec = examData.students.find(s => String(s.name).trim().toLowerCase() === String(student.name).trim().toLowerCase());
+        examSteps = (rec && rec.steps) || [];
+      }
+    } catch (e) { /* exam service unavailable — omit */ }
   }
 
-  const dayData = ATTENDANCE_DATA[iso] && ATTENDANCE_DATA[iso].students;
-  let status = "unmarked";
-  if (dayData) {
-    if ((dayData.presentIds || []).includes(currentStudentKey)) status = "present";
-    else if ((dayData.absentIds || []).includes(currentStudentKey)) status = "absent";
+  const presentCount = attendance.filter(a => a.status === 'present').length;
+  const absentCount = attendance.filter(a => a.status === 'absent').length;
+  const flowerCount = flowers.filter(f => f.provided).length;
+
+  return {
+    matchedVia: source,
+    student: { name: student.name, grade: grade, gender: student.gender || null },
+    year: year,
+    attendanceDataAvailable: bulkOk,
+    attendanceSummary: { presentCount, absentCount, totalMarkedSundays: presentCount + absentCount, totalSundaysThisPeriod: attendance.length },
+    attendance,
+    flowerSummary: { given: flowerCount, totalSundaysThisPeriod: flowers.length },
+    flowers,
+    examResults: examSteps
+  };
+}
+
+/* ============================================================
+   AI AGENT LAYER — calls the Google Gemini API directly from the browser
+   ------------------------------------------------------------
+   ⚠️ Put your real Gemini API key below before deploying. Because
+   this is a plain client-side page, anyone can view-source this
+   file and read the key — fine for an internal/staff-only tool,
+   risky for a public page. For a public deployment, move this call
+   to a small backend/proxy so the key never reaches the browser.
+   ============================================================ */
+const GEMINI_API_KEY = 'AQ.Ab8RN6IoQXi7jLsoieuXsDF9_UQbOVHjd3Z175DaGSqq4Yhh9A';
+const GEMINI_MODEL = 'gemini-3.6-flash';
+
+const SYSTEM_PROMPT = `You are the records assistant for Sri Vipassi Dhamma School (a Sunday Dhamma school in Sri Lanka).
+Every message you receive already contains the FULL data you need, as a JSON object, pulled directly from the school's official attendance and exam spreadsheets. You already have this data — it is pasted directly into the conversation. NEVER say you cannot access spreadsheets, external documents, or files: that is never true, since the data is already in front of you in the JSON.
+
+How to read the data (this mirrors exactly how the source spreadsheets are marked):
+- If "attendanceDataAvailable" is false, the attendance system did not respond in time — this is a temporary loading issue, NOT proof of zero attendance. In this case, do not report any present/absent counts; tell the user the attendance data couldn't be loaded just now and to ask again in a moment (the first check of the day can be slow while the server builds its cache; it's fast after that).
+- Otherwise, in "attendance", each entry has a date and a status: "present" (the spreadsheet cell had a ✓ checkmark) or "absent" (the cell had a ✗ cross). Report these directly — do not reinterpret or guess.
+- In "flowers", each entry has a date and "provided": true or false. true means a 🌸 flower mark was present on that date (only meaningful on a day the person was present); false means no flower that day.
+- If a date isn't in the data at all, that Sunday simply hasn't been marked yet — say so plainly ("not marked yet"), don't guess whether they were present or absent.
+- Only use the JSON given. Never invent dates, marks, or numbers not present in it.
+- If the requested year/month has no data at all for this person, say so directly and suggest checking a different year using the year selector — do not apologize about lacking spreadsheet access.
+- Keep answers short, factual, and easy to scan — a small list of dates and statuses is often clearer than a paragraph.
+- If asked about another student or teacher, remind the user to type that person's full name and press "New Student" first.`;
+
+async function callGeminiAPI(apiMessages) {
+  if (!GEMINI_API_KEY || GEMINI_API_KEY === 'YOUR_GEMINI_API_KEY_HERE') {
+    throw new Error('No Gemini API key set. Open the code and set GEMINI_API_KEY.');
   }
-  const known = _loadKnownPresent();
-  if (status === "present") {
-    if (!known.has(iso)) { known.add(iso); _saveKnownPresent(known); }
-  } else if (known.has(iso)) {
-    status = "present";
+
+  // Gemini uses "user"/"model" roles instead of "user"/"assistant".
+  const contents = apiMessages.map(m => ({
+    role: m.role === 'assistant' ? 'model' : 'user',
+    parts: [{ text: m.content }]
+  }));
+
+  const resp = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents,
+        systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
+        generationConfig: { maxOutputTokens: 1024 }
+      })
+    }
+  );
+
+  if (!resp.ok) {
+    const errText = await resp.text().catch(() => '');
+    throw new Error(`API error ${resp.status}: ${errText.slice(0,200)}`);
   }
-
-  return status;
+  const data = await resp.json();
+  const parts = data?.candidates?.[0]?.content?.parts || [];
+  return parts.map(p => p.text || '').join('\n').trim() || '(No response text returned.)';
 }
 
-function populateFilters() {
-  const yearSel = document.getElementById("filterYear");
-  const curYear = new Date().getFullYear();
-  let yearHtml = "";
-  for (let y = curYear; y >= curYear - 4; y--) yearHtml += `<option value="${y}" ${y===curYear?"selected":""}>${y}</option>`;
-  yearSel.innerHTML = yearHtml;
+/* ============================================================
+   CHAT UI STATE + HANDLERS
+   ============================================================ */
+let chatHistory = [];        // [{role, content}] — what we show + send back to the model
+let activeStudentName = null;
+let lastSummaryData = null;
 
-  const monthSel = document.getElementById("filterMonth");
-  const curMonth = new Date().getMonth();
-  monthSel.innerHTML = MONTHS.map((m, i) => `<option value="${i}" ${i===curMonth?"selected":""}>${m}</option>`).join("");
+/* ---------- Graphical report card builders ---------- */
 
-  onFilterChange();
-}
-
-function updateGradeDisplay() {
-  const year = document.getElementById("filterYear").value;
-  const grade = getDisplayGrade(currentStudent, year);
-  document.getElementById("filterGradeDisplay").textContent = grade ? ("Grade " + grade) : "— (no record for " + year + ")";
-
-  console.log("[grade-debug]", {
-    source: _matchSource,
-    studentName: currentStudent && currentStudent.name,
-    rawStudentGrade: currentStudent && currentStudent.grade,
-    yearRecords: currentStudent && currentStudent.yearRecords,
-    selectedYear: year,
-    resolvedGrade: grade
-  });
-
-  return grade;
-}
-
-function populateDateSelect() {
-  const year = parseInt(document.getElementById("filterYear").value, 10);
-  const monthIdx = parseInt(document.getElementById("filterMonth").value, 10);
-  const dateSel = document.getElementById("filterDate");
-  const prev = dateSel.value;
-  let html = '<option value="">All Sundays</option>';
-  for (let d = 1; d <= 31; d++) {
-    const dt = new Date(year, monthIdx, d);
-    if (dt.getMonth() !== monthIdx) break;
-    if (dt.getDay() === 0) html += `<option value="${d}">${MONTHS[monthIdx].substring(0,3)} ${d}</option>`;
-  }
-  dateSel.innerHTML = html;
-  if (prev && Array.from(dateSel.options).some(o => o.value === prev)) dateSel.value = prev;
-}
-
-function getFilterSundays() {
-  const year = parseInt(document.getElementById("filterYear").value, 10);
-  const monthIdx = parseInt(document.getElementById("filterMonth").value, 10);
-  const dateVal = document.getElementById("filterDate").value;
-  const sundays = [];
-  for (let d = 1; d <= 31; d++) {
-    const dt = new Date(year, monthIdx, d);
-    if (dt.getMonth() !== monthIdx) break;
-    if (dt.getDay() === 0 && (!dateVal || dateVal === String(d))) sundays.push(dt);
-  }
-  return sundays;
-}
-
-function refreshCurrentStudentFromRoster() {
-  if (!currentStudent || !ROSTER.students.length) return;
-  let match = ROSTER.students.find(s => s.id === currentStudentKey);
-  if (!match && currentStudent.name) {
-    const q = currentStudent.name.trim().toLowerCase();
-    match = ROSTER.students.find(s => (s.name || "").trim().toLowerCase() === q);
-  }
-  if (match) {
-    currentStudent = match;
-    currentStudentKey = match.id;
-  }
-}
-
-let _isSyncing = false;
-
-async function manualSync() {
-  if (_isSyncing) return;
-  _isSyncing = true;
-  const btn = document.getElementById("syncBtn");
-  const label = document.getElementById("syncBtnLabel");
-  if (btn) btn.disabled = true;
-  if (label) label.innerHTML = '<span class="spinner"></span> Syncing…';
-
-  try {
-    rosterLoadingPromise = null;
-    await loadBulkAttendanceData_(true);
-    await onFilterChange();
-    showAlert("✅ Synced with the latest data", "success");
-  } catch (e) {
-    showAlert("Sync failed: " + e.message, "error");
-  } finally {
-    _isSyncing = false;
-    if (btn) btn.disabled = false;
-    if (label) label.textContent = "🔄 Sync Now";
-  }
-}
-window.manualSync = manualSync;
-
-async function onFilterChange() {
-  await loadRosterAndAttendance();
-  refreshCurrentStudentFromRoster();
-  const grade = updateGradeDisplay();
-  populateDateSelect();
-  await loadDirectMonthStatus_(grade);
-  renderAttendancePanel();
-  renderFlowersPanel();
-  loadExamResults();
-}
-
-function renderAttendancePanel() {
-  const body = document.getElementById("attendancePanelBody");
-  const sundays = getFilterSundays();
-  if (!sundays.length) {
-    body.innerHTML = `<div class="empty-state" style="padding:1rem;">No Sundays in this selection.</div>`;
-    return;
-  }
-  let present = 0, absent = 0;
-  const rows = sundays.map(d => {
-    const iso = toLocalDateStr(d);
-    const status = myStatusOn(iso);
-    if (status === "present") present++; else if (status === "absent") absent++;
-    const cls = status === "present" ? "present" : status === "absent" ? "absent" : "unmarked";
-    const label = status === "present" ? "✓ Present" : status === "absent" ? "✗ Absent" : "— Not Marked";
-    return `<tr><td>${formatDateForDisplay(iso)}</td><td><span class="status-dot ${cls}" style="margin-right:8px;"></span>${label}</td></tr>`;
-  }).join("");
-  const totalMarked = present + absent;
-  const pct = totalMarked ? Math.round((present / totalMarked) * 100) : 0;
-  body.innerHTML = `
-    <div style="text-align:center;margin-bottom:0.8rem;">
-      <span style="font-size:1.7rem;font-weight:700;color:var(--deep-forest);">${pct}%</span>
-      <div style="font-size:0.7rem;color:var(--text-soft);">present (${present} of ${totalMarked || sundays.length})</div>
-    </div>
-    <div class="history-wrap"><table><thead><tr><th>Date</th><th>Status</th></tr></thead><tbody>${rows}</tbody></table></div>`;
-}
-
-function myFlowerProvided(iso) {
-  if (!_directMonthStatusLoaded) return false;
-  const label = isoToSheetLabel_(iso);
-  return !!_directMonthFlowerMap[label];
-}
-
-function renderFlowersPanel() {
-  const body = document.getElementById("flowersPanelBody");
-  const sundays = getFilterSundays();
-  if (!_directMonthStatusLoaded) {
-    body.innerHTML = `<div class="empty-state" style="padding:1rem;">Flower data unavailable right now.</div>`;
-    return;
-  }
-  if (!sundays.length) {
-    body.innerHTML = `<div class="empty-state" style="padding:1rem;">No Sundays in this selection.</div>`;
-    return;
-  }
-  let given = 0;
-  const rows = sundays.map(d => {
-    const iso = toLocalDateStr(d);
-    const provided = myFlowerProvided(iso);
-    if (provided) given++;
-    return `<tr><td>${formatDateForDisplay(iso)}</td><td>${provided ? '<span class="status-dot present" style="margin-right:8px;"></span> 🌸 Provided' : '<span class="status-dot unmarked" style="margin-right:8px;"></span> Not provided'}</td></tr>`;
-  }).join("");
-  body.innerHTML = `
-    <div style="text-align:center;margin-bottom:0.8rem;">
-      <span style="font-size:1.7rem;font-weight:700;color:var(--deep-forest);">${given}/${sundays.length}</span>
-      <div style="font-size:0.7rem;color:var(--text-soft);">Sundays with a flower offered</div>
-    </div>
-    <div class="history-wrap"><table><thead><tr><th>Date</th><th>Status</th></tr></thead><tbody>${rows}</tbody></table></div>`;
-}
-
-function renderTermStep(step) {
-  if (!step) return `<div class="empty-state" style="padding:0.8rem;font-size:0.75rem;">Not entered yet.</div>`;
-  const noMark = step.marks === "" || step.marks === undefined || step.marks === null;
-  const marksLabel = noMark ? "Not entered" : step.marks + "%";
-  const avgLabel = (noMark || step.average === "" || step.average === undefined) ? "—" : step.average + "%";
-  const rankLabel = (noMark || step.rank === "" || step.rank === undefined) ? "—" : step.rank;
-  return `
-    <div class="marks-row" style="flex-direction:column;align-items:stretch;gap:8px;">
-      <div class="marks-row-exam" style="text-align:center;">${step.exam}</div>
-      <div class="marks-pills" style="justify-content:center;">
-        <span class="marks-pill${noMark ? " not-entered" : ""}">MARKS <b>${marksLabel}</b></span>
-        <span class="marks-pill${noMark ? " not-entered" : ""}">PLACE <b>${rankLabel}</b></span>
-      </div>
-      <div class="marks-avg" style="text-align:center;margin:0;">Avg: ${avgLabel}</div>
+function buildAttendanceDonutHTML_(present, absent, total) {
+  const presentPct = total ? (present / total) * 100 : 0;
+  const absentPct = total ? (absent / total) * 100 : 0;
+  const gradient = total
+    ? `conic-gradient(#22c55e 0% ${presentPct}%, #ef4444 ${presentPct}% ${presentPct + absentPct}%, #e2e8f0 ${presentPct + absentPct}% 100%)`
+    : `conic-gradient(#e2e8f0 0% 100%)`;
+  const pct = total ? Math.round((present / total) * 100) : 0;
+  return `<div class="donut-wrap">
+      <div class="donut-chart" style="background:${gradient}"></div>
+      <div class="donut-center"><b>${pct}%</b><span>present</span></div>
     </div>`;
 }
 
-async function loadExamResults() {
-  const year = document.getElementById("filterYear").value;
-  const grade = updateGradeDisplay();
-  const ids = ["term1Body", "term2Body", "term3Body", "termOtherBody"];
-  ids.forEach(id => { document.getElementById(id).innerHTML = `<div class="empty-state" style="padding:0.8rem;font-size:0.75rem;"><span class="spinner"></span> Loading…</div>`; });
+function buildFlowerRowHTML_(flowers) {
+  if (!flowers || !flowers.length) return '<div class="report-empty">No Sundays in this period yet.</div>';
+  return '<div class="flower-row">' + flowers.map(f => {
+    const cls = f.provided ? 'given' : 'missing';
+    const label = `${f.date} — ${f.provided ? 'flower provided' : 'no flower'}`;
+    return `<div class="flower-icon ${cls}" title="${label}">🌸</div>`;
+  }).join('') + '</div>';
+}
 
-  if (!grade) {
-    ids.forEach(id => { document.getElementById(id).innerHTML = `<div class="empty-state" style="padding:0.8rem;font-size:0.75rem;">No grade on record for ${year}.</div>`; });
-    return;
+function buildExamCardsHTML_(steps) {
+  if (!steps || !steps.length) return '<div class="report-empty">No exam results recorded yet.</div>';
+  return '<div class="exam-cards">' + steps.map(s => {
+    const marksLabel = /^\d+(\.\d+)?$/.test(String(s.marks).trim()) ? `${s.marks}%` : s.marks;
+    return `<div class="exam-card">
+        <div class="exam-name">${s.exam}</div>
+        <div class="exam-marks">${marksLabel}</div>
+        <div class="exam-meta">Avg ${s.average || '—'} · Rank ${s.rank || '—'}</div>
+      </div>`;
+  }).join('') + '</div>';
+}
+
+function buildReportCardHTML_(summary) {
+  const a = summary.attendanceSummary;
+  const unmarked = Math.max(a.totalSundaysThisPeriod - a.presentCount - a.absentCount, 0);
+  const donut = buildAttendanceDonutHTML_(a.presentCount, a.absentCount, a.totalSundaysThisPeriod);
+  const legend = `<div class="attendance-legend">
+      <div class="legend-item"><span class="legend-dot" style="background:#22c55e"></span> Present — ${a.presentCount}</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#ef4444"></span> Absent — ${a.absentCount}</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#e2e8f0"></span> Unmarked — ${unmarked}</div>
+    </div>`;
+  return `
+    <div class="report-head">
+      <div class="report-name">${summary.student.name}</div>
+      <div class="report-badge">Grade ${summary.student.grade || '—'} · ${summary.year}</div>
+    </div>
+    <div class="report-grid">${donut}${legend}</div>
+    <div class="report-section-title">🌸 Flower Offerings (${summary.flowerSummary.given}/${summary.flowerSummary.totalSundaysThisPeriod})</div>
+    ${buildFlowerRowHTML_(summary.flowers)}
+    <div class="report-section-title">📊 Exam Results</div>
+    ${buildExamCardsHTML_(summary.examResults)}
+  `;
+}
+
+function appendReportCard_(summary) {
+  const win = document.getElementById('chatWindow');
+  const div = document.createElement('div');
+  div.className = 'report-card';
+  div.innerHTML = buildReportCardHTML_(summary);
+  win.appendChild(div);
+  win.scrollTop = win.scrollHeight;
+}
+
+function escapeHtml_(s) {
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+// Minimal, safe markdown-lite: escapes HTML first, then re-enables just
+// **bold** and line breaks so Gemini's formatting actually renders.
+function formatAssistantText_(text) {
+  let safe = escapeHtml_(text);
+  safe = safe.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  safe = safe.replace(/\n/g, '<br>');
+  return safe;
+}
+
+function appendBubble(role, text, opts = {}) {
+  const win = document.getElementById('chatWindow');
+  const div = document.createElement('div');
+  div.className = 'bubble ' + role + (opts.loading ? ' loading' : '') + (opts.error ? ' error' : '');
+  if (role === 'assistant' && !opts.loading) {
+    div.innerHTML = formatAssistantText_(text);
+  } else {
+    div.textContent = text;
   }
+  win.appendChild(div);
+  win.scrollTop = win.scrollHeight;
+  return div;
+}
 
+function setSending(isSending) {
+  document.getElementById('sendBtn').disabled = isSending;
+  document.getElementById('chatInput').disabled = isSending;
+}
+
+function currentYear() { return document.getElementById('yearSelect').value; }
+
+function populateYearSelect() {
+  const sel = document.getElementById('yearSelect');
+  const curYear = new Date().getFullYear();
+  let html = '';
+  for (let y = curYear; y >= curYear - 4; y--) html += `<option value="${y}" ${y===curYear?'selected':''}>${y}</option>`;
+  sel.innerHTML = html;
+}
+
+function startNewStudent() {
+  activeStudentName = null;
+  lastSummaryData = null;
+  chatHistory = [];
+  document.getElementById('activeStudentLabel').textContent = '';
+  document.getElementById('chatWindow').innerHTML = '';
+  document.getElementById('chatInput').placeholder = "Type a student's full name to begin…";
+  appendBubble('assistant', "👋 Ready for a new lookup. Please type the student's full name.");
+}
+
+async function onYearChange() {
+  if (!activeStudentName) return;
+  appendBubble('user', `(switched records year to ${currentYear()})`);
+  let loadingEl = null;
   try {
-    const data = await examApiCall({ action: "getCumulativeResults", grade, year });
-    if (data.error || !data.students) {
-      ids.forEach(id => { document.getElementById(id).innerHTML = `<div class="empty-state" style="padding:0.8rem;font-size:0.75rem;">Marks unavailable.</div>`; });
-      return;
-    }
-    const rec = data.students.find(s => String(s.name).trim().toLowerCase() === String(currentStudent.name).trim().toLowerCase());
-    const steps = (rec && rec.steps) || [];
-    const buckets = { term1: null, term2: null, term3: null, other: [] };
-    steps.forEach(step => {
-      const n = (step.exam || "").toLowerCase();
-      if (/1st/.test(n)) buckets.term1 = step;
-      else if (/2nd/.test(n)) buckets.term2 = step;
-      else if (/3rd/.test(n)) buckets.term3 = step;
-      else buckets.other.push(step);
-    });
-    document.getElementById("term1Body").innerHTML = renderTermStep(buckets.term1);
-    document.getElementById("term2Body").innerHTML = renderTermStep(buckets.term2);
-    document.getElementById("term3Body").innerHTML = renderTermStep(buckets.term3);
-    document.getElementById("termOtherBody").innerHTML = buckets.other.length
-      ? buckets.other.map(renderTermStep).join("")
-      : `<div class="empty-state" style="padding:0.8rem;font-size:0.75rem;">No other exams recorded.</div>`;
+    const searchingEl = appendBubble('assistant', '⏳ Refreshing records…', { loading: true });
+    const summary = await gatherStudentSummary(activeStudentName, currentYear());
+    if (!summary) { searchingEl.classList.add('error'); searchingEl.textContent = "Couldn't find that student for the selected year."; return; }
+    searchingEl.remove();
+    lastSummaryData = summary;
+    appendReportCard_(summary);
+    const dataMsg = { role: 'user', content: `Updated data for ${summary.student.name}, year ${summary.year} (JSON):\n${JSON.stringify(summary)}\n\nPlease give a short updated summary for this year.` };
+    loadingEl = appendBubble('assistant', '⏳ Thinking…', { loading: true });
+    const reply = await callGeminiAPI([...chatHistory, dataMsg]);
+    chatHistory.push({ role: 'assistant', content: reply });
+    loadingEl.classList.remove('loading');
+    loadingEl.innerHTML = formatAssistantText_(reply);
   } catch (e) {
-    ids.forEach(id => { document.getElementById(id).innerHTML = `<div class="empty-state" style="padding:0.8rem;font-size:0.75rem;">Could not load.</div>`; });
+    if (loadingEl) { loadingEl.classList.add('error'); loadingEl.textContent = '⚠️ ' + e.message; }
+    else appendBubble('assistant', '⚠️ ' + e.message, { error: true });
   }
 }
 
-async function exportMyCSV() {
-  if (!currentStudentKey) { showAlert("Session expired", "error"); return; }
-  await loadRosterAndAttendance();
-  const sundays = getFilterSundays();
-  if (!sundays.length) { showAlert("No Sundays in the current selection", "error"); return; }
+async function sendChatMessage() {
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+  appendBubble('user', text);
+  setSending(true);
 
-  let csvRows = [["Date", "Status"]];
-  sundays.forEach(d => {
-    const iso = toLocalDateStr(d);
-    const status = myStatusOn(iso);
-    csvRows.push([formatDateForDisplay(iso), status === "present" ? "Present" : status === "absent" ? "Absent" : "Not Marked"]);
-  });
-
-  const csvContent = csvRows.map(row => row.join(",")).join("\n");
-  const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" });
-  const link = document.createElement("a");
-  link.href = URL.createObjectURL(blob);
-  link.setAttribute("download", `my_attendance_${currentStudent.name}.csv`);
-  document.body.appendChild(link); link.click();
-  document.body.removeChild(link);
-  showAlert("CSV exported successfully", "success");
-}
-
-async function initializeHistoryPage() {
+  let loadingEl = null;
   try {
-    await loadRosterAndAttendance();
-    populateFilters();
-  } catch(e) { showAlert("Connection issue", "error"); }
-}
+    let summary = lastSummaryData;
 
-window.onFilterChange = onFilterChange;
-window.exportMyCSV = exportMyCSV;
-window.verifyAccess = verifyAccess;
-window.logout = logout;
-</script>
-<script src="face-utils.js"></script>
-
-<script src="nav-gate.js"></script>
-
-<script>
-const pageAuth = firebase.auth();
-const pageDb   = firebase.firestore();
-const pageGoogleProvider = new firebase.auth.GoogleAuthProvider();
-pageGoogleProvider.addScope('email');
-pageGoogleProvider.addScope('profile');
-
-async function saveUser(user, extra={}) {
-  try {
-    const ref  = pageDb.collection("users").doc(user.uid);
-    const snap = await ref.get();
-    if (!snap.exists) {
-      await ref.set({
-        uid: user.uid, email: user.email || "",
-        displayName: user.displayName || extra.name || "",
-        photoURL: user.photoURL || "",
-        role: "student",
-        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-        ...extra
+    if (!activeStudentName) {
+      // First message in a session = the student's name
+      const searchingEl = appendBubble('assistant', '⏳ Looking up student…', { loading: true });
+      summary = await gatherStudentSummary(text, currentYear());
+      if (!summary) {
+        searchingEl.classList.add('error');
+        searchingEl.textContent = `I couldn't find a student matching "${text}". Please check the spelling of the full name and try again.`;
+        setSending(false);
+        return;
+      }
+      searchingEl.remove();
+      activeStudentName = summary.student.name;
+      lastSummaryData = summary;
+      document.getElementById('activeStudentLabel').textContent = '👤 ' + activeStudentName;
+      document.getElementById('chatInput').placeholder = 'Ask about attendance, flowers, or exam results…';
+      appendReportCard_(summary);
+      chatHistory.push({
+        role: 'user',
+        content: `Here is the school data for ${summary.student.name}, year ${summary.year} (JSON):\n${JSON.stringify(summary)}\n\nPlease give a warm, brief overview of their attendance, flower offerings, and exam results.`
+      });
+    } else {
+      chatHistory.push({
+        role: 'user',
+        content: `(Reminder — data for ${summary.student.name}, year ${summary.year}, JSON):\n${JSON.stringify(summary)}\n\nUser question: ${text}`
       });
     }
-  } catch(e) { console.warn("Firestore:", e.message); }
-}
 
-pageAuth.onAuthStateChanged(u => {
-  [document.getElementById("loginBtn"), document.getElementById("mobileLoginBtn")].filter(Boolean).forEach(btn => {
-    if (u) {
-      const first = (u.displayName || u.email || "User").split(/[ @]/)[0];
-      btn.textContent = first;
-      btn.classList.add("logged-in");
-    } else {
-      btn.textContent = "Login";
-      btn.classList.remove("logged-in");
-    }
-  });
-  const lgName  = document.getElementById("lgName");
-  const lgEmail = document.getElementById("lgEmail");
-  const av = document.getElementById("lgAvatar");
-  if (u) {
-    const first = (u.displayName || u.email || "User").split(/[ @]/)[0];
-    if (lgName)  lgName.textContent  = "Welcome, " + (u.displayName || u.email);
-    if (lgEmail) lgEmail.textContent = u.email || "";
-    if (av) av.innerHTML = u.photoURL
-      ? `<img src="${u.photoURL}" style="width:100%;height:100%;border-radius:50%;object-fit:cover">`
-      : first.charAt(0).toUpperCase();
-  }
-
-  if (window.applyRoleGatedNav_) window.applyRoleGatedNav_(u); // see nav-gate.js
-});
-
-function openAuth(tab) {
-  document.getElementById("authOverlay")?.classList.add("open");
-  if (pageAuth.currentUser) { showPan("panLI"); return; }
-  switchTab(tab || "si");
-}
-function closeAuth() {
-  document.getElementById("authOverlay")?.classList.remove("open");
-  clearErrs();
-}
-function overlayClick(e) {
-  if (e.target === document.getElementById("authOverlay")) closeAuth();
-}
-function switchTab(t) {
-  document.getElementById("tabSI")?.classList.toggle("on", t === "si");
-  document.getElementById("tabSU")?.classList.toggle("on", t === "su");
-  showPan(t === "si" ? "panSI" : "panSU");
-}
-function showPan(id) {
-  ["panSI","panSU","panLI"].forEach(p => {
-    const el = document.getElementById(p);
-    if (el) el.style.display = p === id ? "block" : "none";
-  });
-}
-function clearErrs() {
-  ["siErr","suErr"].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) { el.textContent = ""; el.className = "am-err"; }
-  });
-}
-function errMsg(id, m) { const el=document.getElementById(id); if (el) { el.textContent=m; el.className="am-err"; } }
-function okMsg(id, m)  { const el=document.getElementById(id); if (el) { el.textContent=m; el.className="am-err am-ok"; } }
-function fErr(c) {
-  return ({
-    "auth/user-not-found":        "No account found with that email.",
-    "auth/wrong-password":        "Incorrect password.",
-    "auth/invalid-credential":    "Invalid email or password.",
-    "auth/email-already-in-use":  "Email already registered — try Sign In.",
-    "auth/invalid-email":         "Please enter a valid email.",
-    "auth/weak-password":         "Password must be at least 6 characters.",
-    "auth/popup-closed-by-user":  "Sign-in popup was closed.",
-    "auth/popup-blocked":         "Popup was blocked — please allow popups.",
-    "auth/network-request-failed":"Network error. Check your connection.",
-    "auth/too-many-requests":     "Too many attempts — try again later.",
-    "auth/unauthorized-domain":   "This domain is not authorized. Please open via a proper web server.",
-    "auth/operation-not-supported-in-this-environment": "Please open via a web server, not a file."
-  })[c] || "Something went wrong. (" + c + ")";
-}
-
-async function doSignIn() {
-  const email = document.getElementById("siEmail").value.trim();
-  const pass  = document.getElementById("siPass").value;
-  if (!email || !pass) { errMsg("siErr","Please fill in all fields."); return; }
-  const btn = document.getElementById("siBtn");
-  btn.disabled = true;
-  try {
-    await pageAuth.signInWithEmailAndPassword(email, pass);
-    showPan("panLI"); setTimeout(closeAuth, 1400);
-  } catch(e) { errMsg("siErr", fErr(e.code)); }
-  finally { btn.disabled = false; }
-}
-
-async function doGoogle() {
-  try {
-   const result = await pageAuth.signInWithPopup(pageGoogleProvider);
-    await saveUser(result.user);
-    showPan("panLI"); setTimeout(closeAuth, 1400);
-  } catch(e) {
-    const activeErr = document.getElementById("panSU")?.style.display === "block" ? "suErr" : "siErr";
-    errMsg(activeErr, fErr(e.code));
+    loadingEl = appendBubble('assistant', '⏳ Thinking…', { loading: true });
+    const reply = await callGeminiAPI(chatHistory);
+    chatHistory.push({ role: 'assistant', content: reply });
+    loadingEl.classList.remove('loading');
+    loadingEl.innerHTML = formatAssistantText_(reply);
+  } catch (e) {
+    if (loadingEl) { loadingEl.classList.add('error'); loadingEl.textContent = '⚠️ ' + e.message; }
+    else appendBubble('assistant', '⚠️ ' + e.message, { error: true });
+  } finally {
+    setSending(false);
   }
 }
 
-async function doSignOut() {
-  await pageAuth.signOut();
-  showPan("panSI");
-  closeAuth();
-  logout();
-}
+window.sendChatMessage = sendChatMessage;
+window.startNewStudent = startNewStudent;
+window.onYearChange = onYearChange;
 
-async function forgotPw() {
-  const email = document.getElementById("siEmail").value.trim();
-  if (!email) { errMsg("siErr","Enter your email above first."); return; }
-  try {
-    await pageAuth.sendPasswordResetEmail(email);
-    okMsg("siErr","Reset email sent — check your inbox.");
-  } catch(e) { errMsg("siErr", fErr(e.code)); }
-}
-
+/* ============================================================
+   NAV / MOBILE MENU (unchanged)
+   ============================================================ */
 function toggleMobileMenu(){
   document.getElementById('mobileSidebar').classList.toggle('open');
   document.getElementById('mobileOverlay').classList.toggle('open');
@@ -1614,19 +1232,64 @@ function closeMobileMenu(){
   document.getElementById('mobileOverlay').classList.remove('open');
   document.querySelector('.hamburger').classList.remove('open');
 }
-</script>
 
-  
-  
- 
-</script>
-  <script src="auth-system.js"></script>
-  <script>
-    // Call initPortal after Firebase and auth UI are ready
-    if (typeof initPortal === 'function') {
-      try { initPortal(); } catch (e) { console.warn('initPortal failed:', e); }
+/* ============================================================
+   AUTH STATE — greet signed-in users, role-gate the nav
+   (Firebase itself is already initialized in <head>)
+   ============================================================ */
+function handleLoginBtnClick_() {
+  if (firebase.auth().currentUser) {
+    firebase.auth().signOut();
+  } else {
+    // This page doesn't carry the full sign-in modal — send them to
+    // the page that has it. The signed-in session then applies here too.
+    window.location.href = 'index.html';
+  }
+}
+
+firebase.auth().onAuthStateChanged(u => {
+  const btn = document.getElementById('loginBtn');
+  const mbtn = document.getElementById('mobileLoginBtn');
+  [btn, mbtn].filter(Boolean).forEach(b => {
+    if (u) {
+      const first = (u.displayName || u.email || 'User').split(/[ @]/)[0];
+      b.textContent = '👋 Hello, ' + first;
+      b.classList.add('logged-in');
+    } else {
+      b.textContent = 'Login';
+      b.classList.remove('logged-in');
     }
-  </script>
+  });
+  if (window.applyRoleGatedNav_) window.applyRoleGatedNav_(u); // shows "Daily Attendance" for student/teacher roles
+});
+
+/* ============================================================
+   THEME — dark / light toggle
+   ============================================================ */
+function applyTheme_(theme) {
+  document.body.classList.toggle('dark-theme', theme === 'dark');
+  const btn = document.getElementById('themeToggleBtn');
+  if (btn) btn.textContent = theme === 'dark' ? '☀️ Light' : '🌙 Dark';
+}
+
+function toggleTheme() {
+  const isDark = document.body.classList.contains('dark-theme');
+  const next = isDark ? 'light' : 'dark';
+  applyTheme_(next);
+  try { localStorage.setItem('vipassi_theme', next); } catch (e) { /* storage may be unavailable */ }
+}
+
+/* ============================================================
+   INIT
+   ============================================================ */
+document.addEventListener('DOMContentLoaded', () => {
+  populateYearSelect();
+  let savedTheme = 'light';
+  try { savedTheme = localStorage.getItem('vipassi_theme') || 'light'; } catch (e) { /* ignore */ }
+  applyTheme_(savedTheme);
+  appendBubble('assistant', "👋 Hello! I'm the Vipassi Dhamma School records assistant. Type a student's full name to get started.");
+});
+</script>
 
   <div class="footer-wrap">
     <div class="footer-top">
