@@ -123,15 +123,15 @@ body { font-family: 'Inter', system-ui, sans-serif; color: var(--text); min-heig
 .chat-header h1 {
   font-family:'Cormorant Garamond',serif;
   font-weight:800;
-  font-size:1.6rem;
+  font-size:clamp(1.15rem, 4.5vw, 1.6rem);
   color:#0a0a0a;
 }
 .chat-header p { font-size:.72rem; color:#1e3a8a; font-weight:600; letter-spacing:.3px; }
-.chat-header-actions { margin-left:auto; display:flex; gap:8px; }
-.icon-btn { background:rgba(255,255,255,0.7); border:1px solid rgba(120,140,255,0.35); color:#3730a3; font-size:.68rem; letter-spacing:.5px; text-transform:uppercase; padding:7px 12px; border-radius:40px; cursor:pointer; transition:.2s; font-weight:700; }
+.chat-header-actions { margin-left:auto; display:flex; flex-wrap:wrap; gap:8px; }
+.icon-btn { background:rgba(255,255,255,0.7); border:1px solid rgba(120,140,255,0.35); color:#3730a3; font-size:.68rem; letter-spacing:.5px; text-transform:uppercase; padding:7px 12px; border-radius:40px; cursor:pointer; transition:.2s; font-weight:700; white-space:nowrap; }
 .icon-btn:hover { background:#fff; border-color:#7c3aed; box-shadow: 0 2px 10px rgba(124,58,237,0.2); }
 
-.year-row { display:flex; align-items:center; gap:8px; margin-bottom:1rem; font-size:.75rem; color:#3f3f5f; font-weight:600; flex-shrink: 0; }
+.year-row { display:flex; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:1rem; font-size:.75rem; color:#3f3f5f; font-weight:600; flex-shrink: 0; }
 .year-row select { background:rgba(255,255,255,0.8); border:1px solid rgba(120,140,255,0.35); color:#312e81; border-radius:20px; padding:5px 12px; font-size:.75rem; font-weight:700; }
 
 .chat-window {
@@ -315,6 +315,77 @@ body.dark-theme .report-empty { color:#737373; }
   .dhamma-strip span{margin:0 6px}
   .social-row{justify-content:center}
 }
+
+/* ============================================================
+   AI ASSISTANT — RESPONSIVE (phones → tablets → ultrawide)
+   ============================================================ */
+
+/* Tablets and small laptops */
+@media (max-width: 900px) {
+  .page-content { padding: 0.7rem; }
+  .main-card { border-radius: 20px; }
+  .mac-inner { padding: 1rem 1.1rem 1.2rem; }
+}
+
+/* Phones */
+@media (max-width: 560px) {
+  .page-content { padding: 0.4rem; height: calc(100vh - 48px); }
+  .main-card { border-radius: 14px; }
+  .mac-bar { padding: 10px 12px; }
+  .mac-inner { padding: 0.8rem 0.8rem 1rem; }
+  .chat-header { gap: 0.5rem; margin-bottom: 0.7rem; }
+  .chat-header p { font-size: 0.66rem; }
+  .chat-header-actions { gap: 6px; }
+  .icon-btn { font-size: 0.6rem; padding: 6px 10px; }
+  .year-row { font-size: 0.68rem; margin-bottom: 0.7rem; }
+  .year-row select { font-size: 0.68rem; padding: 4px 10px; }
+  #activeStudentLabel { width: 100%; margin-left: 0 !important; }
+  .chat-window { padding: 0.7rem; border-radius: 16px; gap: 8px; }
+  .bubble { max-width: 92%; font-size: 0.8rem; padding: 8px 12px; }
+  .chat-input-row input { padding: 9px 13px; font-size: 0.8rem; }
+  .chat-input-row button { padding: 0 16px; font-size: 0.75rem; }
+  .hint-line { font-size: 0.62rem; }
+
+  .report-card { padding: 0.85rem 0.9rem; border-radius: 16px; }
+  .report-head { gap: 0.5rem; margin-bottom: 0.7rem; }
+  .report-name { font-size: 1.2rem; }
+  .report-badge { font-size: 0.62rem; padding: 3px 10px; }
+  .report-grid { gap: 0.9rem; }
+  .donut-wrap { width: 76px; height: 76px; }
+  .donut-center { inset: 9px; }
+  .donut-center b { font-size: 0.92rem; }
+  .donut-center span { font-size: 0.52rem; }
+  .attendance-legend { font-size: 0.72rem; }
+  .flower-icon { width: 22px; height: 22px; font-size: 12px; }
+  .exam-card { min-width: 92px; padding: 0.55rem 0.7rem; }
+  .exam-card .exam-marks { font-size: 1.05rem; }
+}
+
+/* Very small phones */
+@media (max-width: 360px) {
+  .chat-header h1 { font-size: 1.05rem; }
+  .icon-btn { font-size: 0.56rem; padding: 5px 8px; }
+  .chat-input-row { flex-direction: column; }
+  .chat-input-row button { width: 100%; padding: 9px; }
+}
+
+/* Large desktops / ultrawide — keep content readable, don't let it stretch edge-to-edge */
+@media (min-width: 1600px) {
+  .page-content { padding: 2rem 4rem; }
+  .main-card { max-width: 1400px; margin: 0 auto; }
+  .mac-inner { padding: 2rem 2.4rem 2.2rem; }
+  .chat-header h1 { font-size: 2rem; }
+  .chat-header p { font-size: 0.85rem; }
+  .icon-btn { font-size: 0.78rem; padding: 9px 16px; }
+  .year-row { font-size: 0.9rem; }
+  .bubble { font-size: 0.95rem; max-width: 75%; }
+  .chat-input-row input { font-size: 0.95rem; padding: 13px 20px; }
+  .chat-input-row button { font-size: 0.9rem; padding: 0 28px; }
+  .report-name { font-size: 1.9rem; }
+  .donut-wrap { width: 120px; height: 120px; }
+  .donut-center b { font-size: 1.3rem; }
+}
+
   </style>
 </head>
 <body>
@@ -403,7 +474,7 @@ body.dark-theme .report-empty { color:#737373; }
       <div class="chat-window" id="chatWindow"></div>
 
       <div class="chat-input-row">
-        <input type="text" id="chatInput" placeholder="Type a student's full name to begin…" onkeydown="if(event.key==='Enter')sendChatMessage()">
+        <input type="text" id="chatInput" placeholder="Type a student or teacher's full name to begin…" onkeydown="if(event.key==='Enter')sendChatMessage()">
         <button id="sendBtn" onclick="sendChatMessage()">Send</button>
       </div>
       <div class="hint-line">All registered students can look up their own records using their full name. Data comes only from the school's own records, and the assistant is instructed not to invent facts.</div>
@@ -674,6 +745,85 @@ async function buildBulkAttendanceClient_() {
   return data;
 }
 
+/* ---------- TEACHERS: roster (name/uid/photo, no grade concept) ---------- */
+
+async function buildTeacherRosterClient_() {
+  const teachersFolder = await driveFindNamedSubfolder_(STUDENTS_TEACHERS_ROOT_ID, 'Teachers');
+  if (!teachersFolder) return [];
+  const files = [];
+  await driveCollectSpreadsheetsRecursively_(teachersFolder.id, files);
+
+  const byName = {};
+  for (const file of files) {
+    const year = parseYearFromName_(file.name);
+    if (!year) continue;
+
+    let titles;
+    try { titles = await sheetsGetTabTitles_(file.id); } catch (e) { continue; }
+    const wantedMonths = MONTHS.filter(m => titles.includes(`${m} ${year}`));
+    const hasSheet1 = titles.includes('Sheet1');
+    const ranges = wantedMonths.map(m => `'${m} ${year}'!A1:Z60`);
+    if (hasSheet1) ranges.push(`'Sheet1'!A1:Z60`);
+    if (!ranges.length) continue;
+
+    let valueRanges;
+    try { valueRanges = await sheetsBatchGet_(file.id, ranges); } catch (e) { continue; }
+
+    const namesThisYear = {};
+    wantedMonths.forEach((m, i) => {
+      const monthData = parseMonthValues_(valueRanges[i] && valueRanges[i].values);
+      if (monthData) Object.keys(monthData).forEach(k => { namesThisYear[k] = monthData[k].name; });
+    });
+
+    if (hasSheet1) {
+      const sheet1VR = valueRanges[wantedMonths.length];
+      if (sheet1VR && sheet1VR.values) {
+        parseRosterValues_(sheet1VR.values).forEach(r => {
+          const key = r.name.toLowerCase();
+          if (!namesThisYear[key]) namesThisYear[key] = r.name;
+        });
+      }
+    }
+
+    Object.keys(namesThisYear).forEach(key => {
+      if (!byName[key]) byName[key] = { id: key, name: namesThisYear[key] };
+    });
+  }
+  return Object.keys(byName).map(k => byName[k]);
+}
+
+/* ---------- TEACHERS: bulk attendance + flowers (keyed by year/month only, no grade) ---------- */
+
+async function buildTeacherBulkAttendanceClient_() {
+  const teachersFolder = await driveFindNamedSubfolder_(STUDENTS_TEACHERS_ROOT_ID, 'Teachers');
+  if (!teachersFolder) return {};
+  const files = [];
+  await driveCollectSpreadsheetsRecursively_(teachersFolder.id, files);
+
+  const data = {}; // { year: { month: { nameLower: {name, statuses, flowers} } } }
+  for (const file of files) {
+    const year = parseYearFromName_(file.name);
+    if (!year) continue;
+    const yearStr = String(year);
+    if (!data[yearStr]) data[yearStr] = {};
+
+    let titles;
+    try { titles = await sheetsGetTabTitles_(file.id); } catch (e) { continue; }
+    const wantedMonths = MONTHS.filter(m => titles.includes(`${m} ${yearStr}`));
+    if (!wantedMonths.length) continue;
+    const ranges = wantedMonths.map(m => `'${m} ${yearStr}'!A1:Z60`);
+
+    let valueRanges;
+    try { valueRanges = await sheetsBatchGet_(file.id, ranges); } catch (e) { continue; }
+
+    wantedMonths.forEach((m, i) => {
+      const monthData = parseMonthValues_(valueRanges[i] && valueRanges[i].values);
+      if (monthData) data[yearStr][m] = monthData;
+    });
+  }
+  return data;
+}
+
 /* ---------- In-memory caches + the same external interface the rest of the app expects ---------- */
 
 const ROSTER = { students: [] };
@@ -698,6 +848,40 @@ function loadBulkAttendanceData_(forceRefresh) {
     .then(data => { _bulkAttendanceCache = data; return data; })
     .catch(e => { console.error('[bulk attendance]', e); _bulkAttendanceCache = null; return null; });
   return _bulkAttendanceLoadingPromise;
+}
+
+const TEACHER_ROSTER = { teachers: [] };
+let teacherRosterLoadingPromise = null;
+
+function loadTeacherRoster_() {
+  if (teacherRosterLoadingPromise) return teacherRosterLoadingPromise;
+  teacherRosterLoadingPromise = buildTeacherRosterClient_()
+    .then(teachers => { TEACHER_ROSTER.teachers = teachers; return true; })
+    .catch(e => { console.error('[teacher roster]', e); return false; });
+  return teacherRosterLoadingPromise;
+}
+
+let _teacherBulkCache = null;
+let _teacherBulkLoadingPromise = null;
+
+function loadTeacherBulkAttendanceData_(forceRefresh) {
+  if (forceRefresh) { _teacherBulkCache = null; _teacherBulkLoadingPromise = null; }
+  if (_teacherBulkCache) return Promise.resolve(_teacherBulkCache);
+  if (_teacherBulkLoadingPromise) return _teacherBulkLoadingPromise;
+  _teacherBulkLoadingPromise = buildTeacherBulkAttendanceClient_()
+    .then(data => { _teacherBulkCache = data; return data; })
+    .catch(e => { console.error('[teacher bulk attendance]', e); _teacherBulkCache = null; return null; });
+  return _teacherBulkLoadingPromise;
+}
+
+async function getDirectTeacherRecordForMonth_(year, monthIdx, teacherName) {
+  const bulk = await loadTeacherBulkAttendanceData_();
+  if (!bulk) return null;
+  const yearData = bulk[String(year)];
+  const monthData = yearData && yearData[MONTHS[monthIdx]];
+  if (!monthData) return null;
+  const rec = monthData[(teacherName || '').trim().toLowerCase()];
+  return rec || null;
 }
 
 async function getDirectRecordForMonth_(grade, year, monthIdx, studentName) {
@@ -847,6 +1031,51 @@ async function findStudentInBulkData_(nameQuery) {
   return bestScore >= NAME_MATCH_THRESHOLD ? { key: best.id, student: best } : null;
 }
 
+function findTeacherByName_(nameQuery) {
+  const q = (nameQuery || "").trim().toLowerCase();
+  if (!q) return null;
+  let best = null, bestScore = 0;
+  for (const t of TEACHER_ROSTER.teachers) {
+    const teacherName = (t.name || "").trim().toLowerCase();
+    if (teacherName === q) return { key: t.id, teacher: t };
+    const score = nameMatchScore_(teacherName, q);
+    if (score > bestScore) { bestScore = score; best = { key: t.id, teacher: t }; }
+  }
+  return bestScore >= NAME_MATCH_THRESHOLD ? best : null;
+}
+
+async function findTeacherInBulkData_(nameQuery) {
+  const q = (nameQuery || "").trim().toLowerCase();
+  if (!q) return null;
+  const bulk = await loadTeacherBulkAttendanceData_();
+  if (!bulk) return null;
+
+  let exact = null, exactBestYear = -1;
+  let best = null, bestScore = 0, bestScoreYear = -1;
+
+  for (const year of Object.keys(bulk)) {
+    const yearNum = parseInt(year, 10);
+    for (const month of Object.keys(bulk[year])) {
+      const monthData = bulk[year][month];
+      for (const nameLower of Object.keys(monthData)) {
+        const rec = monthData[nameLower];
+        const candidate = { id: nameLower, name: rec.name };
+        if (nameLower === q) {
+          if (yearNum > exactBestYear) { exact = candidate; exactBestYear = yearNum; }
+          continue;
+        }
+        const score = nameMatchScore_(nameLower, q);
+        if (score > bestScore || (score === bestScore && yearNum > bestScoreYear)) {
+          bestScore = score; best = candidate; bestScoreYear = yearNum;
+        }
+      }
+    }
+  }
+
+  if (exact) return { key: exact.id, teacher: exact };
+  return bestScore >= NAME_MATCH_THRESHOLD ? { key: best.id, teacher: best } : null;
+}
+
 /* ---------- EXAM RESULTS ---------- */
 
 async function examApiCall(params) {
@@ -895,9 +1124,10 @@ async function examApiCall(params) {
 }
 
 /* ============================================================
-   GATHER A STUDENT'S FULL RECORD SUMMARY FOR A GIVEN YEAR
+   GATHER A PERSON'S FULL RECORD SUMMARY FOR A GIVEN YEAR
+   Tries students first, then falls back to teachers.
    ============================================================ */
-async function gatherStudentSummary(nameQuery, year) {
+async function gatherStudentSummaryInternal_(nameQuery, year) {
   await loadRosterAndAttendance();
   let match = findStudentByName(nameQuery);
   let source = 'roster';
@@ -945,7 +1175,7 @@ async function gatherStudentSummary(nameQuery, year) {
 
   return {
     matchedVia: source,
-    student: { name: student.name, grade: grade, gender: student.gender || null },
+    person: { name: student.name, type: 'student', grade: grade, gender: student.gender || null },
     year: year,
     attendanceDataAvailable: bulkOk,
     attendanceSummary: { presentCount, absentCount, totalMarkedSundays: presentCount + absentCount, totalSundaysThisPeriod: attendance.length },
@@ -954,6 +1184,59 @@ async function gatherStudentSummary(nameQuery, year) {
     flowers,
     examResults: examSteps
   };
+}
+
+async function gatherTeacherSummaryInternal_(nameQuery, year) {
+  await loadTeacherRoster_();
+  let match = findTeacherByName_(nameQuery);
+  let source = 'roster';
+  if (!match) { match = await findTeacherInBulkData_(nameQuery); source = 'bulk-fallback'; }
+  if (!match) return null;
+
+  const teacher = match.teacher;
+  const currentYear = new Date().getFullYear();
+  const lastMonthIdx = (parseInt(year, 10) === currentYear) ? new Date().getMonth() : 11;
+
+  const attendance = [];
+  const flowers = [];
+  const bulkOk = !!(await loadTeacherBulkAttendanceData_());
+  if (bulkOk) {
+    for (let m = 0; m <= lastMonthIdx; m++) {
+      const rec = await getDirectTeacherRecordForMonth_(year, m, teacher.name);
+      if (!rec) continue;
+      const sundays = getSundaysInMonth_(parseInt(year, 10), m);
+      sundays.forEach(d => {
+        const iso = toLocalDateStr(d);
+        const label = isoToSheetLabel_(iso);
+        const status = rec.statuses ? rec.statuses[label] : undefined;
+        if (status === 'present' || status === 'absent') attendance.push({ date: iso, status });
+        const flowerGiven = rec.flowers ? !!rec.flowers[label] : false;
+        flowers.push({ date: iso, provided: flowerGiven });
+      });
+    }
+  }
+
+  const presentCount = attendance.filter(a => a.status === 'present').length;
+  const absentCount = attendance.filter(a => a.status === 'absent').length;
+  const flowerCount = flowers.filter(f => f.provided).length;
+
+  return {
+    matchedVia: source,
+    person: { name: teacher.name, type: 'teacher', grade: null, gender: null },
+    year: year,
+    attendanceDataAvailable: bulkOk,
+    attendanceSummary: { presentCount, absentCount, totalMarkedSundays: presentCount + absentCount, totalSundaysThisPeriod: attendance.length },
+    attendance,
+    flowerSummary: { given: flowerCount, totalSundaysThisPeriod: flowers.length },
+    flowers,
+    examResults: [] // not applicable to teachers
+  };
+}
+
+async function gatherStudentSummary(nameQuery, year) {
+  const studentSummary = await gatherStudentSummaryInternal_(nameQuery, year);
+  if (studentSummary) return studentSummary;
+  return await gatherTeacherSummaryInternal_(nameQuery, year);
 }
 
 /* ============================================================
@@ -1059,6 +1342,7 @@ function buildExamCardsHTML_(steps) {
 
 function buildReportCardHTML_(summary) {
   const a = summary.attendanceSummary;
+  const isTeacher = summary.person.type === 'teacher';
   const unmarked = Math.max(a.totalSundaysThisPeriod - a.presentCount - a.absentCount, 0);
   const donut = buildAttendanceDonutHTML_(a.presentCount, a.absentCount, a.totalSundaysThisPeriod);
   const legend = `<div class="attendance-legend">
@@ -1066,16 +1350,18 @@ function buildReportCardHTML_(summary) {
       <div class="legend-item"><span class="legend-dot" style="background:#ef4444"></span> Absent — ${a.absentCount}</div>
       <div class="legend-item"><span class="legend-dot" style="background:#e2e8f0"></span> Unmarked — ${unmarked}</div>
     </div>`;
+  const badgeLabel = isTeacher ? `Teacher · ${summary.year}` : `Grade ${summary.person.grade || '—'} · ${summary.year}`;
+  const examSection = isTeacher ? '' : `
+    <div class="report-section-title">📊 Exam Results</div>
+    ${buildExamCardsHTML_(summary.examResults)}`;
   return `
     <div class="report-head">
-      <div class="report-name">${summary.student.name}</div>
-      <div class="report-badge">Grade ${summary.student.grade || '—'} · ${summary.year}</div>
+      <div class="report-name">${summary.person.name}</div>
+      <div class="report-badge">${badgeLabel}</div>
     </div>
     <div class="report-grid">${donut}${legend}</div>
     <div class="report-section-title">🌸 Flower Offerings (${summary.flowerSummary.given}/${summary.flowerSummary.totalSundaysThisPeriod})</div>
-    ${buildFlowerRowHTML_(summary.flowers)}
-    <div class="report-section-title">📊 Exam Results</div>
-    ${buildExamCardsHTML_(summary.examResults)}
+    ${buildFlowerRowHTML_(summary.flowers)}${examSection}
   `;
 }
 
@@ -1136,8 +1422,8 @@ function startNewStudent() {
   chatHistory = [];
   document.getElementById('activeStudentLabel').textContent = '';
   document.getElementById('chatWindow').innerHTML = '';
-  document.getElementById('chatInput').placeholder = "Type a student's full name to begin…";
-  appendBubble('assistant', "👋 Ready for a new lookup. Please type the student's full name.");
+  document.getElementById('chatInput').placeholder = "Type a student or teacher's full name to begin…";
+  appendBubble('assistant', "👋 Ready for a new lookup. Please type the student or teacher's full name.");
 }
 
 async function onYearChange() {
@@ -1151,7 +1437,7 @@ async function onYearChange() {
     searchingEl.remove();
     lastSummaryData = summary;
     appendReportCard_(summary);
-    const dataMsg = { role: 'user', content: `Updated data for ${summary.student.name}, year ${summary.year} (JSON):\n${JSON.stringify(summary)}\n\nPlease give a short updated summary for this year.` };
+    const dataMsg = { role: 'user', content: `Updated data for ${summary.person.name}, year ${summary.year} (JSON):\n${JSON.stringify(summary)}\n\nPlease give a short updated summary for this year.` };
     loadingEl = appendBubble('assistant', '⏳ Thinking…', { loading: true });
     const reply = await callGeminiAPI([...chatHistory, dataMsg]);
     chatHistory.push({ role: 'assistant', content: reply });
@@ -1177,28 +1463,28 @@ async function sendChatMessage() {
 
     if (!activeStudentName) {
       // First message in a session = the student's name
-      const searchingEl = appendBubble('assistant', '⏳ Looking up student…', { loading: true });
+      const searchingEl = appendBubble('assistant', '⏳ Looking up person…', { loading: true });
       summary = await gatherStudentSummary(text, currentYear());
       if (!summary) {
         searchingEl.classList.add('error');
-        searchingEl.textContent = `I couldn't find a student matching "${text}". Please check the spelling of the full name and try again.`;
+        searchingEl.textContent = `I couldn't find a student or teacher matching "${text}". Please check the spelling of the full name and try again.`;
         setSending(false);
         return;
       }
       searchingEl.remove();
-      activeStudentName = summary.student.name;
+      activeStudentName = summary.person.name;
       lastSummaryData = summary;
       document.getElementById('activeStudentLabel').textContent = '👤 ' + activeStudentName;
       document.getElementById('chatInput').placeholder = 'Ask about attendance, flowers, or exam results…';
       appendReportCard_(summary);
       chatHistory.push({
         role: 'user',
-        content: `Here is the school data for ${summary.student.name}, year ${summary.year} (JSON):\n${JSON.stringify(summary)}\n\nPlease give a warm, brief overview of their attendance, flower offerings, and exam results.`
+        content: `Here is the school data for ${summary.person.name}, year ${summary.year} (JSON):\n${JSON.stringify(summary)}\n\nPlease give a warm, brief overview of their attendance, flower offerings, and exam results.`
       });
     } else {
       chatHistory.push({
         role: 'user',
-        content: `(Reminder — data for ${summary.student.name}, year ${summary.year}, JSON):\n${JSON.stringify(summary)}\n\nUser question: ${text}`
+        content: `(Reminder — data for ${summary.person.name}, year ${summary.year}, JSON):\n${JSON.stringify(summary)}\n\nUser question: ${text}`
       });
     }
 
@@ -1287,7 +1573,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let savedTheme = 'light';
   try { savedTheme = localStorage.getItem('vipassi_theme') || 'light'; } catch (e) { /* ignore */ }
   applyTheme_(savedTheme);
-  appendBubble('assistant', "👋 Hello! I'm the Vipassi Dhamma School records assistant. Type a student's full name to get started.");
+  appendBubble('assistant', "👋 Hello! I'm the Vipassi Dhamma School records assistant. Type a student or teacher's full name to get started.");
 });
 </script>
 

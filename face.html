@@ -60,6 +60,13 @@
   }
   select:focus{ border-color:var(--gold); }
 
+  .checkbox-row{
+    display:flex; align-items:center; gap:8px; cursor:pointer;
+    margin-bottom:14px; font-size:12px; color:var(--muted);
+    text-transform:none; letter-spacing:0;
+  }
+  .checkbox-row input[type="checkbox"]{ width:auto; margin:0; }
+
   #results{ max-height:180px; overflow-y:auto; margin-bottom:14px; border-radius:10px; }
   .result-item{
     padding:10px 14px; background:var(--field); border:1px solid var(--border); border-radius:10px;
@@ -116,6 +123,12 @@
   <div id="search-block" style="display:none">
     <label for="search">Find student by name</label>
     <input id="search" type="text" placeholder="Start typing a name…">
+
+    <label class="checkbox-row" for="missingFaceOnly">
+      <input id="missingFaceOnly" type="checkbox">
+      Only show people missing a face
+    </label>
+
     <label for="gradeFilter">Or browse by grade</label>
     <select id="gradeFilter">
       <option value="">All grades</option>
@@ -168,7 +181,7 @@
 
 <script>
 /* ═══ Same config values as auth.js — keep these in sync with the main site ═══ */
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzaO1YQO3R2HqU5s4YqqT0YfBYZcdnEjcOhUvLx-XTMpXuXRui3TJnhaeMoItS08oJB/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzvfUJQxBswKcvzMrntAilKZknV1sfD5C62sLGUNLpyBQpkhyuDwYp7b0QI03-T1P7f4w/exec';
 
 if (!firebase.apps.find(a => a.name === 'authApp')) {
   firebase.initializeApp({
@@ -243,6 +256,7 @@ async function trySelfSelect() {
    runSearch's fetch to call that instead for a much faster, cleaner lookup. ═══ */
 const searchInput = document.getElementById('search');
 const gradeFilter = document.getElementById('gradeFilter');
+const missingFaceOnly = document.getElementById('missingFaceOnly');
 const resultsEl = document.getElementById('results');
 let searchTimer = null;
 
@@ -257,6 +271,11 @@ gradeFilter.addEventListener('change', function(){
   if (term.length < 2 && gradeFilter.value) {
     resultsEl.innerHTML = '<div class="result-item" style="cursor:default">Loading grade list…</div>';
   }
+  scheduleSearch();
+});
+
+missingFaceOnly.addEventListener('change', function(){
+  clearTimeout(searchTimer);
   scheduleSearch();
 });
 
@@ -317,6 +336,11 @@ async function runSearch(term, grade) {
         if (grade === 'teacher') return v.data.role === 'teacher';
         return v.data.role === 'student' && String(v.data.grade) === grade;
       });
+    }
+
+    // Only show people who don't have a face on file yet.
+    if (missingFaceOnly.checked) {
+      valid = valid.filter(function(v){ return !v.data.hasFace; });
     }
 
     // Sort alphabetically when browsing a whole grade, for easy scanning.
